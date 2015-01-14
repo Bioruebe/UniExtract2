@@ -1,0 +1,23 @@
+//If this file is not displayed correctly, open it with notepad++
+
+Other useful software which is currently not supported by Universal Extractor
+
+File identifiers
+-------------------------------------------------------------------------------
+Protection iD				executables (499 detections, copy protection, heuristic, 				http://pid.gamecopyworld.com/
+							64 bit, multiple protections)
+
+
+Extractors
+-------------------------------------------------------------------------------
+ExtractData					generic archive unpacking (multimedia files inside archives,			http://tlwiki.org/index.php?title=Tools
+							picture/sound/video, game archive)
+Game Extractors				list of several extractors for games									http://www.progamercity.net/game-files/2695-info-general-extraction-tools.html
+
+
+Other
+-------------------------------------------------------------------------------
+AutoIt						simple but powerful programming language								http://www.autoitscript.com/site/autoit/
+Notepad++					better notepad with syntax highlighting for many languages				http://notepad-plus-plus.org/
+Dropbox						online storage with file syncing 										https://www.dropbox.com/
+Unlocker					Delete/move/rename files which are locked by the system					http://www.emptyloop.com/unlocker/

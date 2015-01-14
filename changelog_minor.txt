@@ -1,0 +1,87 @@
+Beta 1:
+  Added support for Ren'Py game engine's .rpa archives using unrpa
+  Added support for Unreal Engine packages (.u, .uax, .upk) using Unreal Package Extractor (plugin)
+  Added support for Telltale game archives (.ttarch)
+  Added delay to update script to prevent 'not found' error
+  Added 'Open program directory' help menu entry
+  Fixed after update behaviour when other versions of UniExtract are installed
+  Fixed last update date not beeing saved when an update was found
+  Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
+  Fixed possible infinite loop in run function when helper binary execution terminates too fast, resulting in UniExtract not shutting down after successful extraction
+  Fixed BMS scripts were not checked if GAUP detected files, but was unable to extract them
+  Fixed game archive detection if file extension is not lower case
+  Fixed detection of Matroska files, extraction of ogg and webm tracks in video files
+  Changed percentage indicator detection to include float percentage values
+  Changed percentage indicator detection to include pattern x/y
+  Changed check for update behaviour: check is only performed on start if GUI is opened; if run from command line or context menu,
+		  it will be done right before terminating, so extraction/scan will not abort after installing update
+  Changed internal behaviour for extraction and game select functions
+  Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
+  Updated unrar to 5.11
+  Updated fsbextract to 0.3.3
+
+Alpha 4:
+  Added scroll bar to feedback edit controls
+  Added view/edit batch queue GUI
+  Added option to change path of filescan.txt (batch mode filescan log file)
+  Added /batch command line parameter to add a file to the batch queue without processing it
+  Added /clear command line parameter to clear batch queue and disable batch mode
+  Added unicodecheck option to preferences GUI
+  Added option for manual status box positioning to ini file
+  Added plugin GUI
+  Changed NO_FREE_SPACE message: file sizes are now rounded
+  Fixed deactivate batch mode on tray exit
+  Fixed disabled logging for 'silent exits'
+  Fixed automatically adding a file to batch mode by singleton logic resulted in an endless loop opening and closing UniExtract 
+		until main instance finished work
+  Fixed changes in the batch file when UniExtract is running were completely ignored until the process restarted
+  Fixed ctrl+a did not work on edit controls due to Windows API bug
+  Fixed filescan.txt should now be deleted correctly before starting new batch mode
+  Fixed batch mode not starting when clicking OK on main GUI
+  Fixed unicode check displaying message box in silent mode
+  Fixed batch file not beeing closed when clicked on 'No' on duplicate message box
+  Fixed automatic status box positioning with non-standard task bar (e.g. task bar on top of screen)
+  Updated QuickBMS to 0.6
+  
+
+Alpha 3:
+  Added delay before checking for renamed file after tridscan
+  Added no update available message box
+  Added warning before changing file associations
+  Added option to disable unicode check
+  Added 1024 bytes hex dump of input file when user decides to open feedback GUI via prompt
+  Fixed RENAME_NOTFOUND message contained '&' special character
+  Fixed possible update check failure when ini file does not contain a lastupdate value
+  Fixed batch queue file was created in working dir when using relative paths
+  Changed main gui, changing between scan and extraction mode is much easier now
+  Changed after update behaviour: now opening minor changelog instead of overall changelog
+  Changed after update behaviour: new options are now added to ini file (useful for options without corresponding GUI control)
+  Updated Exeinfo PE to 0.0.3.6
+  
+  Alpha 3 tests:
+	File cleanup
+	Subdir update
+	Global update check and installaion
+	
+  Upcoming in Beta 1:
+	delete filescan.txt
+	batch via command line
+	view/edit batch queue
+	additional tooltips
+	change new exitcodes, re-evaluate commandline parser
+  
+Alpha 2.1:
+  Added minor changelog
+  Fixed cascading context menu
+  
+  
+Notes:
+  Some features are not yet available in development versions; they will be added during beta test.
+	- Usage statistics
+	- Some extractions are already supported, but the filetype is only recognized with custom trid definitions.
+	  These will be added as soon as the stable version is ready to be released.
+	
+	
+	
+	
+	

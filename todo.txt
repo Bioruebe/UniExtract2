@@ -1,0 +1,130 @@
+//If this file is not displayed correctly, open it with notepad++
+
+// Language:
+update language files
+fix word order support for translations //need examples
+
+// Unpacker changes:
+password list for unrar,... --> unrar t -p
+method select for zip to profit from 7zip capabilities
+
+7z support for nifs, fat, vhd, mbr?
+7z support for gzip, bzip2, lzma, xz, tar from stdin?
+7z support for mslz?
+7z support for APM?
+
+// New unpackers
+lrzip? - http://ck.kolivas.org/apps/lrzip/
+pdf?
+hj-join
+sqx
+paq, zpaq
+lz
+Smart install maker - http://www.nullsecurity.org/tools
+Replace GCFScape
+mdf, mds images
+crass
+
+
+// User Interface:
+check control size for other languages
+statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
+
+
+// Bugs
+jsmsi: .cab not found (working dir?)
+percentage indicator fixed? //inno
+arj percentage indicator //tee problem
+inno unpacker status box?
+AddToBatch: unicode files are changed to ???????? and therefore fail to extract
+qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
+Unicode files: extraction to subdir folder name is 'Unicode File'
+Zip extraction: 'User input needed' message does not disappear
+
+
+// Other:
+quickbms logging
+FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765
+additional file types for arc_conv //refine .nsa def
+change new exitcodes, re-evaluate commandline parser
+include tridscan gui?
+ntlea
+
+
+// Short term
+
+
+
+//ArcConvTest
+bza		-		bz2 header 		trid x
+bz2		x	
+yz		-						trid x
+replace with freearc?
+
+
+// Known bugs:
+Converting to iso failes when iso file already exists (helper binary not terminating correctly)
+Overwriting files in general depends on extractor (sometimes asks, sometimes overwrites without asking)
+Error messages appear sometimes althought extracted correctly
+7z generic .exe extraction mostly results in not useful files //not a bug
+batch mode might stop depending on the extractor, when user input is needed //make sure files do not exist before starting batch mode to avoid this
+
+!!Compiling 64 bit version results in drag & drop application error!!
+
+
+//Not supported Installers/Archives:
+Deploymaster - http://www.deploymaster.com
+Anything from Clickteam //grrr...
+Spoon Installer - http://legroom.net/node/842
+Astrum InstallWizard - http://www.thraexsoftware.com
+LiberalInstaller
+Long Range Zip (lrzip)
+
+
+
+
+
+// Not necessary/declined:
+Incorporate output within AutoIt GUI rather than spawning external shell(s)   //possibility to hide cmd windows implemented
+Add option to copy rather than move temporary files - 439
+7z support for swf, flv?    //not useful --> alternative implemented
+new formats? - MultiExtractor - 395	//license
+support LiberalInstaller - 562 (probably not possible)   //no sample files, no unpacker available
+vmunpacker - packed file decompressor (http://unpacking.narod.ru/unpackers/universal/VMUnpacker1.2.rar)
+LinMSI - req 51   //added jsMSI from same developer (http://www.jsware.net/jsware/msicode.php3)
+new formats? - Dragon UnPACKer, Game Extractor, Quick Unpack - 405 //limited usefullness, no command line interface, license
+include menu bar in dropzone for files //doesn't seem possible, aim better :)
+fix height of Program Options UI in installer - add vertical scrollbar? //removed
+new CD image converter - http://iat.berlios.de/ - 832
+replace booz with unzoo (http://archives.math.utk.edu/software/multi-platform/gap/util/unzoo.c) //"LZD not yet implemented" error
+TTComp archive data decompressor (http://www.exelana.com/techie/c/ttdecomp.html) //output mostly unusable, only one single file extractable
+investigate archive listing - req 44
+
+
+// Done:
+add option to not display foreground extraction box?
+add option to open destination folder after extraction - comment 193
+force "completed" message box to always be on top - 431
+add option to delete after successful extraction?  - req 51
+GUI options for new preferences
+support multiple file extraction - 502
+add useful functionality to tray icon? - 503
+message box icons
+Exeinfo PE as replacement for PEiD - req 51
+UPX check before the other tests
+7z sfx script extraction - req 46
+possibility to send feedback
+remove i*comp? - http://www.msfn.org/board/topic/136743-zddll-license/
+add unshield.exe for InstallShield cabs - 558
+store window position between starts?
+version log of helper binaries
+add association options to UniExtract in addition to installer
+improve context menu integration in Windows 7 - req 51
+add cascaded context menu (what about cmenu?) - 447, 524   //win 7 only
+unicode support
+change to http://www.totalcmd.net/plugring/MhtUnPack.html
+support .dmg with DMGExtractor. - 738
+support to convert and extract .daa files (PowerIso compressed iso format) (http://aluigi.altervista.org/mytoolz.htm#both)
+separate associated file types for Windows Explorer sorting? - comment 116
+leave uniextract open after extraction - req 48
+

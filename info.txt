@@ -1,0 +1,39 @@
+Universal Extractor 2.0.0
+--------------------------------
+
+Important: If you want to have context menu entries of Universal Extractor 2.0.0, please uninstall previous versions or disable old context menu entries manually.
+
+Note: All preferences will be set on first start of Universal Extractor. This installer will not give the possibility to do so (as in previous versions).
+
+
+Changelog
+--------------------------------
+Main features added in version 2.0.0:
+	Batch mode
+	Scan only mode, using up to 4 different file identyfiers
+	Silent mode
+	Auto Updater
+	New optional status box
+	Better & faster file type detection
+	Improved usability
+	Ressource usage/speed improvements
+	Cascading context menu (only Windows 7 or newer)
+	Improved log file, completely optional
+	Console windows can be hidden
+	First start assistant
+	64 bit support
+	Plugin system
+	New extractors
+	
+New filetypes supported in version 2.0.0:
+	.fsb
+	.dmg
+	.flv, .swf
+	.uif, .daa, .gbi (with converting)
+	.bin/.cue, .img, .nrg, .c2d, .cdi (without converting)
+	several video formats
+	several game files
+	ThinApp/Thinstall portable software (plugin needed)
+	.rgssad, .rgss2a (plugin needed)
+	
+For a complete and more detailed log of changes since the last version, see changelog.txt in the Universal Extractor main directory.
