@@ -48,7 +48,11 @@ FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=3176
 additional file types for arc_conv //refine .nsa def
 change new exitcodes, re-evaluate commandline parser
 include tridscan gui?
+check ffmpeg 32/64 bit for portable usage
 ntlea
+save process name to terminate on tray exit
+MediaInfo dll for video files
+Crage logging does not work
 
 
 // Short term

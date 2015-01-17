@@ -49,6 +49,7 @@
   Added support for several game archives using QuickBMS and Game Archive UnPacker PRO plugin (optional)
   Added support for several game archives using arc_conv (older RPG Maker, Wolf RPG Editor, NScripter, YU-RIS Script Engine archives; plugin)
   Added support for RPG Maker VX Ace archives using RPGMaker Decrypter (plugin)
+  Added support for Livemaker games via crass/crage (plugin)
   Added support for .alz files using unalz
   Added support for .fsb files using FSB files extractor
   Added support for newer .kgb files using version 2 of KGB archiver

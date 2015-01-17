@@ -2,6 +2,7 @@ Beta 1:
   Added support for Ren'Py game engine's .rpa archives using unrpa
   Added support for Unreal Engine packages (.u, .uax, .upk) using Unreal Package Extractor (plugin)
   Added support for Telltale game archives (.ttarch)
+  Added support for Livemaker games via crass/crage (plugin)
   Added delay to update script to prevent 'not found' error
   Added 'Open program directory' help menu entry
   Fixed after update behaviour when other versions of UniExtract are installed
@@ -17,7 +18,7 @@ Beta 1:
 		  it will be done right before terminating, so extraction/scan will not abort after installing update
   Changed internal behaviour for extraction and game select functions
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
-  Updated unrar to 5.11
+  Updated unrar to 5.20
   Updated fsbextract to 0.3.3
 
 Alpha 4:

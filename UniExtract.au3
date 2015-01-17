@@ -55,7 +55,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 0.2.2"
+Const $version = "2.0.0 Beta 0.2.4"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -199,7 +199,7 @@ Const $rgss3 = "RPGDecrypter-spaces.ru.exe"
 Const $arc_conv = "arc_conv.exe"
 Const $dcp = "dcp_unpacker.exe"
 Const $unreal = "extract.exe"
-Const $crage = ".\bin\crass\crage.exe"
+Const $crage = ".\bin\crass-0.4.14.0\crage.exe"
 
 If Not @Compiled Then HotKeySet("{^}", "Test")
 
@@ -2014,7 +2014,86 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case $arctype == "crage"
 			HasPlugin($crage)
 
-			_Run($cmd & 'crage.exe -p "' & $file & '" -o "' & $outdir & '" -v', @ScriptDir & "\bin\crass", @SW_MINIMIZE, False)
+			_Run($cmd & 'crage.exe -p "' & $file & '" -o "' & $outdir & '" -v', @ScriptDir & "\bin\crass-0.4.14.0", @SW_SHOW, False)
+
+		Case $arctype == "ctar"
+			; Get existing files in $outdir
+			$oldfiles = ReturnFiles($outdir)
+
+			; Decompress archive with 7-zip
+			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
+
+			; Check for new files
+			$handle = FileFindFirstFile($outdir & "\*")
+			If Not @error Then
+				While 1
+					$fname = FileFindNextFile($handle)
+					If @error Then ExitLoop
+					If Not StringInStr($oldfiles, $fname) Then
+
+						; Check for supported archive format
+						$return = FetchStdout($cmd & $7z & ' l "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
+						If StringInStr($return, "Listing archive:", 0) Then
+							_Run($cmd & $7z & ' x "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
+							FileDelete($outdir & '\' & $fname)
+						EndIf
+					EndIf
+				WEnd
+			EndIf
+			FileClose($handle)
+
+		Case $arctype == "dmg"
+			_DeleteTrayMessageBox()
+
+			IsJavaInstalled()
+
+			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('DMG'), 1)
+
+			; Begin conversion to .iso format
+			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DMG ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
+			$isofile = $filedir & '\' & $filename & '.iso'
+			Cout('Executing: ' & $cmd & 'start javaw -jar "' & @ScriptDir & "\bin\" & $dmg & '" "' & $file & '" "' & $isofile & '"')
+			$pid = Run($cmd & 'start javaw -jar "' & @ScriptDir & "\bin\" & $dmg & '" "' & $file & '" "' & $isofile & '"', $filedir, @SW_HIDE, False)
+
+			WinWait("DMGExtractor 0.70", "", $Timeout)
+			WinActivate("DMGExtractor 0.70")
+			Send("{ENTER}")
+			Opt("WinTitleMatchMode", 3)
+
+			Do
+				If WinExists("DMGExtractor 0.70: Error") Then
+					Cout("Error detected")
+					WinActivate("DMGExtractor 0.70: Error")
+					Send("{ENTER}")
+					If FileExists($isofile) Then FileDelete($isofile)
+					_DeleteTrayMessageBox()
+					Return
+				EndIf
+				Sleep(500)
+			Until WinExists("DMGExtractor 0.70") ;OR NOT ProcessExists($pid)
+
+			If WinExists("DMGExtractor 0.70") Then
+				WinActivate("DMGExtractor 0.70")
+				Send("{ENTER}")
+			Else
+				If FileExists($isofile) Then FileDelete($isofile)
+				Return
+			EndIf
+
+			_DeleteTrayMessageBox()
+			; Begin extraction from .iso
+			If FileExists($isofile) And FileGetSize($isofile) > 0 Then
+				_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DMG ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
+				$file = $isofile
+				If Not CheckIso() Then _Run($cmd & $7z & ' x "' & $isofile & '"', $outdir)
+				; Exit if conversion failed
+			Else
+				Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED', "", 0)
+				If $createdir Then DirRemove($outdir, 0)
+				If FileExists($isofile) Then FileDelete($isofile)
+				check7z()
+				terminate("failed", $file, $arcdisp)
+			EndIf
 
 		Case $arctype == "daa"
 			; Prompt user to continue
@@ -2100,85 +2179,6 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				DirRemove($tempoutdir)
 			Else
 				_Run($cmd & $inno & ' -x -m -a "' & $file & '"', $outdir)
-			EndIf
-
-		Case $arctype == "ctar"
-			; Get existing files in $outdir
-			$oldfiles = ReturnFiles($outdir)
-
-			; Decompress archive with 7-zip
-			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
-
-			; Check for new files
-			$handle = FileFindFirstFile($outdir & "\*")
-			If Not @error Then
-				While 1
-					$fname = FileFindNextFile($handle)
-					If @error Then ExitLoop
-					If Not StringInStr($oldfiles, $fname) Then
-
-						; Check for supported archive format
-						$return = FetchStdout($cmd & $7z & ' l "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
-						If StringInStr($return, "Listing archive:", 0) Then
-							_Run($cmd & $7z & ' x "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
-							FileDelete($outdir & '\' & $fname)
-						EndIf
-					EndIf
-				WEnd
-			EndIf
-			FileClose($handle)
-
-		Case $arctype == "dmg"
-			_DeleteTrayMessageBox()
-
-			IsJavaInstalled()
-
-			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('DMG'), 1)
-
-			; Begin conversion to .iso format
-			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DMG ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
-			$isofile = $filedir & '\' & $filename & '.iso'
-			Cout('Executing: ' & $cmd & 'start javaw -jar "' & @ScriptDir & "\bin\" & $dmg & '" "' & $file & '" "' & $isofile & '"')
-			$pid = Run($cmd & 'start javaw -jar "' & @ScriptDir & "\bin\" & $dmg & '" "' & $file & '" "' & $isofile & '"', $filedir, @SW_HIDE, False)
-
-			WinWait("DMGExtractor 0.70", "", $Timeout)
-			WinActivate("DMGExtractor 0.70")
-			Send("{ENTER}")
-			Opt("WinTitleMatchMode", 3)
-
-			Do
-				If WinExists("DMGExtractor 0.70: Error") Then
-					Cout("Error detected")
-					WinActivate("DMGExtractor 0.70: Error")
-					Send("{ENTER}")
-					If FileExists($isofile) Then FileDelete($isofile)
-					_DeleteTrayMessageBox()
-					Return
-				EndIf
-				Sleep(500)
-			Until WinExists("DMGExtractor 0.70") ;OR NOT ProcessExists($pid)
-
-			If WinExists("DMGExtractor 0.70") Then
-				WinActivate("DMGExtractor 0.70")
-				Send("{ENTER}")
-			Else
-				If FileExists($isofile) Then FileDelete($isofile)
-				Return
-			EndIf
-
-			_DeleteTrayMessageBox()
-			; Begin extraction from .iso
-			If FileExists($isofile) And FileGetSize($isofile) > 0 Then
-				_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DMG ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
-				$file = $isofile
-				If Not CheckIso() Then _Run($cmd & $7z & ' x "' & $isofile & '"', $outdir)
-				; Exit if conversion failed
-			Else
-				Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED', "", 0)
-				If $createdir Then DirRemove($outdir, 0)
-				If FileExists($isofile) Then FileDelete($isofile)
-				check7z()
-				terminate("failed", $file, $arcdisp)
 			EndIf
 
 		Case $arctype == "is3arc"
@@ -3829,7 +3829,7 @@ Func CheckUpdate($silent = False)
 			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im UniExtract.exe" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -o"' & @ScriptDir & '" "' & $return & '"' & _
 					@CRLF & @CRLF & "@ping -n 3 localhost> nul" & @CRLF & 'del "' & $return & '"' & @CRLF & 'start "" ".\' & @ScriptName & '" /afterupdate' & @CRLF & "del Update.bat" & @CRLF & "exit")
 			FileClose($handle)
-			Run(@ScriptDir & "\Update.bat")
+			Run(@ScriptDir & "\Update.bat", @ScriptDir)
 			Exit
 		EndIf
 	EndIf
