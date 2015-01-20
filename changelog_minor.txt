@@ -3,7 +3,8 @@ Beta 1:
   Added support for Unreal Engine packages (.u, .uax, .upk) using Unreal Package Extractor (plugin)
   Added support for Telltale game archives (.ttarch)
   Added support for Livemaker games via crass/crage (plugin)
-  Added delay to update script to prevent 'not found' error
+  Added support for .aac audio files (decompress to wav) using faad (plugin)
+  Added delay to update script to prevent 'not found' error, changed execution parameter
   Added 'Open program directory' help menu entry
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found

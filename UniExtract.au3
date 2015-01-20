@@ -191,6 +191,9 @@ Const $mht_plug = "MhtUnPack.wcx"
 Const $msi_plug = "msi.wcx"
 Const $sis = "PDunSIS.wcx"
 
+; Other
+Const $tee = "mtee.exe"
+
 ; Not included binaries
 Const $ffmpeg = "ffmpeg.exe"
 Const $iscab = "iscab.exe"
@@ -200,6 +203,7 @@ Const $arc_conv = "arc_conv.exe"
 Const $dcp = "dcp_unpacker.exe"
 Const $unreal = "extract.exe"
 Const $crage = ".\bin\crass-0.4.14.0\crage.exe"
+Const $faad = "faad.exe"
 
 If Not @Compiled Then HotKeySet("{^}", "Test")
 
@@ -367,7 +371,7 @@ Func StartExtraction($checkext = True)
 
 	; First, check for file extensions that require special actions
 	If $checkext Then
-		Cout("Extension check")
+		;Cout("Extension check")
 		; Compound compressed files that require multiple actions
 		If $fileext = "ipk" Or $fileext = "tbz2" Or $fileext = "tgz" _
 				Or $fileext = "tz" Or $fileext = "tlz" Or $fileext = "txz" Then
@@ -1321,6 +1325,8 @@ Func advfilescan($f)
 			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
 		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0)
 			extract("video", 'Video ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "AAC,")
+			extract("aac", 'AAC Audio ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
 			CheckIso()
 
@@ -1917,8 +1923,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 	$tempoutdir = _TempFile($outdir, 'uni_', '')
 
 	; Extract archive based on filetype
-	Select
-		Case $arctype == "7z"
+	Switch $arctype
+		Case "7z"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
 
 			; Extract inner CPIO for RPMs
@@ -1936,7 +1942,11 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				EndIf
 			EndIf
 
-		Case $arctype == "ace"
+		Case "aac"
+			HasPlugin($faad)
+			_Run($cmd & $faad & ' -o "' & $outdir & '\' & $filename & '.wav" "' & $file & '"', $outdir, @SW_HIDE)
+
+		Case "ace"
 			Opt("WinTitleMatchMode", 3)
 			$pid = Run($ace & ' -x "' & $file & '" "' & $outdir & '"', $filedir)
 			Sleep(100)
@@ -1948,14 +1958,14 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				Sleep(50)
 			WEnd
 
-		Case $arctype == "alz"
+		Case "alz"
 			_Run($cmd & $alz & ' -d "' & $outdir & '" "' & $file & '"', $outdir)
 			If @error Then terminate("failed", $file, $arcdisp)
 
-		Case $arctype == "arc"
+		Case "arc"
 			_Run($cmd & $arc & ' x "' & $file & '"', $outdir)
 
-		Case $arctype == "arc_conv"
+		Case "arc_conv"
 			If Not HasPlugin($arc_conv, $returnFail) Then Return
 
 			Run($cmd & $arc_conv & ' "' & $file & '"', $outdir, @SW_HIDE)
@@ -1979,17 +1989,17 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				DirMove($file & "~", $outdir, 1)
 			EndIf
 
-		Case $arctype == "arj"
+		Case "arj"
 			_Run($cmd & $arj & ' x "' & $file & '"', $outdir)
 
-		Case $arctype == "bz2"
+		Case "bz2"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
 			If FileExists($outdir & '\' & $filename) Then
 				_Run($cmd & $7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
 				FileDelete($outdir & '\' & $filename)
 			EndIf
 
-		Case $arctype == "cab"
+		Case "cab"
 			If StringInStr($filetype, 'Type 1', 0) Then
 				If $warnexecute Then Warn_Execute($filename & '.exe /q /x:"<outdir>"')
 				RunWait('"' & $file & '" /q /x:"' & $outdir & '"', $outdir)
@@ -1997,7 +2007,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				check7z()
 			EndIf
 
-		Case $arctype == "chm"
+		Case "chm"
 			RunWait($cmd & $7z & ' x "' & $file & '"', $outdir)
 			FileDelete($outdir & '\#*')
 			FileDelete($outdir & '\$*')
@@ -2011,12 +2021,12 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 			FileClose($dirs)
 
-		Case $arctype == "crage"
+		Case "crage"
 			HasPlugin($crage)
 
 			_Run($cmd & 'crage.exe -p "' & $file & '" -o "' & $outdir & '" -v', @ScriptDir & "\bin\crass-0.4.14.0", @SW_SHOW, False)
 
-		Case $arctype == "ctar"
+		Case "ctar"
 			; Get existing files in $outdir
 			$oldfiles = ReturnFiles($outdir)
 
@@ -2042,7 +2052,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 			FileClose($handle)
 
-		Case $arctype == "dmg"
+		Case "dmg"
 			_DeleteTrayMessageBox()
 
 			IsJavaInstalled()
@@ -2095,7 +2105,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				terminate("failed", $file, $arcdisp)
 			EndIf
 
-		Case $arctype == "daa"
+		Case "daa"
 			; Prompt user to continue
 			_DeleteTrayMessageBox()
 			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('DAA/GBI'), 1)
@@ -2120,40 +2130,40 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				terminate("failed", $file, $arcdisp)
 			EndIf
 
-		Case $arctype == "dcp"
+		Case "dcp"
 			HasPlugin($dcp)
 			_Run($cmd & $dcp & ' "' & $file & '"', $outdir)
 
-		Case $arctype == "ethornell"
+		Case "ethornell"
 			_Run($cmd & $ethornell & ' "' & $file & '" "' & $outdir & '"', $outdir)
 
-		Case $arctype == "fead"
+		Case "fead"
 			If $warnexecute Then Warn_Execute($filename & '.exe /s -nos_ne -nos_o"<outdir>"')
 			RunWait($file & ' /s -nos_ne -nos_o"' & $tempoutdir & '"', $filedir)
 			FileSetAttrib($tempoutdir & '\*', '-R', 1)
 			MoveFiles($tempoutdir, $outdir)
 			DirRemove($tempoutdir)
 
-		Case $arctype == "flv"
+		Case "flv"
 			_Run($cmd & $flv & ' -v -a -t -d "' & $outdir & '" "' & $file & '"', $filedir)
 
-		Case $arctype == "fsb"
+		Case "fsb"
 			_Run($cmd & $fsb & ' -d "' & $outdir & '" "' & $file & '"', $filedir)
 
-		Case $arctype == "gcf"
+		Case "gcf"
 			Prompt(48 + 1, 'PACKAGE_EXPLORER', CreateArray($file, $name), 1)
 			Run($gcf & ' "' & $file & '"')
 			If $createdir Then DirRemove($outdir, 0)
 			terminate("silent", "", "")
 
-		Case $arctype == "gz"
+		Case "gz"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
 			If FileExists($outdir & '\' & $filename) And StringTrimLeft($filename, StringInStr($filename, '.', 0, -1)) = "tar" Then
 				_Run($cmd & $7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
 				FileDelete($outdir & '\' & $filename)
 			EndIf
 
-		Case $arctype == "hlp"
+		Case "hlp"
 			RunWait($cmd & $hlp & ' "' & $file & '"', $outdir)
 			If DirGetSize($outdir) > $initdirsize Then
 				DirCreate($tempoutdir)
@@ -2163,14 +2173,14 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 
 			; failsafe in case TrID misidentifies MS SFX hotfixes
-		Case $arctype == "hotfix"
+		Case "hotfix"
 			If $warnexecute Then Warn_Execute($filename & '.exe /q /x:"<outdir>"')
 			RunWait('"' & $file & '" /q /x:"' & $outdir & '"', $outdir)
 
-		Case $arctype == "img"
+		Case "img"
 			_Run($cmd & $img & ' -x "' & $file & '"', $outdir)
 
-		Case $arctype == "inno"
+		Case "inno"
 			If StringInStr($filetype, "Reflexive Arcade", 0) Then
 				DirCreate($tempoutdir)
 				_Run($cmd & $rai & ' "' & $file & '" "' & $tempoutdir & '\' & $filename & '.exe"', $filedir)
@@ -2181,7 +2191,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				_Run($cmd & $inno & ' -x -m -a "' & $file & '"', $outdir)
 			EndIf
 
-		Case $arctype == "is3arc"
+		Case "is3arc"
 			$choice = MethodSelect($arctype, $arcdisp)
 
 			; Extract using i3comp
@@ -2198,7 +2208,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				_Run($cmd & $stix & ' ' & FileGetShortName($file) & ' ' & FileGetShortName($outdir), $filedir)
 			EndIf
 
-		Case $arctype == "iscab"
+		Case "iscab"
 
 			$choice = "is6comp"
 			If FileExists(@ScriptDir & "\bin\" & $iscab) Then $choice = MethodSelect($arctype, $arcdisp)
@@ -2225,7 +2235,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				FileDelete($outdir & "\files.ini")
 			EndIf
 
-		Case $arctype == "isexe"
+		Case "isexe"
 			exescan($file, 'ext', 0)
 			If StringInStr($filetype, "3.x", 0) Then
 				; Extract 3.x SFX installer using stix
@@ -2314,7 +2324,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				EndIf
 			EndIf
 
-		Case $arctype == "kgb"
+		Case "kgb"
 			_Run($cmd & $kgb & ' "' & $file & '"', $outdir, @SW_SHOW, False)
 			#cs
 				$show_stats = regread("HKCU\Software\KGB Archiver", "show_stats")
@@ -2327,16 +2337,16 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				endif
 			#ce
 
-		Case $arctype == "lit"
+		Case "lit"
 			_Run($cmd & $lit & ' "' & $file & '" "' & $outdir & '"', $outdir)
 
-		Case $arctype == "lzo"
+		Case "lzo"
 			_Run($cmd & $lzo & ' -d -p"' & $outdir & '" "' & $file & '"', $filedir)
 
-		Case $arctype == "lzx"
+		Case "lzx"
 			_Run($cmd & $lzx & ' -x "' & $file & '"', $outdir)
 
-		Case $arctype == "mht"
+		Case "mht"
 			$choice = MethodSelect($arctype, $arcdisp)
 
 			; Extract using ExtractMHT
@@ -2346,7 +2356,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				extract('qbms', $arcdisp, $mht_plug)
 			EndIf
 
-		Case $arctype == "msi"
+		Case "msi"
 			$choice = MethodSelect($arctype, $arcdisp)
 
 			; Extract using administrative install
@@ -2397,12 +2407,12 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 			EndIf
 
-		Case $arctype == "msm"
+		Case "msm"
 			Local $appendargs = ''
 			If $appendext Then $appendargs = '/ext'
 			_Run($cmd & $msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendargs, $filedir)
 
-		Case $arctype == "msp"
+		Case "msp"
 			$choice = MethodSelect($arctype, $arcdisp)
 
 			; Extract using TC MSI
@@ -2439,17 +2449,17 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			MoveFiles($tempoutdir, $outdir)
 			DirRemove($tempoutdir)
 
-		Case $arctype == "nbh"
+		Case "nbh"
 			RunWait($cmd & $nbh & ' "' & $file & '"', $outdir)
 
-		Case $arctype == "NSIS"
+		Case "NSIS"
 			; Ignore duplicates and extract
 			_Run($cmd & $7z & ' x -aos' & ' "' & $file & '"', $outdir)
 
 			; Determine if there are .bin files in filedir
 			checkBin()
 
-		Case $arctype == "pea"
+		Case "pea"
 			Local $pid = Run($pea & ' UNPEA "' & $file & '" "' & $tempoutdir & '" RESETDATE SETATTR EXTRACT2DIR INTERACTIVE', $filedir)
 			While ProcessExists($pid)
 				$return = ControlGetText(_WinGetByPID($pid), '', 'Button1')
@@ -2459,14 +2469,14 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			MoveFiles($tempoutdir, $outdir)
 			DirRemove($tempoutdir)
 
-		Case $arctype == "qbms"
+		Case "qbms"
 			_Run($cmd & $quickbms & ' "' & @ScriptDir & '\bin\' & $additionalParameters & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, False)
 			If FileExists(@ScriptDir & "\bin\" & $bms) Then FileDelete(@ScriptDir & "\bin\" & $bms)
 
-		Case $arctype == "rar"
+		Case "rar"
 			_Run($cmd & $rar & ' x "' & $file & '"', $outdir, @SW_SHOW)
 
-		Case $arctype == "rgss3"
+		Case "rgss3"
 			HasPlugin($rgss3)
 			Run($rgss3, $outdir, @SW_HIDE)
 			Local $handle = WinWait("RPGMaker Decrypter", "")
@@ -2483,14 +2493,14 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			Cout($return)
 			$success = True
 
-		Case $arctype == "robo"
+		Case "robo"
 			If $warnexecute Then Warn_Execute($filename & '.exe /unpack="<outdir>"')
 			RunWait($file & ' /unpack="' & $outdir & '"', $filedir)
 
-		Case $arctype == "rpa"
+		Case "rpa"
 			_Run($cmd & $rpa & ' -m -v -p "' & $outdir & '" "' & $file & '"', @ScriptDir)
 
-		Case $arctype == "sit"
+		Case "sit"
 			DirCreate($tempoutdir)
 			FileMove($file, $tempoutdir)
 			_Run($sit & ' "' & $tempoutdir & '\' & $filename & '.' & $fileext & '"', $tempoutdir, @SW_SHOW, False)
@@ -2498,13 +2508,13 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			MoveFiles($tempoutdir & '\', $outdir, 1)
 			DirRemove($tempoutdir, 1)
 
-		Case $arctype == "superdat"
+		Case "superdat"
 			If $warnexecute Then Warn_Execute($filename & '.exe /e "<outdir>"')
 			RunWait($file & ' /e "' & $outdir & '"', $outdir)
 			Cout(FileRead($filedir & '\SuperDAT.log'))
 			FileDelete($filedir & '\SuperDAT.log')
 
-		Case $arctype == "swf"
+		Case "swf"
 			; Run swfextract to get list of contents
 			$return = StringSplit(FetchStdout($cmd & $swf & ' "' & $file & '"', $filedir, @SW_HIDE), @CRLF)
 			;_ArrayDisplay($return)
@@ -2546,7 +2556,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				EndIf
 			Next
 
-		Case $arctype == "tar"
+		Case "tar"
 			If $fileext = "tar" Then
 				_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
 			Else
@@ -2555,7 +2565,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				FileDelete($outdir & '\' & $filename & '.tar')
 			EndIf
 
-		Case $arctype == "thinstall"
+		Case "thinstall"
 			HasPlugin($thinstall)
 
 			If $warnexecute Then Warn_Execute($file)
@@ -2579,7 +2589,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			Sleep(1000)
 			ProcessClose($pid)
 
-		Case $arctype == "ttarch"
+		Case "ttarch"
 			; Get all supported games
 			$aReturn = _StringBetween(FetchStdout($ttarch, @ScriptDir, @SW_HIDE), "Games", "Examples")
 			If @error Then terminate("failed", $file, $arcdisp)
@@ -2595,7 +2605,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				$returnFail = True
 			EndIf
 
-		Case $arctype == "uif"
+		Case "uif"
 			_DeleteTrayMessageBox()
 			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('UIF'), 1)
 
@@ -2621,15 +2631,15 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				terminate("failed", $file, $arcdisp)
 			EndIf
 
-		Case $arctype == "unity"
+		Case "unity"
 			IsJavaInstalled()
 			_Run($unity & ' extract "' & $file & '"', $filedir)
 
-		Case $arctype == "unreal"
+		Case "unreal"
 			HasPlugin($unreal)
 			_Run($cmd & $unreal & ' -out="' & $outdir & '" "' & $file & '"', $outdir)
 
-		Case $arctype == "video"
+		Case "video"
 			; Prompt to download FFmpeg if file not found
 			If Not FileExists(@ScriptDir & "\bin\" & $ffmpeg) Then
 				Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, $name, $name, "http://ffmpeg.org/legal.html"), 1)
@@ -2680,22 +2690,22 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				EndIf
 			Next
 
-		Case $arctype == "vssfx"
+		Case "vssfx"
 			If $warnexecute Then Warn_Execute($filename & '.exe /extract')
 			FileMove($file, $outdir)
 			RunWait($outdir & '\' & $filename & '.' & $fileext & ' /extract', $outdir)
 			FileMove($outdir & '\' & $filename & '.' & $fileext, $filedir)
 
 			; removed - not possible to access due to 7zip check after deep scan
-			;case $arctype == "vssfxhotfix"
+			;case "vssfxhotfix"
 			;	if $warnexecute then Warn_Execute($filename & '.exe /xp:"<outdir>" /q')
 			;	runwait($file & ' /xp:"' & $outdir & '" /q', $outdir)
 
-		Case $arctype == "vssfxpath"
+		Case "vssfxpath"
 			If $warnexecute Then Warn_Execute($filename & '.exe /extract:"<outdir>" /quiet')
 			RunWait($file & ' /extract:"' & $outdir & '" /quiet', $outdir)
 
-		Case $arctype == "wise"
+		Case "wise"
 			$choice = MethodSelect($arctype, $arcdisp)
 
 			; Extract with E_WISE
@@ -2769,7 +2779,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				AppendExtensions($outdir)
 			EndIf
 
-		Case $arctype == "uha"
+		Case "uha"
 			_Run($cmd & $uharc & ' x -t"' & $outdir & '" "' & $file & '"', $outdir)
 			If Not $success And DirGetSize($outdir) <= $initdirsize Then
 				_Run($cmd & $uharc04 & ' x -t"' & $outdir & '" "' & $file & '"', $outdir)
@@ -2777,30 +2787,30 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						_Run($cmd & $uharc02 & ' x -t' & FileGetShortName($outdir) & ' ' & FileGetShortName($file), $outdir)
 			EndIf
 
-		Case $arctype == "uu"
+		Case "uu"
 			_Run($cmd & $uu & ' -p "' & $outdir & '" -i "' & $file & '"', $filedir)
 
-		Case $arctype == "xz"
+		Case "xz"
 			RunWait($cmd & $7z & ' x "' & $file & '"', $outdir)
 			If FileExists($outdir & '\' & $filename) And StringTrimLeft($filename, StringInStr($filename, '.', 0, -1)) = "tar" Then
 				RunWait($cmd & $7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
 				FileDelete($outdir & '\' & $filename)
 			EndIf
 
-		Case $arctype == "Z"
+		Case "Z"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
 			If FileExists($outdir & '\' & $filename) And StringTrimLeft($filename, StringInStr($filename, '.', 0, -1)) = "tar" Then
 				RunWait($cmd & $7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
 				FileDelete($outdir & '\' & $filename)
 			EndIf
 
-		Case $arctype == "zip"
+		Case "zip"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
 
 			If Not $success Then _Run($cmd & $zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, False)
 
 
-		Case $arctype == "zoo"
+		Case "zoo"
 			DirCreate($tempoutdir)
 			FileMove($file, $tempoutdir)
 			_Run($cmd & $zoo & ' x ' & FileGetShortName($filename & '.' & $fileext), $tempoutdir, @SW_MINIMIZE, False)
@@ -2810,7 +2820,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case Else
 			Cout("Unknown arctype: " & $arctype & ". Feature not implemented!")
-	EndSelect
+	EndSwitch
 
 	_DeleteTrayMessageBox()
 
@@ -3625,15 +3635,15 @@ Func CreateLog($status)
 EndFunc   ;==>CreateLog
 
 ; Executes a program and log output using tee
-Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $tee = True)
-	Local $teeCmd = ' 2>&1 | mtee.exe "' & @ScriptDir & '\log\teelog.txt"'
-	Cout("Executing: " & $f & ($tee? $teeCmd: ""))
-	;If NOT $Log Then $tee = False
+Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
+	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
+	Cout("Executing: " & $f & ($useTee? $teeCmd: ""))
 	Global $run = "", $runtitle = 0
 	Local $return = "", $pos = 0, $size = 1
 
 	; Create log
-	If $tee Then
+	If $useTee Then
+		HasPlugin($tee)
 		If Not FileExists(@ScriptDir & "\log\") Then DirCreate(@ScriptDir & "\log\")
 		$run = Run($f & $teeCmd, $workingdir, @SW_MINIMIZE)
 		If @error Then Return
@@ -5182,13 +5192,16 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url
-	Local $aPluginInfo[7][5] = [[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470'], _
-			[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar'], _
-			[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False], _
-			[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'http://cs10.userfiles.me/f/0/1411802749/48096296/0/a18c40637226ca066f472fc6d69fd877/RPGDecrypter-spaces.ru.exe'], _
-			[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/downloads'], _
-			[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625'], _
-			[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z']]
+	Local $aPluginInfo[8][5] = [ _
+		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470'], _
+		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar'], _
+		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False], _
+		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'http://cs10.userfiles.me/f/0/1411802749/48096296/0/a18c40637226ca066f472fc6d69fd877/RPGDecrypter-spaces.ru.exe'], _
+		[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/downloads'], _
+		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625'], _
+		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z'], _
+		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'] _
+	]
 	Local Const $sSupportedFileTypes = t('TERM_SUPPORTED_FILETYPES')
 	Local $current = -1
 ;~ 	_ArrayDisplay($aPluginInfo)
