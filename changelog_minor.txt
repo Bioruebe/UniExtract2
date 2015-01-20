@@ -4,6 +4,7 @@ Beta 1:
   Added support for Telltale game archives (.ttarch)
   Added support for Livemaker games via crass/crage (plugin)
   Added support for .aac audio files (decompress to wav) using faad (plugin)
+  Added filescan with MediaInfo dll to provide additional information on media files (scan only mode)
   Added delay to update script to prevent 'not found' error, changed execution parameter
   Added 'Open program directory' help menu entry
   Fixed after update behaviour when other versions of UniExtract are installed

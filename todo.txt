@@ -6,7 +6,6 @@ fix word order support for translations //need examples
 
 // Unpacker changes:
 password list for unrar,... --> unrar t -p
-method select for zip to profit from 7zip capabilities
 
 7z support for nifs, fat, vhd, mbr?
 7z support for gzip, bzip2, lzma, xz, tar from stdin?
@@ -23,7 +22,6 @@ lz
 Smart install maker - http://www.nullsecurity.org/tools
 Replace GCFScape
 mdf, mds images
-crass
 
 
 // User Interface:
@@ -50,8 +48,6 @@ change new exitcodes, re-evaluate commandline parser
 include tridscan gui?
 check ffmpeg 32/64 bit for portable usage
 ntlea
-save process name to terminate on tray exit
-MediaInfo dll for video files
 Crage logging does not work
 
 

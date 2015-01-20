@@ -18,6 +18,7 @@
   Added batch mode for multiple file extraction
   Added silent mode (assuming yes to all prompts, e.g for unattended batch extraction)
   Added scan only mode to detect file type using 4 different file scanners
+  Added filescan with MediaInfo dll to provide additional information on media files (scan only mode)
   Added check to prevent errors caused by multiple instances (--> Singleton)
   Added filename to tray icon tooltip and status box (useful for batch mode)
   Added more useful functionality to menu + tray

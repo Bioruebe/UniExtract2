@@ -72,12 +72,6 @@ Opt("TrayMenuMode", 1 + 2)
 Opt("TrayIconDebug", 1)
 GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO") ; minimum window size for feedback GUI
 
-If @OSArch == "X64" Or @OSArch == "IA64" Then
-	Global $OSArch = "x64"
-Else
-	Global $OSArch = "x86"
-EndIf
-
 ; Preferences
 Global $langdir = @ScriptDir & "\lang"
 Global $batchQueue = @ScriptDir & "\batch.queue"
@@ -128,6 +122,14 @@ Dim $isexe = False, $Message, $run, $runtitle, $DeleteOrigFileOpt[3]
 Dim $queueArray[0]
 Dim $section = "UniExtract Preferences"
 
+; Check if OS is 64 bit version
+If @OSArch == "X64" Or @OSArch == "IA64" Then
+	Global $OSArch = "x64"
+	Global $reg64 = 64
+Else
+	Global $OSArch = "x86"
+EndIf
+
 ; Extractors
 Const $7z = '7z.exe' ;x64									;9.20  ; Problems with newer versions --> tee
 Const $7zsplit = "7ZSplit.exe" 								;0.2
@@ -174,7 +176,7 @@ Const $uif = "uif2iso.exe" 									;0.1.7c
 Const $unity = "disunity.bat" 								;0.3.2
 Const $unshield = "unshield.exe" 							;0.5
 Const $upx = "upx.exe" 										;3.08w
-Const $rpa = ".\bin\unrpa\unrpa.exe"						;1.4	;modified to include a progress indicator
+Const $rpa = ".\bin\unrpa\unrpa.exe"						;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
 Const $uu = "uudeview.exe" 									;0.5pl20
 Const $wise_ewise = "e_wise_w.exe" 							;2002/07/01
 Const $wise_wun = "wun.exe" 								;0.90A
@@ -193,6 +195,7 @@ Const $sis = "PDunSIS.wcx"
 
 ; Other
 Const $tee = "mtee.exe"
+Const $mediainfo = "MediaInfo" & $reg64 & ".dll"			; 0.7.72
 
 ; Not included binaries
 Const $ffmpeg = "ffmpeg.exe"
@@ -206,9 +209,6 @@ Const $crage = ".\bin\crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
 
 If Not @Compiled Then HotKeySet("{^}", "Test")
-
-; Check if OS is 64 bit version
-If $OSArch == "x64" Then Global $reg64 = 64
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -394,7 +394,10 @@ Func StartExtraction($checkext = True)
 	If Not $tridfailed Then filescan($file, $extract)
 
 	; Terminate if scan only mode is activated
-	If Not $extract Then terminate("fileinfo", "", "")
+	If Not $extract Then
+		MediaFileScan($file)
+		terminate("fileinfo", "", "")
+	EndIf
 
 	; Else perform additional extraction methods
 	If Not $isofailed Then CheckIso()
@@ -1002,7 +1005,7 @@ Func filescan($f, $analyze = 1)
 		FilenameParse($file)
 	EndIf
 
-	If $filetype_curr <> "" Then $filetype &= $filetype_curr & @CRLF & @CRLF
+	If $filetype_curr <> "" Then $filetype &= $filetype_curr & @CRLF
 
 	_DeleteTrayMessageBox()
 
@@ -1650,6 +1653,40 @@ Func advexescan($f, $analyze = 1)
 			$notpacked = True
 	EndSelect
 EndFunc   ;==>advexescan
+
+; Scan file using MediaInfo dll, only used in scan only mode
+Func MediaFileScan($f)
+	Local $filetype_curr = ""
+	Cout("Start filescan using MediaInfo dll")
+	_CreateTrayMessageBox(t('SCANNING_FILE', CreateArray("MediaInfo")))
+
+	HasPlugin($mediainfo)
+	$hDll = DllOpen("MediaInfo.dll")
+	$hMI = DllCall($hDll, "ptr", "MediaInfo_New")
+
+	$Open_Result = DllCall($hDll, "int", "MediaInfo_Open", "ptr", $hMI[0], "wstr", $f)
+	$return = DllCall($hDll, "wstr", "MediaInfo_Inform", "ptr", $hMI[0], "int", 0)
+
+	$hMI = DllCall($hDll, "none", "MediaInfo_Delete", "ptr", $hMI[0])
+	DllClose($hDll)
+
+	Cout($return[0])
+
+	; Format returned string to align in message box
+	For $i in StringSplit($return[0], @CRLF, 2)
+		$return = StringSplit($i, " : ", 2+1)
+		If @error Then
+			If Not StringIsSpace($i) Then $filetype_curr &= @CRLF & "[" & $i & "]" & @CRLF
+			ContinueLoop
+		EndIf
+		$sType = StringStripWS($return[0], 4+2+1)
+		$iLen = StringLen($sType)
+		$filetype_curr &= $sType & _StringRepeat(@TAB, 3 - Floor($iLen / 10)) & (($iLen > 20 And $iLen < 25)? @TAB: "") & StringStripWS($return[1], 4+2+1) & @CRLF
+	Next
+
+	$filetype &= $filetype_curr & @CRLF & @CRLF
+	_DeleteTrayMessageBox()
+EndFunc
 
 ; Determine if 7-zip can extract the file
 Func check7z()
@@ -2934,6 +2971,7 @@ EndFunc   ;==>unpack
 
 ; Terminate if specified plugin was not found
 Func HasPlugin($plugin, $returnFail = False)
+	Cout("Searching for plugin " & $plugin)
 	If Not StringInStr($plugin, "\bin\") Then $plugin = @ScriptDir & "\bin\" & $plugin
 	If Not FileExists($plugin) Then
 		If $createdir Then DirRemove($outdir, 0)
