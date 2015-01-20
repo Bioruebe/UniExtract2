@@ -179,7 +179,7 @@ Const $uu = "uudeview.exe" 									;0.5pl20
 Const $wise_ewise = "e_wise_w.exe" 							;2002/07/01
 Const $wise_wun = "wun.exe" 								;0.90A
 Const $zip = "unzip.exe" 									;6.00
-Const $zoo = "booz.exe" 									;2.00
+Const $zoo = "unzoo.exe" 									;4.5
 
 ; Plugins
 Const $bms = "BMS.bms"
@@ -2806,14 +2806,12 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "zip"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
-
 			If Not $success Then _Run($cmd & $zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, False)
-
 
 		Case "zoo"
 			DirCreate($tempoutdir)
 			FileMove($file, $tempoutdir)
-			_Run($cmd & $zoo & ' x ' & FileGetShortName($filename & '.' & $fileext), $tempoutdir, @SW_MINIMIZE, False)
+			_Run($cmd & $zoo & ' -x ' & $filename & '.' & $fileext, $tempoutdir, @SW_HIDE)
 			FileMove($tempoutdir & '\' & $filename & '.' & $fileext, $file)
 			MoveFiles($tempoutdir, $outdir)
 			DirRemove($tempoutdir)
@@ -3874,6 +3872,7 @@ Func _AfterUpdate()
 	; Remove unused files
 	If FileExists(@ScriptDir & "\bin\plugins\kanal_for_Exeinfo.dll") Then FileDelete(@ScriptDir & "\bin\plugins\kanal_for_Exeinfo.dll")
 	If FileExists(@ScriptDir & "\bin\tee.exe") Then FileDelete(@ScriptDir & "\bin\tee.exe")
+	If FileExists(@ScriptDir & "\bin\BOOZ.EXE") Then FileDelete(@ScriptDir & "\bin\BOOZ.EXE")
 
 	; Add new options to ini file (for options without corresponding GUI control)
 	SavePref("unicodecheck", $checkUnicode)

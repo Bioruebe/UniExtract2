@@ -19,7 +19,6 @@ Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Rope
 ARJ32										arj.exe						3.10		!	x	!	GNU GPL v2				Andrew Belov					http://arj.sourceforge.net/										
 AspackDie									AspackDie.exe				1.41					Open Source				yoda							http://scifi.pages.at/yoda9k/									
 											ForceLibrary.dll			-------		---------	-------					-------							-------															
-Barebones Ooz (Booz)						BOOZ.EXE					2.00		-	x	-	Open Source				Rahul Dhesi						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson					http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma					http://aluigi.altervista.org/mytoolz.htm#daa2iso				
 disunity									disunity.jar				0.3.2		-	-	-	Public Domain			ata4							https://github.com/ata4/disunity
@@ -78,6 +77,7 @@ Unshield									unshield.exe				0.5						Freeware				David Eriksson					http://
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz					http://en.wikipedia.org/wiki/UHarc								
 											UHARC04.EXE					0.4			?	x	?	-------					-------							http://www.klaimsoft.com/forum/index.php?showtopic=25			
 											UNUHARC06.EXE				0.6b		x	x	x	-------					-------							-------
+unzoo										unzoo.exe					4.5			-	x	-	Public Domain			Martin Schoenert				http://archives.math.utk.edu/software/multi-platform/gap/util/
 Info-ZIPs UnZip								unzip.exe					6.00		-	x	-	Open Source				Info-ZIP						http://www.info-zip.org/pub/infozip/							
 uif2iso										uif2iso.exe					0.1.7c					GNU GPL v2				Luigi Auriemma					http://aluigi.altervista.org/mytoolz.htm#uif2iso				
 UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w					modified GNU GPL v2+	Laszlo Molnar, John Reiser, 	http://upx.sourceforge.net/										
