@@ -1672,8 +1672,15 @@ Func MediaFileScan($f)
 
 	Cout($return[0])
 
+	; Return if file is not a media file
+	$return = StringSplit($return[0], @CRLF, 2)
+	If UBound($return) < 10 Then
+		_DeleteTrayMessageBox()
+		Return
+	EndIf
+
 	; Format returned string to align in message box
-	For $i in StringSplit($return[0], @CRLF, 2)
+	For $i in $return
 		$return = StringSplit($i, " : ", 2+1)
 		If @error Then
 			If Not StringIsSpace($i) Then $filetype_curr &= @CRLF & "[" & $i & "]" & @CRLF
