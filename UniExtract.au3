@@ -2030,7 +2030,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						Sleep(10)
 					EndIf
 				WEnd
-				DirMove($file & "~", $outdir, 1)
+				MoveFiles($file & "~", $outdir, True, "", True)
 			EndIf
 
 		Case "arj"
@@ -2185,7 +2185,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			If $warnexecute Then Warn_Execute($filename & '.exe /s -nos_ne -nos_o"<outdir>"')
 			RunWait($file & ' /s -nos_ne -nos_o"' & $tempoutdir & '"', $filedir)
 			FileSetAttrib($tempoutdir & '\*', '-R', 1)
-			MoveFiles($tempoutdir, $outdir)
+			MoveFiles($tempoutdir, $outdir, False, "", True)
 			DirRemove($tempoutdir)
 
 		Case "flv"
@@ -2353,8 +2353,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 							; Move files to outdir
 							_DeleteTrayMessageBox()
 							Prompt(64, 'INIT_COMPLETE', 0)
-							MoveFiles($tempoutdir, $outdir)
-							DirRemove($tempoutdir, 1)
+							MoveFiles($tempoutdir, $outdir, False, "", True)
 							$success = True
 							ExitLoop
 						EndIf
@@ -2446,9 +2445,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				EndIf
 
 				; Move files to output directory and remove tempdir
-				MoveFiles($tempoutdir, $outdir)
-				DirRemove($tempoutdir)
-
+				MoveFiles($tempoutdir, $outdir, False, "", True)
 			EndIf
 
 		Case "msm"
@@ -2490,8 +2487,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 
 			; Move files to output directory and remove tempdir
-			MoveFiles($tempoutdir, $outdir)
-			DirRemove($tempoutdir)
+			MoveFiles($tempoutdir, $outdir, False, "", True)
 
 		Case "nbh"
 			RunWait($cmd & $nbh & ' "' & $file & '"', $outdir)
@@ -2510,8 +2506,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				If StringLeft($return, 4) = 'Done' Then ProcessClose($pid)
 				Sleep(10)
 			WEnd
-			MoveFiles($tempoutdir, $outdir)
-			DirRemove($tempoutdir)
+			MoveFiles($tempoutdir, $outdir, False, "", True)
 
 		Case "qbms"
 			_Run($cmd & $quickbms & ' "' & @ScriptDir & '\bin\' & $additionalParameters & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, False)
@@ -2549,8 +2544,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			FileMove($file, $tempoutdir)
 			_Run($sit & ' "' & $tempoutdir & '\' & $filename & '.' & $fileext & '"', $tempoutdir, @SW_SHOW, False)
 			FileMove($tempoutdir & '\' & $filename & '.' & $fileext, $file)
-			MoveFiles($tempoutdir & '\', $outdir, 1)
-			DirRemove($tempoutdir, 1)
+			MoveFiles($tempoutdir & '\', $outdir, True, "", True)
 
 		Case "superdat"
 			If $warnexecute Then Warn_Execute($filename & '.exe /e "<outdir>"')
@@ -2772,8 +2766,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 					FileMove($tempoutdir & "\INST0*", $outdir)
 					FileMove($tempoutdir & "\WISE0*", $outdir)
 				EndIf
-				MoveFiles($tempoutdir, $outdir)
-				DirRemove($tempoutdir)
+				MoveFiles($tempoutdir, $outdir, False, "", True)
 
 				; Extract using the /x switch
 			ElseIf $choice == 'Wise Installer /x' Then
@@ -2806,8 +2799,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				WEnd
 
 				; Move new files
-				MoveFiles(@CommonFilesDir & "\Wise Installation Wizard", $outdir, 0, $oldfiles)
-				DirRemove(@CommonFilesDir & "\Wise Installation Wizard", 0)
+				MoveFiles(@CommonFilesDir & "\Wise Installation Wizard", $outdir, 0, $oldfiles, True)
 				WinClose("Windows Installer")
 
 				; Extract using unzip, falling back to 7-Zip
@@ -2857,8 +2849,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			FileMove($file, $tempoutdir)
 			_Run($cmd & $zoo & ' -x ' & $filename & '.' & $fileext, $tempoutdir, @SW_HIDE)
 			FileMove($tempoutdir & '\' & $filename & '.' & $fileext, $file)
-			MoveFiles($tempoutdir, $outdir)
-			DirRemove($tempoutdir)
+			MoveFiles($tempoutdir, $outdir, False, "", True)
 
 		Case Else
 			Cout("Unknown arctype: " & $arctype & ". Feature not implemented!")
@@ -2980,7 +2971,7 @@ EndFunc   ;==>unpack
 Func HasPlugin($plugin, $returnFail = False)
 	Cout("Searching for plugin " & $plugin)
 	If Not StringInStr($plugin, "\bin\") Then $plugin = @ScriptDir & "\bin\" & $plugin
-	If Not FileExists($plugin) Then
+	If Not FileExists(_PathFull($plugin, @ScriptDir)) Then
 		If $createdir Then DirRemove($outdir, 0)
 		If $returnFail Then Return False
 		terminate('missingexe', $file, $plugin)
@@ -3033,7 +3024,7 @@ EndFunc   ;==>ReturnFiles
 ; Move all files and subdirectories from one directory to another
 ; $force is an integer that specifies whether or not to replace existing files
 ; $omit is a string that includes files to be excluded from move
-Func MoveFiles($source, $dest, $force = 0, $omit = '')
+Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = False)
 	Local $handle, $fname
 	DirCreate($dest)
 	$handle = FileFindFirstFile($source & "\*")
@@ -3057,6 +3048,8 @@ Func MoveFiles($source, $dest, $force = 0, $omit = '')
 		SetError(1)
 		Return
 	EndIf
+
+	If $removeSourceDir Then Return DirRemove($source, ($omit = ""? 1: 0))
 EndFunc   ;==>MoveFiles
 
 ; Append missing file extensions using TrID
@@ -3814,7 +3807,6 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 			$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 			If $size > 0 Then
 				If $TBgui Then GUICtrlSetData($TrayMsg_Status, $size & " MB")
-				Sleep(100)
 			Else
 				If $TimerStart And TimerDiff($TimerStart) > 60000 Then
 					WinSetState($runtitle, "", @SW_SHOW)
@@ -3823,6 +3815,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 					$TimerStart = 0
 				EndIf
 			EndIf
+			Sleep(100)
 		WEnd
 	EndIf
 	; Reset run var so no wrong process is closed on tray exit
