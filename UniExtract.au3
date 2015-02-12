@@ -3751,7 +3751,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 						Else ; # x
 							$pos = StringInStr($return, "#", 0, -1)
 							If $pos Then
-								$Num = Number(StringMid($return, $pos), 1)
+								$Num = Number(StringMid($return, $pos + 1), 1)
 								If $Num > 0 Then
 									$size = 0
 									GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " #" & $Num)

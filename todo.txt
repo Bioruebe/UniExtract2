@@ -33,7 +33,6 @@ statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
 jsmsi: .cab not found (working dir?)
 percentage indicator fixed? //inno
 arj percentage indicator //tee problem
-inno unpacker status box?
 AddToBatch: unicode files are changed to ???????? and therefore fail to extract
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 Unicode files: extraction to subdir folder name is 'Unicode File'
