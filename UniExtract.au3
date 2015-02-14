@@ -4846,7 +4846,7 @@ Func GUI_ContextMenu()
 	$CM_Checkbox[1] = GUICtrlCreateCheckbox(t('EXTRACT_HERE'), GetPos($CM_GUI, $CM_Checkbox[0], 150), 426, 113, 17)
 	$CM_Checkbox[2] = GUICtrlCreateCheckbox(t('EXTRACT_SUB'), 25, 446, 129, 17)
 	$CM_Checkbox[3] = GUICtrlCreateCheckbox(t('SCAN_FILE'), GetPos($CM_GUI, $CM_Checkbox[0], 150), 446, 113, 17)
-	;Global $CM_Picture = GUICtrlCreatePic("", 55, 75, 0, 0, -1, $WS_EX_LAYERED)
+	Global $CM_Picture = GUICtrlCreatePic("", 55, 75, 0, 0, -1, $WS_EX_LAYERED)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 	GUICtrlCreateGroup(t('CONTEXT_FILE_ASSOC_LABEL'), 5, 475, 440, 80)
 	Global $CM_Checkbox_add = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 495, -1, 17)
@@ -4908,8 +4908,11 @@ Func GUI_ContextMenu()
 		GUI_Create_Tooltip($CM_GUI, $CM_Cascading_Radio, t('CONTEXT_CASCADING_RADIO_TOOLTIP'))
 	EndIf
 
-	GUI_Create_Tooltip($CM_GUI, $CM_Checkbox_allusers, t('CONTEXT_ADMIN_REQUIRED'))
-	GUI_Create_Tooltip($CM_GUI, $CM_Checkbox_allusers2, t('CONTEXT_ADMIN_REQUIRED'))
+	; Create tooltips for disabled admin only options
+	If Not IsAdmin() Then
+		GUI_Create_Tooltip($CM_GUI, $CM_Checkbox_allusers, t('CONTEXT_ADMIN_REQUIRED'))
+		GUI_Create_Tooltip($CM_GUI, $CM_Checkbox_allusers2, t('CONTEXT_ADMIN_REQUIRED'))
+	EndIf
 
 	; Check for additional file associations
 	If $addassocenabled Then GUICtrlSetState($CM_Checkbox_add, $GUI_CHECKED)
@@ -4919,19 +4922,17 @@ Func GUI_ContextMenu()
 
 	; Activate controls if context menu entries are enabled
 	GUI_ContextMenu_activate()
-	; Change picture according to selected context menu type
 	GUI_ContextMenu_ChangePic()
 
 	GUISetState(@SW_SHOW)
 EndFunc   ;==>GUI_ContextMenu
 
-; Change context menu picture
+; Change picture according to selected context menu type
 Func GUI_ContextMenu_ChangePic()
-	If $CM_Picture Then GUICtrlDelete($CM_Picture)
 	If GUICtrlRead($CM_Cascading_Radio) = $GUI_CHECKED Then
-		$CM_Picture = GUICtrlCreatePic(".\support\Icons\cascading.jpg", 55, 75, 0, 0, -1, $WS_EX_LAYERED)
+		GUICtrlSetImage($CM_Picture, ".\support\Icons\cascading.jpg")
 	Else
-		$CM_Picture = GUICtrlCreatePic(".\support\Icons\simple.jpg", 55, 75, 0, 0, -1, $WS_EX_LAYERED)
+		GUICtrlSetImage($CM_Picture, ".\support\Icons\simple.jpg")
 	EndIf
 EndFunc   ;==>GUI_ContextMenu_ChangePic
 
@@ -4998,18 +4999,22 @@ Func GUI_ContextMenu_OK()
 	GUIDelete($CM_GUI)
 EndFunc   ;==>GUI_ContextMenu_OK
 
-; (De)activate controls if enabled not checked
+; (De)activate controls if enabled but not checked
 Func GUI_ContextMenu_activate()
+	; Set state according to main enable checkbox
 	If GUICtrlRead($CM_Checkbox_enabled) = $GUI_CHECKED Then
 		Local $state = $GUI_ENABLE
 	Else
 		Local $state = $GUI_DISABLE
 	EndIf
+
 	If IsAdmin() Then GUICtrlSetState($CM_Checkbox_allusers, $state)
 	GUICtrlSetState($CM_Simple_Radio, $state)
+
 	For $i = 0 To 3
 		GUICtrlSetState($CM_Checkbox[$i], $state)
 	Next
+
 	If $win7 Then GUICtrlSetState($CM_Cascading_Radio, $state)
 	If GUICtrlRead($CM_Checkbox_add) = $GUI_CHECKED Then
 		If IsAdmin() Then GUICtrlSetState($CM_Checkbox_allusers2, $GUI_ENABLE)

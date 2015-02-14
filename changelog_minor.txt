@@ -14,6 +14,7 @@ Beta 1:
   Fixed BMS scripts were not checked if GAUP detected files, but was unable to extract them
   Fixed game archive detection if file extension is not lower case
   Fixed detection of Matroska files, extraction of ogg and webm tracks in video files
+  Fixed context menu GUI: alluser checkboxes not clickable despite having admin rights
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed check for update behaviour: check is only performed on start if GUI is opened; if run from command line or context menu,
