@@ -1339,8 +1339,8 @@ Func advfilescan($f)
 				StringInStr($filetype_curr, "batch file")) Or _
 				StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
 				(StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
-				StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "shortcut", 0) Or _
-				StringInStr($filetype_curr, "ogg", 0)
+				StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
+				StringInStr($filetype_curr, "shortcut", 0) Or StringInStr($filetype_curr, "ogg", 0)
 			terminate("notpacked", $file, "")
 
 	EndSelect
@@ -3429,7 +3429,7 @@ Func _CreateTrayMessageBox($TBText)
 	_DeleteTrayMessageBox()
 
 	Local $iSpace = -1
-	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5
+	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 29
 	If $NoBox = 1 Then Return
 
 	; Determine taskbar size
@@ -3449,8 +3449,8 @@ Func _CreateTrayMessageBox($TBText)
 	_GuiRoundCorners($TBgui, 0, 0, 30, 30)
 	If $filename = "" Then
 		Global $Tray_File = GUICtrlCreateLabel($TBText, $left, $top, $width, 80)
-	ElseIf StringLen($filename & "." & $fileext) > 30 Then
-		Global $Tray_File = GUICtrlCreateLabel(StringLeft($filename & "." & $fileext, 30) & " [...]" & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
+	ElseIf StringLen($filename & "." & $fileext) > $iMaxCharCount Then
+		Global $Tray_File = GUICtrlCreateLabel(StringLeft($filename & "." & $fileext, $iMaxCharCount) & " [...]" & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
 	Else
 		Global $Tray_File = GUICtrlCreateLabel($filename & "." & $fileext & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
 	EndIf
