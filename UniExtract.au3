@@ -1252,7 +1252,7 @@ Func filescan($f, $analyze = 1)
 
 		Case StringInStr($filetype_curr, "Video", 0) Or StringInStr($filetype_curr, "QuickTime Movie", 0) _
 				Or StringInStr($filetype_curr, "Matroska", 0)
-			extract("video", 'Video ' & t('TERM_FILE'))
+			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
 			; not supported filetypes
 		Case StringInStr($filetype_curr, "Spoon Installer", 0)
@@ -1327,7 +1327,7 @@ Func advfilescan($f)
 		Case StringInStr($filetype_curr, "PowerISO Direct-Access-Archive", 0)
 			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
 		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0)
-			extract("video", 'Video ' & t('TERM_FILE'))
+			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
 			extract("aac", 'AAC Audio ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
@@ -2690,19 +2690,21 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			$return = FetchStdout($command, $outdir, @SW_HIDE)
 
 			; Terminate if file could not be read by FFmpeg
-			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") _
-				Then terminate("failed", $file, $arcdisp)
+			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") Then _
+				terminate("failed", $file, $arcdisp)
 
 			; Otherwise, extract all tracks
 			$Streams = StringSplit($return, "Stream", 1)
 			;_ArrayDisplay($Streams)
+			Local $iVideo = 0, $iAudio = 0
 			For $i = 2 To $Streams[0]
 				$Streams[$i] = StringRegExpReplace($Streams[$i], "(?i)(?s).*?: (\w+): (\w+).*", "$1,$2")
 				;_ArrayDisplay($Streams)
 				$StreamType = StringSplit($Streams[$i], ",")
 				If $StreamType[1] == "Video" Then
+					$iVideo += 1
 					If $StreamType[2] == "h264" Then
-						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & $filename & "." & $StreamType[2] & '"', $outdir)
+						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_MINIMIZE, True, False)
 					Else
 						; Special cases
 						If StringInStr($StreamType[2], "wmv") Then
@@ -2712,9 +2714,10 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						ElseIf StringInStr($StreamType[2], "v8") Then
 							$StreamType[2] = "webm"
 						EndIf
-						_Run($command & ' -vcodec copy -an "' & $filename & "." & $StreamType[2] & '"', $outdir)
+						_Run($command & ' -vcodec copy -an "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_MINIMIZE, True, False)
 					EndIf
 				ElseIf $StreamType[1] == "Audio" Then
+					$iAudio += 1
 					; Special cases
 					If StringInStr($StreamType[2], "wma") Then
 						$StreamType[2] = "wma" ;wmav2
@@ -2722,7 +2725,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						$StreamType[2] = "ogg"
 					EndIf
 
-					_Run($command & ' -acodec copy -vn "' & $filename & "." & $StreamType[2] & '"', $outdir)
+					_Run($command & ' -acodec copy -vn "' & $filename & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & "." & $StreamType[2] & '"', $outdir, @SW_MINIMIZE, True, False)
 				Else
 					Cout("Unknown stream type: " & $StreamType[1])
 				EndIf
@@ -3429,7 +3432,7 @@ Func _CreateTrayMessageBox($TBText)
 	_DeleteTrayMessageBox()
 
 	Local $iSpace = -1
-	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 29
+	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 28
 	If $NoBox = 1 Then Return
 
 	; Determine taskbar size
@@ -3671,11 +3674,11 @@ Func CreateLog($status)
 EndFunc   ;==>CreateLog
 
 ; Executes a program and log output using tee
-Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
+Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True)
 	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
-	Cout("Executing: " & $f & ($useTee? $teeCmd: ""))
+	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
 	Global $run = "", $runtitle = 0
-	Local $return = "", $pos = 0, $size = 1
+	Local $return = "", $pos = 0, $size = 1, $lastSize = 0
 
 	; Create log
 	If $useTee Then
@@ -3689,14 +3692,13 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 			Sleep(1)
 			If TimerDiff($TimerStart) > 5000 Then ExitLoop
 		Until ProcessExists($run)
-;~ Cout("Process exists")
+
 		$runtitle = _WinGetByPID($run)
 		WinSetState($runtitle, "", $show_flag)
 		Cout("Runtitle: " & $runtitle)
 
 		; Wait until logfile exists
 		$TimerStart = TimerInit()
-;~ 		Cout("Waiting for teelog")
 
 		Do
 			Sleep(10)
@@ -3704,7 +3706,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 		Until FileExists(@ScriptDir & "\log\teelog.txt")
 		$handle = FileOpen(@ScriptDir & "\log\teelog.txt")
 		$state = ""
-;~ Cout("Extracting!")
+
 		; Show progress (percentage) in status box
 		While ProcessExists($run)
 			$return = FileRead($handle)
@@ -3715,37 +3717,32 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 				If StringInStr($return, "password", 0) Or StringInStr($return, "already exist", 0) Or _
 						StringInStr($return, "overwrite", 0) Or StringInStr($return, "replace", 0) Then
 					WinSetState($runtitle, "", @SW_SHOW)
+					GUICtrlSetFont($TrayMsg_Status, 8.5, 900)
 					GUICtrlSetData($TrayMsg_Status, t('INPUT_NEEDED'))
 					WinActivate($runtitle)
+					$lastSize = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
+					ContinueLoop
 				EndIf
 				; Percentage indicator
-				If $TBgui Then
+				If $patternSearch = True And $TBgui Then
+					Cout("PATTERN")
 					If StringInStr($return, "%", 0, -1) Then ; x %
 						$aReturn = StringRegExp($return, "(\d{1,3})[\d\.,]*%", 1)
-;~ 						_ArrayDisplay($aReturn)
 						If UBound($aReturn) > 0 Then
-							$size = 0
+							$size = -1
 							GUICtrlSetData($TrayMsg_Status, _ArrayPop($aReturn) & "%")
 						EndIf
-;~ 					Old version ignores float values
-;~ 					$pos = StringInStr($return, "%", 0, -1) ; x %
-;~ 					If $pos Then
-;~ 						$Num = Number(StringMid($return, $pos - 2, $pos - 1), 1)
-;~ 						If $Num > 0 Then
-;~ 							$size = 0
-;~ 							GUICtrlSetData($TrayMsg_Status, $Num & "%")
-;~ 						EndIf
 					ElseIf StringInStr($return, "/", 0, -1) Then
 						$aReturn = StringRegExp($return, " (\d+)/(\d+)", 1) ; x/y
 						If UBound($aReturn) > 1 Then
-							$size = 0
+							$size = -1
 							$Num = _ArrayPop($aReturn)
 							GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " " & _ArrayPop($aReturn) & "/" & $Num)
 						EndIf
 					Else
 						$aReturn = StringRegExp($return, "\[(\d+) on (\d+)\]", 1) ; [x on y]
 						If UBound($aReturn) > 1 Then
-							$size = 0
+							$size = -1
 							$Num = _ArrayPop($aReturn)
 							GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " " & _ArrayPop($aReturn) & "/" & $Num)
 						Else ; # x
@@ -3753,7 +3750,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 							If $pos Then
 								$Num = Number(StringMid($return, $pos + 1), 1)
 								If $Num > 0 Then
-									$size = 0
+									$size = -1
 									GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " #" & $Num)
 								EndIf
 							EndIf
@@ -3763,10 +3760,14 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True)
 				EndIf
 			EndIf
 			; Size of extracted file(s)
-			If $size Then
+			If $size > -1 Then
 				$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
-				;Cout("Size: " & $size)
-				If $size > 0 Then GUICtrlSetData($TrayMsg_Status, $size & " MB")
+				Cout("Size: " & $size & @TAB & $lastSize)
+				If $size > 0 And $size <> $lastSize Then
+					Cout("Size: " & $size & @TAB & $lastSize)
+					GUICtrlSetData($TrayMsg_Status, $size & " MB")
+				EndIf
+				$lastSize = $size
 				Sleep(50)
 			EndIf
 			Sleep(200)
@@ -5244,7 +5245,7 @@ Func GUI_Plugins()
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z'], _
 		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'] _
 	]
-	Local Const $sSupportedFileTypes = t('TERM_SUPPORTED_FILETYPES')
+	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1
 ;~ 	_ArrayDisplay($aPluginInfo)
 

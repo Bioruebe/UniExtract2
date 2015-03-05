@@ -15,6 +15,9 @@ Beta 1:
   Fixed game archive detection if file extension is not lower case
   Fixed detection of Matroska files, extraction of ogg and webm tracks in video files
   Fixed context menu GUI: alluser checkboxes not clickable despite having admin rights
+  Fixed video extraction: multiple audio/video tracks had same names when extracted, so FFMPEG always asked to overwrite, 
+        now type(audio/video) and number of track for each type is added
+  Fixed folder size calculation in status box did not work correctly for FFMPEG and probably others
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed check for update behaviour: check is only performed on start if GUI is opened; if run from command line or context menu,
