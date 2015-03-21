@@ -55,7 +55,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 0.2.4"
+Const $version = "2.0.0 Beta 0.2.5"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -254,7 +254,7 @@ If $prompt Then
 	; Check if Universal Extractor is started the first time
 	If $ID = "" Or StringIsSpace($ID) Then
 		$ID = StringRight(String(_Crypt_EncryptData(Random(10000, 1000000), @ComputerName & Random(10000, 1000000), $CALG_AES_256)), 25)
-		Cout("Creating User ID: " & $ID)
+		Cout("Created User ID: " & $ID)
 		SavePref("ID", $ID)
 		Global $FS_GUI = False
 		GUI_FirstStart()
@@ -299,6 +299,11 @@ Func StartExtraction($checkext = True)
 
 	; Parse filename
 	FilenameParse($file)
+
+	; Collect file information, for log/feedback only
+	Cout("File size: " & Round(FileGetSize($file) / 1048576, 2) & " MB")
+	Cout("Created: " & FileGetTime($file, 1, 1))
+	Cout("Modified: " & FileGetTime($file, 0, 1))
 
 	; Set full output directory
 	If $outdir = '/sub' Then
@@ -772,7 +777,7 @@ Func ReadPrefs()
 	LoadPref("lastupdate", $lastupdate, False)
 	LoadPref("ID", $ID, False)
 
-	If $language == "" Then _GetOSLanguage()
+	If $language == "" Then $language = _GetOSLanguage()
 
 	If $silentmode Then Cout("Silent mode enabled")
 	If $batchEnabled Then Cout("Batch mode enabled")
@@ -3103,7 +3108,7 @@ Func terminate($status, $fname, $ID)
 		Else
 			FileDelete($filemove)
 		EndIf
-		DirMove($outdir, $oldoutdir, 1)
+		MoveFiles($outdir, $oldoutdir, 1, "", 1)
 		$fname = $oldpath
 	EndIf
 
@@ -3210,7 +3215,9 @@ Func terminate($status, $fname, $ID)
 		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', CreateArray($name, $file, $name), 0) Then
 			; Attach input file's first bytes for debug purpose
 			Cout("--------------------------------------------------File dump--------------------------------------------------" & _
-					@CRLF & _HexDump($file, 1024))
+				 @CRLF & _HexDump($file, 1024))
+			Cout("------------------------------------------------File metadata------------------------------------------------" & _
+				 @CRLF & _ArrayToString(_GetExtProperty($file), @CRLF))
 			; Prompt to send feedback
 			GUI_Feedback($status, $file, $debug)
 			Do
@@ -3628,11 +3635,10 @@ Func _GetOSLanguage()
 	For $i = 1 To $aString[0]
 		If StringInStr($aString[$i], @OSLang) Then
 			Cout("Selecting language based on OS language: " & $aLanguage[$i])
-			Global $language = $aLanguage[$i]
-			Return
+			Return $aLanguage[$i]
 		EndIf
 	Next
-	Global $language = $aLanguage[1]
+	Return $aLanguage[1]
 EndFunc   ;==>_GetOSLanguage
 
 ; Determine whether JRE is installed or not and terminate if not found
@@ -3661,6 +3667,85 @@ Func _StringGetLine($sString, $iLine, $bCountBlank = False)
 	If $iLine = -1 Then Return StringTrimLeft($sString, StringInStr($sString, @CRLF, 0, -2))
 	Return StringRegExpReplace($sString, "((." & $sChar & "\n){" & $iLine - 1 & "})(." & $sChar & "\n)((." & $sChar & "\n?)+)", "\2")
 EndFunc   ;==>_StringGetLine
+
+; Return file metadata
+; (Source: http://www.autoitscript.com/forum/topic/40684-querying-a-files-metadata/)
+;===============================================================================
+; Function Name:    GetExtProperty($sPath,$iProp)
+; Description:      Returns an extended property of a given file.
+; Parameter(s):     $sPath - The path to the file you are attempting to retrieve an extended property from.
+;                   $iProp - The numerical value for the property you want returned. If $iProp is is set
+;                             to -1 then all properties will be returned in a 1 dimensional array in their corresponding order.
+;                           The properties are as follows:
+;                           Name = 0
+;                           Size = 1
+;                           Type = 2
+;                           DateModified = 3
+;                           DateCreated = 4
+;                           DateAccessed = 5
+;                           Attributes = 6
+;                           Status = 7
+;                           Owner = 8
+;                           Author = 9
+;                           Title = 10
+;                           Subject = 11
+;                           Category = 12
+;                           Pages = 13
+;                           Comments = 14
+;                           Copyright = 15
+;                           Artist = 16
+;                           AlbumTitle = 17
+;                           Year = 18
+;                           TrackNumber = 19
+;                           Genre = 20
+;                           Duration = 21
+;                           BitRate = 22
+;                           Protected = 23
+;                           CameraModel = 24
+;                           DatePictureTaken = 25
+;                           Dimensions = 26
+;                           Width = 27
+;                           Height = 28
+;                           Company = 30
+;                           Description = 31
+;                           FileVersion = 32
+;                           ProductName = 33
+;                           ProductVersion = 34
+; Requirement(s):   File specified in $spath must exist.
+; Return Value(s):  On Success - The extended file property, or if $iProp = -1 then an array with all properties
+;                   On Failure - 0, @Error - 1 (If file does not exist)
+; Author(s):        Simucal (Simucal@gmail.com)
+; Note(s):
+;
+;===============================================================================
+Func _GetExtProperty($sPath, $iProp = -1)
+    Local $iExist, $sFile, $sDir, $oShellApp, $oDir, $oFile, $aProperty, $sProperty
+    $iExist = FileExists($sPath)
+    If $iExist = 0 Then
+        SetError(1)
+        Return 0
+    Else
+        $sFile = StringTrimLeft($sPath, StringInStr($sPath, "\", 0, -1))
+        $sDir = StringTrimRight($sPath, (StringLen($sPath) - StringInStr($sPath, "\", 0, -1)))
+        $oShellApp = ObjCreate("shell.application")
+        $oDir = $oShellApp.NameSpace ($sDir)
+        $oFile = $oDir.Parsename ($sFile)
+        If $iProp = -1 Then
+            Local $aProperty[35]
+            For $i = 0 To 34
+                $aProperty[$i] = $oDir.GetDetailsOf ($oFile, $i)
+            Next
+            Return $aProperty
+        Else
+            $sProperty = $oDir.GetDetailsOf ($oFile, $iProp)
+            If $sProperty = "" Then
+                Return 0
+            Else
+                Return $sProperty
+            EndIf
+        EndIf
+    EndIf
+EndFunc   ;==>_GetExtProperty
 
 ; Dump complete debug content to log file
 Func CreateLog($status)
@@ -4735,7 +4820,7 @@ Func GUI_Feedback_Send()
 		Return
 	EndIf
 	GUIDelete($FB_GUI)
-	GUISetState(@SW_HIDE, $guimain)
+	If $guimain Then GUISetState(@SW_HIDE, $guimain)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
 
 	Local $FB_Types = StringSplit(t('FEEDBACK_TYPE_OPTIONS', '', 'english'), "|", $STR_NOCOUNT)
@@ -4765,12 +4850,12 @@ Func GUI_Feedback_Send()
 
 	_DeleteTrayMessageBox()
 
-	If StringInStr($sResponse, "1") Then
+	If $sResponse = "1" Then
 		Cout("Feedback successfully sent")
 		MsgBox(262144, $title, t('FEEDBACK_SUCCESS'))
 	Else
 		Cout("Error sending feedback")
-		MsgBox(262144, $title, t('FEEDBACK_ERROR'))
+		MsgBox(262144+16, $title, t('FEEDBACK_ERROR'))
 	EndIf
 
 	GUISetState(@SW_SHOW, $guimain)

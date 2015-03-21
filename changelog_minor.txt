@@ -7,6 +7,7 @@ Beta 1:
   Added filescan with MediaInfo dll to provide additional information on media files (scan only mode)
   Added delay to update script to prevent 'not found' error, changed execution parameter
   Added 'Open program directory' help menu entry
+  Added file metadata (filesize, creation date,...) to log file when 'Ask for feedback' is enabled
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found
   Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
@@ -18,8 +19,11 @@ Beta 1:
   Fixed video extraction: multiple audio/video tracks had same names when extracted, so FFMPEG always asked to overwrite, 
         now type(audio/video) and number of track for each type is added
   Fixed folder size calculation in status box did not work correctly for FFMPEG and probably others
+  Fixed moving unicode tempfiles to output directory created subdirectory with temporary name
+  Fixed feedback success evaluation
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
+  Changed user input needed message should be more visible now
   Changed check for update behaviour: check is only performed on start if GUI is opened; if run from command line or context menu,
 		  it will be done right before terminating, so extraction/scan will not abort after installing update
   Changed internal behaviour for extraction and game select functions

@@ -2,7 +2,7 @@
 
 // Language:
 update language files
-fix word order support for translations //need examples
+fix word order support for translations
 
 // Unpacker changes:
 password list for unrar,... --> unrar t -p
@@ -22,6 +22,7 @@ lz
 Smart install maker - http://www.nullsecurity.org/tools
 Replace GCFScape
 mdf, mds images
+flac
 
 
 // User Interface:
@@ -52,7 +53,7 @@ Check filesize in _Run function and notify if no change for x seconds
 
 
 // Short term
-
+Send log - privacy information before sending/opt-in
 
 
 //ArcConvTest
