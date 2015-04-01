@@ -28,6 +28,7 @@ Beta 1:
   Changed check for update behaviour: check is only performed on start if GUI is opened; if run from command line or context menu,
 		  it will be done right before terminating, so extraction/scan will not abort after installing update
   Changed internal behaviour for extraction and game select functions
+  Changed language files, added new %name term to reduce %s usage
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated unrar to 5.20

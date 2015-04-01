@@ -645,21 +645,19 @@ Func t($t, $vars = '', $lang = $language)
 	If $return == '' Then
 		Cout("Translation not found for term " & $t)
 		$return = IniRead(@ScriptDir & '\English.ini', 'UniExtract', $t, '???')
+		If $return = "???" Then Cout("Warning: term " & $t & " is not defined")
 	EndIf
-	;if stringinstr($return, ' //') then
-	;	$return = stringleft($return, stringinstr($return, ' //')-1)
-	;	if stringleft($return, 1) == '"' AND stringright($return, 1) == '"' then
-	;		$return = stringtrimleft($return, 1)
-	;		$return = stringtrimright($return, 1)
-	;	endif
-	;endif
+
+	$return = StringReplace($return, '%name', $name)
 	$return = StringReplace($return, '%n', @CRLF)
 	$return = StringReplace($return, '%t', @TAB)
+
 	For $i = 0 To UBound($vars) - 1
 		$return = StringReplace($return, '%s', $vars[$i], 1)
 	Next
+
 	Return $return
-EndFunc   ;==>t
+EndFunc
 
 ; Parse command line
 Func ParseCommandLine()
@@ -999,7 +997,7 @@ Func filescan($f, $analyze = 1)
 
 			If $error Then
 				Cout("Failed to locate renamed file. Guessed name: " & $new)
-				If Not $silentmode Then MsgBox(262144 + 16, $name, t('RENAME_NOTFOUND', CreateArray($name, $name, $new, StringReplace(t('PREFS_APPEND_EXT_LABEL'), "&", ""))))
+				If Not $silentmode Then MsgBox(262144 + 16, $name, t('RENAME_NOTFOUND', CreateArray($new, StringReplace(t('PREFS_APPEND_EXT_LABEL'), "&", ""))))
 				terminate('silent', '', '')
 			EndIf
 		Else
@@ -1776,7 +1774,7 @@ Func checkBin()
 
 	$NSISbin = FileFindFirstFile($filedir & "\data*.bin")
 	If $NSISbin == -1 Then Return
-	If Prompt(64 + 1, "NSIS_BINFILES", CreateArray($file, $filename & "." & $fileext, $name), 0) Then
+	If Prompt(64 + 1, "NSIS_BINFILES", CreateArray($file, $filename & "." & $fileext), 0) Then
 		While 1
 			$file = $filedir & "\" & FileFindNextFile($NSISbin)
 			If @error Then ExitLoop
@@ -2200,7 +2198,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			_Run($cmd & $fsb & ' -d "' & $outdir & '" "' & $file & '"', $filedir)
 
 		Case "gcf"
-			Prompt(48 + 1, 'PACKAGE_EXPLORER', CreateArray($file, $name), 1)
+			Prompt(48 + 1, 'PACKAGE_EXPLORER', CreateArray($file), 1)
 			Run($gcf & ' "' & $file & '"')
 			If $createdir Then DirRemove($outdir, 0)
 			terminate("silent", "", "")
@@ -2685,7 +2683,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "video"
 			; Prompt to download FFmpeg if file not found
 			If Not FileExists(@ScriptDir & "\bin\" & $ffmpeg) Then
-				Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, $name, $name, "http://ffmpeg.org/legal.html"), 1)
+				Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "http://ffmpeg.org/legal.html"), 1)
 				GetFFmpeg()
 				If @error Then terminate("silent", "", "")
 			EndIf
@@ -2786,7 +2784,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 				; Prompt to continue
 				_DeleteTrayMessageBox()
-				Prompt(48 + 4, 'WISE_MSI_PROMPT', CreateArray($name), 1)
+				Prompt(48 + 4, 'WISE_MSI_PROMPT', 1)
 
 				; First, check for any files that are already in extraction dir
 				If $warnexecute Then Warn_Execute($filename & '.exe /?')
@@ -2893,7 +2891,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			; Check generic .exe ressource extraction
 			If FileExists($outdir & "\[0]") Then
 				; Try to find correct file extensions for unpacked files
-				If Prompt(48 + 1, "UNPACK_GENERIC_ZIP", CreateArray($file, "7Zip", $name, $outdir & "\[0]"), 0) Then
+				If Prompt(48 + 1, "UNPACK_GENERIC_ZIP", CreateArray($file, "7Zip", $outdir & "\[0]"), 0) Then
 					$file = $outdir & "\[0]"
 					$outdir = $file & "\"
 					FilenameParse($file)
@@ -2963,7 +2961,7 @@ Func unpack()
 	; Success evaluation
 	If FileExists($filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext) Then
 		; Prompt if unpacked file should be scanned
-		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($file, $name, $filename & '_' & t('TERM_UNPACKED') & "." & $fileext), 0) Then
+		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($file, $filename & '_' & t('TERM_UNPACKED') & "." & $fileext), 0) Then
 			$file = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext
 			$outdir = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "\"
 			StartExtraction()
@@ -3143,17 +3141,17 @@ Func terminate($status, $fname, $ID)
 			$syntax &= t('HELP_SCAN')
 			$syntax &= t('HELP_SILENT')
 			$syntax &= t('HELP_BATCH')
-			$syntax &= t('HELP_SUB', CreateArray($name))
+			$syntax &= t('HELP_SUB')
 			$syntax &= t('HELP_EXAMPLE1')
 			$syntax &= t('HELP_EXAMPLE2', CreateArray(@ScriptName))
-			$syntax &= t('HELP_NOARGS', CreateArray($name))
+			$syntax &= t('HELP_NOARGS')
 			MsgBox(262144 + 32, $title, $syntax, 15)
 
 			; Display file type information and exit
 		Case $status == "fileinfo"
 			If $filetype == "" Then
 				$exitcode = 4
-				$filetype = t('UNKNOWN_EXT', CreateArray($file, $name, ""))
+				$filetype = t('UNKNOWN_EXT', CreateArray($file, ""))
 			EndIf
 			If $silentmode Then ; Save info to result file if in silent mode
 				$handle = FileOpen($fileScanLogFile, 8 + 1)
@@ -3168,7 +3166,7 @@ Func terminate($status, $fname, $ID)
 			If Not $silentmode And Prompt(256 + 16 + 4, 'CANNOT_EXTRACT', CreateArray($file, $filetype), 0) Then Run($exeinfope & ' "' & $file & '"', $filedir)
 			$exitcode = 3
 		Case $status == "unknownext"
-			Prompt(16, 'UNKNOWN_EXT', CreateArray($file, $name, $filetype), 0)
+			Prompt(16, 'UNKNOWN_EXT', CreateArray($file, $filetype), 0)
 			$exitcode = 4
 		Case $status == "invaliddir"
 			Prompt(16, 'INVALID_DIR', CreateArray($fname), 0)
@@ -3177,7 +3175,7 @@ Func terminate($status, $fname, $ID)
 			Prompt(48, 'NOT_PACKED', CreateArray($file, $filetype), 0)
 			$exitcode = 6
 		Case $status == "notsupported"
-			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, $name, $filetype), 0)
+			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, $filetype), 0)
 			$exitcode = 7
 		Case $status == "missingexe"
 			Prompt(48, 'MISSING_EXE', CreateArray($file, $ID))
@@ -3185,7 +3183,7 @@ Func terminate($status, $fname, $ID)
 
 			; Display failed attempt information and exit
 		Case $status == "failed"
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $ID, $name), 0) Then
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $ID), 0) Then
 				If $LogFile Then
 					ShellExecute($LogFile)
 				Else
@@ -3199,7 +3197,7 @@ Func terminate($status, $fname, $ID)
 			If $DeleteOrigFile = 1 Then
 				FileDelete($file)
 			ElseIf $DeleteOrigFile = 2 Then
-				If Not $silentmode And Prompt(32 + 4, 'FILE_DELETE', CreateArray($file, $name)) Then FileDelete($file)
+				If Not $silentmode And Prompt(32 + 4, 'FILE_DELETE', CreateArray($file)) Then FileDelete($file)
 			EndIf
 			If $OpenOutDir And Not $silentmode Then Run("explorer.exe /e, " & $outdir)
 	EndSelect
@@ -3215,7 +3213,7 @@ Func terminate($status, $fname, $ID)
 	EndIf
 
 	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Then
-		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', CreateArray($name, $file, $name), 0) Then
+		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', CreateArray($file), 0) Then
 			; Attach input file's first bytes for debug purpose
 			Cout("--------------------------------------------------File dump--------------------------------------------------" & _
 				 @CRLF & _HexDump($file, 1024))
@@ -3329,7 +3327,7 @@ Func MethodSelect($format, $splashdisp)
 	Opt("GUIOnEventMode", 0)
 	Local $guimethod = GUICreate($title, 330, $base_height + (UBound($method) * 20))
 	$header = GUICtrlCreateLabel(t('METHOD_HEADER', CreateArray($select_type)), 5, 5, 320, 20)
-	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', CreateArray($name, $select_type, $name)), 5, 25, 320, 65, $SS_LEFT)
+	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', CreateArray($select_type)), 5, 25, 320, 65, $SS_LEFT)
 
 	; Create radio selection options
 	GUICtrlCreateGroup(t('METHOD_RADIO_LABEL'), 5, $base_radio, 215, 25 + (UBound($method) * 20))
@@ -3375,8 +3373,7 @@ EndFunc   ;==>MethodSelect
 Func GameSelect($sEntries, $sStandard)
 	Local $sSelection = 0
 	$GameSelectGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
-	$GameSelectLabel = GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filename & "." & $fileext, $name, _
-		   $sStandard)), 10, 8, 252, 210, $SS_CENTER)
+	$GameSelectLabel = GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filename & "." & $fileext, $sStandard)), 10, 8, 252, 210, $SS_CENTER)
 	$GameSelectList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT, $LBS_SORT))
 	GUICtrlSetData(-1, $sStandard & '|' & $sEntries)
 	$ok = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)
@@ -3952,7 +3949,7 @@ Func CheckUpdate($silent = False)
 	If $return <> $version Then
 		Cout("--> Update available")
 		$found = True
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return), 0) Then
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($version, $return), 0) Then
 			$UEURL = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
 			If @error Or $UEURL = "" Then
 				If Not $silent Then MsgBox(262144 + 48, $title, t('UPDATE_FAILED'))
@@ -3983,7 +3980,7 @@ Func CheckUpdate($silent = False)
 		EndIf
 	EndIf
 
-	If $found = False And $silent = False Then MsgBox(262144 + 64, $name, t('UPDATE_CURRENT', CreateArray($name)))
+	If $found = False And $silent = False Then MsgBox(262144 + 64, $name, t('UPDATE_CURRENT'))
 
 	Cout("Check for updates finished")
 EndFunc   ;==>CheckUpdate
@@ -4026,7 +4023,7 @@ Func GetFFmpeg()
 	Local $success = RunWait($cmd & $7z & ' x "' & $return & '"', @TempDir)
 	FileDelete($return)
 	If $success <> 0 Then
-		MsgBox(262144 + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip", $name)))
+		MsgBox(262144 + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip")))
 		Return
 	EndIf
 
@@ -4103,7 +4100,7 @@ Func CreateGUI()
 	Local $filemenu = GUICtrlCreateMenu(t('MENU_FILE_LABEL'))
 	Local $openitem = GUICtrlCreateMenuItem(t('MENU_FILE_OPEN_LABEL'), $filemenu)
 	GUICtrlCreateMenuItem("", $filemenu)
-	Global $keepopenitem = GUICtrlCreateMenuItem(t('MENU_FILE_KEEP_OPEN_LABEL', CreateArray($name)), $filemenu)
+	Global $keepopenitem = GUICtrlCreateMenuItem(t('MENU_FILE_KEEP_OPEN_LABEL'), $filemenu)
 	GUICtrlCreateMenuItem("", $filemenu)
 	Global $showitem = GUICtrlCreateMenuItem(t('MENU_FILE_SHOW_LABEL'), $filemenu)
 	Global $clearitem = GUICtrlCreateMenuItem(t('MENU_FILE_CLEAR_LABEL'), $filemenu)
@@ -4124,7 +4121,7 @@ Func CreateGUI()
 	Local $pluginsitem = GUICtrlCreateMenuItem(t('MENU_HELP_PLUGINS_LABEL'), $helpmenu)
 	Local $firststartitem = GUICtrlCreateMenuItem(t('FIRSTSTART_TITLE'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
-	Local $webitem = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', CreateArray($name)), $helpmenu)
+	Local $webitem = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL'), $helpmenu)
 	Local $forumitem = GUICtrlCreateMenuItem(t('MENU_HELP_FORUM_LABEL'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $statsitem = GUICtrlCreateMenuItem(t('MENU_HELP_STATS_LABEL'), $helpmenu)
@@ -4781,7 +4778,7 @@ Func GUI_Feedback($Type = "", $file = "", $Output = "")
 	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
 	Global $FB_FileCont = GUICtrlCreateInput($file, 8, 72, 233, 21)
 	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
-	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL', CreateArray($name)), 8, 104, -1, 15)
+	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 104, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
 	Global $FB_OutputCont = GUICtrlCreateEdit("", 8, 120, 233, 49, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetData(-1, $Output)
@@ -5251,9 +5248,8 @@ Func GUI_FirstStart()
 		Exit 99
 	EndIf
 	Global $FS_Texts[UBound($FS_Sections)] = [ _
-			"", t('FIRSTSTART_PAGE1', CreateArray($name, $name)), t('FIRSTSTART_PAGE2', CreateArray($name)), _
-			t('FIRSTSTART_PAGE3', CreateArray($name)), t('FIRSTSTART_PAGE4', CreateArray($name)), t('FIRSTSTART_PAGE5', _
-			CreateArray($name, @ScriptDir & "\bin")), t('FIRSTSTART_PAGE6', CreateArray($name, $name, $name)) _
+				"", t('FIRSTSTART_PAGE1'), t('FIRSTSTART_PAGE2'), t('FIRSTSTART_PAGE3'), t('FIRSTSTART_PAGE4'), _
+				t('FIRSTSTART_PAGE5', CreateArray(@ScriptDir & "\bin")), t('FIRSTSTART_PAGE6') _
 			]
 ;~  	_ArrayDisplay($FS_Texts)
 	GUISetState(@SW_SHOW)
@@ -5433,7 +5429,7 @@ Func GUI_About()
 	GUICtrlCreateLabel($name, 24, 16, 348, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 30, 400, 0, "MS Sans Serif")
 	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($version)), 16, 72, 362, 17, $SS_CENTER)
-	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", $website)), 16, 104, 364, 113, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", $website, "GNU GPLv2")), 16, 104, 364, 113, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, 255, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")
 	GUICtrlCreatePic(".\support\Icons\Bioruebe.jpg", 295, 212, 89, 50)
