@@ -21,6 +21,7 @@ Beta 1:
   Fixed folder size calculation in status box did not work correctly for FFMPEG and probably others
   Fixed moving unicode tempfiles to output directory created subdirectory with temporary name
   Fixed feedback success evaluation
+  Fixed some terms not using translation files
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now

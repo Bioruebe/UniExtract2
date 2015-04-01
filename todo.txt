@@ -49,7 +49,8 @@ include tridscan gui?
 check ffmpeg 32/64 bit for portable usage
 ntlea
 Crage logging does not work
-Check filesize in _Run function and notify if no change for x seconds
+Remove unnecessary DeleteDir commands in extract function
+Look through terminate function
 
 
 // Short term

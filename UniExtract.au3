@@ -3205,10 +3205,13 @@ Func terminate($status, $fname, $ID)
 	EndSelect
 
 	; Write error log if in batchmode
-	If $exitcode <> 0 And $silentmode And $extract Then
-		$handle = FileOpen(@ScriptDir & "\log\errorlog.txt", 8 + 1)
-		FileWrite($handle, $filename & "." & $fileext & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
-		FileClose($handle)
+	If $exitcode <> 0 Then
+		If $silentmode And $extract Then
+			$handle = FileOpen(@ScriptDir & "\log\errorlog.txt", 8 + 1)
+			FileWrite($handle, $filename & "." & $fileext & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
+			FileClose($handle)
+		EndIf
+		If $createdir And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 	EndIf
 
 	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Then
@@ -5429,12 +5432,12 @@ Func GUI_About()
 	$About = GUICreate($title & " " & $codename, 397, 270, -1, -1, -1, -1, $guimain)
 	GUICtrlCreateLabel($name, 24, 16, 348, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 30, 400, 0, "MS Sans Serif")
-	GUICtrlCreateLabel("Version " & $version, 16, 72, 362, 17, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($version)), 16, 72, 362, 17, $SS_CENTER)
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", $website)), 16, 104, 364, 113, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, 255, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")
 	GUICtrlCreatePic(".\support\Icons\Bioruebe.jpg", 295, 212, 89, 50)
-	$About_OK = GUICtrlCreateButton("OK", 154, 225, 89, 25)
+	$About_OK = GUICtrlCreateButton(t('OK_BUT'), 154, 225, 89, 25)
 	GUISetState(@SW_SHOW)
 
 	GUICtrlSetOnEvent($About_OK, "GUI_About_Exit")
