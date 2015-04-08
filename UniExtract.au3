@@ -141,7 +141,7 @@ Const $aspack = "AspackDie.exe" 							;1.4.1
 Const $daa = "daa2iso.exe" 									;0.1.7e
 Const $dmg = "dmgextractor.jar" 							;0.70	;Java
 Const $ethornell = "ethornell.exe" 							;unknown
-Const $exeinfope = "exeinfope.exe" 							;0.0.3.0
+Const $exeinfope = "exeinfope.exe" 							;0.0.3.7
 Const $filetool = @ScriptDir & "\bin\file\bin\file.exe" 	;5.03
 Const $flv = "FLVExtractCL.exe" 							;1.6.2
 Const $fsb = "fsbext.exe" 									;0.3.3
@@ -2496,8 +2496,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			RunWait($cmd & $nbh & ' "' & $file & '"', $outdir)
 
 		Case "NSIS"
-			; Ignore duplicates and extract
-			_Run($cmd & $7z & ' x -aos' & ' "' & $file & '"', $outdir)
+			; Rename duplicates and extract
+			_Run($cmd & $7z & ' x -aou' & ' "' & $file & '"', $outdir)
 
 			; Determine if there are .bin files in filedir
 			checkBin()

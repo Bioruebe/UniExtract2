@@ -110,6 +110,8 @@
   Fixed output directory field is now autofilling correctly when using drag and drop (optional)
   Fixed detection/extraction behaviour for Generic PC disk image (check 7zip first)
   Fixed UniExtract now tries to close helper binaries (stop extraction) on exit via tray menu
+  Fixed NSIS extraction overwriting existing files; UniExtract still creates not useful output files for some custom NSIS installers
+		but all content is now kept in output directory
   Removed obsolete msi2xml binaries, unneeded lzma binary (source)
   Removed unneeded/obsolete license/url files (general file cleanup)
   Removed bin2iso

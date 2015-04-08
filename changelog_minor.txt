@@ -22,6 +22,8 @@ Beta 1:
   Fixed moving unicode tempfiles to output directory created subdirectory with temporary name
   Fixed feedback success evaluation
   Fixed some terms not using translation files
+  Fixed NSIS extraction overwriting existing files; UniExtract still creates not useful output files for some custom NSIS installers
+		but all content is now kept in output directory
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
@@ -33,6 +35,7 @@ Beta 1:
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated unrar to 5.20
   Updated fsbextract to 0.3.3
+  Updated exeinfo PE to 0.0.3.7
 
 Alpha 4:
   Added scroll bar to feedback edit controls
