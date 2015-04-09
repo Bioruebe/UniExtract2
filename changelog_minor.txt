@@ -4,6 +4,7 @@ Beta 1:
   Added support for Telltale game archives (.ttarch)
   Added support for Livemaker games via crass/crage (plugin)
   Added support for .aac audio files (decompress to wav) using faad (plugin)
+  Added support for .flac audio files using flac
   Added filescan with MediaInfo dll to provide additional information on media files (scan only mode)
   Added delay to update script to prevent 'not found' error, changed execution parameter
   Added 'Open program directory' help menu entry
@@ -36,8 +37,9 @@ Beta 1:
   Changed internal behaviour for extraction and game select functions
   Changed language files, added new %name term to reduce %s usage
   Changed FFMPEG is now downloaded to the correct subdirectory (x86/x64), so the appropriate version is used in portable mode on 
-		  different operatiing systems
-  Changed feedback GUI now displays privacy agreement before sending	  
+		  different operating systems
+  Changed feedback GUI now displays privacy agreement before sending	
+  Changed after update behaviour, most recent changelog is now opened  
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated unrar to 5.20

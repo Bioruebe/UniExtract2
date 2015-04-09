@@ -143,6 +143,7 @@ Const $dmg = "dmgextractor.jar" 							;0.70	;Java
 Const $ethornell = "ethornell.exe" 							;unknown
 Const $exeinfope = "exeinfope.exe" 							;0.0.3.7
 Const $filetool = @ScriptDir & "\bin\file\bin\file.exe" 	;5.03
+Const $flac = "flac.exe"									;1.3.1
 Const $flv = "FLVExtractCL.exe" 							;1.6.2
 Const $fsb = "fsbext.exe" 									;0.3.3
 Const $gcf = "GCFScape.exe" ;x64							;1.8.2
@@ -1068,6 +1069,9 @@ Func filescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "Disk Image (Macintosh)", 0)
 			extract("dmg", 'DMG ' & t('TERM_IMAGE'))
 
+		Case StringInStr($filetype_curr, "FLAC lossless", 0)
+			extract("flac", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+
 		Case StringInStr($filetype_curr, "Flash Video", 0)
 			extract("flv", 'Flash Video ' & t('TERM_CONTAINER'))
 
@@ -1332,7 +1336,9 @@ Func advfilescan($f)
 			 StringInStr($filetype_curr, "MPEG sequence")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
-			extract("aac", 'AAC Audio ' & t('TERM_FILE'))
+			extract("aac", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "FLAC audio")
+			extract("flac", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
 			CheckIso()
 
@@ -2186,6 +2192,9 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			FileSetAttrib($tempoutdir & '\*', '-R', 1)
 			MoveFiles($tempoutdir, $outdir, False, "", True)
 			DirRemove($tempoutdir)
+
+		Case "flac"
+			_Run($cmd & $flac & ' -o "' & $outdir & '\' & $filename & '.wav" -d "' & $file & '"', $outdir, @SW_HIDE, True, False)
 
 		Case "flv"
 			_Run($cmd & $flv & ' -v -a -t -d "' & $outdir & '" "' & $file & '"', $filedir)
@@ -3863,7 +3872,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
 				Or StringInStr($return, "All OK") Or StringInStr($return, "done.") _
-				Or StringInStr($return, "Done ...") Then
+				Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") Then
 			$success = True
 		EndIf
 
@@ -4002,9 +4011,12 @@ EndFunc
 
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
-	If FileExists("changelog_minor.txt") Then
+	; Open most recent changelog
+	$1 = FileGetTime("changelog_minor.txt", 0, 1)
+	$2 = FileGetTime("changelog.txt", 0, 1)
+	If $1 > $2 Then
 		ShellExecute("changelog_minor.txt")
-	ElseIf FileExists("changelog.txt") Then
+	Else
 		ShellExecute("changelog.txt")
 	EndIf
 
@@ -4038,7 +4050,7 @@ Func GetFFmpeg()
 	Cout("Moving FFmpeg files")
 	Local $dir = StringTrimRight($return, 3)
 	FileMove($dir & "\bin\ffmpeg.exe", @ScriptDir & "\bin\" & $OSArch & "\ffmpeg.exe", 1)
-	DirMove($dir & "\licenses", @ScriptDir & "\docs\FFmpeg", 1)
+	MoveFiles($dir & "\licenses", @ScriptDir & "\docs\FFmpeg", True)
 	DirRemove($dir, 1)
 
 	; Download license information

@@ -5,101 +5,103 @@ Universal Extractor 2.0.0
 
 Binaries:
 															(Success Evaluation|Fast Detection|Percentage Indicator)
-Name										Files						Version		Features	License					Author							Website
+Name										Files						Version		Features	License					Author								Website
 															
-7Zip										7z32.exe					9.20		o	o	-	GNU LGPL 				Igor Pavlov						http://www.7-zip.org/
-											7z64.exe					-------		---------	(+ unRAR restriction)	-------							-------															
-											7z32.dll					-------		---------	-------					-------							-------															
-											7z64.dll					-------		---------	-------					-------							-------															
-7z SFX Archives splitter					7ZSplit.exe					0.2			---------	GNU LGPL v3				Oleg Scherbakov					http://www.7zsfx.info/en/										
-ARC - Archive utility						arc.exe						5.21i		-	x	-	GNU GPL v2				Howard Chu						http://gnuwin32.sourceforge.net/packages/arc.htm				
-Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Roper					https://github.com/minirop/arc-reader/downloads
-											libpng12.dll				-------		---------	-------					-------							-------
-											zlib1.dll					-------		---------	-------					-------							-------
-ARJ32										arj.exe						3.10		!	x	!	GNU GPL v2				Andrew Belov					http://arj.sourceforge.net/										
-AspackDie									AspackDie.exe				1.41					Open Source				yoda							http://scifi.pages.at/yoda9k/									
-											ForceLibrary.dll			-------		---------	-------					-------							-------															
-ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson					http://www.convertlit.com/										
-daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma					http://aluigi.altervista.org/mytoolz.htm#daa2iso				
-disunity									disunity.jar				0.3.2		-	-	-	Public Domain			ata4							https://github.com/ata4/disunity
-											disunity.bat				-------		---------	-------					-------							-------
-											\lib directory				-------		---------	-------					-------							-------
-Catacombae DMGExtractor						dmgextractor.jar			0.7			x	x	o	GNU GPL v3				Erik Larsson					http://www.catacombae.org/dmgx.html								
-E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser				http://kannegieser.net/~veit/programm/index_e.htm				
-											E_WISE.INI					-------		---------	-------					-------							-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.3.1.0		---------	Freeware				A.S.L.							http://users.cjb.net/exeinfope/									
-											exeinfopeRUN.cfg			-------		---------	-------					-------							-------															
-											Ext_Detector.dll			-------		---------	-------					-------							-------
-											\plugins directory			-------		---------	-------					-------							-------															
-											\languages directory		-------		---------	-------					-------							-------
-Stuffit Expander							Expander.exe				6.0						Freeware				Aladdin Systems					ftp://ftp.elf.stuba.sk/pub/pc/pack/
-											stuffit5.engine-5.1.dll		-------		---------	-------					-------							-------															
-Extract NT									EXTRNT.EXE					2.10					Freeware				Gilles Vollant					http://www.winimage.com/extract.htm								
-extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland					http://legroom.net/software/extractmht							
-FFmpeg										ffmpeg.exe					newest		-		-	LGPL/GPL v2+			FFmpeg project					http://ffmpeg.zeranoe.com/builds/								
-File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project	http://gnuwin32.sourceforge.net/packages/file.htm		
-FLV Extract CL								FLVExtractCL.exe			1.6.2					GNU GPL v2				J.D.Purcell						http://moitah.net												
-FSB files extractor							fsbext.exe					0.3						GNU GPL v2				Luigi Auriemma					http://aluigi.altervista.org/papers.htm#fsbext					
-GCFScape									GCFScape32.exe				1.8.2					Freeware				Rynn Gregg						http://nemesis.thewavelength.net/index.php?p=25					
-											GCFScape64.exe				-------		---------	-------					-------							-------															
-											hllib32.dll					2.4.0		---------	GNU LGPL				-------							http://nemesis.thewavelength.net/index.php?p=35					
-											hllib64.dll					-------		---------	-------					-------							-------															
-HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff				http://www.geocities.com/mwinterhoff/helpdeco.htm				
-											---------					-------		---------	-------					-------							http://www.helpmaster.info/hlp-developmentaids-helpdeco.htm		
-i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac					ftp://ftp.elf.stuba.sk/pub/pc/pack/								
-innounp, the Inno Setup Unpacker			innounp.exe					0.40				o	GNU GPL	v2				QuickeneR, Ariman				http://innounp.sourceforge.net/									
-IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN				http://forum.exetools.com/showthread.php?t=3619					
-jsMSIx										jsMSIx.exe					1.11.0704				Freeware				JSWare							http://www.jsware.net/jsware/msicode.php5#unpackx				
-KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak					http://kgbarchiver.sourceforge.net/								
-lzop										lzop.exe					1.03					GNU GPL v2+				Markus F.X.J. Oberhumer			http://www.lzop.org/											
-MediaInfo 									MediaInfo.dll				0.7.72		---------	MediaInfo(Lib) License	MediaArea.net SARL				http://mediaarea.net/MediaInfo/
-											MediaInfo64.dll				---------	---------	---------				---------						---------
-MsiX										MsiX.exe					1.0						Open Source				Heath Stewart					http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
-mtee										mtee.exe					2.1			---------	MIT						Ritchie Lawrence				http://sourceforge.net/projects/mtee
-NBHextract									NBHextract.exe				1.0						Freeware				pof and TheBlasphemer			http://forum.xda-developers.com/showthread.php?t=289830				
-PeaZip										pea.exe						0.12/1.0				Open Source				Giorgio Tani					http://peazip.sourceforge.net/									
-Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP	http://www.peid.info/											
-PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------							-------															
-QuickBMS									quickbms.exe				0.5.13		!	o	!	GNU GPL v2|public code	Luigi Auriemma					http://aluigi.altervista.org/quickbms.htm						
-QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma					http://aluigi.altervista.org/quickbms.htm						
-QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios					http://sourceforge.net/projects/gameextractor/					
-RA Installer Unwrapper						RAIU.exe					0.1a					Open Source				Icebird							http://legroom.net/node/539										
-STIX										STIX_D.exe					2001/06/13				Freeware				Veit Kannegieser				http://kannegieser.net/veit/programm/index_e.htm				
-											WDOSXLE.exe					-------		---------	-------					-------							-------															
-swfextract	(part of swftools)				swfextract.exe				0.9.2					GNU GPL v3				Ricardo Pedroso?				http://www.swftools.org/										
-											---------					-------		---------	-------					-------							http://unxutils.sourceforge.net/								
-TrID										trid.exe					2.10		---------	Freeware				Marco Pontello					http://mark0.net/soft-trid-e.html								
-TrID definations							TrIDDefs.TRD				2012/05/06	---------	-------					-------							-------															
-Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.2.4		-	-	-	GNU GPL v2				Luigi Auriemma					http://aluigi.altervista.org/papers.htm#ttarchext
-unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com				http://www.kippler.com/win/unalz/
-UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert					http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					4.10				x	Freeware				Eugene and Alexander Roshal		http://www.rarlab.com/rar_add.htm								
-unrpa										/unrpa directory			1.4 mod		x	-	x	GNU GPL v3				Gareth Latty					http://www.lattyware.co.uk/projects/unrpa/
-Unshield									unshield.exe				0.5						Freeware				David Eriksson					http://github.com/twogood/unshield/tree/						
-UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz					http://en.wikipedia.org/wiki/UHarc								
-											UHARC04.EXE					0.4			?	x	?	-------					-------							http://www.klaimsoft.com/forum/index.php?showtopic=25			
-											UNUHARC06.EXE				0.6b		x	x	x	-------					-------							-------
-unzoo										unzoo.exe					4.5			-	x	-	Public Domain			Martin Schoenert				http://archives.math.utk.edu/software/multi-platform/gap/util/
-Info-ZIPs UnZip								unzip.exe					6.00		-	x	-	Open Source				Info-ZIP						http://www.info-zip.org/pub/infozip/							
-uif2iso										uif2iso.exe					0.1.7c					GNU GPL v2				Luigi Auriemma					http://aluigi.altervista.org/mytoolz.htm#uif2iso				
-UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w					modified GNU GPL v2+	Laszlo Molnar, John Reiser, 	http://upx.sourceforge.net/										
-											---------					-------		---------	(UPX License)			Markus Oberhumer				-------															
-UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer					http://www.fpx.de/fp/Software/UUDeview/		
-Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird	http://www.911cd.net/forums//index.php?showtopic=14906			
-XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke					http://www.winace.com/											
+7Zip										x86\7z.exe					9.20		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
+											x64\7z.exe					-------		---------	(+ unRAR restriction)	-------								-------															
+											x86\7z.dll					-------		---------	-------					-------								-------															
+											x64\7z.dll					-------		---------	-------					-------								-------															
+7z SFX Archives splitter					7ZSplit.exe					0.2			---------	GNU LGPL v3				Oleg Scherbakov						http://www.7zsfx.info/en/										
+ARC - Archive utility						arc.exe						5.21i		-	x	-	GNU GPL v2				Howard Chu							http://gnuwin32.sourceforge.net/packages/arc.htm				
+Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Roper						https://github.com/minirop/arc-reader/downloads
+											libpng12.dll				-------		---------	-------					-------								-------
+											zlib1.dll					-------		---------	-------					-------								-------
+ARJ32										arj.exe						3.10		!	x	!	GNU GPL v2				Andrew Belov							http://arj.sourceforge.net/										
+AspackDie									AspackDie.exe				1.41					Open Source				yoda								http://scifi.pages.at/yoda9k/									
+											ForceLibrary.dll			-------		---------	-------					-------								-------															
+ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
+daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
+disunity									disunity.jar				0.3.2		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
+											disunity.bat				-------		---------	-------					-------								-------
+											\lib directory				-------		---------	-------					-------								-------
+Catacombae DMGExtractor						dmgextractor.jar			0.7			x	x	o	GNU GPL v3				Erik Larsson						http://www.catacombae.org/dmgx.html								
+E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
+											E_WISE.INI					-------		---------	-------					-------								-------															
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.3.1.0		---------	Freeware				A.S.L.								http://users.cjb.net/exeinfope/									
+											exeinfopeRUN.cfg			-------		---------	-------					-------								-------															
+											Ext_Detector.dll			-------		---------	-------					-------								-------
+											\plugins directory			-------		---------	-------					-------								-------															
+											\languages directory		-------		---------	-------					-------								-------
+Stuffit Expander							Expander.exe				6.0						Freeware				Aladdin Systems						ftp://ftp.elf.stuba.sk/pub/pc/pack/
+											stuffit5.engine-5.1.dll		-------		---------	-------					-------								-------															
+Extract NT									EXTRNT.EXE					2.10					Freeware				Gilles Vollant						http://www.winimage.com/extract.htm								
+extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland						http://legroom.net/software/extractmht							
+FFmpeg										x86\ffmpeg.exe				newest		-		-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
+											x64\ffmpeg.exe				-------		---------	-------					-------								-------
+File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
+flac										x86\flac.exe				1.3.1		x	x	-	GNU GPL v2+				Josh Coalson, Xiph.Org Foundation	https://xiph.org/flac/index.html
+FLV Extract CL								FLVExtractCL.exe			1.6.2					GNU GPL v2				J.D.Purcell							http://moitah.net												
+FSB files extractor							fsbext.exe					0.3						GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
+GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http://nemesis.thewavelength.net/index.php?p=25					
+											x64\GCFScape.exe			-------		---------	-------					-------								-------															
+											x86\hllib.dll				2.4.0		---------	GNU LGPL				-------								http://nemesis.thewavelength.net/index.php?p=35					
+											x64\hllib.dll				-------		---------	-------					-------								-------															
+HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					http://www.geocities.com/mwinterhoff/helpdeco.htm				
+											---------					-------		---------	-------					-------								http://www.helpmaster.info/hlp-developmentaids-helpdeco.htm		
+i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
+innounp, the Inno Setup Unpacker			innounp.exe					0.40				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
+IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
+jsMSIx										jsMSIx.exe					1.11.0704				Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
+KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								
+lzop										lzop.exe					1.03					GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
+MediaInfo 									MediaInfo.dll				0.7.72		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
+											MediaInfo64.dll				---------	---------	---------				---------							---------
+MsiX										MsiX.exe					1.0						Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
+mtee										mtee.exe					2.1			---------	MIT						Ritchie Lawrence					http://sourceforge.net/projects/mtee
+NBHextract									NBHextract.exe				1.0						Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
+PeaZip										pea.exe						0.12/1.0				Open Source				Giorgio Tani						http://peazip.sourceforge.net/									
+Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
+PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
+QuickBMS									quickbms.exe				0.5.13		!	o	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
+QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
+QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
+RA Installer Unwrapper						RAIU.exe					0.1a					Open Source				Icebird								http://legroom.net/node/539										
+STIX										STIX_D.exe					2001/06/13				Freeware				Veit Kannegieser					http://kannegieser.net/veit/programm/index_e.htm				
+											WDOSXLE.exe					-------		---------	-------					-------								-------															
+swfextract	(part of swftools)				swfextract.exe				0.9.2					GNU GPL v3				Ricardo Pedroso?					http://www.swftools.org/										
+											---------					-------		---------	-------					-------								http://unxutils.sourceforge.net/								
+TrID										trid.exe					2.10		---------	Freeware				Marco Pontello						http://mark0.net/soft-trid-e.html								
+TrID definations							TrIDDefs.TRD				2012/05/06	---------	-------					-------								-------															
+Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.2.4		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
+unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com					http://www.kippler.com/win/unalz/
+UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
+UnRAR										UnRAR.exe					4.10				x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
+unrpa										/unrpa directory			1.4 mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
+Unshield									unshield.exe				0.5						Freeware				David Eriksson						http://github.com/twogood/unshield/tree/						
+UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
+											UHARC04.EXE					0.4			?	x	?	-------					-------								http://www.klaimsoft.com/forum/index.php?showtopic=25			
+											UNUHARC06.EXE				0.6b		x	x	x	-------					-------								-------
+unzoo										unzoo.exe					4.5			-	x	-	Public Domain			Martin Schoenert					http://archives.math.utk.edu/software/multi-platform/gap/util/
+Info-ZIPs UnZip								unzip.exe					6.00		-	x	-	Open Source				Info-ZIP							http://www.info-zip.org/pub/infozip/							
+uif2iso										uif2iso.exe					0.1.7c					GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#uif2iso				
+UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w					modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		http://upx.sourceforge.net/										
+											---------					-------		---------	(UPX License)			Markus Oberhumer					-------															
+UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
+Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
+XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke						http://www.winace.com/											
 
 
 Total Commander plugins:
-   DBX plugin								dbxplug.wcx					1.2				x		Freeware				Dmitri R. Letichevski			http://www.totalcmd.net/plugring/dbx.html						
-   Game Archive UnPacker PRO plugin			gaup_pro.wcx				0.6.0.3			-		Freeware				Alexander Cherenkov				http://forrox.narod.ru/											
-   InstallExplorer plugin					InstExpl.wcx				0.9.2					Freeware				Domo							http://www.totalcmd.net/plugring/InstallExplorer.html			
-											InstExpl.dll				-------		---------	-------					-------							-------															
-											\Unp directory				-------		---------	-------					-------							-------															
-   Iso plugin								iso_x86.wcx					1.7.7					Open Source				Domo							http://www.totalcmd.net/plugring/iso64.html						
-											iso_x64.wcx					-------		---------	-------					-------							-------															
-   MhtUnPack plugin							MhtUnPack.wcx				1.1.1			-		Freeware				Alexander Afonin				http://www.totalcmd.net/plugring/MhtUnPack.html					
-   MSI plugin								msi.wcx						1.2						Freeware				Alex Gretha						http://www.totalcmd.net/plugring/msi.html						
-   PDunSIS plugin							PDunSIS.wcx					1.0						Freeware				Patrik Daranský					http://ghisler.fileburst.com/plugins/pdunsis.zip				
+   DBX plugin								dbxplug.wcx					1.2				x		Freeware				Dmitri R. Letichevski				http://www.totalcmd.net/plugring/dbx.html						
+   Game Archive UnPacker PRO plugin			gaup_pro.wcx				0.6.0.3			-		Freeware				Alexander Cherenkov					http://forrox.narod.ru/											
+   InstallExplorer plugin					InstExpl.wcx				0.9.2					Freeware				Domo								http://www.totalcmd.net/plugring/InstallExplorer.html			
+											InstExpl.dll				-------		---------	-------					-------								-------															
+											\Unp directory				-------		---------	-------					-------								-------															
+   Iso plugin								iso_x86.wcx					1.7.7					Open Source				Domo								http://www.totalcmd.net/plugring/iso64.html						
+											iso_x64.wcx					-------		---------	-------					-------								-------															
+   MhtUnPack plugin							MhtUnPack.wcx				1.1.1			-		Freeware				Alexander Afonin					http://www.totalcmd.net/plugring/MhtUnPack.html					
+   MSI plugin								msi.wcx						1.2						Freeware				Alex Gretha							http://www.totalcmd.net/plugring/msi.html						
+   PDunSIS plugin							PDunSIS.wcx					1.0						Freeware				Patrik Daranský						http://ghisler.fileburst.com/plugins/pdunsis.zip				
 
 Notes
 ----------------------------
