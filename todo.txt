@@ -8,7 +8,6 @@ fix word order support for translations
 password list for unrar,... --> unrar t -p
 
 7z support for nifs, fat, vhd, mbr?
-7z support for gzip, bzip2, lzma, xz, tar from stdin?
 7z support for mslz?
 7z support for APM?
 
@@ -46,15 +45,13 @@ FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=3176
 additional file types for arc_conv //refine .nsa def
 change new exitcodes, re-evaluate commandline parser
 include tridscan gui?
-check ffmpeg 32/64 bit for portable usage
 ntlea
 Crage logging does not work
-Remove unnecessary DeleteDir commands in extract function
 Look through terminate function
 
 
+
 // Short term
-Send log - privacy information before sending/opt-in
 
 
 //ArcConvTest

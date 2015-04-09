@@ -11,7 +11,8 @@ Beta 1:
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found
   Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
-  Fixed possible infinite loop in run function when helper binary execution terminates too fast, resulting in UniExtract not shutting down after successful extraction
+  Fixed possible infinite loop in run function when helper binary execution terminates too fast, resulting in UniExtract not 
+        shutting down after successful extraction
   Fixed BMS scripts were not checked if GAUP detected files, but was unable to extract them
   Fixed game archive detection if file extension is not lower case
   Fixed detection of Matroska files, extraction of ogg and webm tracks in video files
@@ -24,6 +25,9 @@ Beta 1:
   Fixed some terms not using translation files
   Fixed NSIS extraction overwriting existing files; UniExtract still creates not useful output files for some custom NSIS installers
 		but all content is now kept in output directory
+  Fixed occasionally high CPU load when reading console output
+  Fixed tray exit handler not terminating all helper binaries
+  Fixed FFMPEG updater
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
@@ -31,6 +35,9 @@ Beta 1:
 		  it will be done right before terminating, so extraction/scan will not abort after installing update
   Changed internal behaviour for extraction and game select functions
   Changed language files, added new %name term to reduce %s usage
+  Changed FFMPEG is now downloaded to the correct subdirectory (x86/x64), so the appropriate version is used in portable mode on 
+		  different operatiing systems
+  Changed feedback GUI now displays privacy agreement before sending	  
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated unrar to 5.20

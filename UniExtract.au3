@@ -55,7 +55,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 0.2.5"
+Const $version = "2.0.0 Beta 0.3.0"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -118,7 +118,7 @@ Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfa
 Dim $oldpath = False, $oldoutdir
 Dim $createdir, $dirmtime
 Dim $FB_finish = False, $TrayMsg_Status, $BatchBut, $Tray_File
-Dim $isexe = False, $Message, $run, $runtitle, $DeleteOrigFileOpt[3]
+Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $queueArray[0]
 Dim $section = "UniExtract Preferences"
 
@@ -176,7 +176,7 @@ Const $uif = "uif2iso.exe" 									;0.1.7c
 Const $unity = "disunity.bat" 								;0.3.2
 Const $unshield = "unshield.exe" 							;0.5
 Const $upx = "upx.exe" 										;3.08w
-Const $rpa = ".\bin\unrpa\unrpa.exe"						;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
+Const $rpa = @ScriptDir & "\bin\unrpa\unrpa.exe"			;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
 Const $uu = "uudeview.exe" 									;0.5pl20
 Const $wise_ewise = "e_wise_w.exe" 							;2002/07/01
 Const $wise_wun = "wun.exe" 								;0.90A
@@ -198,14 +198,14 @@ Const $tee = "mtee.exe"
 Const $mediainfo = "MediaInfo" & $reg64 & ".dll"			; 0.7.72
 
 ; Not included binaries
-Const $ffmpeg = "ffmpeg.exe"
+Const $ffmpeg = "ffmpeg.exe"	;x64
 Const $iscab = "iscab.exe"
 Const $thinstall = "Extractor.exe"
 Const $rgss3 = "RPGDecrypter-spaces.ru.exe"
 Const $arc_conv = "arc_conv.exe"
 Const $dcp = "dcp_unpacker.exe"
 Const $unreal = "extract.exe"
-Const $crage = ".\bin\crass-0.4.14.0\crage.exe"
+Const $crage = @ScriptDir & "\bin\crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
 
 If Not @Compiled Then HotKeySet("{^}", "Test")
@@ -302,8 +302,7 @@ Func StartExtraction($checkext = True)
 
 	; Collect file information, for log/feedback only
 	Cout("File size: " & Round(FileGetSize($file) / 1048576, 2) & " MB")
-	Cout("Created: " & FileGetTime($file, 1, 1))
-	Cout("Modified: " & FileGetTime($file, 0, 1))
+	Cout("Created " & FileGetTime($file, 1, 1) & ", modified " & FileGetTime($file, 0, 1))
 
 	; Set full output directory
 	If $outdir = '/sub' Then
@@ -1329,7 +1328,8 @@ Func advfilescan($f)
 			extract("swf", 'Shockwave Flash ' & t('TERM_CONTAINER'))
 		Case StringInStr($filetype_curr, "PowerISO Direct-Access-Archive", 0)
 			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
-		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0)
+		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
+			 StringInStr($filetype_curr, "MPEG sequence")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
 			extract("aac", 'AAC Audio ' & t('TERM_FILE'))
@@ -1338,16 +1338,15 @@ Func advfilescan($f)
 
 			; Not extractable filetypes
 		Case (StringInStr($filetype_curr, "text", 0) And (StringInStr($filetype_curr, "CRLF", 0) Or _
-				StringInStr($filetype_curr, "long lines", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Or _
-				StringInStr($filetype_curr, "batch file")) Or _
-				StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
-				(StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
-				StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
-				StringInStr($filetype_curr, "shortcut", 0) Or StringInStr($filetype_curr, "ogg", 0)
+			  StringInStr($filetype_curr, "long lines", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Or _
+			  StringInStr($filetype_curr, "batch file")) Or _
+			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
+			 (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
+			  StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
+			  StringInStr($filetype_curr, "shortcut", 0) Or StringInStr($filetype_curr, "ogg", 0)
 			terminate("notpacked", $file, "")
-
 	EndSelect
-EndFunc   ;==>advfilescan
+EndFunc
 
 ; Scan .exe file using PEiD
 Func exescan($f, $scantype, $analyze = 1)
@@ -2143,10 +2142,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DMG ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
 				$file = $isofile
 				If Not CheckIso() Then _Run($cmd & $7z & ' x "' & $isofile & '"', $outdir)
-				; Exit if conversion failed
-			Else
+			Else ; Exit if conversion failed
 				Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED', "", 0)
-				If $createdir Then DirRemove($outdir, 0)
 				If FileExists($isofile) Then FileDelete($isofile)
 				check7z()
 				terminate("failed", $file, $arcdisp)
@@ -2171,7 +2168,6 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				; Exit if conversion failed
 			Else
 				Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED', "", 0)
-				If $createdir Then DirRemove($outdir, 0)
 				If FileExists($isofile) Then FileDelete($isofile)
 				check7z()
 				terminate("failed", $file, $arcdisp)
@@ -2200,7 +2196,6 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "gcf"
 			Prompt(48 + 1, 'PACKAGE_EXPLORER', CreateArray($file), 1)
 			Run($gcf & ' "' & $file & '"')
-			If $createdir Then DirRemove($outdir, 0)
 			terminate("silent", "", "")
 
 		Case "gz"
@@ -2666,7 +2661,6 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				; Exit if conversion failed
 			Else
 				Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED', '', 0)
-				If $createdir Then DirRemove($outdir, 0)
 				If FileExists($isofile) Then FileDelete($isofile)
 				check7z()
 				terminate("failed", $file, $arcdisp)
@@ -2682,7 +2676,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "video"
 			; Prompt to download FFmpeg if file not found
-			If Not FileExists(@ScriptDir & "\bin\" & $ffmpeg) Then
+			If Not FileExists(@ScriptDir & "\bin\" & $OSArch & "\" & $ffmpeg) Then
 				Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "http://ffmpeg.org/legal.html"), 1)
 				GetFFmpeg()
 				If @error Then terminate("silent", "", "")
@@ -2707,7 +2701,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				If $StreamType[1] == "Video" Then
 					$iVideo += 1
 					If $StreamType[2] == "h264" Then
-						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_MINIMIZE, True, False)
+						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 					Else
 						; Special cases
 						If StringInStr($StreamType[2], "wmv") Then
@@ -2717,7 +2711,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						ElseIf StringInStr($StreamType[2], "v8") Then
 							$StreamType[2] = "webm"
 						EndIf
-						_Run($command & ' -vcodec copy -an "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_MINIMIZE, True, False)
+						_Run($command & ' -vcodec copy -an "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 					EndIf
 				ElseIf $StreamType[1] == "Audio" Then
 					$iAudio += 1
@@ -2728,7 +2722,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						$StreamType[2] = "ogg"
 					EndIf
 
-					_Run($command & ' -acodec copy -vn "' & $filename & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & "." & $StreamType[2] & '"', $outdir, @SW_MINIMIZE, True, False)
+					_Run($command & ' -acodec copy -vn "' & $filename & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 				Else
 					Cout("Unknown stream type: " & $StreamType[1])
 				EndIf
@@ -2911,7 +2905,6 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 	; Otherwise, check directory size
 	If DirGetSize($outdir) <= $initdirsize Then
-		If $createdir Then DirRemove($outdir, 0)
 		If $arctype = "ace" And $fileext = "exe" Then Return False
 		If FileExists($isofile) Then
 			If Prompt(16 + 4, 'CONVERT_CDROM_STAGE2_FAILED', '', 0) Then FileDelete($isofile)
@@ -2978,12 +2971,12 @@ Func HasPlugin($plugin, $returnFail = False)
 	Cout("Searching for plugin " & $plugin)
 	If Not StringInStr($plugin, "\bin\") Then $plugin = @ScriptDir & "\bin\" & $plugin
 	If Not FileExists(_PathFull($plugin, @ScriptDir)) Then
-		If $createdir Then DirRemove($outdir, 0)
+		Cout("Error: plugin not found")
 		If $returnFail Then Return False
 		terminate('missingexe', $file, $plugin)
 	EndIf
 	Return True
-EndFunc   ;==>HasPlugin
+EndFunc
 
 ; Check if enough free space is available
 Func HasFreeSpace()
@@ -3203,14 +3196,14 @@ Func terminate($status, $fname, $ID)
 	EndSelect
 
 	; Write error log if in batchmode
-	If $exitcode <> 0 Then
-		If $silentmode And $extract Then
-			$handle = FileOpen(@ScriptDir & "\log\errorlog.txt", 8 + 1)
-			FileWrite($handle, $filename & "." & $fileext & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
-			FileClose($handle)
-		EndIf
-		If $createdir And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
+	If $exitcode <> 0 And $silentmode And $extract Then
+		$handle = FileOpen(@ScriptDir & "\log\errorlog.txt", 8 + 1)
+		FileWrite($handle, $filename & "." & $fileext & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
+		FileClose($handle)
 	EndIf
+
+	; Delete empty output directory if failed
+	If $createdir And $status <> "success" And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
 	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Then
 		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', CreateArray($file), 0) Then
@@ -3762,7 +3755,7 @@ EndFunc   ;==>CreateLog
 Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True)
 	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
 	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
-	Global $run = "", $runtitle = 0
+	Global $run = 0, $runtitle = 0
 	Local $return = "", $pos = 0, $size = 1, $lastSize = 0
 
 	; Create log
@@ -3906,27 +3899,49 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 	EndIf
 	; Reset run var so no wrong process is closed on tray exit
 	$run = 0
-EndFunc   ;==>_Run
+EndFunc
 
 ; Run a program and return stdout/stderr stream
 Func FetchStdout($f, $workingdir, $show_flag, $line = 0)
 	Cout("Executing: " & $f)
-	Local $run = "", $return = ""
+	Global $run = 0, $return = ""
 	$run = Run($f, $workingdir, $show_flag, $STDERR_MERGED)
+	$runtitle = _WinGetByPID($run)
+;~ 	Cout("PID: " & $run)
 	Do
+		Sleep(1)
 		$return &= StdoutRead($run)
 	Until @error
 	Cout($return)
+	$run = 0
 	If $line <> 0 Then Return _StringGetLine($return, $line)
 	Return $return
-EndFunc   ;==>FetchStdout
+EndFunc
+
+; Stop running helper process
+Func KillHelper()
+	If Not $run Then Return
+	$runtitle = _WinGetByPID($run)
+
+	If Not @error And Not StringIsSpace($runtitle) Then
+		Cout("Runtitle: " & $runtitle)
+		; Send SIGINT to console to terminate child processes
+		WinActivate($runtitle)
+		Send("^c")
+		; Close console
+		WinClose($runtitle)
+	EndIf
+
+	; Force termination if other close commands failed
+	If ProcessExists($run) Then ProcessClose($run)
+EndFunc
 
 ; Write data to stdout stream if enabled in options
 Func Cout($Data)
 	Local $Output = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC & ":" & @MSEC & @TAB & $Data & @CRLF; & @CRLF
 	If $Opt_ConsoleOutput == 1 Then ConsoleWrite($Output)
 	$debug &= $Output
-EndFunc   ;==>Cout
+EndFunc
 
 ; Check for new version
 Func CheckUpdate($silent = False)
@@ -3947,9 +3962,9 @@ Func CheckUpdate($silent = False)
 	Cout("Server: " & $return)
 
 	If $return <> $version Then
-		Cout("--> Update available")
+		Cout("Update available")
 		$found = True
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($version, $return), 0) Then
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return), 0) Then
 			$UEURL = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
 			If @error Or $UEURL = "" Then
 				If Not $silent Then MsgBox(262144 + 48, $title, t('UPDATE_FAILED'))
@@ -3967,11 +3982,11 @@ Func CheckUpdate($silent = False)
 	EndIf
 
 	; If ffmpeg.exe exists check for new ffmpeg version
-	If FileExists(@ScriptDir & "\bin\" & $ffmpeg) Then
+	If FileExists(@ScriptDir & "\bin\" & $OSArch & "\" & $ffmpeg) Then
 		; Determine FFmpeg version
-		$return = FetchStdout(@ScriptDir & "\bin\" & $ffmpeg, @ScriptDir, @SW_HIDE)
+		$return = FetchStdout(@ScriptDir & "\bin\" & $OSArch & "\" & $ffmpeg, @ScriptDir, @SW_HIDE)
 		$ffmpegvers = _StringBetween($return, "ffmpeg version ", " Copyright")
-		$return = _INetGetSource($updateURL & "ffversion")
+		$return = _INetGetSource($updateURL & "?get=ffversion")
 		; Download new
 		If $return > $ffmpegvers[0] Then
 			$found = True
@@ -3983,7 +3998,7 @@ Func CheckUpdate($silent = False)
 	If $found = False And $silent = False Then MsgBox(262144 + 64, $name, t('UPDATE_CURRENT'))
 
 	Cout("Check for updates finished")
-EndFunc   ;==>CheckUpdate
+EndFunc
 
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
@@ -4009,34 +4024,32 @@ EndFunc   ;==>_AfterUpdate
 Func GetFFmpeg()
 	$FFmpegURL = _INetGetSource($updateURL & "?get=ffmpeg&OSarch=" & @OSArch & "&id=" & $ID)
 	$return = Download($FFmpegURL)
-	;ConsoleWrite($cmd & $7z & ' x "' & $return & '"')
-
-	; Check for download errors
-	If $return == 0 Then
-		SetError(1)
-		Return
-	EndIf
+	If @error Then Return SetError(1, 0, 0)
 
 	; Extract files, move them to scriptdir and delete files from tempdir
-	;MsgBox(1,"", $cmd & $7z & ' x "' & $return & '"')
 	Cout("Extracting FFmpeg")
 	Local $success = RunWait($cmd & $7z & ' x "' & $return & '"', @TempDir)
 	FileDelete($return)
 	If $success <> 0 Then
 		MsgBox(262144 + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip")))
-		Return
+		Return SetError(1, 0, 0)
 	EndIf
 
 	Cout("Moving FFmpeg files")
-	FileMove(StringTrimRight($return, 3) & "\bin\ffmpeg.exe", @ScriptDir & "\bin\ffmpeg.exe", 1)
-	DirMove(StringTrimRight($return, 3) & "\licenses", @ScriptDir & "\docs\FFmpeg", 1)
-	DirRemove(StringTrimRight($return, 3), 1)
+	Local $dir = StringTrimRight($return, 3)
+	FileMove($dir & "\bin\ffmpeg.exe", @ScriptDir & "\bin\" & $OSArch & "\ffmpeg.exe", 1)
+	DirMove($dir & "\licenses", @ScriptDir & "\docs\FFmpeg", 1)
+	DirRemove($dir, 1)
 
 	; Download license information
-	$return = Download("http://ffmpeg.org/legal.html")
-	FileMove($return, @ScriptDir & "\docs\FFmpeg\FFmpeg_license.html", 8 + 1)
-	Cout("FFmpeg succesfully included")
-EndFunc   ;==>GetFFmpeg
+	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then
+		$return = Download("http://ffmpeg.org/legal.html")
+		If Not @error Then FileMove($return, @ScriptDir & "\docs\FFmpeg\FFmpeg_license.html", 8 + 1)
+	EndIf
+
+	Cout("FFmpeg succesfully loaded")
+	Return 1
+EndFunc
 
 ; Download a file
 Func Download($f)
@@ -4064,7 +4077,7 @@ Func Download($f)
 			Cout("Download failed")
 			Prompt(48, 'DOWNLOAD_FAILED', CreateArray($f), 0)
 			GUIDelete($DownloadGUI)
-			Return 0
+			Return SetError(1, 0, 0)
 		EndIf
 		$BytesReceived = InetGetInfo($Download, 0)
 		GUICtrlSetData($DownloadProgress, Int($BytesReceived / $BytesNeeded * 100))
@@ -4076,10 +4089,10 @@ Func Download($f)
 	Cout("Download finished")
 	If Not FileExists($DownloadedFile) Then
 		Cout("Downloaded file does not exist")
-		Return 0
+		Return SetError(1, 0, 0)
 	EndIf
 	Return $DownloadedFile
-EndFunc   ;==>Download
+EndFunc
 
 ; ------------------------ Begin GUI Control Functions ------------------------
 
@@ -4259,25 +4272,19 @@ EndFunc   ;==>CharCount
 
 ; Get title of a window by PID as returned by Run()
 ; Script by SmOke_N (http://www.autoitscript.com/forum/topic/136271-solved-wingethandle-from-wingetprocess/#entry952135)
-Func _WinGetByPID($iPID, $iArray = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
+Func _WinGetByPID($iPID, $iString = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
 	Local $aError[1] = [0], $aWinList, $sReturn
-	If IsString($iPID) Then
-		$iPID = ProcessExists($iPID)
-	EndIf
+	If IsString($iPID) Then $iPID = ProcessExists($iPID)
 	$aWinList = WinList()
 	For $A = 1 To $aWinList[0][0]
-		If WinGetProcess($aWinList[$A][1]) = $iPID And BitAND(WinGetState($aWinList[$A][1]), 2) Then
-			If $iArray Then
-				Return $aWinList[$A][1]
-			EndIf
+		If WinGetProcess($aWinList[$A][1]) = $iPID Then ;And BitAND(WinGetState($aWinList[$A][1]), 2) Then
+			If $iString Then Return $aWinList[$A][1]
 			$sReturn &= $aWinList[$A][1] & Chr(1)
 		EndIf
 	Next
-	If $sReturn Then
-		Return StringSplit(StringTrimRight($sReturn, 1), Chr(1))
-	EndIf
-	Return SetError(1, 0, $aError)
-EndFunc   ;==>_WinGetByPID
+	If $sReturn Then Return StringSplit(StringTrimRight($sReturn, 1), Chr(1))
+	Return SetError(1, 0, $iString? 0: $aError)
+EndFunc
 
 ; Round corners of status box
 ; Code by ? (http://www.autoitscript.com/forum/topic/100790-guiroundcorners-help/page__p__719767__hl__round%20corner__fromsearch__1#entry719767)
@@ -4815,10 +4822,15 @@ Func GUI_Feedback_Send()
 	$FB_Output = GUICtrlRead($FB_OutputCont)
 	$FB_Message = GUICtrlRead($FB_MessageCont)
 	$FB_Mail = GUICtrlRead($FB_MailCont)
+
 	If $FB_File = "" And $FB_Output = "" And $FB_Message = "" Then
 		MsgBox(262144 + 16, $name, t('FEEDBACK_EMPTY'))
 		Return
 	EndIf
+
+	; Opt-in privacy agreement
+	If Not Prompt(64+4, 'FEEDBACK_PRIVACY', 0, 0) Then Return
+
 	GUIDelete($FB_GUI)
 	If $guimain Then GUISetState(@SW_HIDE, $guimain)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
@@ -5467,7 +5479,6 @@ EndFunc   ;==>GUI_Exit
 ; Shows/hides cmd window when clicked on tray icon
 Func Tray_ShowHide()
 	If Not ProcessExists($run) Then Return
-	;Local $title = _WinGetByPID($run)
 	If BitAND(WinGetState($runtitle), 2) Then
 		WinSetState($runtitle, "", @SW_HIDE)
 	Else
@@ -5494,11 +5505,9 @@ EndFunc   ;==>Tray_Statusbox
 
 ; Exit and close helper binaries if necessary
 Func Tray_Exit()
-	Cout("Tray exit")
-	; Stop running extraction process
-	If ProcessExists($run) Then
-		If Not WinClose(_WinGetByPID($run)) Then ProcessClose($run)
-	EndIf
+	Cout("Tray exit, helper PID: " & $run)
+
+	KillHelper()
 
 	If $guimain Then
 		GUIGetPosition()
@@ -5507,7 +5516,7 @@ Func Tray_Exit()
 	EndIf
 
 	terminate("silent", '', '')
-EndFunc   ;==>Tray_Exit
+EndFunc
 
 ; Test specific functions
 Func Test()
