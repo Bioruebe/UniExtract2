@@ -1345,7 +1345,7 @@ Func advfilescan($f)
 			; Not extractable filetypes
 		Case (StringInStr($filetype_curr, "text", 0) And (StringInStr($filetype_curr, "CRLF", 0) Or _
 			  StringInStr($filetype_curr, "long lines", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Or _
-			  StringInStr($filetype_curr, "batch file")) Or _
+			  StringInStr($filetype_curr, "batch file")) Or StringInStr($filetype_curr, "source text", 0) Or _
 			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
 			 (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
 			  StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
@@ -4267,14 +4267,11 @@ Func CreateGUI()
 EndFunc   ;==>CreateGUI
 
 ; Return control width (for dynamic positioning)
-Func GetPos($gui, $control, $offset = 0)
-	$location = ControlGetPos($gui, '', $control)
-	If @error Then
-		SetError(1, '', 0)
-	Else
-		Return $location[0] + $location[2] + $offset
-	EndIf
-EndFunc   ;==>GetPos
+Func GetPos($hGUI, $hControl, $iOffset = 0)
+	$return = ControlGetPos($hGUI, '', $hControl)
+	If @error Then Return SetError(1, '', $iOffset)
+	Return $return[0] + $return[2] + $iOffset
+EndFunc
 
 ; Return number of times a character appears in a string
 Func CharCount($string, $char)

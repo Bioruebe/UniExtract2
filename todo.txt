@@ -19,9 +19,8 @@ sqx
 paq, zpaq
 lz
 Smart install maker - http://www.nullsecurity.org/tools
-Replace GCFScape
+Replace GCFScape with ?
 mdf, mds images
-flac
 
 
 // User Interface:
