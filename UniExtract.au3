@@ -145,6 +145,7 @@ Const $exeinfope = "exeinfope.exe" 							;0.0.3.7
 Const $filetool = @ScriptDir & "\bin\file\bin\file.exe" 	;5.03
 Const $flac = "flac.exe"									;1.3.1
 Const $flv = "FLVExtractCL.exe" 							;1.6.2
+Const $freearc = "unarc.exe"								;0.666
 Const $fsb = "fsbext.exe" 									;0.3.3
 Const $gcf = "GCFScape.exe" ;x64							;1.8.2
 Const $hlp = "helpdeco.exe" 								;2.1
@@ -324,7 +325,7 @@ Func StartExtraction($checkext = True)
 		$oldoutdir = $outdir
 		; Prompt to copy or move
 		Local $return = 6
-		If Not $silentmode Then $return = MsgBox(262144 + 32 + 3, $title, t('FILE_MOVE', CreateArray($file)))
+		If Not $silentmode Then $return = MsgBox(262144 + 32 + 3, $title, t('FILE_MOVE', $file))
 		If $return == 6 Then
 			Cout("Renaming and copying unicode file to " & $filemove)
 			If Not FileCopy($file, $filemove, 1) Then terminate("invaliddir", $filemove, "")
@@ -638,7 +639,7 @@ Func EnvParse($string)
 EndFunc   ;==>EnvParse
 
 ; Translate text
-Func t($t, $vars = '', $lang = $language)
+Func t($t, $aVars = 0, $lang = $language)
 	Local $ldir = @ScriptDir
 	If $lang <> 'English' Then $ldir &= '\lang'
 	$return = IniRead($ldir & '\' & $lang & '.ini', 'UniExtract', $t, '')
@@ -652,9 +653,15 @@ Func t($t, $vars = '', $lang = $language)
 	$return = StringReplace($return, '%n', @CRLF)
 	$return = StringReplace($return, '%t', @TAB)
 
-	For $i = 0 To UBound($vars) - 1
-		$return = StringReplace($return, '%s', $vars[$i], 1)
-	Next
+	If $aVars == 0 Then Return $return
+
+	If IsArray($aVars) Then
+		For $i = 0 To UBound($aVars) - 1
+			$return = StringReplace($return, '%s', $aVars[$i], 1)
+		Next
+	Else
+		$return = StringReplace($return, '%s', $aVars)
+	EndIf
 
 	Return $return
 EndFunc
@@ -953,7 +960,7 @@ Func filescan($f, $analyze = 1)
 	; Scan file using unix file tool
 	advfilescan($f)
 
-	_CreateTrayMessageBox(t('SCANNING_FILE', CreateArray("TrID")))
+	_CreateTrayMessageBox(t('SCANNING_FILE', "TrID"))
 
 	Cout("Start filescan using TrID")
 	Local $filetype_curr = ""
@@ -1030,8 +1037,10 @@ Func filescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "LZIP compressed archive")
 			extract("lz", "LZIP " & t('TERM_COMPRESSED') & " " & t('TERM_ARCHIVE'))
 
-		Case StringInStr($filetype_curr, "ARC Compressed archive", 0) _
-				And Not StringInStr($filetype_curr, "UHARC", 0)
+		Case StringInStr($filetype_curr, "FreeArc compressed archive", 0)
+			extract("freearc", 'FreeArc ' & t('TERM_ARCHIVE'))
+
+		Case StringInStr($filetype_curr, "ARC Compressed archive", 0) And Not StringInStr($filetype_curr, "UHARC", 0)
 			extract("arc", 'ARC ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "ARJ compressed archive", 0)
@@ -1279,7 +1288,7 @@ EndFunc   ;==>filescan
 Func advfilescan($f)
 	Local $filetype_curr = ""
 
-	_CreateTrayMessageBox(t('SCANNING_FILE', CreateArray("Unix File Tool")))
+	_CreateTrayMessageBox(t('SCANNING_FILE', "Unix File Tool"))
 
 	Cout("Start filescan using unix file tool")
 	$filetype_curr = StringReplace(StringReplace(FetchStdout($filetool & ' "' & $f & '"', $filedir, @SW_HIDE), $f & "; ", ""), @CRLF, "")
@@ -1360,7 +1369,7 @@ Func exescan($f, $scantype, $analyze = 1)
 
 	Cout("Start filescan using PEiD")
 
-	_CreateTrayMessageBox(t('SCANNING_EXE', CreateArray("PEiD")))
+	_CreateTrayMessageBox(t('SCANNING_EXE', "PEiD"))
 
 	; Backup existing PEiD options
 	Local $exsig = RegRead("HKCU\Software\PEiD", "ExSig")
@@ -1486,7 +1495,7 @@ EndFunc   ;==>exescan
 Func advexescan($f, $analyze = 1)
 	Cout("Start filescan using Exeinfo PE")
 
-	_CreateTrayMessageBox(t('SCANNING_EXE', CreateArray("Exeinfo PE")))
+	_CreateTrayMessageBox(t('SCANNING_EXE', "Exeinfo PE"))
 
 	Local $filetype_curr = ""
 
@@ -1617,7 +1626,7 @@ Func advexescan($f, $analyze = 1)
 			extract("ie", 'Setup Factory ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Microsoft SFX CAB", 0) And StringInStr($filetype_curr, "rename file *.exe as *.cab", 0)
-			Prompt(1, "FILE_COPY", CreateArray($file), 1)
+			Prompt(1, "FILE_COPY", $file, 1)
 			Local $return = _TempFile($filedir, $filename & "_", ".cab")
 			FileCopy($file, $return)
 			$file = $return
@@ -1666,7 +1675,7 @@ EndFunc   ;==>advexescan
 Func MediaFileScan($f)
 	Local $filetype_curr = ""
 	Cout("Start filescan using MediaInfo dll")
-	_CreateTrayMessageBox(t('SCANNING_FILE', CreateArray("MediaInfo")))
+	_CreateTrayMessageBox(t('SCANNING_FILE', "MediaInfo"))
 
 	HasPlugin($mediainfo)
 	$hDll = DllOpen("MediaInfo.dll")
@@ -1837,6 +1846,7 @@ Func CheckGame()
 
 	If $gameformat[0] > 1 Then
 		_ArrayDelete($gameformat, 0)
+		_ArraySort($gameformat)
 		$game = GameSelect(_ArrayToString($gameformat), t('METHOD_GAME_NOGAME'))
 
 		If $game Then
@@ -1959,6 +1969,9 @@ EndFunc   ;==>checkZip
 ; Extract from known archive format
 Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
 	$success = False
+
+	Cout("Starting " & $arctype & " extraction")
+
 	; Display banner and create subdirectory
 	_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 	If StringRight($outdir, 1) = '\' Then $outdir = StringTrimRight($outdir, 1)
@@ -2015,7 +2028,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			If @error Then terminate("failed", $file, $arcdisp)
 
 		Case "arc"
-			_Run($cmd & $arc & ' x "' & $file & '"', $outdir)
+			_Run($cmd & $arc & ' x "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 
 		Case "arc_conv"
 			If Not HasPlugin($arc_conv, $returnFail) Then Return
@@ -2075,7 +2088,6 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "crage"
 			HasPlugin($crage)
-
 			_Run($cmd & 'crage.exe -p "' & $file & '" -o "' & $outdir & '" -v', @ScriptDir & "\bin\crass-0.4.14.0", @SW_SHOW, False)
 
 		Case "ctar"
@@ -2109,7 +2121,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 			IsJavaInstalled()
 
-			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('DMG'), 1)
+			Prompt(32 + 4, 'CONVERT_CDROM', 'DMG', 1)
 
 			; Begin conversion to .iso format
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DMG ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
@@ -2158,7 +2170,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "daa"
 			; Prompt user to continue
 			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('DAA/GBI'), 1)
+			Prompt(32 + 4, 'CONVERT_CDROM', 'DAA/GBI', 1)
 
 			; Begin conversion to .iso format
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DAA/GBI ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
@@ -2199,11 +2211,14 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "flv"
 			_Run($cmd & $flv & ' -v -a -t -d "' & $outdir & '" "' & $file & '"', $filedir)
 
+		Case "freearc"
+			_Run($cmd & $freearc & ' x -dp"' & $outdir & '" "' & $file & '"', $filedir, @SW_HIDE, True, False, False)
+
 		Case "fsb"
 			_Run($cmd & $fsb & ' -d "' & $outdir & '" "' & $file & '"', $filedir)
 
 		Case "gcf"
-			Prompt(48 + 1, 'PACKAGE_EXPLORER', CreateArray($file), 1)
+			Prompt(48 + 1, 'PACKAGE_EXPLORER', $file, 1)
 			Run($gcf & ' "' & $file & '"')
 			terminate("silent", "", "")
 
@@ -2567,12 +2582,11 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				$line = $return[$i]
 				; Extract files
 				If StringInStr($line, "MP3 Soundstream") Then
-					_Run($cmd & $swf & ' -m "' & $file & '"', $outdir, @SW_HIDE)
-					If FileExists($outdir & "\output.mp3") Then _
-							FileMove($outdir & "\output.mp3", $outdir & "\MP3 Soundstream\soundstream.mp3", 8 + 1)
+					_Run($cmd & $swf & ' -m "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
+					If FileExists($outdir & "\output.mp3") Then FileMove($outdir & "\output.mp3", $outdir & "\MP3 Soundstream\soundstream.mp3", 8 + 1)
 				ElseIf $line <> "" Then
 					$swf_arr = StringSplit(StringRegExpReplace(StringStripWS($line, 8), '(?i)\[(-\w)\]\d+(.+):(.*?)\)', "$1,$2,"), ",")
-					;_ArrayDisplay($swf_arr)
+;~ 					_ArrayDisplay($swf_arr)
 					$j = 3
 					Do
 						;Cout("$j = " & $j & @TAB & $swf_arr[$j])
@@ -2583,15 +2597,16 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 								_ArrayAdd($swf_arr, $k)
 							Next
 							$swf_arr[0] = UBound($swf_arr) - 1
-							;_ArrayDisplay($swf_arr)
+;~ 							_ArrayDisplay($swf_arr)
 						Else
-							_Run($cmd & $swf & " " & $swf_arr[1] & " " & StringStripWS($swf_arr[$j], 1) _
-									 & ' "' & $file & '"', $outdir, @SW_HIDE)
+							_Run($cmd & $swf & " " & $swf_arr[1] & " " & StringStripWS($swf_arr[$j], 1) & ' "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 							; Rename and move file to subfolder
 							If $swf_arr[2] = "Sound" Then
 								FileMove($outdir & "\output.mp3", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".mp3", 8 + 1)
 							ElseIf $swf_arr[2] = "PNGs" Then
 								FileMove($outdir & "\output.png", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".png", 8 + 1)
+							ElseIf $swf_arr[2] = "JPEG" Then
+								FileMove($outdir & "\output.jpg", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".jpg", 8 + 1)
 							Else
 								FileMove($outdir & "\output.swf", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".swf", 8 + 1)
 							EndIf
@@ -2652,7 +2667,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "uif"
 			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', CreateArray('UIF'), 1)
+			Prompt(32 + 4, 'CONVERT_CDROM', 'UIF', 1)
 
 			; Begin conversion, format selected by uif2iso
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'UIF ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
@@ -2677,7 +2692,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "unity"
 			IsJavaInstalled()
-			_Run($unity & ' extract "' & $file & '"', $filedir)
+			_Run($unity & ' extract "' & $file & '"', $filedir, @SW_MINIMIZE, True, False)
 
 		Case "unreal"
 			HasPlugin($unreal)
@@ -2971,7 +2986,7 @@ Func unpack()
 			terminate("success", "", $packer)
 		EndIf
 	Else
-		Prompt(16, 'UNPACK_FAILED', CreateArray($file), 1)
+		Prompt(16, 'UNPACK_FAILED', $file, 1)
 	EndIf
 EndFunc   ;==>unpack
 
@@ -3132,7 +3147,7 @@ Func terminate($status, $fname, $ID)
 		; Display usage information and exit
 		Case $status == "syntax"
 			$syntax = t('HELP_SUMMARY')
-			$syntax &= t('HELP_SYNTAX', CreateArray(@ScriptName))
+			$syntax &= t('HELP_SYNTAX', @ScriptName)
 			$syntax &= t('HELP_ARGUMENTS')
 			$syntax &= t('HELP_HELP')
 			$syntax &= t('HELP_PREFS')
@@ -3145,7 +3160,7 @@ Func terminate($status, $fname, $ID)
 			$syntax &= t('HELP_BATCH')
 			$syntax &= t('HELP_SUB')
 			$syntax &= t('HELP_EXAMPLE1')
-			$syntax &= t('HELP_EXAMPLE2', CreateArray(@ScriptName))
+			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
 			$syntax &= t('HELP_NOARGS')
 			MsgBox(262144 + 32, $title, $syntax, 15)
 
@@ -3171,7 +3186,7 @@ Func terminate($status, $fname, $ID)
 			Prompt(16, 'UNKNOWN_EXT', CreateArray($file, $filetype), 0)
 			$exitcode = 4
 		Case $status == "invaliddir"
-			Prompt(16, 'INVALID_DIR', CreateArray($fname), 0)
+			Prompt(16, 'INVALID_DIR', $fname, 0)
 			$exitcode = 5
 		Case $status == "notpacked"
 			Prompt(48, 'NOT_PACKED', CreateArray($file, $filetype), 0)
@@ -3199,7 +3214,7 @@ Func terminate($status, $fname, $ID)
 			If $DeleteOrigFile = 1 Then
 				FileDelete($file)
 			ElseIf $DeleteOrigFile = 2 Then
-				If Not $silentmode And Prompt(32 + 4, 'FILE_DELETE', CreateArray($file)) Then FileDelete($file)
+				If Not $silentmode And Prompt(32 + 4, 'FILE_DELETE', $file) Then FileDelete($file)
 			EndIf
 			If $OpenOutDir And Not $silentmode Then Run("explorer.exe /e, " & $outdir)
 	EndSelect
@@ -3215,7 +3230,7 @@ Func terminate($status, $fname, $ID)
 	If $createdir And $status <> "success" And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
 	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Then
-		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', CreateArray($file), 0) Then
+		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', $file, 0) Then
 			; Attach input file's first bytes for debug purpose
 			Cout("--------------------------------------------------File dump--------------------------------------------------" & _
 				 @CRLF & _HexDump($file, 1024))
@@ -3328,13 +3343,13 @@ Func MethodSelect($format, $splashdisp)
 	; Create GUI and set header information
 	Opt("GUIOnEventMode", 0)
 	Local $guimethod = GUICreate($title, 330, $base_height + (UBound($method) * 20))
-	$header = GUICtrlCreateLabel(t('METHOD_HEADER', CreateArray($select_type)), 5, 5, 320, 20)
-	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', CreateArray($select_type)), 5, 25, 320, 65, $SS_LEFT)
+	$header = GUICtrlCreateLabel(t('METHOD_HEADER', $select_type), 5, 5, 320, 20)
+	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', $select_type), 5, 25, 320, 65, $SS_LEFT)
 
 	; Create radio selection options
 	GUICtrlCreateGroup(t('METHOD_RADIO_LABEL'), 5, $base_radio, 215, 25 + (UBound($method) * 20))
 	For $i = 0 To UBound($method) - 1
-		$select[$i] = GUICtrlCreateRadio(t($method[$i][1], CreateArray($method[$i][0])), 10, $base_radio + 20 + ($i * 20), 205, 20)
+		$select[$i] = GUICtrlCreateRadio(t($method[$i][1], $method[$i][0]), 10, $base_radio + 20 + ($i * 20), 205, 20)
 	Next
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
@@ -3376,7 +3391,7 @@ Func GameSelect($sEntries, $sStandard)
 	Local $sSelection = 0
 	$GameSelectGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
 	$GameSelectLabel = GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filename & "." & $fileext, $sStandard)), 10, 8, 252, 210, $SS_CENTER)
-	$GameSelectList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT, $LBS_SORT))
+	$GameSelectList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
 	GUICtrlSetData(-1, $sStandard & '|' & $sEntries)
 	$ok = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)
 	$cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 152, 427, 81, 25)
@@ -3403,7 +3418,7 @@ EndFunc
 ; Warn user before executing files for extraction
 Func Warn_Execute($command)
 	Cout("Warning: In order to extract files of this type, the file must be directly executed.")
-	$prompt = MsgBox(262144 + 49, $title, t('WARN_EXECUTE', CreateArray($command)))
+	$prompt = MsgBox(262144 + 49, $title, t('WARN_EXECUTE', $command))
 	If $prompt <> 1 Then
 		If $createdir Then DirRemove($outdir, 0)
 		terminate('silent', '', '')
@@ -3417,12 +3432,12 @@ Func CreateArray($i0, $i1 = 0, $i2 = 0, $i3 = 0, $i4 = 0, $i5 = 0, $i6 = 0, $i7 
 	Local $arr[10] = [$i0, $i1, $i2, $i3, $i4, $i5, $i6, $i7, $i8, $i9]
 	ReDim $arr[@NumParams]
 	Return $arr
-EndFunc   ;==>CreateArray
+EndFunc
 
 ; Display a custom prompt and return user choice
-Func Prompt($show_flag, $Message, $vars = '', $terminate = 1)
+Func Prompt($show_flag, $Message, $vars = 0, $terminate = 1)
 	If $silentmode Then
-		Cout("Assuming yes to message " & $Message & ", " & $vars)
+		Cout("Assuming yes to message " & $Message)
 		Return 1
 	EndIf
 	Local $return = MsgBox(262144 + $show_flag, $title, t($Message, $vars))
@@ -3517,7 +3532,7 @@ Func AddToBatch()
 	Local $cmdline = GetCmd()
 	$handle = FileOpen($batchQueue, 8 + 1)
 	FileSetPos($handle, 0, 0)
-	If StringInStr(FileRead($handle), $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', CreateArray($file), 0) Then
+	If StringInStr(FileRead($handle), $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file, 0) Then
 		Cout("Not adding duplicate file " & $cmdline)
 		FileClose($handle)
 		Return
@@ -3570,7 +3585,7 @@ Func BatchQueuePop()
 		FileClose($handle)
 
 		FileDelete(@ScriptDir & "\log\errorlog.txt")
-		If $return <> "" Then MsgBox(262144 + 48, $name, t('BATCH_FINISH', CreateArray($return)))
+		If $return <> "" Then MsgBox(262144 + 48, $name, t('BATCH_FINISH', $return))
 	Else ; Get next command and execute it
 		Local $element = $queueArray[1]
 		_ArrayDelete($queueArray, 1)
@@ -3761,7 +3776,7 @@ Func CreateLog($status)
 EndFunc   ;==>CreateLog
 
 ; Executes a program and log output using tee
-Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True)
+Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True)
 	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
 	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
 	Global $run = 0, $runtitle = 0
@@ -3771,7 +3786,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 	If $useTee Then
 		HasPlugin($tee)
 		If Not FileExists(@ScriptDir & "\log\") Then DirCreate(@ScriptDir & "\log\")
-		$run = Run($f & $teeCmd, $workingdir, @SW_MINIMIZE)
+		$run = Run($f & $teeCmd, $workingdir, $initialShow? @SW_MINIMIZE: $show_flag)
 		If @error Then Return
 		Local $TimerStart = TimerInit()
 		Cout("Pid: " & $run)
@@ -3849,7 +3864,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 			; Size of extracted file(s)
 			If $size > -1 Then
 				$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
-				Cout("Size: " & $size & @TAB & $lastSize)
+;~ 				Cout("Size: " & $size & @TAB & $lastSize)
 				If $size > 0 And $size <> $lastSize Then
 					Cout("Size: " & $size & @TAB & $lastSize)
 					GUICtrlSetData($TrayMsg_Status, $size & " MB")
@@ -3862,7 +3877,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		; Write tee log to UniExtract log file
 		FileSetPos($handle, 0, $FILE_BEGIN)
 		$return = FileRead($handle)
-		Cout("Teelog:" & @CRLF & $return)
+		If Not StringIsSpace($return) Then Cout("Teelog:" & @CRLF & $return)
 		FileClose($handle)
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
@@ -3873,6 +3888,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
 				Or StringInStr($return, "All OK") Or StringInStr($return, "done.") _
 				Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") Then
+			Cout("Success evaluation passed")
 			$success = True
 		EndIf
 
@@ -4087,7 +4103,7 @@ Func Download($f)
 		Sleep(50)
 		If InetGetInfo($Download, 4) <> 0 Then
 			Cout("Download failed")
-			Prompt(48, 'DOWNLOAD_FAILED', CreateArray($f), 0)
+			Prompt(48, 'DOWNLOAD_FAILED', $f, 0)
 			GUIDelete($DownloadGUI)
 			Return SetError(1, 0, 0)
 		EndIf
@@ -4611,7 +4627,7 @@ Func GUI_OK_Set($Msg = False)
 		Return 1
 	ElseIf $Msg Then
 		If $file <> '' Then $file &= ' ' & t('DOES_NOT_EXIST')
-		MsgBox(262144 + 48, $title, t('INVALID_FILE_SELECTED', CreateArray($file)))
+		MsgBox(262144 + 48, $title, t('INVALID_FILE_SELECTED', $file))
 	EndIf
 	Return 0
 EndFunc   ;==>GUI_OK_Set
@@ -5270,7 +5286,7 @@ Func GUI_FirstStart()
 	EndIf
 	Global $FS_Texts[UBound($FS_Sections)] = [ _
 				"", t('FIRSTSTART_PAGE1'), t('FIRSTSTART_PAGE2'), t('FIRSTSTART_PAGE3'), t('FIRSTSTART_PAGE4'), _
-				t('FIRSTSTART_PAGE5', CreateArray(@ScriptDir & "\bin")), t('FIRSTSTART_PAGE6') _
+				t('FIRSTSTART_PAGE5', @ScriptDir & "\bin"), t('FIRSTSTART_PAGE6') _
 			]
 ;~  	_ArrayDisplay($FS_Texts)
 	GUISetState(@SW_SHOW)
@@ -5429,7 +5445,7 @@ EndFunc   ;==>GUI_DeleteLogs
 ; Update log directory size in menu entry after deleting log files
 Func GUI_UpdateLogItem()
 	Local $size = Round(DirGetSize(@ScriptDir & "\log") / 1024 / 1024, 2) & " MB"
-	GUICtrlSetData($logitem, t('MENU_FILE_LOG_LABEL', CreateArray($size)))
+	GUICtrlSetData($logitem, t('MENU_FILE_LOG_LABEL', $size))
 EndFunc   ;==>GUI_UpdateLogItem
 
 ; Display use statistics
@@ -5449,7 +5465,7 @@ Func GUI_About()
 	$About = GUICreate($title & " " & $codename, 397, 270, -1, -1, -1, -1, $guimain)
 	GUICtrlCreateLabel($name, 24, 16, 348, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 30, 400, 0, "MS Sans Serif")
-	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($version)), 16, 72, 362, 17, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_VERSION', $version), 16, 72, 362, 17, $SS_CENTER)
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", $website, "GNU GPLv2")), 16, 104, 364, 113, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, 255, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")

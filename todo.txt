@@ -57,7 +57,6 @@ Look through terminate function
 bza		-		bz2 header 		trid x
 bz2		x	
 yz		-						trid x
-replace with freearc?
 
 
 // Known bugs:

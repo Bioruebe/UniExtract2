@@ -21,7 +21,7 @@ AspackDie									AspackDie.exe				1.41					Open Source				yoda								http://sc
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
-disunity									disunity.jar				0.3.2		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
+disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
 											disunity.bat				-------		---------	-------					-------								-------
 											\lib directory				-------		---------	-------					-------								-------
 Catacombae DMGExtractor						dmgextractor.jar			0.7			x	x	o	GNU GPL v3				Erik Larsson						http://www.catacombae.org/dmgx.html								
@@ -74,6 +74,7 @@ TrID										trid.exe					2.10		---------	Freeware				Marco Pontello						http:
 TrID definations							TrIDDefs.TRD				2012/05/06	---------	-------					-------								-------															
 Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.2.4		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
 unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com					http://www.kippler.com/win/unalz/
+FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin						http://freearc.org/
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
 UnRAR										UnRAR.exe					4.10				x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										/unrpa directory			1.4 mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/

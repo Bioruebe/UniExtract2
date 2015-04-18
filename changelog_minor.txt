@@ -5,6 +5,7 @@ Beta 1:
   Added support for Livemaker games via crass/crage (plugin)
   Added support for .aac audio files (decompress to wav) using faad (plugin)
   Added support for .flac audio files using flac
+  Added support for FreeArc compressed archives (.arc) using FreeArc unpacker
   Added filescan with MediaInfo dll to provide additional information on media files (scan only mode)
   Added delay to update script to prevent 'not found' error, changed execution parameter
   Added 'Open program directory' help menu entry
@@ -29,6 +30,8 @@ Beta 1:
   Fixed occasionally high CPU load when reading console output
   Fixed tray exit handler not terminating all helper binaries
   Fixed FFMPEG updater
+  Fixed swf: extraction of .jpg files; performance slightly increased
+  Fixed GameSelect GUI: not a game message is now always the first element and preselected
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
@@ -45,6 +48,7 @@ Beta 1:
   Updated unrar to 5.20
   Updated fsbextract to 0.3.3
   Updated exeinfo PE to 0.0.3.7
+  Updated disunity to 0.3.4
 
 Alpha 4:
   Added scroll bar to feedback edit controls
