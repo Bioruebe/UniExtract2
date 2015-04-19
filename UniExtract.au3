@@ -657,10 +657,10 @@ Func t($t, $aVars = 0, $lang = $language)
 
 	If IsArray($aVars) Then
 		For $i = 0 To UBound($aVars) - 1
-			$return = StringReplace($return, '%s', $aVars[$i], 1)
+			$return = StringReplace($return, '%' & $i+1, $aVars[$i])
 		Next
 	Else
-		$return = StringReplace($return, '%s', $aVars)
+		$return = StringReplace($return, '%1', $aVars)
 	EndIf
 
 	Return $return

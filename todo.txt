@@ -2,7 +2,7 @@
 
 // Language:
 update language files
-fix word order support for translations
+check control size for other languages
 
 // Unpacker changes:
 password list for unrar,... --> unrar t -p
@@ -24,7 +24,6 @@ mdf, mds images
 
 
 // User Interface:
-check control size for other languages
 statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
 
 
@@ -41,22 +40,19 @@ Zip extraction: 'User input needed' message does not disappear
 // Other:
 quickbms logging
 FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765
-additional file types for arc_conv //refine .nsa def
+additional file types for arc_conv
 change new exitcodes, re-evaluate commandline parser
 include tridscan gui?
 ntlea
 Crage logging does not work
 Look through terminate function
-
+Disable _Run function's pattern search for extractors that do not provide patterns
 
 
 // Short term
+Rename instead of moving unicode files
 
 
-//ArcConvTest
-bza		-		bz2 header 		trid x
-bz2		x	
-yz		-						trid x
 
 
 // Known bugs:
@@ -124,4 +120,5 @@ support .dmg with DMGExtractor. - 738
 support to convert and extract .daa files (PowerIso compressed iso format) (http://aluigi.altervista.org/mytoolz.htm#both)
 separate associated file types for Windows Explorer sorting? - comment 116
 leave uniextract open after extraction - req 48
+fix word order support for translations
 

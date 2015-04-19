@@ -95,6 +95,8 @@
   Changed cmd window hidden by default, open & auto focus when user input needed (e.g. overwrite prompt)
 		  or manually when clicking on tray icon (experimental)
   Changed appenext option now changes the extension of all files scanned by TrID
+  Changed translation files, removed %s variables and introduced numbered placeholders, that can be switched to 
+		  fit a language's word order; added %name shortcut
   Fixed ressource usage/speed, source code cleanup
   Fixed minor bugs and cosmetic issues
   Fixed message boxes (more information displayed, silent mode compatibility, correct icons and buttons)

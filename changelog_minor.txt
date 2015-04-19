@@ -42,7 +42,9 @@ Beta 1:
   Changed FFMPEG is now downloaded to the correct subdirectory (x86/x64), so the appropriate version is used in portable mode on 
 		  different operating systems
   Changed feedback GUI now displays privacy agreement before sending	
-  Changed after update behaviour, most recent changelog is now opened  
+  Changed after update behaviour, most recent changelog is now opened
+  Changed translation files, removed %s variables and introduced numbered placeholders, that can be switched to 
+		  fit a language's word order; added %name shortcut
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated unrar to 5.20
