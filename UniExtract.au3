@@ -55,7 +55,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 0.3.0"
+Const $version = "2.0.0 Beta 1"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -108,14 +108,14 @@ Global $posx = -1, $posy = -1
 Global $trayX = -1, $trayY = -1
 
 ; Global variables
-Dim $file, $filename, $filedir, $fileext, $initoutdir, $outdir, $filetype = "", $filemove, $initdirsize
+Dim $file, $filename, $filedir, $fileext, $initoutdir, $outdir, $filetype = "", $initdirsize
 Dim $prompt, $packed, $return, $Output, $langlist, $notpacked
 Dim $gaDropFiles[1], $queueArray[1]
-Dim $About, $Type, $win7, $silent, $moveback = False, $reg64 = ""
+Dim $About, $Type, $win7, $silent, $bIsUnicode = False, $reg64 = ""
 Dim $debug = "", $guimain = False, $success = False, $TBgui, $isofile = 0
 Dim $test, $testarj, $testace, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed = 0
-Dim $oldpath = False, $oldoutdir
+Dim $oldpath, $oldoutdir, $sUnicodeName
 Dim $createdir, $dirmtime
 Dim $FB_finish = False, $TrayMsg_Status, $BatchBut, $Tray_File
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
@@ -165,7 +165,7 @@ Const $pea = "pea.exe" 										;0.12/1.0
 Const $peid = "peid.exe" 									;0.95   2012/04/24
 Const $quickbms = "quickbms.exe" 							;0.5.12
 Const $rai = "RAIU.EXE" 									;0.1a
-Const $rar = "unrar.exe" 									;5.11
+Const $rar = "unrar.exe" 									;5.21
 Const $sit = "Expander.exe" 								;6.0
 Const $stix = "stix_d.exe" 									;2001/06/13
 Const $swf = "swfextract.exe" 								;0.9.1
@@ -297,7 +297,7 @@ StartExtraction($extract)
 Func StartExtraction($checkext = True)
 	Cout("------------------------------------------------------------")
 
-	$moveback = False
+	$bIsUnicode = False
 
 	; Parse filename
 	FilenameParse($file)
@@ -317,31 +317,23 @@ Func StartExtraction($checkext = True)
 		EndIf
 	EndIf
 
-	; Check for unicode characters in path
-	If $checkUnicode And Not StringRegExp($file, $unicodepattern, 0) Then
-		Global $filemove = _TempFile(@TempDir, "Unicode File_", "." & $fileext)
-		Cout("File seems to be unicode")
-		$oldpath = $file
-		$oldoutdir = $outdir
-		; Prompt to copy or move
-		Local $return = 6
-		If Not $silentmode Then $return = MsgBox(262144 + 32 + 3, $title, t('FILE_MOVE', $file))
-		If $return == 6 Then
-			Cout("Renaming and copying unicode file to " & $filemove)
-			If Not FileCopy($file, $filemove, 1) Then terminate("invaliddir", $filemove, "")
-		ElseIf $return == 7 Then
-			Cout("Renaming and moving unicode file to " & $filemove)
-			If Not FileMove($file, $filemove, 1) Then terminate("invaliddir", $filemove, "")
-			$moveback = True
-		Else
-			terminate("silent", "", "")
-		EndIf
-		$file = $filemove
-		$outdir = @TempDir & "\" & "Unicode File"
-	EndIf
-
 	; Set filename as tray icon tooltip
 	TraySetToolTip($filename & "." & $fileext)
+
+	; Check for unicode characters in path
+	If $checkUnicode And Not StringRegExp($file, $unicodepattern, 0) Then
+		Cout("File seems to be unicode")
+		$bIsUnicode = True
+		$sUnicodeName = $filename
+		$oldoutdir = $outdir
+		$oldpath = $file
+		$file = _TempFile($filedir, "Unicode_", $fileext)
+		Cout('Renaming "' & $sUnicodeName & '" to "' & $file & '"')
+		FileMove($oldpath, $file)
+		FilenameParse($file)
+		$outdir = $initoutdir
+	EndIf
+
 	; Register tray function
 	TraySetOnEvent($TRAY_EVENT_PRIMARYUP, "Tray_ShowHide")
 
@@ -626,7 +618,7 @@ Func FilenameParse($f)
 		$fileext = ''
 		$initoutdir = $filedir & '\' & $filename & '_' & t('TERM_UNPACKED')
 	EndIf
-;~ 	Cout("FilenameParse: " & @CRLF & "Raw input: " & $f & @CRLF & "FileName: " & $filename & @CRLF & "FileExt: " & $fileext & @CRLF & "FileDir: " & $filedir & @CRLF & "InitOutDIr: " & $initoutdir)
+	Cout("FilenameParse: " & @CRLF & "Raw input: " & $f & @CRLF & "FileName: " & $filename & @CRLF & "FileExt: " & $fileext & @CRLF & "FileDir: " & $filedir & @CRLF & "InitOutDir: " & $initoutdir)
 EndFunc   ;==>FilenameParse
 
 ; Parse string for environmental variables and return expanded output
@@ -2725,7 +2717,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				If $StreamType[1] == "Video" Then
 					$iVideo += 1
 					If $StreamType[2] == "h264" Then
-						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 					Else
 						; Special cases
 						If StringInStr($StreamType[2], "wmv") Then
@@ -2735,7 +2727,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						ElseIf StringInStr($StreamType[2], "v8") Then
 							$StreamType[2] = "webm"
 						EndIf
-						_Run($command & ' -vcodec copy -an "' & $filename & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+						_Run($command & ' -vcodec copy -an "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 					EndIf
 				ElseIf $StreamType[1] == "Audio" Then
 					$iAudio += 1
@@ -2746,7 +2738,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						$StreamType[2] = "ogg"
 					EndIf
 
-					_Run($command & ' -acodec copy -vn "' & $filename & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+					_Run($command & ' -acodec copy -vn "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 				Else
 					Cout("Unknown stream type: " & $StreamType[1])
 				EndIf
@@ -3114,16 +3106,11 @@ EndFunc   ;==>FileSearch
 
 ; Handle program termination with appropriate error message
 Func terminate($status, $fname, $ID)
-	; Move back unicode file
-	If $filemove Then
-;~ 		Sleep(5000)
-		If $moveback Then
-			Cout("Moving back unicode file")
-			FileMove($filemove, $oldpath, 1)
-		Else
-			FileDelete($filemove)
-		EndIf
-		MoveFiles($outdir, $oldoutdir, 1, "", 1)
+	; Rename unicode file
+	If $bIsUnicode Then
+		Cout("Renaming unicode file")
+		FileMove($file, $oldpath, 1)
+		DirMove($outdir, $oldoutdir)
 		$fname = $oldpath
 	EndIf
 
@@ -3476,10 +3463,10 @@ Func _CreateTrayMessageBox($TBText)
 	_GuiRoundCorners($TBgui, 0, 0, 30, 30)
 	If $filename = "" Then
 		Global $Tray_File = GUICtrlCreateLabel($TBText, $left, $top, $width, 80)
-	ElseIf StringLen($filename & "." & $fileext) > $iMaxCharCount Then
-		Global $Tray_File = GUICtrlCreateLabel(StringLeft($filename & "." & $fileext, $iMaxCharCount) & " [...]" & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
+	ElseIf StringLen(($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext) > $iMaxCharCount Then
+		Global $Tray_File = GUICtrlCreateLabel(StringLeft(($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext, $iMaxCharCount) & " [...]" & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
 	Else
-		Global $Tray_File = GUICtrlCreateLabel($filename & "." & $fileext & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
+		Global $Tray_File = GUICtrlCreateLabel(($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
 	EndIf
 	Global $TrayMsg_Status = GUICtrlCreateLabel("", $left, 74, $width, 20, $SS_CENTER)
 ;~     DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 250, "long", 0x00080000 )
@@ -3530,9 +3517,11 @@ EndFunc   ;==>GetCmd
 ; Add file to batch queue
 Func AddToBatch()
 	Local $cmdline = GetCmd()
-	$handle = FileOpen($batchQueue, 8 + 1)
+	$handle = FileOpen($batchQueue, 32 + 8 + 1)
 	FileSetPos($handle, 0, 0)
-	If StringInStr(FileRead($handle), $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file, 0) Then
+	Local $return = FileRead($handle)
+
+	If StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file, 0) Then
 		Cout("Not adding duplicate file " & $cmdline)
 		FileClose($handle)
 		Return
@@ -3768,12 +3757,12 @@ EndFunc   ;==>_GetExtProperty
 Func CreateLog($status)
 	Local $name = @ScriptDir & "\log\" & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
 	If $status <> "success" Then $name &= StringUpper($status) & "_"
-	$name &= $filename & "." & $fileext & ".log"
+	$name &= ($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext & ".log"
 	$handle = FileOpen($name, 32 + 8 + 2)
 	FileWrite($handle, $debug)
 	FileClose($handle)
 	Return $name
-EndFunc   ;==>CreateLog
+EndFunc
 
 ; Executes a program and log output using tee
 Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True)

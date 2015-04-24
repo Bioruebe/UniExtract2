@@ -32,6 +32,8 @@ Beta 1:
   Fixed FFMPEG updater
   Fixed swf: extraction of .jpg files; performance slightly increased
   Fixed GameSelect GUI: not a game message is now always the first element and preselected
+  Fixed unicode files are changed to ???????? and therefore fail to extract when adding them to batch queue
+  Fixed unicode files' extraction to subdir folder name
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
@@ -45,9 +47,10 @@ Beta 1:
   Changed after update behaviour, most recent changelog is now opened
   Changed translation files, removed %s variables and introduced numbered placeholders, that can be switched to 
 		  fit a language's word order; added %name shortcut
+  Changed unicode files are now renamed instead of moving them to a temporary directory
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
-  Updated unrar to 5.20
+  Updated unrar to 5.21
   Updated fsbextract to 0.3.3
   Updated exeinfo PE to 0.0.3.7
   Updated disunity to 0.3.4
