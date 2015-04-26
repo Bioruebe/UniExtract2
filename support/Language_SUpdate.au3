@@ -14,20 +14,27 @@
 #include <String.au3>
 
 ;~ $sFile = "..\English.ini"
-$sFile = "..\lang\German.ini"
 
-$aFileContent = FileReadToArray($sFile)
+;~ _SUpdate("..\lang\Chinese (Simplified).ini")
 
-;~ _ArrayDisplay($aFileContent)
+Func _SUpdate($sFile)
+;~ 	ConsoleWrite("[SUpdate] " & $sFile & @CRLF)
+	$hFile = FileOpen($sFile, 16384)
+	$aFileContent = FileReadToArray($sFile)
+	FileClose($hFile)
 
-For $i = 0 To UBound($aFileContent)-1
-	$sFirstChar = StringLeft($aFileContent[$i], 1)
-	If $sFirstChar = ";" Or $sFirstChar = "[" Then ContinueLoop
-	For $j = 1 To 9
-		$aFileContent[$i] = StringReplace($aFileContent[$i], "%s", "%" & $j, 1)
+	;~ _ArrayDisplay($aFileContent)
+
+	For $i = 0 To UBound($aFileContent)-1
+		$sFirstChar = StringLeft($aFileContent[$i], 1)
+		If $sFirstChar = ";" Or $sFirstChar = "[" Then ContinueLoop
+		For $j = 1 To 9
+			$aFileContent[$i] = StringReplace($aFileContent[$i], "%s", "%" & $j, 1)
+		Next
 	Next
-Next
-;~ _ArrayDisplay($aFileContent)
+	;~ _ArrayDisplay($aFileContent)
 
-$hFile = FileOpen($sFile, 2)
-FileWrite($hFile, _ArrayToString($aFileContent, @CRLF))
+	$hFile = FileOpen($sFile, 32+2)
+	FileWrite($hFile, _ArrayToString($aFileContent, @CRLF))
+	FileClose($hFile)
+EndFunc

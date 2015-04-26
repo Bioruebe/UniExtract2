@@ -45,7 +45,6 @@ Crage logging does not work
 Look through terminate function
 Disable _Run function's pattern search for extractors that do not provide patterns
 
-
 // Short term
 
 

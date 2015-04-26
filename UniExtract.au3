@@ -59,6 +59,8 @@ Const $version = "2.0.0 Beta 1"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
+Const $website2 = "http://bioruebe.com/uniextract"
+Const $websiteGithub = "https://github.com/Bioruebe/UniExtract2"
 Const $forum = "http://www.msfn.org/board/forum/159-universal-extractor/"
 Const $updateURL = "http://update.bioruebe.com/uniextract/update.php"
 Const $supportURL = "http://support.bioruebe.com/uniextract/upload.php"
@@ -1158,7 +1160,7 @@ Func filescan($f, $analyze = 1)
 			extract("rgss3", "RPG Maker VX Ace " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "NScripter archive", 0)
-			extract("arc_conv", "NScripter  " & t('TERM_ARCHIVE'))
+			extract("arc_conv", "NScripter " & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "RPG Maker", 0)
 			extract("arc_conv", "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
@@ -2027,24 +2029,23 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 			Run($cmd & $arc_conv & ' "' & $file & '"', $outdir, @SW_HIDE)
 			Local $hWnd = WinWait("arc_conv", "", $Timeout)
-			If $hWnd <> 0 Then
-				Local $current = "", $last = ""
-				; Hide not possible as window text has to be read
-				WinSetState("arc_conv", "", @SW_MINIMIZE)
-				While WinExists("arc_conv")
-					$current = WinGetText("arc_conv")
-					If $current <> $last Then
-						If StringInStr($current, "/") Then
-							GUICtrlSetData($TrayMsg_Status, $current)
-						Else
-							GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " #" & $current)
-						EndIf
-						$last = $current
-						Sleep(10)
+			If $hWnd == 0 Then terminate("timeout", $file, $arcdisp)
+			Local $current = "", $last = ""
+			; Hide not possible as window text has to be read
+			WinSetState("arc_conv", "", @SW_MINIMIZE)
+			While WinExists("arc_conv")
+				$current = WinGetText("arc_conv")
+				If $current <> $last Then
+					If StringInStr($current, "/") Then
+						GUICtrlSetData($TrayMsg_Status, $current)
+					Else
+						GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " #" & $current)
 					EndIf
-				WEnd
-				MoveFiles($file & "~", $outdir, True, "", True)
-			EndIf
+					$last = $current
+					Sleep(10)
+				EndIf
+			WEnd
+			MoveFiles($file & "~", $outdir, True, "", True)
 
 		Case "arj"
 			_Run($cmd & $arj & ' x "' & $file & '"', $outdir)
@@ -2121,7 +2122,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			Cout('Executing: ' & $cmd & 'start javaw -jar "' & @ScriptDir & "\bin\" & $dmg & '" "' & $file & '" "' & $isofile & '"')
 			$pid = Run($cmd & 'start javaw -jar "' & @ScriptDir & "\bin\" & $dmg & '" "' & $file & '" "' & $isofile & '"', $filedir, @SW_HIDE, False)
 
-			WinWait("DMGExtractor 0.70", "", $Timeout)
+			$handle = WinWait("DMGExtractor 0.70", "", $Timeout)
+			If $handle = 0 Then terminate("timeout", $file, $arcdisp)
 			WinActivate("DMGExtractor 0.70")
 			Send("{ENTER}")
 			Opt("WinTitleMatchMode", 3)
@@ -2532,8 +2534,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "rgss3"
 			HasPlugin($rgss3)
 			Run($rgss3, $outdir, @SW_HIDE)
-			Local $handle = WinWait("RPGMaker Decrypter", "")
-;~ 			If ($handle = 0) Then terminate("failed", $file, $arcdisp)
+			Local $handle = WinWait("RPGMaker Decrypter", "", $Timeout)
+			If $handle = 0 Then terminate("timeout", $file, $arcdisp)
 			ControlSetText($handle, "", "Edit1", $file)
 			ControlSetText($handle, "", "Edit2", $outdir)
 			ControlClick($handle, "", "Button4")
@@ -3106,6 +3108,8 @@ EndFunc   ;==>FileSearch
 
 ; Handle program termination with appropriate error message
 Func terminate($status, $fname, $ID)
+	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = "success")? $ID: $status
+
 	; Rename unicode file
 	If $bIsUnicode Then
 		Cout("Renaming unicode file")
@@ -3120,13 +3124,9 @@ Func terminate($status, $fname, $ID)
 	; So we need to look for changes in the batch queue file, so batch mode could be enabled if necessary.
 	If Not $silentmode And GetBatchQueue() Then $silentmode = True
 
-	; Create log file if option enabled
-	Local $LogFile = 0, $exitcode = 0
-	$shortStatus = $status
-	If $status = "success" Then $shortStatus = $ID
-
+	; Create log file if enabled in options
 	If $Log And Not ($status = "silent" Or $status = "syntax" Or $status = "fileinfo" Or $status = "notpacked") Or ($status = "fileinfo" And $silentmode) Then _
-			$LogFile = CreateLog($shortStatus)
+		$LogFile = CreateLog($shortStatus)
 
 	SaveStat($shortStatus)
 
@@ -3184,6 +3184,9 @@ Func terminate($status, $fname, $ID)
 		Case $status == "missingexe"
 			Prompt(48, 'MISSING_EXE', CreateArray($file, $ID))
 			$exitcode = 8
+		Case $status == "timeout"
+			Prompt(48, 'EXTRACT_TIMEOUT', $file)
+			$exitcode = 9
 
 			; Display failed attempt information and exit
 		Case $status == "failed"
@@ -3242,7 +3245,7 @@ Func terminate($status, $fname, $ID)
 	If Not $silentmode And $status <> "silent" And _DateDiff("D", $lastupdate, _NowCalc()) >= $updateinterval Then CheckUpdate(True)
 
 	Exit $exitcode
-EndFunc   ;==>terminate
+EndFunc
 
 ; Function to prompt user for choice of extraction method
 Func MethodSelect($format, $splashdisp)
@@ -3435,7 +3438,7 @@ Func Prompt($show_flag, $Message, $vars = 0, $terminate = 1)
 		If $createdir Then DirRemove($outdir, 0)
 		terminate("silent", '', '')
 	EndIf
-EndFunc   ;==>Prompt
+EndFunc
 
 ; Show Tray Message
 ; Based on work by Valuater (http://www.autoitscript.com/forum/topic/85977-system-tray-message-box-udf/)
@@ -4151,7 +4154,9 @@ Func CreateGUI()
 	Local $pluginsitem = GUICtrlCreateMenuItem(t('MENU_HELP_PLUGINS_LABEL'), $helpmenu)
 	Local $firststartitem = GUICtrlCreateMenuItem(t('FIRSTSTART_TITLE'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
-	Local $webitem = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL'), $helpmenu)
+	Local $webitem = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', $name), $helpmenu)
+	Local $web2item = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', $name & " 2"), $helpmenu)
+	Local $gititem = GUICtrlCreateMenuItem(t('MENU_HELP_GITHUB_LABEL'), $helpmenu)
 	Local $forumitem = GUICtrlCreateMenuItem(t('MENU_HELP_FORUM_LABEL'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $statsitem = GUICtrlCreateMenuItem(t('MENU_HELP_STATS_LABEL'), $helpmenu)
@@ -4163,8 +4168,8 @@ Func CreateGUI()
 
 	; File controls
 	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), 5, 4, -1, 15)
-	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 10), 3, Default, 15)
-	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 15), 3, Default, 15)
+	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 5), 3, Default, 15)
+	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), 3, Default, 15)
 
 	If $extract Then
 		GUICtrlSetState($GUI_Main_Extract, $GUI_CHECKED)
@@ -4255,6 +4260,8 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($firststartitem, "GUI_FirstStart")
 	GUICtrlSetOnEvent($updateitem, "CheckUpdate")
 	GUICtrlSetOnEvent($webitem, "GUI_Website")
+	GUICtrlSetOnEvent($web2item, "GUI_Website2")
+	GUICtrlSetOnEvent($gititem, "GUI_Website_Github")
 	GUICtrlSetOnEvent($forumitem, "GUI_Forum")
 	GUICtrlSetOnEvent($statsitem, "GUI_Stats")
 	GUICtrlSetOnEvent($programdiritem, "GUI_ProgDir")
@@ -4528,11 +4535,9 @@ Func GUI_Prefs_OK()
 		$language = GUICtrlRead($langselect)
 		$redrawgui = True
 	EndIf
-	If $Timeout / 1000 <> GUICtrlRead($TimeoutCont) And Int(GUICtrlRead($TimeoutCont)) > 9 Then _
-			$Timeout = Int(GUICtrlRead($TimeoutCont)) * 1000
+	If $Timeout / 1000 <> GUICtrlRead($TimeoutCont) And Int(GUICtrlRead($TimeoutCont)) > 9 Then $Timeout = Int(GUICtrlRead($TimeoutCont)) * 1000
 
-	If $updateinterval <> GUICtrlRead($IntervalCont) Then _
-			$updateinterval = GUICtrlRead($IntervalCont)
+	If $updateinterval <> GUICtrlRead($IntervalCont) Then $updateinterval = GUICtrlRead($IntervalCont)
 
 	; format-specific preferences
 	If GUICtrlRead($warnexecuteopt) == $GUI_CHECKED Then
@@ -5472,11 +5477,23 @@ Func GUI_About_Exit()
 	GUIDelete($About)
 EndFunc   ;==>GUI_About_Exit
 
-; Launch Universal Extractor website if help menu item selected
+; Launch Universal Extractor website if help menu item clicked
 Func GUI_Website()
 	Cout("Opening website")
 	ShellExecute($website)
-EndFunc   ;==>GUI_Website
+EndFunc
+
+; Launch Universal Extractor 2 website if help menu item clicked
+Func GUI_Website2()
+	Cout("Opening version 2 website")
+	ShellExecute($website2)
+EndFunc
+
+; Launch Universal Extractor 2 Github website if help menu item clicked
+Func GUI_Website_Github()
+	Cout("Opening Github website")
+	ShellExecute($websiteGithub)
+EndFunc
 
 ; Launch developer forum website if help menu item selected
 Func GUI_Forum()

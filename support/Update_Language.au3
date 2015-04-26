@@ -13,6 +13,8 @@
 #include <Array.au3>
 #include <File.au3>
 #include "_GetIntersection.au3"
+#include "Language_NameUpdate.au3"
+#include "Language_SUpdate.au3"
 
 Dim $arr_new, $file_old, $version, $changes_arr, $changes_new_arr, $changes_old_arr, $changes_ini
 
@@ -30,10 +32,11 @@ $timestamp = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & "-" & @MIN & "-" &
 $ini_old = _FileListToArray($dir, "*.ini", 1)
 ;_ArrayDisplay($ini_old)
 
-; Read template file
+; Read template file, build array with key names only to be inserted into new files
 _FileReadToArray($ini_new, $arr_new)
 If @error Then ConsoleWrite("Error opening file: " & @error & @CRLF)
 _Strip($arr_new)
+;~ _ArrayDisplay($arr_new)
 
 
 For $i=1 To $ini_old[0]
@@ -51,8 +54,7 @@ Func GetChanges()
 
 	$changes_arr = _GetIntersection($changes_old_arr, $changes_new_arr)
 
-	;_ArrayDisplay($changes_arr)
-
+;~ 	_ArrayDisplay($changes_arr)
 
 	; Write to file
 	FileMove($dir & "changes.txt", "..\backup\lang\" & $version & "_" & $timestamp & "\", 8+1)
@@ -62,8 +64,7 @@ Func GetChanges()
 
 	WriteChanges($handle, 2)
 
-	FileWrite($handle, @CRLF & @CRLF & "Deleted entries:" & @CRLF & _
-			  "-----------------------------------------------------------" & @CRLF & @CRLF)
+	FileWrite($handle, @CRLF & @CRLF & "Deleted entries:" & @CRLF & "-----------------------------------------------------------" & @CRLF & @CRLF)
 
 	WriteChanges($handle, 1)
 
@@ -76,23 +77,32 @@ Func WriteChanges($handle, $col)
 	Next
 EndFunc
 
+; Skip files in exclude array, process others
 Func CheckExcludes($ini)
+	Local $sFile = $dir & $ini
 	For $j=0 To UBound($exclude)-1
 		If $ini = $exclude[$j] Then
-			ConsoleWrite("Skipping file " & $dir & $ini)
+			ConsoleWrite("Skipping file " & $sFile)
 			Return
 		EndIf
 	Next
-	_Start($dir & $ini)
+	_Start($sFile)
+;~ 	_NameUpdate($sFile)
+;~ 	_SUpdate($sFile)
 EndFunc
 
 Func _Start($file)
 	ConsoleWrite("Processing file " & $file)
 
-	_FileReadToArray($file, $file_old)
+	$hFile = FileOpen($file, 16384)
+	$file_old = FileReadToArray($hFile)
 	If @error Then ConsoleWrite("Error opening file: " & @error & @CRLF)
+	FileClose($hFile)
+	_ArrayInsert($file_old, 0, UBound($file_old))
 
-	Global $handle = FileOpen("new.ini", 128+2) ;128 unicode
+;~ 	_ArrayDisplay($file_old)
+
+	Global $handle = FileOpen("new.ini", 32+2)
 
 	_Update()
 
@@ -105,35 +115,47 @@ Func _Start($file)
 EndFunc
 
 Func _Update()
+	; Copy header from old file
+	For $i = 1 To $file_old[0]
+		If StringInStr($file_old[$i], "Written for Universal Extractor") Then
+			FileWriteLine($handle, "; Written for Universal Extractor " & $version)
+		ElseIf StringLeft($file_old[$i], 1) = ";" Or StringIsSpace($file_old[$i]) Then
+			FileWriteLine($handle, $file_old[$i])
+		Else
+			ExitLoop
+		EndIf
+	Next
+
+	Local $bIsHeader = True
 	For $i = 1 To $arr_new[0]
-		$pos = 0
-		$pos = _ArraySearch($file_old, $arr_new[$i], 1, 0, 0, 1)
-		;ConsoleWrite("Searching " & $arr_new[$i] & " | Position " & $pos & " (Error: " & @error & ")" & @CRLF)
-		If $i > 31 Then
+		$pos = -1
+;~ 		ConsoleWrite("Searching " & $arr_new[$i] & " | Position " & $pos & " (Error: " & @error & ")" & @CRLF)
+
+		; Skip header as it can have different lengths
+		If $bIsHeader And (StringLeft($arr_new[$i], 1) = ";" Or StringIsSpace($arr_new[$i])) Then
+			ContinueLoop
+		Else
+			$bIsHeader = False
+			$pos = _ArraySearch($file_old, $arr_new[$i], 1, 0, 0, 1)
 			If $pos = -1 Then
 				If StringInStr($arr_new[$i], "=") Then
-					FileWriteLine($handle, $arr_new[$i] & '""')
+					FileWriteLine($handle, $arr_new[$i] & ' ""')
 				Else
 					FileWriteLine($handle, $arr_new[$i])
 				EndIf
 			Else
 				FileWriteLine($handle, $file_old[$pos])
 			EndIf
-		Else
-			If StringInStr($file_old[$i], "Written for Universal Extractor") Then
-				FileWriteLine($handle, $arr_new[$i])
-				$version = StringReplace($arr_new[$i], "; Written for ", "")
-			Else
-				FileWriteLine($handle, $file_old[$i])
-			EndIf
 		EndIf
 	Next
 EndFunc
 
+; Strip values
 Func _Strip(ByRef $arr)
 	For $i=1 To $arr[0]
 		$pos = 0
 		$pos = StringInStr($arr[$i], "=")
-		If $pos Then $arr[$i] = StringLeft($arr[$i], $pos+1)
+		If $pos Then $arr[$i] = StringLeft($arr[$i], $pos)
+		If StringInStr($arr[$i], "Written for") Then $version = StringReplace($arr[$i], "; Written for ", "")
 	Next
 EndFunc

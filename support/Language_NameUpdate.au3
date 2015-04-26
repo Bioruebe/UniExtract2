@@ -1,7 +1,7 @@
 #cs ----------------------------------------------------------------------------
 
  AutoIt Version: 3.3.12.0
- Author:         myName
+ Author:         Bioruebe
 
  Script Function:
 	Update language files, replace %s with %name
@@ -14,8 +14,7 @@
 #include <String.au3>
 
 $sUpdatedFile = "..\English.ini"
-$sOldFile = "..\lang\German.ini"
-Local $aTerms[0][2]
+Global $aTerms[0][2]
 
 $aFileContent = FileReadToArray($sUpdatedFile)
 
@@ -33,16 +32,26 @@ For $i = 0 To UBound($aFileContent)-1
 Next
 ;~ _ArrayDisplay($aTerms)
 
-$aOldContent = FileReadToArray($sOldFile)
-;~ _ArrayDisplay($aOldContent)
+;~ _NameUpdate("..\lang\Chinese (Simplified).ini")
 
 
-For $i = 0 To UBound($aTerms)-1
-	$iIndex = _ArraySearch($aOldContent, $aTerms[$i][0], 0, 0, 0, 1)
-	If @error Then ContinueLoop
-	$aOldContent[$iIndex] = StringReplace($aOldContent[$iIndex], "%s", "%name", $aTerms[$i][1], 0)
-Next
+Func _NameUpdate($sOldFile)
+;~ 	ConsoleWrite("[NameUpdate] " & $sOldFile & @CRLF)
 
-;~ _ArrayDisplay($aOldContent)
+	$hOldFile = FileOpen($sOldFile, 16384)
+	$aOldContent = FileReadToArray($hOldFile)
+	FileClose($hOldFile)
+	;~ _ArrayDisplay($aOldContent)
 
-FileWrite(".\German.ini", _ArrayToString($aOldContent, @CRLF))
+	For $i = 0 To UBound($aTerms)-1
+		$iIndex = _ArraySearch($aOldContent, $aTerms[$i][0], 0, 0, 0, 1)
+		If @error Then ContinueLoop
+		$aOldContent[$iIndex] = StringReplace($aOldContent[$iIndex], "%s", "%name", $aTerms[$i][1], 0)
+	Next
+
+	;~ _ArrayDisplay($aOldContent)
+
+	$hOldFile = FileOpen($sOldFile, 32+2)
+	FileWrite($hOldFile, _ArrayToString($aOldContent, @CRLF))
+	FileClose($hOldFile)
+EndFunc
