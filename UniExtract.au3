@@ -1656,7 +1656,8 @@ Func advexescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "Autoit", 0)
 			terminate("notpacked", $file, "")
 
-		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0)
+		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0) Or _
+			 StringInStr($filetype_curr, "CreateInstall", 0)
 			terminate("notsupported", $file, "")
 
 			; Terminate if file cannot be unpacked

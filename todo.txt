@@ -67,6 +67,7 @@ Spoon Installer - http://legroom.net/node/842
 Astrum InstallWizard - http://www.thraexsoftware.com
 LiberalInstaller
 Long Range Zip (lrzip)
+CreateInstall - http://www.createinstall.com
 
 
 
