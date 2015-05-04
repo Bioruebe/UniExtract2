@@ -2714,13 +2714,13 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			;_ArrayDisplay($Streams)
 			Local $iVideo = 0, $iAudio = 0
 			For $i = 2 To $Streams[0]
-				$Streams[$i] = StringRegExpReplace($Streams[$i], "(?i)(?s).*?: (\w+): (\w+).*", "$1,$2")
-				;_ArrayDisplay($Streams)
+				$Streams[$i] = StringRegExpReplace($Streams[$i], "(?i)(?s).*?#(\d:\d)(.*?): (\w+): (\w+).*", "$3,$4,$1,$2")
+;~ 				_ArrayDisplay($Streams)
 				$StreamType = StringSplit($Streams[$i], ",")
 				If $StreamType[1] == "Video" Then
 					$iVideo += 1
 					If $StreamType[2] == "h264" Then
-						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb -map ' & $StreamType[3] & ' "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 					Else
 						; Special cases
 						If StringInStr($StreamType[2], "wmv") Then
@@ -2730,7 +2730,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						ElseIf StringInStr($StreamType[2], "v8") Then
 							$StreamType[2] = "webm"
 						EndIf
-						_Run($command & ' -vcodec copy -an "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+						_Run($command & ' -vcodec copy -an -map ' & $StreamType[3] & ' "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 					EndIf
 				ElseIf $StreamType[1] == "Audio" Then
 					$iAudio += 1
@@ -2741,7 +2741,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 						$StreamType[2] = "ogg"
 					EndIf
 
-					_Run($command & ' -acodec copy -vn "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+					_Run($command & ' -acodec copy -vn -map ' & $StreamType[3] & ' "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
 				Else
 					Cout("Unknown stream type: " & $StreamType[1])
 				EndIf
