@@ -105,6 +105,7 @@ Global $KeepOpen = 0
 Global $silentmode = 0
 Global $extract = 1
 Global $checkUnicode = 1
+Global $bExtractVideo = 1
 Global $StoreGUIPosition = 0
 Global $posx = -1, $posy = -1
 Global $trayX = -1, $trayY = -1
@@ -758,6 +759,7 @@ Func ReadPrefs()
 	LoadPref("CheckGame", $CheckGame)
 	LoadPref("extract", $extract)
 	LoadPref("unicodecheck", $checkUnicode)
+	LoadPref("extractvideotrack", $bExtractVideo)
 	LoadPref("silentmode", $silentmode)
 	LoadPref("storeguiposition", $StoreGUIPosition)
 
@@ -817,6 +819,7 @@ Func WritePrefs()
 	SavePref('consoleoutput', $Opt_ConsoleOutput)
 	SavePref('log', $Log)
 	SavePref('CheckGame', $CheckGame)
+	SavePref("extractvideotrack", $bExtractVideo)
 	SavePref('storeguiposition', $StoreGUIPosition)
 	SavePref('timeout', $Timeout / 1000)
 	SavePref('updateinterval', $updateinterval)
@@ -2706,8 +2709,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			$return = FetchStdout($command, $outdir, @SW_HIDE)
 
 			; Terminate if file could not be read by FFmpeg
-			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") Then _
-				terminate("failed", $file, $arcdisp)
+			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") Then terminate("failed", $file, $arcdisp)
 
 			; Otherwise, extract all tracks
 			$Streams = StringSplit($return, "Stream", 1)
@@ -2718,6 +2720,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 ;~ 				_ArrayDisplay($Streams)
 				$StreamType = StringSplit($Streams[$i], ",")
 				If $StreamType[1] == "Video" Then
+					If Not $bExtractVideo Then ContinueLoop
 					$iVideo += 1
 					If $StreamType[2] == "h264" Then
 						_Run($command & ' -vcodec copy -an -bsf:v h264_mp4toannexb -map ' & $StreamType[3] & ' "' & ($bIsUnicode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
@@ -3971,10 +3974,7 @@ Func CheckUpdate($silent = False)
 
 	; Universal Extractor
 	$return = _INetGetSource($updateURL & "?get=version&id=" & $ID)
-	If @error Then
-		If Not $silent Then MsgBox(262144 + 48, $title, t('UPDATE_FAILED'))
-		Return
-	EndIf
+	If @error Then $silent? 0: MsgBox(262144 + 48, $title, t('UPDATECHECK_FAILED'))
 
 	Cout("Local: " & $version)
 	Cout("Server: " & $return)
@@ -3984,10 +3984,7 @@ Func CheckUpdate($silent = False)
 		$found = True
 		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return), 0) Then
 			$UEURL = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
-			If @error Or $UEURL = "" Then
-				If Not $silent Then MsgBox(262144 + 48, $title, t('UPDATE_FAILED'))
-				Return
-			EndIf
+			If @error Or $UEURL = "" Then Return $silent? 0: MsgBox(262144 + 48, $title, t('UPDATE_FAILED'))
 			$return = Download($UEURL)
 			If $return == 0 Then Return
 			$handle = FileOpen(@ScriptDir & "\Update.bat", 2)
@@ -4030,16 +4027,11 @@ Func _AfterUpdate()
 	EndIf
 
 	; Remove unused files
-	If FileExists(@ScriptDir & "\bin\plugins\kanal_for_Exeinfo.dll") Then FileDelete(@ScriptDir & "\bin\plugins\kanal_for_Exeinfo.dll")
-	If FileExists(@ScriptDir & "\bin\tee.exe") Then FileDelete(@ScriptDir & "\bin\tee.exe")
-	If FileExists(@ScriptDir & "\bin\BOOZ.EXE") Then FileDelete(@ScriptDir & "\bin\BOOZ.EXE")
+
 
 	; Add new options to ini file (for options without corresponding GUI control)
-	SavePref("unicodecheck", $checkUnicode)
-	SavePref("filescanlogfile", $fileScanLogFile)
-	SavePref("statusposx", $trayX)
-	SavePref("statusposy", $trayY)
-EndFunc   ;==>_AfterUpdate
+
+EndFunc
 
 ; Download FFmpeg and move needed files to Universal Extractor directory
 Func GetFFmpeg()
@@ -4424,9 +4416,9 @@ Func GUI_Prefs()
 	Cout("Creating preferences GUI")
 	; Create GUI
 	If $guimain Then
-		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 430, -1, -1, -1, -1, $guimain)
+		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 450, -1, -1, -1, -1, $guimain)
 	Else
-		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 430)
+		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 450)
 	EndIf
 
 	; Universal prefs box
@@ -4452,7 +4444,7 @@ Func GUI_Prefs()
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Format-specific preferences
-	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 5, 130, 240, 220)
+	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 5, 130, 240, 240)
 	Global $warnexecuteopt = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), 10, 145, -1, 20)
 	Global $freeSpaceCheckOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_FREE_SPACE_LABEL'), 10, 165, -1, 20)
 	Global $unicodecheckopt = GUICtrlCreateCheckbox(t('PREFS_CHECK_UNICODE_LABEL'), 10, 185, -1, 20)
@@ -4463,18 +4455,22 @@ Func GUI_Prefs()
 	Global $StoreGUIPositionOpt = GUICtrlCreateCheckbox(t('PREFS_WINDOW_POSITION_LABEL'), 10, 285, -1, 20)
 	Global $CheckGameOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_GAME_LABEL'), 10, 305, -1, 20)
 	Global $LogOpt = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), 10, 325, -1, 20)
+	Global $VideoTrackOpt = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), 10, 345, -1, 20)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Source file options
-	GUICtrlCreateGroup(t('PREFS_SOURCE_FILES_LABEL'), 5, 355, 240, 40)
-	$DeleteOrigFileOpt[0] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_KEEP'), 10, 370)
-	$DeleteOrigFileOpt[1] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_DELETE'), GetPos($guiprefs, $DeleteOrigFileOpt[0], 20), 370)
-	$DeleteOrigFileOpt[2] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_ASK'), GetPos($guiprefs, $DeleteOrigFileOpt[1], 20), 370)
+	GUICtrlCreateGroup(t('PREFS_SOURCE_FILES_LABEL'), 5, 375, 240, 40)
+	$DeleteOrigFileOpt[0] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_KEEP'), 10, 390)
+	$DeleteOrigFileOpt[1] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_DELETE'), GetPos($guiprefs, $DeleteOrigFileOpt[0], 20), 390)
+	$DeleteOrigFileOpt[2] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_ASK'), GetPos($guiprefs, $DeleteOrigFileOpt[1], 20), 390)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Buttons
-	Local $prefsok = GUICtrlCreateButton(t('OK_BUT'), 55, 403, 60, 20)
-	Local $prefscancel = GUICtrlCreateButton(t('CANCEL_BUT'), 135, 403, 60, 20)
+	Local $prefsok = GUICtrlCreateButton(t('OK_BUT'), 55, 423, 60, 20)
+	Local $prefscancel = GUICtrlCreateButton(t('CANCEL_BUT'), 135, 423, 60, 20)
+
+	; Tooltips
+	GUICtrlSetTip($VideoTrackOpt, t('PREFS_VIDEOTRACK_TOOLTIP'))
 
 	; Set properties
 	GUICtrlSetState($prefsok, $GUI_DEFBUTTON)
@@ -4489,6 +4485,7 @@ Func GUI_Prefs()
 	If $StoreGUIPosition Then GUICtrlSetState($StoreGUIPositionOpt, $GUI_CHECKED)
 	If $CheckGame Then GUICtrlSetState($CheckGameOpt, $GUI_CHECKED)
 	If $Log Then GUICtrlSetState($LogOpt, $GUI_CHECKED)
+	If $bExtractVideo Then GUICtrlSetState($VideoTrackOpt, $GUI_CHECKED)
 	GUICtrlSetState($DeleteOrigFileOpt[$DeleteOrigFile], $GUI_CHECKED)
 
 	GUICtrlSetData($langselect, $langlist, $language)
@@ -4500,7 +4497,7 @@ Func GUI_Prefs()
 
 	; Display GUI and wait for action
 	GUISetState(@SW_SHOW)
-EndFunc   ;==>GUI_Prefs
+EndFunc
 
 ; Exit preferences GUI if Cancel clicked or window closed
 Func GUI_Prefs_Exit()
@@ -4541,27 +4538,6 @@ Func GUI_Prefs_OK()
 	If $updateinterval <> GUICtrlRead($IntervalCont) Then $updateinterval = GUICtrlRead($IntervalCont)
 
 	; format-specific preferences
-	If GUICtrlRead($warnexecuteopt) == $GUI_CHECKED Then
-		$warnexecute = 1
-	Else
-		$warnexecute = 0
-	EndIf
-	If GUICtrlRead($unicodecheckopt) == $GUI_CHECKED Then
-		$checkUnicode = 1
-	Else
-		$checkUnicode = 0
-	EndIf
-
-	If GUICtrlRead($freeSpaceCheckOpt) == $GUI_CHECKED Then
-		$freeSpaceCheck = 1
-	Else
-		$freeSpaceCheck = 0
-	EndIf
-	If GUICtrlRead($appendextopt) == $GUI_CHECKED Then
-		$appendext = 1
-	Else
-		$appendext = 0
-	EndIf
 	If GUICtrlRead($NoBoxOpt) == $GUI_CHECKED Then
 		$NoBox = 1
 		TrayItemSetState($Tray_Statusbox, $TRAY_CHECKED)
@@ -4569,37 +4545,30 @@ Func GUI_Prefs_OK()
 		$NoBox = 0
 		TrayItemSetState($Tray_Statusbox, $TRAY_UNCHECKED)
 	EndIf
-	If GUICtrlRead($OpenOutDirOpt) == $GUI_CHECKED Then
-		$OpenOutDir = 1
-	Else
-		$OpenOutDir = 0
-	EndIf
-	If GUICtrlRead($FeedbackPromptOpt) == $GUI_CHECKED Then
-		$FB_ask = 1
-	Else
-		$FB_ask = 0
-	EndIf
-	If GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED Then
-		$StoreGUIPosition = 1
-	Else
-		$StoreGUIPosition = 0
-	EndIf
-	If GUICtrlRead($LogOpt) == $GUI_CHECKED Then
-		$Log = 1
-	Else
-		$Log = 0
-	EndIf
+
+	$warnexecute = Number(GUICtrlRead($warnexecuteopt) == $GUI_CHECKED)
+	$checkUnicode = Number(GUICtrlRead($unicodecheckopt) == $GUI_CHECKED)
+	$freeSpaceCheck = Number(GUICtrlRead($freeSpaceCheckOpt) == $GUI_CHECKED)
+	$appendext = Number(GUICtrlRead($appendextopt) == $GUI_CHECKED)
+	$OpenOutDir = Number(GUICtrlRead($OpenOutDirOpt) == $GUI_CHECKED)
+	$FB_ask = Number(GUICtrlRead($FeedbackPromptOpt) == $GUI_CHECKED)
+	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
+	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
+
 	For $i = 0 To 2
 		If GUICtrlRead($DeleteOrigFileOpt[$i]) == $GUI_CHECKED Then $DeleteOrigFile = $i
 	Next
+
 	WritePrefs()
+
 	GUIDelete($guiprefs)
 	$guiprefs = False
+
 	If $redrawgui Then
 		GUIDelete($guimain)
 		CreateGUI()
 	EndIf
-EndFunc   ;==>GUI_Prefs_OK
+EndFunc
 
 ; Handle click on OK
 Func GUI_OK()

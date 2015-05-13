@@ -12,6 +12,7 @@ Beta 1:
   Added file metadata (filesize, creation date,...) to log file when 'Ask for feedback' is enabled
   Added timeout exit message
   Added additional weblinks to help menu
+  Added option to disable video track extraction
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found
   Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
@@ -97,17 +98,6 @@ Alpha 3:
   Changed after update behaviour: new options are now added to ini file (useful for options without corresponding GUI control)
   Updated Exeinfo PE to 0.0.3.6
   
-  Alpha 3 tests:
-	File cleanup
-	Subdir update
-	Global update check and installaion
-	
-  Upcoming in Beta 1:
-	delete filescan.txt
-	batch via command line
-	view/edit batch queue
-	additional tooltips
-	change new exitcodes, re-evaluate commandline parser
   
 Alpha 2.1:
   Added minor changelog
@@ -116,7 +106,6 @@ Alpha 2.1:
   
 Notes:
   Some features are not yet available in development versions; they will be added during beta test.
-	- Usage statistics
 	- Some extractions are already supported, but the filetype is only recognized with custom trid definitions.
 	  These will be added as soon as the stable version is ready to be released.
 	
