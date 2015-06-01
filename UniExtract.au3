@@ -166,7 +166,7 @@ Const $msi_jsmsix = "jsMSIx.exe" 							;1.11.0704
 Const $nbh = "NBHextract.exe" 								;1.0
 Const $pea = "pea.exe" 										;0.12/1.0
 Const $peid = "peid.exe" 									;0.95   2012/04/24
-Const $quickbms = "quickbms.exe" 							;0.5.12
+Const $quickbms = "quickbms.exe" 							;0.6.4
 Const $rai = "RAIU.EXE" 									;0.1a
 Const $rar = "unrar.exe" 									;5.21
 Const $sit = "Expander.exe" 								;6.0
@@ -193,7 +193,7 @@ Const $bms = "BMS.bms"
 Const $dbx = "dbxplug.wcx"
 Const $gaup = "gaup_pro.wcx"
 Const $ie = "InstExpl.wcx"
-Const $iso = "Iso_" & $OSArch & ".wcx" ;x64
+Const $iso = "Iso.wcx"
 Const $mht_plug = "MhtUnPack.wcx"
 Const $msi_plug = "msi.wcx"
 Const $sis = "PDunSIS.wcx"
@@ -212,6 +212,7 @@ Const $dcp = "dcp_unpacker.exe"
 Const $unreal = "extract.exe"
 Const $crage = @ScriptDir & "\bin\crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
+Const $mpq = "mpq.wcx"
 
 If Not @Compiled Then HotKeySet("{^}", "Test")
 
@@ -1046,8 +1047,7 @@ Func filescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "bzip2 compressed archive", 0)
 			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
 
-		Case StringInStr($filetype_curr, "Microsoft Cabinet Archive", 0) _
-				Or StringInStr($filetype_curr, "IncrediMail letter/ecard", 0)
+		Case StringInStr($filetype_curr, "Microsoft Cabinet Archive", 0) Or StringInStr($filetype_curr, "IncrediMail letter/ecard", 0)
 			extract("cab", 'Microsoft CAB ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Magic ISO Universal Image Format", 0)
@@ -1142,6 +1142,10 @@ Func filescan($f, $analyze = 1)
 
 		Case StringInStr($filetype_curr, "Microsoft Windows Installer patch", 0)
 			extract("msp", 'Windows Installer (MSP) ' & t('TERM_PATCH'))
+
+		Case StringInStr($filetype_curr, "MPQ Archive - Blizzard game data", 0)
+			HasPlugin($mpq)
+			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
 
 		Case StringInStr($filetype_curr, "HTC NBH ROM Image", 0)
 			extract("nbh", 'NBH ' & t('TERM_IMAGE'))
@@ -1338,6 +1342,9 @@ Func advfilescan($f)
 			extract("swf", 'Shockwave Flash ' & t('TERM_CONTAINER'))
 		Case StringInStr($filetype_curr, "PowerISO Direct-Access-Archive", 0)
 			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
+		Case StringInStr($filetype_curr, "MoPaQ", 0)
+			HasPlugin($mpq)
+			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
 		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
 			 StringInStr($filetype_curr, "MPEG sequence")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
@@ -1982,7 +1989,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 	HasFreeSpace()
 
-	$initdirsize = DirGetSize($outdir)
+	$initdirsize = _DirGetSize($outdir)
 	$tempoutdir = _TempFile($outdir, 'uni_', '')
 
 	; Extract archive based on filetype
@@ -2254,6 +2261,17 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			Else
 				_Run($cmd & $inno & ' -x -m -a "' & $file & '"', $outdir)
 			EndIf
+
+			; Inno setup files can contain multiple versions of files, they are named ',1', ',2',... after extraction
+			; Rename the first file(s), so extracted programs do not fail with not found exceptions
+			; This is a convenience function, so the user does not have to rename them manually
+			$return = $outdir & "\{app}\"
+			$aReturn = _FileListToArrayRec($return, "*,1.*", 1, 1)
+			For $i = 1 To $aReturn[0]
+				$ret = StringReplace($aReturn[$i], ",1", "", -1)
+				Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
+				FileMove($return & $aReturn[$i], $return & $ret)
+			Next
 
 		Case "is3arc"
 			$choice = MethodSelect($arctype, $arcdisp)
@@ -2534,6 +2552,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "rar"
 			_Run($cmd & $rar & ' x "' & $file & '"', $outdir, @SW_SHOW)
+			If @error Then terminate("failed", $file, $arcdisp)
 
 		Case "rgss3"
 			HasPlugin($rgss3)
@@ -3677,7 +3696,7 @@ Func _StringGetLine($sString, $iLine, $bCountBlank = False)
 	Local $sChar = "+"
 	If $bCountBlank = True Then $sChar = "*"
 	If Not IsInt($iLine) Then Return SetError(1, 0, "")
-	If $iLine = -1 Then Return StringTrimLeft($sString, StringInStr($sString, @CRLF, 0, -2))
+	If $iLine < 0 Then Return StringTrimLeft($sString, StringInStr($sString, @CRLF, 0, -2 + $iLine))
 	Return StringRegExpReplace($sString, "((." & $sChar & "\n){" & $iLine - 1 & "})(." & $sChar & "\n)((." & $sChar & "\n?)+)", "\2")
 EndFunc   ;==>_StringGetLine
 
@@ -3818,7 +3837,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 					GUICtrlSetFont($TrayMsg_Status, 8.5, 900)
 					GUICtrlSetData($TrayMsg_Status, t('INPUT_NEEDED'))
 					WinActivate($runtitle)
-					$lastSize = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
+					$lastSize = Round((_DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 					ContinueLoop
 				EndIf
 				; Percentage indicator
@@ -3859,7 +3878,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 			EndIf
 			; Size of extracted file(s)
 			If $size > -1 Then
-				$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
+				$size = Round((_DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 ;~ 				Cout("Size: " & $size & @TAB & $lastSize)
 				If $size > 0 And $size <> $lastSize Then
 					Cout("Size: " & $size & @TAB & $lastSize)
@@ -3877,8 +3896,8 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		FileClose($handle)
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
-		; Check for success indicator in log
-		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Then
+		; Check for success or failure indicator in log
+		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or StringInStr($return, "Write error: ", 1) Then
 			SetError(1)
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
@@ -3939,6 +3958,12 @@ Func FetchStdout($f, $workingdir, $show_flag, $line = 0)
 	Return $return
 EndFunc
 
+; DirGetSize wrapper with additional logic
+Func _DirGetSize($f)
+	If (StringLen($f) < 4) Then Return 0 ; Calculating the size of a whole drive would take way too much time
+	Return DirGetSize($f)
+EndFunc
+
 ; Stop running helper process
 Func KillHelper()
 	If Not $run Then Return
@@ -3988,7 +4013,7 @@ Func CheckUpdate($silent = False)
 			$return = Download($UEURL)
 			If $return == 0 Then Return
 			$handle = FileOpen(@ScriptDir & "\Update.bat", 2)
-			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im UniExtract.exe" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -o"' & @ScriptDir & '" "' & $return & '"' & _
+			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im UniExtract.exe 2>nul" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -o"' & @ScriptDir & '" "' & $return & '"' & _
 					@CRLF & @CRLF & "@ping -n 3 localhost> nul" & @CRLF & 'del "' & $return & '"' & @CRLF & 'start "" ".\' & @ScriptName & '" /afterupdate' & @CRLF & "del Update.bat" & @CRLF & "exit")
 			FileClose($handle)
 			Run(@ScriptDir & "\Update.bat", @ScriptDir)
@@ -5320,7 +5345,7 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url
-	Local $aPluginInfo[8][5] = [ _
+	Local $aPluginInfo[9][5] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False], _
@@ -5328,7 +5353,8 @@ Func GUI_Plugins()
 		[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/downloads'], _
 		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625'], _
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z'], _
-		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'] _
+		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'], _
+		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip'] _
 	]
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1

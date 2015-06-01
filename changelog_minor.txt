@@ -6,6 +6,7 @@ Beta 1:
   Added support for .aac audio files (decompress to wav) using faad (plugin)
   Added support for .flac audio files using flac
   Added support for FreeArc compressed archives (.arc) using FreeArc unpacker
+  Added support for .mpq archives using MPQ Plugin for Total Commander (plugin)
   Added filescan with MediaInfo dll to provide additional information on media files (scan only mode)
   Added delay to update script to prevent 'not found' error, changed execution parameter
   Added 'Open program directory' help menu entry
@@ -37,6 +38,7 @@ Beta 1:
   Fixed GameSelect GUI: not a game message is now always the first element and preselected
   Fixed unicode files are changed to ???????? and therefore fail to extract when adding them to batch queue
   Fixed unicode files' extraction to subdir folder name
+  Fixed rar extraction returning success if there was a write error
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
@@ -51,12 +53,16 @@ Beta 1:
   Changed translation files, removed %s variables and introduced numbered placeholders, that can be switched to 
 		  fit a language's word order; added %name shortcut
   Changed unicode files are now renamed instead of moving them to a temporary directory
+  Changed inno setup extraction to rename ',1' files to avoid extracted programs not finding some files
+  Disabled directory size calculation when extracting to drive to prevent significant slow down
+  Removed 64 bit iso.wcx plugin as it does not work correctly with QuickBMS
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated unrar to 5.21
-  Updated fsbextract to 0.3.3
+  Updated fsbextract to 0.3.4a
   Updated exeinfo PE to 0.0.3.7
   Updated disunity to 0.3.4
+  Updated quickbms to 0.6.4
   Updated language files, added new termsto all language files, set encoding to UTF-16, updated translation info text,
 		  changed %s to %name and %1, %2,...
 

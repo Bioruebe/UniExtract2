@@ -35,18 +35,19 @@ Zip extraction: 'User input needed' message does not disappear
 
 
 // Other:
+investigate archive listing - req 44 // Add file list display for extractors, that support it, create command line parameter, include into context menu
 quickbms logging
-FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765
 additional file types for arc_conv
 change new exitcodes, re-evaluate commandline parser
 include tridscan gui?
-ntlea
+ntlea?
 Crage logging does not work
 Look through terminate function
 Disable _Run function's pattern search for extractors that do not provide patterns
 
-// Short term
 
+// Short term
+Extracting to C:// creates file in @ScriptDir (at least ffmpeg)
 
 
 
@@ -87,7 +88,7 @@ fix height of Program Options UI in installer - add vertical scrollbar? //remove
 new CD image converter - http://iat.berlios.de/ - 832
 replace booz with unzoo (http://archives.math.utk.edu/software/multi-platform/gap/util/unzoo.c) //"LZD not yet implemented" error
 TTComp archive data decompressor (http://www.exelana.com/techie/c/ttdecomp.html) //output mostly unusable, only one single file extractable
-investigate archive listing - req 44
+FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765 //There seems to be no fast enough and reliable way to do that
 
 
 // Done:
