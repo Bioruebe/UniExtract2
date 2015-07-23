@@ -32,22 +32,22 @@ percentage indicator fixed? //inno
 arj percentage indicator //tee problem
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 Zip extraction: 'User input needed' message does not disappear
+Extracting to C:/ creates file in @ScriptDir
 
 
 // Other:
 investigate archive listing - req 44 // Add file list display for extractors, that support it, create command line parameter, include into context menu
 quickbms logging
 additional file types for arc_conv
-change new exitcodes, re-evaluate commandline parser
+change new exitcodes
 include tridscan gui?
 ntlea?
 Crage logging does not work
-Look through terminate function
 Disable _Run function's pattern search for extractors that do not provide patterns
+Unicode files are not moved to outdir if using unpack() function
 
 
 // Short term
-Extracting to C:// creates file in @ScriptDir (at least ffmpeg)
 
 
 

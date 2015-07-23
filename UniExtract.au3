@@ -320,22 +320,32 @@ Func StartExtraction($checkext = True)
 			$outdir = _PathFull($filedir & '\' & $outdir)
 		EndIf
 	EndIf
+	Cout("Output directory: " & $outdir)
 
 	; Set filename as tray icon tooltip
 	TraySetToolTip($filename & "." & $fileext)
 
 	; Check for unicode characters in path
-	If $checkUnicode And Not StringRegExp($file, $unicodepattern, 0) Then
-		Cout("File seems to be unicode")
-		$bIsUnicode = True
-		$sUnicodeName = $filename
-		$oldoutdir = $outdir
-		$oldpath = $file
-		$file = _TempFile($filedir, "Unicode_", $fileext)
-		Cout('Renaming "' & $sUnicodeName & '" to "' & $file & '"')
-		FileMove($oldpath, $file)
-		FilenameParse($file)
-		$outdir = $initoutdir
+	If $checkUnicode Then
+		If Not StringRegExp($file, $unicodepattern, 0) Then
+			Cout("File name seems to be unicode")
+			$bIsUnicode = True
+			$sUnicodeName = $filename
+			$oldoutdir = $outdir
+			$oldpath = $file
+
+			If StringRegExp($filedir, $unicodepattern, 0) Then
+				$file = _TempFile($filedir, "Unicode_", $fileext)
+			Else
+				Cout("File path seems to be unicode")
+				$file = _TempFile(@TempDir, "Unicode_", $fileext)
+			EndIf
+
+			Cout('Renaming "' & $sUnicodeName & '" to "' & $file & '"')
+			FileMove($oldpath, $file)
+			FilenameParse($file)
+			$outdir = $initoutdir
+		EndIf
 	EndIf
 
 	; Register tray function
@@ -669,12 +679,9 @@ Func ParseCommandLine()
 
 	$extract = 1
 	$OpenOutDir = 0
-	If $cmdline[1] = "/help" Or $cmdline[1] = "/h" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
-		terminate("syntax", "", "")
 
-	ElseIf $cmdline[1] = "/prefs" Then
+	If $cmdline[1] = "/prefs" Then
 		GUI_Prefs()
-		$guiprefs = False
 		While $guiprefs
 			Sleep(250)
 		WEnd
@@ -686,17 +693,12 @@ Func ParseCommandLine()
 
 	ElseIf $cmdline[1] = "/remove" Then
 		; Completely delete registry entries, used by uninstaller
-		If @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Then
-			Global $win7 = True
-		Else
-			Global $win7 = False
-		EndIf
+		_IsWin7()
 		GUI_ContextMenu_remove()
 		GUI_ContextMenu_fileassoc(0)
-
 		terminate("silent", '', '')
 
-	ElseIf $cmdline[1] = "/clear" Then
+	ElseIf $cmdline[1] = "/batchclear" Then
 		GUI_Batch_Clear()
 		terminate("silent", '', '')
 
@@ -704,20 +706,20 @@ Func ParseCommandLine()
 		If FileExists($cmdline[1]) Then
 			$file = _PathFull($cmdline[1])
 		Else
-			terminate("syntax", "", "")
+			terminate("syntax", "", "notimeout")
 		EndIf
 		If $cmdline[0] > 1 Then
-			; Scan only
-			If $cmdline[2] = "/scan" Then
-				$extract = False
-				$Log = False
-				If $cmdline[0] > 2 And $cmdline[3] = "/silent" Then $silentmode = 1
-				; Silent mode
-			ElseIf $cmdline[2] = "/silent" Then
+			; Silent mode
+			If $cmdline[2] = "/silent" Then
 				$silentmode = 1
-				; Outdir specified
 			Else
-				$outdir = $cmdline[2]
+				; Scan only
+				If $cmdline[2] = "/scan" Then
+					$extract = False
+					$Log = False
+				Else ; Outdir specified
+					$outdir = $cmdline[2]
+				EndIf
 				If $cmdline[0] > 2 And $cmdline[3] = "/silent" Then $silentmode = 1
 			EndIf
 		Else
@@ -729,7 +731,7 @@ Func ParseCommandLine()
 			terminate("silent", '', '')
 		EndIf
 	EndIf
-EndFunc   ;==>ParseCommandLine
+EndFunc
 
 ; Read complete preferences
 Func ReadPrefs()
@@ -2267,11 +2269,13 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			; This is a convenience function, so the user does not have to rename them manually
 			$return = $outdir & "\{app}\"
 			$aReturn = _FileListToArrayRec($return, "*,1.*", 1, 1)
-			For $i = 1 To $aReturn[0]
-				$ret = StringReplace($aReturn[$i], ",1", "", -1)
-				Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
-				FileMove($return & $aReturn[$i], $return & $ret)
-			Next
+			If Not @error Then
+				For $i = 1 To $aReturn[0]
+					$ret = StringReplace($aReturn[$i], ",1", "", -1)
+					Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
+					FileMove($return & $aReturn[$i], $return & $ret)
+				Next
+			EndIf
 
 		Case "is3arc"
 			$choice = MethodSelect($arctype, $arcdisp)
@@ -2945,7 +2949,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 	EndIf
 
 	; Otherwise, check directory size
-	If DirGetSize($outdir) <= $initdirsize Then
+	If $initdirsize > -1 And DirGetSize($outdir) <= $initdirsize Then
 		If $arctype = "ace" And $fileext = "exe" Then Return False
 		If FileExists($isofile) Then
 			If Prompt(16 + 4, 'CONVERT_CDROM_STAGE2_FAILED', '', 0) Then FileDelete($isofile)
@@ -3159,22 +3163,22 @@ Func terminate($status, $fname, $ID)
 			$syntax = t('HELP_SUMMARY')
 			$syntax &= t('HELP_SYNTAX', @ScriptName)
 			$syntax &= t('HELP_ARGUMENTS')
-			$syntax &= t('HELP_HELP')
-			$syntax &= t('HELP_PREFS')
-			$syntax &= t('HELP_REMOVE')
-			$syntax &= t('HELP_CLEAR')
+			$syntax &= t('HELP_HELP', "/help")
+			$syntax &= t('HELP_PREFS', "/prefs")
+			$syntax &= t('HELP_REMOVE', "/remove")
+			$syntax &= t('HELP_CLEAR', "/batchclear")
 			$syntax &= t('HELP_FILENAME')
 			$syntax &= t('HELP_DESTINATION')
-			$syntax &= t('HELP_SCAN')
-			$syntax &= t('HELP_SILENT')
-			$syntax &= t('HELP_BATCH')
-			$syntax &= t('HELP_SUB')
+			$syntax &= t('HELP_SCAN', "/scan")
+			$syntax &= t('HELP_SILENT', "/silent")
+			$syntax &= t('HELP_BATCH', "/batch")
+			$syntax &= t('HELP_SUB', "/sub")
 			$syntax &= t('HELP_EXAMPLE1')
 			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
 			$syntax &= t('HELP_NOARGS')
-			MsgBox(262144 + 32, $title, $syntax, 15)
+			MsgBox(262144 + 32, $title, $syntax, StringIsSpace($ID)? 15: 0)
 
-			; Display file type information and exit
+		; Display file type information and exit
 		Case $status == "fileinfo"
 			If $filetype == "" Then
 				$exitcode = 4
@@ -3188,7 +3192,7 @@ Func terminate($status, $fname, $ID)
 				MsgBox(262144 + 64, $title, $filetype)
 			EndIf
 
-			; Display error information and exit
+		; Display error information and exit
 		Case $status == "unknownexe"
 			If Not $silentmode And Prompt(256 + 16 + 4, 'CANNOT_EXTRACT', CreateArray($file, $filetype), 0) Then Run($exeinfope & ' "' & $file & '"', $filedir)
 			$exitcode = 3
@@ -3683,6 +3687,12 @@ Func IsJavaInstalled()
 	terminate('missingexe', $file, "Java Runtime Environment")
 EndFunc   ;==>IsJavaInstalled
 
+; Determine whether Windows version >= Windows 7, used for cascading context menu support
+Func _IsWin7()
+	Global $win7 = @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81"
+	Return $win7
+EndFunc
+
 ; Determine if a key exists in registry
 ; Script by guinness (http://www.autoitscript.com/forum/topic/131425-registry-key-exists/page__view__findpost__p__915063)
 Func RegExists($sKeyName, $sValueName)
@@ -3832,12 +3842,12 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 				$state = $return
 				; Automatically show cmd window when user input needed
 				If StringInStr($return, "password", 0) Or StringInStr($return, "already exist", 0) Or _
-						StringInStr($return, "overwrite", 0) Or StringInStr($return, "replace", 0) Then
+						StringInStr($return, "overwrite", 0) Or StringInStr($return, " replace", 0) Then
 					WinSetState($runtitle, "", @SW_SHOW)
 					GUICtrlSetFont($TrayMsg_Status, 8.5, 900)
 					GUICtrlSetData($TrayMsg_Status, t('INPUT_NEEDED'))
 					WinActivate($runtitle)
-					$lastSize = Round((_DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
+					$lastSize = Round((_DirGetSize($outdir, 0) - $initdirsize) / 1024 / 1024, 3)
 					ContinueLoop
 				EndIf
 				; Percentage indicator
@@ -3897,7 +3907,9 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
 		; Check for success or failure indicator in log
-		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or StringInStr($return, "Write error: ", 1) Then
+		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or _
+		   StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) And _
+		   StringInStr($return, "No files to extract", 1)) Then
 			SetError(1)
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
@@ -3959,8 +3971,10 @@ Func FetchStdout($f, $workingdir, $show_flag, $line = 0)
 EndFunc
 
 ; DirGetSize wrapper with additional logic
-Func _DirGetSize($f)
-	If (StringLen($f) < 4) Then Return 0 ; Calculating the size of a whole drive would take way too much time
+Func _DirGetSize($f, $return = -1)
+	; Calculating the size of a whole drive would take way too much time,
+	; so let's only calculate size if less than 4 GB space used on drive
+	If (StringLen($f) < 4 And DriveSpaceTotal($f) - DriveSpaceFree($f) > 4000) Then Return $return
 	Return DirGetSize($f)
 EndFunc
 
@@ -3998,7 +4012,7 @@ Func CheckUpdate($silent = False)
 	SavePref('lastupdate', @YEAR & "/" & @MON & "/" & @MDAY)
 
 	; Universal Extractor
-	$return = _INetGetSource($updateURL & "?get=version&id=" & $ID)
+	$return = _StringGetLine(_INetGetSource($updateURL & "?get=version&id=" & $ID), -1)
 	If @error Then $silent? 0: MsgBox(262144 + 48, $title, t('UPDATECHECK_FAILED'))
 
 	Cout("Local: " & $version)
@@ -4994,8 +5008,7 @@ Func GUI_ContextMenu()
 	Next
 
 	; Disable Cascading context menu for non Win 7 / Win 8 users as it is not supported
-	If @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Then
-		Global $win7 = True
+	If _IsWin7() Then
 		; Check if Cascading context menu entries are enabled
 		For $i = 0 To 3
 			If RegExists($regall & "\Uniextract\Shell\" & $CM_Shells[$i][0], "") Then
@@ -5015,7 +5028,6 @@ Func GUI_ContextMenu()
 		GUICtrlSetOnEvent($CM_Simple_Radio, "GUI_ContextMenu_ChangePic")
 		GUICtrlSetOnEvent($CM_Cascading_Radio, "GUI_ContextMenu_ChangePic")
 	Else
-		Global $win7 = False
 		GUICtrlSetState($CM_Cascading_Radio, $GUI_DISABLE)
 		GUI_Create_Tooltip($CM_GUI, $CM_Cascading_Radio, t('CONTEXT_CASCADING_RADIO_TOOLTIP'))
 	EndIf
