@@ -14,6 +14,7 @@ Beta 1:
   Added timeout exit message
   Added additional weblinks to help menu
   Added option to disable video track extraction
+  Added support for Windows 10
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found
   Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
@@ -57,10 +58,12 @@ Beta 1:
 		  fit a language's word order; added %name shortcut
   Changed unicode files are now renamed instead of moving them to a temporary directory if possible
   Changed inno setup extraction to rename ',1' files to avoid extracted programs not finding some files
+  Changed GUI design on Windows 10 systems to fit standard window style
   Disabled directory size calculation when extracting to drive to prevent significant slow down
   Removed 64 bit iso.wcx plugin as it does not work correctly with QuickBMS
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
+  Updated AutoIt to 3.3.14.1
   Updated unrar to 5.21
   Updated fsbextract to 0.3.4a
   Updated exeinfo PE to 0.0.3.8

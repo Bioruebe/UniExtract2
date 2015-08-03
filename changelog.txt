@@ -30,7 +30,7 @@
   Added timeout for PEiD, Exescan PE and others (standard: 60 seconds, min. 10 seconds)
   Added timeout (15 seconds) to syntax error dialog to prevent batch mode stopping on unexpected errors
   Added additional check and automatic extraction of all .bin files in filedir (Nullsoft Installer)
-  Added official support for Windows 8 and 8.1 (older versions of Universal Extractor should work, too)
+  Added official support for Windows 8, 8.1 and 10 (older versions of Universal Extractor should work, too)
   Added optional cascading context menu (only Windows 7 or newer)
   Added statistics about successful/failed extractions and most opened file types
   Added plugin system
@@ -132,7 +132,7 @@
   Replaced cmdTotal with QuickBMS
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
   Updated translations for English, German, French (partly)
-  Updated AutoIt to 3.3.10.2 and source code to fit new AutoIt version
+  Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
   Updated innounp to 0.40
   Updated KGB archiver to 2 beta 2
   Updated lzop to 1.03

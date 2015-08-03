@@ -3360,6 +3360,7 @@ Func MethodSelect($format, $splashdisp)
 	; Create GUI and set header information
 	Opt("GUIOnEventMode", 0)
 	Local $guimethod = GUICreate($title, 330, $base_height + (UBound($method) * 20))
+	_GuiSetColor()
 	$header = GUICtrlCreateLabel(t('METHOD_HEADER', $select_type), 5, 5, 320, 20)
 	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', $select_type), 5, 25, 320, 65, $SS_LEFT)
 
@@ -3407,6 +3408,7 @@ EndFunc   ;==>MethodSelect
 Func GameSelect($sEntries, $sStandard)
 	Local $sSelection = 0
 	$GameSelectGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
+	_GuiSetColor()
 	$GameSelectLabel = GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filename & "." & $fileext, $sStandard)), 10, 8, 252, 210, $SS_CENTER)
 	$GameSelectList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
 	GUICtrlSetData(-1, $sStandard & '|' & $sEntries)
@@ -3689,7 +3691,7 @@ EndFunc   ;==>IsJavaInstalled
 
 ; Determine whether Windows version >= Windows 7, used for cascading context menu support
 Func _IsWin7()
-	Global $win7 = @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81"
+	Global $win7 = @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Or @OSVersion = "WIN_10"
 	Return $win7
 EndFunc
 
@@ -4109,6 +4111,7 @@ Func Download($f)
 
 	; Create GUI with progressbar
 	Local $DownloadGUI = GUICreate(t('TERM_DOWNLOADING'), 466, 109, -1, -1, $WS_POPUPWINDOW, -1, $guimain)
+	_GuiSetColor()
 	GUICtrlCreateLabel($f, 8, 16, 446, 17, $SS_CENTER)
 	Local $DownloadProgress = GUICtrlCreateProgress(8, 46, 446, 25)
 	GUISetState(@SW_SHOW)
@@ -4159,6 +4162,8 @@ Func CreateGUI()
 	Else
 		Global $guimain = GUICreate($title, 300, 135, -1, -1, -1, BitOR($WS_EX_ACCEPTFILES, $WS_EX_TOPMOST))
 	EndIf
+
+	_GuiSetColor()
 	Local $dropzone = GUICtrlCreateLabel("", 0, 0, 300, 135)
 
 	; Menu controls
@@ -4357,6 +4362,13 @@ Func _GuiRoundCorners($h_win, $i_x1, $i_y1, $i_x3, $i_y3)
 	EndIf
 EndFunc   ;==>_GuiRoundCorners
 
+; Set GUI color to white when using Windows 10
+Func _GuiSetColor()
+	If @OSVersion <> "WIN_10" Then Return
+	GUISetBkColor(0xFFFFFF)
+	GUICtrlSetDefBkColor(0xFFFFFF)
+EndFunc
+
 ; Prompt user for file
 Func GUI_File()
 	$files = StringSplit(FileOpenDialog(t('OPEN_FILE'), "", t('SELECT_FILE') & " (*.*)|" & t('TERM_INSTALLER') & " (*.exe)|" & t('TERM_COMPRESSED') & " (*.rar;*.zip;*.7z)", 4 + 1, "", $guimain), "|", 2)
@@ -4459,6 +4471,8 @@ Func GUI_Prefs()
 	Else
 		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 450)
 	EndIf
+
+	_GuiSetColor()
 
 	; Universal prefs box
 	GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 5, 5, 240, 122)
@@ -4663,6 +4677,7 @@ EndFunc   ;==>GUI_Batch_OK
 Func GUI_Batch_Show()
 	Cout("Opening batch queue edit GUI")
 	$GUI_Batch = GUICreate($name, 418, 267, 476, 262, -1, -1, $guimain)
+	_GuiSetColor()
 	$GUI_Batch_List = GUICtrlCreateList("", 8, 8, 401, 201)
 	GUICtrlSetData(-1, _ArrayToString($queueArray, "|", 1))
 	$GUI_Batch_OK = GUICtrlCreateButton("&OK", 40, 225, 75, 25)
@@ -4798,6 +4813,7 @@ Func GUI_Feedback($Type = "", $file = "", $Output = "")
 		Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 251, 370, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1)
 	EndIf
 
+	_GuiSetColor()
 	GUICtrlCreateLabel(t('FEEDBACK_TYPE_LABEL'), 8, 8, -1, 15)
 	If $Type == "" Then
 		Global $FB_TypeCont = GUICtrlCreateCombo(t('FEEDBACK_TYPE_STANDARD'), 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
@@ -4962,6 +4978,7 @@ Func GUI_ContextMenu()
 		Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 600)
 	EndIf
 
+	_GuiSetColor()
 	GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 5, 0, 440, 470)
 	Global $CM_Checkbox_enabled = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 16, -1, 17)
 	Global $CM_Checkbox_allusers = GUICtrlCreateCheckbox(t('CONTEXT_ALL_USERS_LABEL'), GetPos($CM_GUI, $CM_Checkbox_enabled, 25), 16, -1, 17)
@@ -5258,6 +5275,7 @@ Func GUI_FirstStart()
 	GUISetState(@SW_HIDE, $guimain)
 	; Create GUI
 	Global $FS_GUI = GUICreate($title, 504, 387)
+	_GuiSetColor()
 	GUICtrlCreatePic(".\support\Icons\uniextract_inno.bmp", 8, 312, 65, 65)
 	GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 24, 800, 0, "MS Sans Serif")
@@ -5373,6 +5391,7 @@ Func GUI_Plugins()
 ;~ 	_ArrayDisplay($aPluginInfo)
 
 	$GUI_Plugins = GUICreate($name, 410, 167, -1, -1, -1, -1, $guimain)
+	_GuiSetColor()
 	$GUI_Plugins_List = GUICtrlCreateList("", 8, 8, 209, 149)
 	GUICtrlSetData(-1, _ArrayToString($aPluginInfo, "|", 0, 0, "|", 1, 1))
 	$GUI_Plugins_Close = GUICtrlCreateButton(t('FINISH_BUT'), 320, 132, 83, 25)
@@ -5465,6 +5484,7 @@ EndFunc
 Func GUI_About()
 	Cout("Creating about GUI")
 	$About = GUICreate($title & " " & $codename, 397, 270, -1, -1, -1, -1, $guimain)
+	_GuiSetColor()
 	GUICtrlCreateLabel($name, 24, 16, 348, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 30, 400, 0, "MS Sans Serif")
 	GUICtrlCreateLabel(t('ABOUT_VERSION', $version), 16, 72, 362, 17, $SS_CENTER)
@@ -5472,7 +5492,7 @@ Func GUI_About()
 	GUICtrlCreateLabel($ID, 5, 255, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")
 	GUICtrlCreatePic(".\support\Icons\Bioruebe.jpg", 295, 212, 89, 50)
-	$About_OK = GUICtrlCreateButton(t('OK_BUT'), 154, 225, 89, 25)
+	$About_OK = GUICtrlCreateButton(t('OK_BUT'), 154, 222, 89, 25)
 	GUISetState(@SW_SHOW)
 
 	GUICtrlSetOnEvent($About_OK, "GUI_About_Exit")
