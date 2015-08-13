@@ -63,13 +63,14 @@ Beta 1:
   Removed 64 bit iso.wcx plugin as it does not work correctly with QuickBMS
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced tee with mtee (adds support for unicode and longer filenames, smaller)
+  Replaced tee with wintee (Windows 10 only, due to mtee not terminating fast enough)
   Updated AutoIt to 3.3.14.1
   Updated unrar to 5.21
   Updated fsbextract to 0.3.4a
   Updated exeinfo PE to 0.0.3.8
   Updated disunity to 0.3.4
   Updated quickbms to 0.6.5
-  Updated language files, added new termsto all language files, set encoding to UTF-16, updated translation info text,
+  Updated language files, added new terms to all language files, set encoding to UTF-16, updated translation info text,
 		  changed %s to %name and %1, %2,...
 
 Alpha 4:

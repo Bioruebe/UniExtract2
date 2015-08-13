@@ -88,6 +88,7 @@ uif2iso										uif2iso.exe					0.1.7c					GNU GPL v2				Luigi Auriemma						ht
 UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w					modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		http://upx.sourceforge.net/										
 											---------					-------		---------	(UPX License)			Markus Oberhumer					-------															
 UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
+wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
 XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke						http://www.winace.com/											
 

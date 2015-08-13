@@ -55,7 +55,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 1"
+Const $version = "2.0.0 Beta 1f"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -199,7 +199,8 @@ Const $msi_plug = "msi.wcx"
 Const $sis = "PDunSIS.wcx"
 
 ; Other
-Const $tee = "mtee.exe"
+Const $mtee = "mtee.exe"
+Const $wtee = "wtee.exe"
 Const $mediainfo = "MediaInfo" & $reg64 & ".dll"			; 0.7.72
 
 ; Not included binaries
@@ -1364,7 +1365,7 @@ Func advfilescan($f)
 			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
 			 (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
 			  StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
-			  StringInStr($filetype_curr, "shortcut", 0) Or StringInStr($filetype_curr, "ogg", 0)
+			  StringInStr($filetype_curr, "shortcut", 0)
 			terminate("notpacked", $file, "")
 	EndSelect
 EndFunc
@@ -3804,6 +3805,7 @@ EndFunc
 
 ; Executes a program and log output using tee
 Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True)
+	Local $tee = @OSVersion = "WIN_10"? $wtee: $mtee
 	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
 	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
 	Global $run = 0, $runtitle = 0
@@ -5393,7 +5395,7 @@ Func GUI_Plugins()
 	$GUI_Plugins = GUICreate($name, 410, 167, -1, -1, -1, -1, $guimain)
 	_GuiSetColor()
 	$GUI_Plugins_List = GUICtrlCreateList("", 8, 8, 209, 149)
-	GUICtrlSetData(-1, _ArrayToString($aPluginInfo, "|", 0, 0, "|", 1, 1))
+	GUICtrlSetData(-1, _ArrayToString($aPluginInfo, "|", -1, -1, "|", 1, 1))
 	$GUI_Plugins_Close = GUICtrlCreateButton(t('FINISH_BUT'), 320, 132, 83, 25)
 	$GUI_Plugins_Download = GUICtrlCreateButton(t('TERM_DOWNLOAD'), 224, 132, 83, 25)
 	GUICtrlSetState(-1, $GUI_DISABLE)
