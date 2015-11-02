@@ -5,20 +5,16 @@ update language files
 check control size for other languages
 
 // Unpacker changes:
-password list for unrar,... --> unrar t -p
-
 7z support for nifs, fat, vhd, mbr?
 7z support for mslz?
 7z support for APM?
 
 // New unpackers
 lrzip? - http://ck.kolivas.org/apps/lrzip/
-pdf?
 sqx
 paq, zpaq
 lz
 Smart install maker - http://www.nullsecurity.org/tools
-Replace GCFScape with ?
 mdf, mds images
 gif, apng
 
@@ -40,7 +36,6 @@ Extracting to C:/ creates file in @ScriptDir
 investigate archive listing - req 44 // Add file list display for extractors, that support it, create command line parameter, include into context menu
 quickbms logging
 additional file types for arc_conv
-change new exitcodes
 include tridscan gui?
 ntlea?
 Crage logging does not work

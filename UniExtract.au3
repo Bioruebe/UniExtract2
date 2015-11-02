@@ -55,7 +55,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 1f"
+Const $version = "2.0.0 Beta 1"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -107,6 +107,7 @@ Global $extract = 1
 Global $checkUnicode = 1
 Global $bExtractVideo = 1
 Global $StoreGUIPosition = 0
+Global $iTopmost = 0
 Global $posx = -1, $posy = -1
 Global $trayX = -1, $trayY = -1
 
@@ -153,7 +154,7 @@ Const $fsb = "fsbext.exe" 									;0.3.3
 Const $gcf = "GCFScape.exe" ;x64							;1.8.2
 Const $hlp = "helpdeco.exe" 								;2.1
 Const $img = "EXTRNT.EXE" 									;2.10
-Const $inno = "innounp.exe" 								;0.40
+Const $inno = "innounp.exe" 								;0.43
 Const $is6cab = "i6comp.exe" 								;0.2
 Const $isxunp = "IsXunpack.exe" 							;0.99
 Const $kgb = @ScriptDir & "\bin\kgb\kgb2_console.exe" 		;1.2.1.24
@@ -215,7 +216,7 @@ Const $crage = @ScriptDir & "\bin\crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
 Const $mpq = "mpq.wcx"
 
-If Not @Compiled Then HotKeySet("{^}", "Test")
+;~ If Not @Compiled Then HotKeySet("{^}", "Test")
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -778,6 +779,10 @@ Func ReadPrefs()
 	LoadPref("addassocenabled", $addassocenabled)
 	LoadPref("addassoc", $addassoc, False)
 	LoadPref("addassocallusers", $addassocallusers)
+
+	LoadPref("topmost", $iTopmost)
+	If $iTopmost Then $iTopmost = 262144
+
 	LoadPref("updateinterval", $updateinterval)
 	LoadPref("lastupdate", $lastupdate, False)
 	LoadPref("ID", $ID, False)
@@ -827,6 +832,7 @@ Func WritePrefs()
 	SavePref('storeguiposition', $StoreGUIPosition)
 	SavePref('timeout', $Timeout / 1000)
 	SavePref('updateinterval', $updateinterval)
+	SavePref("topmost", Number($iTopmost > 0))
 EndFunc   ;==>WritePrefs
 
 ; Save single preference
@@ -1005,7 +1011,7 @@ Func filescan($f, $analyze = 1)
 
 			If $error Then
 				Cout("Failed to locate renamed file. Guessed name: " & $new)
-				If Not $silentmode Then MsgBox(262144 + 16, $name, t('RENAME_NOTFOUND', CreateArray($new, StringReplace(t('PREFS_APPEND_EXT_LABEL'), "&", ""))))
+				If Not $silentmode Then MsgBox($iTopmost + 16, $name, t('RENAME_NOTFOUND', CreateArray($new, StringReplace(t('PREFS_APPEND_EXT_LABEL'), "&", ""))))
 				terminate('silent', '', '')
 			EndIf
 		Else
@@ -2556,7 +2562,21 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			If FileExists(@ScriptDir & "\bin\" & $bms) Then FileDelete(@ScriptDir & "\bin\" & $bms)
 
 		Case "rar"
-			_Run($cmd & $rar & ' x "' & $file & '"', $outdir, @SW_SHOW)
+			Local $sPassword = 0
+			If StringInStr(FetchStdout($cmd & $rar & ' t "' & $file & '"', $outdir, @SW_HIDE), "Enter password") Then
+				Cout("Loading password list")
+				$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
+				For $i = 0 To @extended - 1
+					Cout("Trying password " & $i)
+					If StringInStr(FetchStdout($cmd & $rar & ' t -p"' & $aPasswords[$i] & '" "' & $file & '"', $outdir, @SW_HIDE, 0, False), "All OK") Then
+						Cout("Password found")
+						$sPassword = $aPasswords[$i]
+						ExitLoop
+					EndIf
+				Next
+			EndIf
+
+			_Run($cmd & $rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
 			If @error Then terminate("failed", $file, $arcdisp)
 
 		Case "rgss3"
@@ -3026,16 +3046,16 @@ EndFunc
 
 ; Check if enough free space is available
 Func HasFreeSpace()
-	Local $freeSpace = DriveSpaceFree($outdir)
-	Local $fileSize = FileGetSize($file) / 1048576 ; MB
+	Local $freeSpace = Round(DriveSpaceFree($outdir), 2)
+	Local $fileSize = Round(FileGetSize($file) / 1048576, 2) ; MB
 
 	If $freeSpace < $fileSize Then
-		Local $diff = $freeSpace - $fileSize
+		Local $diff = Round($freeSpace - $fileSize, 2)
 		Cout("Not enough free space available: " & $freeSpace & " MB, needed: " & $fileSize & " MB, difference: " & $diff & " MB.")
 
 		If $silentmode Then terminate("failed", '', "Not enough free space available: " & $freeSpace & " MB, needed: " & $fileSize & " MB, difference: " & $diff & " MB.")
 
-		$return = MsgBox(262144 + 48 + 2, $name, t('NO_FREE_SPACE', CreateArray($freeSpace, Round($fileSize, 1), Round($diff, 2))))
+		$return = MsgBox($iTopmost + 48 + 2, $name, t('NO_FREE_SPACE', CreateArray($freeSpace, $fileSize), $diff, 2)))
 		If $return = 4 Then ; Retry
 			HasFreeSpace()
 			Return
@@ -3177,7 +3197,7 @@ Func terminate($status, $fname, $ID)
 			$syntax &= t('HELP_EXAMPLE1')
 			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
 			$syntax &= t('HELP_NOARGS')
-			MsgBox(262144 + 32, $title, $syntax, StringIsSpace($ID)? 15: 0)
+			MsgBox($iTopmost + 32, $title, $syntax, StringIsSpace($ID)? 15: 0)
 
 		; Display file type information and exit
 		Case $status == "fileinfo"
@@ -3190,7 +3210,7 @@ Func terminate($status, $fname, $ID)
 				FileWrite($handle, $file & @CRLF & @CRLF & $filetype & @CRLF & "------------------------------------------------------------" & @CRLF)
 				FileClose($handle)
 			Else
-				MsgBox(262144 + 64, $title, $filetype)
+				MsgBox($iTopmost + 64, $title, $filetype)
 			EndIf
 
 		; Display error information and exit
@@ -3438,7 +3458,7 @@ EndFunc
 ; Warn user before executing files for extraction
 Func Warn_Execute($command)
 	Cout("Warning: In order to extract files of this type, the file must be directly executed.")
-	$prompt = MsgBox(262144 + 49, $title, t('WARN_EXECUTE', $command))
+	$prompt = MsgBox($iTopmost + 49, $title, t('WARN_EXECUTE', $command))
 	If $prompt <> 1 Then
 		If $createdir Then DirRemove($outdir, 0)
 		terminate('silent', '', '')
@@ -3460,7 +3480,7 @@ Func Prompt($show_flag, $Message, $vars = 0, $terminate = 1)
 		Cout("Assuming yes to message " & $Message)
 		Return 1
 	EndIf
-	Local $return = MsgBox(262144 + $show_flag, $title, t($Message, $vars))
+	Local $return = MsgBox($iTopmost + $show_flag, $title, t($Message, $vars))
 	If $return == 1 Or $return == 6 Then
 		Return 1
 	Else
@@ -3607,7 +3627,7 @@ Func BatchQueuePop()
 		FileClose($handle)
 
 		FileDelete(@ScriptDir & "\log\errorlog.txt")
-		If $return <> "" Then MsgBox(262144 + 48, $name, t('BATCH_FINISH', $return))
+		If $return <> "" Then MsgBox($iTopmost + 48, $name, t('BATCH_FINISH', $return))
 	Else ; Get next command and execute it
 		Local $element = $queueArray[1]
 		_ArrayDelete($queueArray, 1)
@@ -3958,7 +3978,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 EndFunc
 
 ; Run a program and return stdout/stderr stream
-Func FetchStdout($f, $workingdir, $show_flag, $line = 0)
+Func FetchStdout($f, $workingdir, $show_flag, $line = 0, $Output = True)
 	Cout("Executing: " & $f)
 	Global $run = 0, $return = ""
 	$run = Run($f, $workingdir, $show_flag, $STDERR_MERGED)
@@ -3968,7 +3988,7 @@ Func FetchStdout($f, $workingdir, $show_flag, $line = 0)
 		Sleep(1)
 		$return &= StdoutRead($run)
 	Until @error
-	Cout($return)
+	If $Output Then Cout($return)
 	$run = 0
 	If $line <> 0 Then Return _StringGetLine($return, $line)
 	Return $return
@@ -4017,7 +4037,7 @@ Func CheckUpdate($silent = False)
 
 	; Universal Extractor
 	$return = _StringGetLine(_INetGetSource($updateURL & "?get=version&id=" & $ID), -1)
-	If @error Then $silent? 0: MsgBox(262144 + 48, $title, t('UPDATECHECK_FAILED'))
+	If @error Then $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
 
 	Cout("Local: " & $version)
 	Cout("Server: " & $return)
@@ -4027,11 +4047,11 @@ Func CheckUpdate($silent = False)
 		$found = True
 		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return), 0) Then
 			$UEURL = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
-			If @error Or $UEURL = "" Then Return $silent? 0: MsgBox(262144 + 48, $title, t('UPDATE_FAILED'))
+			If @error Or $UEURL = "" Then Return $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATE_FAILED'))
 			$return = Download($UEURL)
 			If $return == 0 Then Return
 			$handle = FileOpen(@ScriptDir & "\Update.bat", 2)
-			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im UniExtract.exe 2>nul" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -o"' & @ScriptDir & '" "' & $return & '"' & _
+			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im " & @ScriptName & " 2>nul" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -o"' & @ScriptDir & '" "' & $return & '"' & _
 					@CRLF & @CRLF & "@ping -n 3 localhost> nul" & @CRLF & 'del "' & $return & '"' & @CRLF & 'start "" ".\' & @ScriptName & '" /afterupdate' & @CRLF & "del Update.bat" & @CRLF & "exit")
 			FileClose($handle)
 			Run(@ScriptDir & "\Update.bat", @ScriptDir)
@@ -4053,7 +4073,7 @@ Func CheckUpdate($silent = False)
 		EndIf
 	EndIf
 
-	If $found = False And $silent = False Then MsgBox(262144 + 64, $name, t('UPDATE_CURRENT'))
+	If $found = False And $silent = False Then MsgBox($iTopmost + 64, $name, t('UPDATE_CURRENT'))
 
 	Cout("Check for updates finished")
 EndFunc
@@ -4087,7 +4107,7 @@ Func GetFFmpeg()
 	Local $success = RunWait($cmd & $7z & ' x "' & $return & '"', @TempDir)
 	FileDelete($return)
 	If $success <> 0 Then
-		MsgBox(262144 + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip")))
+		MsgBox($iTopmost + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip")))
 		Return SetError(1, 0, 0)
 	EndIf
 
@@ -4160,9 +4180,9 @@ Func CreateGUI()
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 300, 135, $posx, $posy, -1, BitOR($WS_EX_ACCEPTFILES, $WS_EX_TOPMOST))
+		Global $guimain = GUICreate($title, 300, 135, $posx, $posy, -1, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
 	Else
-		Global $guimain = GUICreate($title, 300, 135, -1, -1, -1, BitOR($WS_EX_ACCEPTFILES, $WS_EX_TOPMOST))
+		Global $guimain = GUICreate($title, 300, 135, -1, -1, -1, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
 	EndIf
 
 	_GuiSetColor()
@@ -4183,6 +4203,8 @@ Func CreateGUI()
 	Local $editmenu = GUICtrlCreateMenu(t('MENU_EDIT_LABEL'))
 	Global $keepitem = GUICtrlCreateMenuItem(t('MENU_EDIT_KEEP_LABEL'), $editmenu)
 	Global $silentitem = GUICtrlCreateMenuItem(t('MENU_EDIT_SILENT_MODE_LABEL'), $editmenu)
+	GUICtrlCreateMenuItem("", $editmenu)
+	Local $passworditem = GUICtrlCreateMenuItem(t('MENU_EDIT_PASSWORD_LABEL'), $editmenu)
 	GUICtrlCreateMenuItem("", $editmenu)
 	Local $contextitem = GUICtrlCreateMenuItem(t('MENU_EDIT_CONTEXT_LABEL'), $editmenu)
 	Local $prefsitem = GUICtrlCreateMenuItem(t('MENU_EDIT_PREFS_LABEL'), $editmenu)
@@ -4292,6 +4314,7 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($GUI_Main_Extract, "GUI_ScanOnly")
 	GUICtrlSetOnEvent($GUI_Main_Scan, "GUI_ScanOnly")
 	GUICtrlSetOnEvent($silentitem, "GUI_Silent")
+	GUICtrlSetOnEvent($passworditem, "GUI_Password")
 	GUICtrlSetOnEvent($contextitem, "GUI_ContextMenu")
 	GUICtrlSetOnEvent($prefsitem, "GUI_Prefs")
 	GUICtrlSetOnEvent($pluginsitem, "GUI_Plugins")
@@ -4469,9 +4492,9 @@ Func GUI_Prefs()
 	Cout("Creating preferences GUI")
 	; Create GUI
 	If $guimain Then
-		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 450, -1, -1, -1, -1, $guimain)
+		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 470, -1, -1, -1, -1, $guimain)
 	Else
-		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 450)
+		Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 470)
 	EndIf
 
 	_GuiSetColor()
@@ -4499,7 +4522,7 @@ Func GUI_Prefs()
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Format-specific preferences
-	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 5, 130, 240, 240)
+	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 5, 130, 240, 260)
 	Global $warnexecuteopt = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), 10, 145, -1, 20)
 	Global $freeSpaceCheckOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_FREE_SPACE_LABEL'), 10, 165, -1, 20)
 	Global $unicodecheckopt = GUICtrlCreateCheckbox(t('PREFS_CHECK_UNICODE_LABEL'), 10, 185, -1, 20)
@@ -4511,20 +4534,27 @@ Func GUI_Prefs()
 	Global $CheckGameOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_GAME_LABEL'), 10, 305, -1, 20)
 	Global $LogOpt = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), 10, 325, -1, 20)
 	Global $VideoTrackOpt = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), 10, 345, -1, 20)
+	Global $TopmostOpt = GUICtrlCreateCheckbox(t('PREFS_TOPMOST_LABEL'), 10, 365, -1, 20)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Source file options
-	GUICtrlCreateGroup(t('PREFS_SOURCE_FILES_LABEL'), 5, 375, 240, 40)
-	$DeleteOrigFileOpt[0] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_KEEP'), 10, 390)
-	$DeleteOrigFileOpt[1] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_DELETE'), GetPos($guiprefs, $DeleteOrigFileOpt[0], 20), 390)
-	$DeleteOrigFileOpt[2] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_ASK'), GetPos($guiprefs, $DeleteOrigFileOpt[1], 20), 390)
+	GUICtrlCreateGroup(t('PREFS_SOURCE_FILES_LABEL'), 5, 395, 240, 40)
+	$DeleteOrigFileOpt[0] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_KEEP'), 10, 410)
+	$DeleteOrigFileOpt[1] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_DELETE'), GetPos($guiprefs, $DeleteOrigFileOpt[0], 20), 410)
+	$DeleteOrigFileOpt[2] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_ASK'), GetPos($guiprefs, $DeleteOrigFileOpt[1], 20), 410)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Buttons
-	Local $prefsok = GUICtrlCreateButton(t('OK_BUT'), 55, 423, 60, 20)
-	Local $prefscancel = GUICtrlCreateButton(t('CANCEL_BUT'), 135, 423, 60, 20)
+	Local $prefsok = GUICtrlCreateButton(t('OK_BUT'), 55, 443, 60, 20)
+	Local $prefscancel = GUICtrlCreateButton(t('CANCEL_BUT'), 135, 443, 60, 20)
 
 	; Tooltips
+	GUICtrlSetTip($warnexecuteopt, t('PREFS_WARN_EXECUTE_TOOLTIP'))
+	GUICtrlSetTip($freeSpaceCheckOpt, t('PREFS_CHECK_FREE_SPACE_TOOLTIP'))
+	GUICtrlSetTip($unicodecheckopt, t('PREFS_CHECK_UNICODE_TOOLTIP'))
+	GUICtrlSetTip($appendextopt, t('PREFS_APPEND_EXT_TOOLTIP'))
+	GUICtrlSetTip($FeedbackPromptOpt, t('PREFS_FEEDBACK_PROMPT_TOOLTIP'))
+	GUICtrlSetTip($CheckGameOpt, t('PREFS_CHECK_GAME_TOOLTIP'))
 	GUICtrlSetTip($VideoTrackOpt, t('PREFS_VIDEOTRACK_TOOLTIP'))
 
 	; Set properties
@@ -4541,6 +4571,7 @@ Func GUI_Prefs()
 	If $CheckGame Then GUICtrlSetState($CheckGameOpt, $GUI_CHECKED)
 	If $Log Then GUICtrlSetState($LogOpt, $GUI_CHECKED)
 	If $bExtractVideo Then GUICtrlSetState($VideoTrackOpt, $GUI_CHECKED)
+	If $iTopmost Then GUICtrlSetState($TopmostOpt, $GUI_CHECKED)
 	GUICtrlSetState($DeleteOrigFileOpt[$DeleteOrigFile], $GUI_CHECKED)
 
 	GUICtrlSetData($langselect, $langlist, $language)
@@ -4610,6 +4641,10 @@ Func GUI_Prefs_OK()
 	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
 	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
 
+	$return = GUICtrlRead($TopmostOpt) == $GUI_CHECKED? 262144: 0
+	If $iTopmost <> $return Then $redrawgui = True
+	$iTopmost = $return
+
 	For $i = 0 To 2
 		If GUICtrlRead($DeleteOrigFileOpt[$i]) == $GUI_CHECKED Then $DeleteOrigFile = $i
 	Next
@@ -4646,7 +4681,7 @@ Func GUI_OK_Set($Msg = False)
 		Return 1
 	ElseIf $Msg Then
 		If $file <> '' Then $file &= ' ' & t('DOES_NOT_EXIST')
-		MsgBox(262144 + 48, $title, t('INVALID_FILE_SELECTED', $file))
+		MsgBox($iTopmost + 48, $title, t('INVALID_FILE_SELECTED', $file))
 	EndIf
 	Return 0
 EndFunc   ;==>GUI_OK_Set
@@ -4677,14 +4712,16 @@ EndFunc   ;==>GUI_Batch_OK
 
 ; Display batch queue and allow changes
 Func GUI_Batch_Show()
+	Local Const $iListLeft = 8, $iListTop = 8
+	Local $iLastIndex = -1, $tt = False
 	Cout("Opening batch queue edit GUI")
 	$GUI_Batch = GUICreate($name, 418, 267, 476, 262, -1, -1, $guimain)
 	_GuiSetColor()
-	$GUI_Batch_List = GUICtrlCreateList("", 8, 8, 401, 201)
+	$GUI_Batch_List = GUICtrlCreateList("", $iListLeft, $iListTop, 401, 201)
 	GUICtrlSetData(-1, _ArrayToString($queueArray, "|", 1))
-	$GUI_Batch_OK = GUICtrlCreateButton("&OK", 40, 225, 75, 25)
-	$GUI_Batch_Cancel = GUICtrlCreateButton("&Cancel", 171, 225, 75, 25)
-	$GUI_Batch_Delete = GUICtrlCreateButton("Delete", 304, 224, 73, 25)
+	$GUI_Batch_OK = GUICtrlCreateButton(t('OK_BUT'), 40, 225, 75, 25)
+	$GUI_Batch_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 171, 225, 75, 25)
+	$GUI_Batch_Delete = GUICtrlCreateButton(t('DELETE_BUT'), 304, 224, 73, 25)
 	GUISetState(@SW_SHOW)
 	Opt("GUIOnEventMode", 0)
 
@@ -4718,12 +4755,35 @@ Func GUI_Batch_Show()
 					If @error Then ContinueLoop
 					If _ArrayDelete($queueArray, $pos) Then GUICtrlSetData($GUI_Batch_List, "|" & _ArrayToString($queueArray, "|", 1))
 				EndIf
+			Case Else
+				; Display tooltips if file name too long
+				; Code by Malkey (https://www.autoitscript.com/forum/topic/146743-listbox-tooltip-for-long-items/?do=findComment&comment=1039835)
+				$aCI = GUIGetCursorInfo($GUI_Batch)
+				If $aCI[4] = $GUI_Batch_List Then
+					$iIndex = _GUICtrlListBox_ItemFromPoint($GUI_Batch_List, $aCI[0] - $iListLeft, $aCI[1] - $iListTop)
+					If $iLastIndex == $iIndex Then ContinueLoop
+					$iLastIndex = $iIndex
+					$sText = _GUICtrlListBox_GetText($GUI_Batch_List, $iIndex)
+					If StringLen($sText) > 72 Then
+						ToolTip($sText)
+						$tt = True
+					Else
+						ToolTip("")
+						$tt = False
+						$iLastIndex = -1
+					EndIf
+				EndIf
+				If $tt And $aCI[4] <> $GUI_Batch_List Then
+					$tt = False
+					$iLastIndex = -1
+					ToolTip("")
+				EndIf
 		EndSwitch
 	WEnd
 
 	GUIDelete($GUI_Batch)
 	Opt("GUIOnEventMode", 1)
-EndFunc   ;==>GUI_Batch_Show
+EndFunc
 
 ; Clear batch queue
 Func GUI_Batch_Clear()
@@ -4870,7 +4930,7 @@ Func GUI_Feedback_Send()
 	$FB_Mail = GUICtrlRead($FB_MailCont)
 
 	If $FB_File = "" And $FB_Output = "" And $FB_Message = "" Then
-		MsgBox(262144 + 16, $name, t('FEEDBACK_EMPTY'))
+		MsgBox($iTopmost + 16, $name, t('FEEDBACK_EMPTY'))
 		Return
 	EndIf
 
@@ -4910,10 +4970,10 @@ Func GUI_Feedback_Send()
 
 	If $sResponse = "1" Then
 		Cout("Feedback successfully sent")
-		MsgBox(262144, $title, t('FEEDBACK_SUCCESS'))
+		MsgBox($iTopmost, $title, t('FEEDBACK_SUCCESS'))
 	Else
 		Cout("Error sending feedback")
-		MsgBox(262144+16, $title, t('FEEDBACK_ERROR'))
+		MsgBox($iTopmost+16, $title, t('FEEDBACK_ERROR'))
 	EndIf
 
 	GUISetState(@SW_SHOW, $guimain)
@@ -5134,7 +5194,7 @@ Func GUI_ContextMenu_OK()
 	; File associations
 	If GUICtrlRead($CM_add_input) == "" Then GUICtrlSetState($CM_Checkbox_add, $GUI_UNCHECKED)
 	If GUICtrlRead($CM_Checkbox_add) == $GUI_CHECKED Then
-		$return = MsgBox(262144 + 48 + 4, $name, t('CONTEXT_DANGEROUS'))
+		$return = MsgBox($iTopmost + 48 + 4, $name, t('CONTEXT_DANGEROUS'))
 		If $return == 6 And ($addassocenabled == 0 Or ($addassocenabled = 1 And $addassoc <> GUICtrlRead($CM_add_input))) Then GUI_ContextMenu_fileassoc(1)
 	Else
 		If $addassocenabled Then GUI_ContextMenu_fileassoc(0)
@@ -5477,6 +5537,16 @@ Func GUI_Stats()
 
 EndFunc   ;==>GUI_Stats
 
+; Open password list file
+Func GUI_Password()
+	Local Const $sPasswordFile = @ScriptDir & "\passwords.txt"
+	If Not FileExists($sPasswordFile) Then
+		$handle = FileOpen($sPasswordFile, 1)
+		FileClose($handle)
+	EndIf
+	ShellExecute($sPasswordFile)
+EndFunc
+
 ; Open program directory
 Func GUI_ProgDir()
 	ShellExecute(@ScriptDir)
@@ -5578,26 +5648,3 @@ Func Tray_Exit()
 
 	terminate("silent", '', '')
 EndFunc
-
-; Test specific functions
-Func Test()
-	;Sleep(50000)
-	;GUI_FirstStart()
-	;terminate("syntax", "", "")
-	;check7z()
-	;_GetOSLanguage()
-	;GUI_ContextMenu()
-	;CreateLog("debug")
-;~ 	BatchQueuePop()
-;~ 	IsJavaInstalled()
-;~ 	_CreateTrayMessageBox("Test")
-	;GUI_ContextMenu_remove()
-	;GUIGetPosition()
-	;$file = "C:\Users\William\Desktop\Documents\Unpacker Test\wzipse40.exe"
-	;$outdir = "C:\Users\William\Desktop\Documents\Unpacker Test\wzipse40"
-	;extract("isexe", 'InstallShield' & t('TERM_ARCHIVE'))
-	;MsgBox(1,"", $unshield & ' -d "' & $outdir & '" x "' & $file & '"')
-	;extract("rgss", "")
-	;GetFFmpeg()
-;~ 	_AfterUpdate()
-EndFunc   ;==>Test

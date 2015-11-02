@@ -15,6 +15,10 @@ Beta 1:
   Added additional weblinks to help menu
   Added option to disable video track extraction
   Added support for Windows 10
+  Added explaining tooltips to some options
+  Added option to always keep GUI in foreground
+  Added tooltips to batch queue view
+  Added support for password list for .rar archives
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found
   Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
@@ -43,6 +47,8 @@ Beta 1:
   Fixed slowdown when extracting to drive root directory caused by size calculation
   Fixed /prefs command line parameter not working
   Fixed help screen closing after 15 seconds when opened from command line
+  Fixed some untranslated terms
+  Fixed rounding issues in free space check when using batch mode
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
@@ -70,6 +76,7 @@ Beta 1:
   Updated exeinfo PE to 0.0.3.8
   Updated disunity to 0.3.4
   Updated quickbms to 0.6.5
+  Updated innounp to 0.43
   Updated language files, added new terms to all language files, set encoding to UTF-16, updated translation info text,
 		  changed %s to %name and %1, %2,...
 

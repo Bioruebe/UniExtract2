@@ -15,6 +15,7 @@
   Added optional stdout debug output (--> http://www.autoitscript.com/autoit3/docs/functions/ConsoleWrite.htm)
   Added optional log file (with error type in filename)
   Added option to delete all log files from menu
+  Added option to always keep GUI in foreground
   Added batch mode for multiple file extraction
   Added silent mode (assuming yes to all prompts, e.g for unattended batch extraction)
   Added scan only mode to detect file type using 4 different file scanners
@@ -72,6 +73,7 @@
   Added jsMSI Unpacker for better .msi extraction (former unsupported files)
   Added unshield as an alternative extraction method for InstallShield archives (also creates log of registry changes during installation as .txt file)
   Added 7z sfx script extraction using 7ZSplit
+  Added support for password list for .rar archives
   Added new command line parameters (/help for complete list)
   Added helper binaries info file (incl. version, author, files, license, URL)
   Added scripts to check/update language files/helper binaries (source, used to simplify development)
@@ -133,7 +135,7 @@
   Replaced tee with mtee/wintee (adds support for unicode and longer filenames, smaller)
   Updated translations for English, German, French (partly)
   Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
-  Updated innounp to 0.40
+  Updated innounp to 0.43
   Updated KGB archiver to 2 beta 2
   Updated lzop to 1.03
   Updated PEiD to 0.95; Database files to 2012/04/24

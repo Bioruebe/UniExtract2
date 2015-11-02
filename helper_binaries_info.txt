@@ -10,8 +10,8 @@ Name										Files						Version		Features	License					Author								Website
 7Zip										x86\7z.exe					9.20		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
 											x64\7z.exe					-------		---------	(+ unRAR restriction)	-------								-------															
 											x86\7z.dll					-------		---------	-------					-------								-------															
-											x64\7z.dll					-------		---------	-------					-------								-------															
 7z SFX Archives splitter					7ZSplit.exe					0.2			---------	GNU LGPL v3				Oleg Scherbakov						http://www.7zsfx.info/en/										
+											x64\7z.dll					-------		---------	-------					-------								-------															
 ARC - Archive utility						arc.exe						5.21i		-	x	-	GNU GPL v2				Howard Chu							http://gnuwin32.sourceforge.net/packages/arc.htm				
 Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Roper						https://github.com/minirop/arc-reader/downloads
 											libpng12.dll				-------		---------	-------					-------								-------
@@ -49,7 +49,7 @@ GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http:
 HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					http://www.geocities.com/mwinterhoff/helpdeco.htm				
 											---------					-------		---------	-------					-------								http://www.helpmaster.info/hlp-developmentaids-helpdeco.htm		
 i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
-innounp, the Inno Setup Unpacker			innounp.exe					0.40				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
+innounp, the Inno Setup Unpacker			innounp.exe					0.43				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
 IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
 jsMSIx										jsMSIx.exe					1.11.0704				Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
 KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								
