@@ -58,6 +58,7 @@
   Added support for .fsb files using FSB files extractor
   Added support for newer .kgb files using version 2 of KGB archiver
   Added support for .dmg files using Catacombae DMGExtractor
+  Added support for .sfArk files using sfarkxtc
   Added support for .flv files using FLV Extract
   Added support for .swf files using swfextract (slow)
   Added support for .uif image files using uif2iso

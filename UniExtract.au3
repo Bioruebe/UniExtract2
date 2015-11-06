@@ -170,6 +170,7 @@ Const $peid = "peid.exe" 									;0.95   2012/04/24
 Const $quickbms = "quickbms.exe" 							;0.6.4
 Const $rai = "RAIU.EXE" 									;0.1a
 Const $rar = "unrar.exe" 									;5.21
+Const $sfark = "sfarkxtc.exe"								;3.0 	;modified
 Const $sit = "Expander.exe" 								;6.0
 Const $stix = "stix_d.exe" 									;2001/06/13
 Const $swf = "swfextract.exe" 								;0.9.1
@@ -1205,6 +1206,9 @@ Func filescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "Setup Factory 6.x Installer", 0)
 			extract("ie", 'Setup Factory ' & t('TERM_ARCHIVE'))
 
+		Case StringInStr($filetype_curr, "sfArk compressed SoundFont")
+			extract("sfark", 'sfArk ' & t('TERM_COMPRESSED'))
+
 		Case StringInStr($filetype_curr, "StuffIT SIT compressed archive", 0)
 			extract("sit", 'StuffIt ' & t('TERM_ARCHIVE'))
 
@@ -1351,6 +1355,8 @@ Func advfilescan($f)
 			extract("swf", 'Shockwave Flash ' & t('TERM_CONTAINER'))
 		Case StringInStr($filetype_curr, "PowerISO Direct-Access-Archive", 0)
 			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
+		Case StringInStr($filetype_curr, "sfArk compressed Soundfont")
+			extract("sfark", 'sfArk ' & t('TERM_COMPRESSED'))
 		Case StringInStr($filetype_curr, "MoPaQ", 0)
 			HasPlugin($mpq)
 			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
@@ -2602,6 +2608,9 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "rpa"
 			_Run($cmd & $rpa & ' -m -v -p "' & $outdir & '" "' & $file & '"', @ScriptDir)
+
+		Case "sfark"
+			_Run($cmd & $sfark & ' "' & $file & '" "' & $outdir & '\' & $filename & '.sf2"', $filedir, @SW_SHOW)
 
 		Case "sit"
 			DirCreate($tempoutdir)
@@ -3938,7 +3947,8 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
 				Or StringInStr($return, "All OK") Or StringInStr($return, "done.") _
-				Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") Then
+				Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") _
+				Or StringInStr($return, "Result:	Successful, errorcode 0") Then
 			Cout("Success evaluation passed")
 			$success = True
 		EndIf
