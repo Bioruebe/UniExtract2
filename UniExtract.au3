@@ -3582,8 +3582,9 @@ Func AddToBatch()
 	$handle = FileOpen($batchQueue, 32 + 8 + 1)
 	FileSetPos($handle, 0, 0)
 	Local $return = FileRead($handle)
-
-	If StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file, 0) Then
+	Local $ret = StringRegExpReplace($cmdline, '(".*?\.part)(\d+\.rar".*)', "$1", 1)
+	If (@extended > 0 And StringInStr($return, $ret)) Or _ ; Only add one file if multiple part rar
+	   (StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file, 0)) Then
 		Cout("Not adding duplicate file " & $cmdline)
 		FileClose($handle)
 		Return
@@ -3592,7 +3593,7 @@ Func AddToBatch()
 	FileClose($handle)
 	Cout("File added to batch queue: " & $cmdline)
 	GetBatchQueue()
-EndFunc   ;==>AddToBatch
+EndFunc
 
 ; Read batch queue from file
 Func GetBatchQueue()
@@ -4702,7 +4703,7 @@ Func GUI_Batch()
 		AddToBatch()
 		GUICtrlSetData($filecont, "")
 		If Not $KeepOutdir Then GUICtrlSetData($dircont, "")
-	Else
+	Else ; Start batch process if items in queue and input fields empty
 		If GetBatchQueue() Then GUI_Batch_OK()
 	EndIf
 EndFunc   ;==>GUI_Batch

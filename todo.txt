@@ -33,13 +33,13 @@ Extracting to C:/ creates file in @ScriptDir
 
 
 // Other:
-investigate archive listing - req 44 // Add file list display for extractors, that support it, create command line parameter, include into context menu
+investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 quickbms logging
 additional file types for arc_conv
 include tridscan gui?
 ntlea?
 Crage logging does not work
-Disable _Run function's pattern search for extractors that do not provide patterns
+Disable _Run function's pattern search for extractors that do not provide percentage indicators
 Unicode files are not moved to outdir if using unpack() function
 
 

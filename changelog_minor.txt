@@ -66,6 +66,8 @@ Beta 1:
   Changed unicode files are now renamed instead of moving them to a temporary directory if possible
   Changed inno setup extraction to rename ',1' files to avoid extracted programs not finding some files
   Changed GUI design on Windows 10 systems to fit standard window style
+  Changed multiple part rar files are now added only once to batch queue, so it is possible to drag and drop 
+		  all rar files onto UniExtract without having to deal with 'file exists' prompts
   Disabled directory size calculation when extracting to drive to prevent significant slow down
   Removed 64 bit iso.wcx plugin as it does not work correctly with QuickBMS
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
