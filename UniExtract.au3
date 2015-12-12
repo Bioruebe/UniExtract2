@@ -47,7 +47,6 @@
 #include <Misc.au3>
 #include <ProgressConstants.au3>
 #include <SQLite.au3>
-#include <SQLite.dll.au3>
 #include <StaticConstants.au3>
 #include <String.au3>
 #include <WinAPI.au3>
@@ -118,7 +117,7 @@ Dim $gaDropFiles[1], $queueArray[1]
 Dim $About, $Type, $win7, $silent, $bIsUnicode = False, $reg64 = ""
 Dim $debug = "", $guimain = False, $success = False, $TBgui, $isofile = 0
 Dim $test, $testarj, $testace, $test7z, $testzip, $testie, $testinno
-Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed = 0
+Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed = 0, $gamefailed
 Dim $oldpath, $oldoutdir, $sUnicodeName
 Dim $createdir, $dirmtime
 Dim $FB_finish = False, $TrayMsg_Status, $BatchBut, $Tray_File
@@ -291,7 +290,7 @@ EndIf
 ; Prevent multiple instances to avoid errors
 ; Only necessary when extract starts
 ; Do not do this in StartExtraction, the function can be called twice
-If _Singleton($name & " " & $version, 1) = 0 Then
+If _Singleton($name & " " & $version, 1) = 0 And Not $extract Then
 	AddToBatch()
 	terminate("silent", '', '')
 EndIf
@@ -310,7 +309,8 @@ Func StartExtraction($checkext = True)
 	FilenameParse($file)
 
 	; Collect file information, for log/feedback only
-	Cout("File size: " & Round(FileGetSize($file) / 1048576, 2) & " MB")
+	Local $return = Round(FileGetSize($file) / 1048576, 2)
+	Cout("File size: " & ($return < 1? Round(FileGetSize($file) / 1024, 2) & " KB": $return & " MB"))
 	Cout("Created " & FileGetTime($file, 1, 1) & ", modified " & FileGetTime($file, 0, 1))
 
 	; Set full output directory
@@ -363,6 +363,7 @@ Func StartExtraction($checkext = True)
 	$zipfailed = False
 	$iefailed = False
 	$isfailed = False
+	$gamefailed = False
 	$testinno = False
 	$testarj = False
 	$testace = False
@@ -416,7 +417,7 @@ Func StartExtraction($checkext = True)
 
 	; Else perform additional extraction methods
 	If Not $isofailed Then CheckIso()
-	CheckGame()
+	If Not $gamefailed Then CheckGame()
 
 	; Use file extension if signature not recognized
 	If $checkext Then
@@ -635,7 +636,7 @@ Func FilenameParse($f)
 		$fileext = ''
 		$initoutdir = $filedir & '\' & $filename & '_' & t('TERM_UNPACKED')
 	EndIf
-	Cout("FilenameParse: " & @CRLF & "Raw input: " & $f & @CRLF & "FileName: " & $filename & @CRLF & "FileExt: " & $fileext & @CRLF & "FileDir: " & $filedir & @CRLF & "InitOutDir: " & $initoutdir)
+;~ 	Cout("FilenameParse: " & @CRLF & "Raw input: " & $f & @CRLF & "FileName: " & $filename & @CRLF & "FileExt: " & $fileext & @CRLF & "FileDir: " & $filedir & @CRLF & "InitOutDir: " & $initoutdir)
 EndFunc   ;==>FilenameParse
 
 ; Parse string for environmental variables and return expanded output
@@ -1057,6 +1058,9 @@ Func filescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "bzip2 compressed archive", 0)
 			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
 
+		Case StringInStr($filetype_curr, "Broken Age package", 0)
+			CheckGame(False)
+
 		Case StringInStr($filetype_curr, "Microsoft Cabinet Archive", 0) Or StringInStr($filetype_curr, "IncrediMail letter/ecard", 0)
 			extract("cab", 'Microsoft CAB ' & t('TERM_ARCHIVE'))
 
@@ -1319,6 +1323,8 @@ Func advfilescan($f)
 	Select
 		Case StringInStr($filetype_curr, "7 zip archive data") Or StringInStr($filetype_curr, "7-zip archive data")
 			extract("7z", '7-Zip ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "RAR archive data")
+			extract("rar", 'RAR ' & t('TERM_ARCHIVE'))
 		Case StringInStr($filetype_curr, "lzip compressed data")
 			extract("lz", "LZIP " & t('TERM_COMPRESSED') & " " & t('TERM_ARCHIVE'))
 		Case StringInStr($filetype_curr, "Zip archive data") And Not StringInStr($filetype_curr, "7")
@@ -1821,23 +1827,27 @@ Func checkBin()
 EndFunc   ;==>checkBin
 
 ; Determine if file is supported game archive
-Func CheckGame()
+Func CheckGame($bUseGaup = True)
 	If Not $CheckGame Then Return
 
 	Cout("Testing Game archive")
 
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' ' & t('TERM_GAME') & t('TERM_PACKAGE'))
 
-	; Check GAUP first
-	$return = FetchStdout($cmd & $quickbms & ' -l "' & @ScriptDir & '\bin\' & $gaup & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
+	If $bUseGaup Then
+		; Check GAUP first
+		$return = FetchStdout($cmd & $quickbms & ' -l "' & @ScriptDir & '\bin\' & $gaup & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
 
-	If StringInStr($return, "Target directory:", 0) Or StringInStr($return, "0 files found", 0) Or StringInStr($return, "Error", 0) _
-			Or StringInStr($return, "exception occured", 0) Or StringInStr($return, "not supported", 0) Or $return == "" Then
+		If StringInStr($return, "Target directory:", 0) Or StringInStr($return, "0 files found", 0) Or StringInStr($return, "Error", 0) _
+		Or StringInStr($return, "exception occured", 0) Or StringInStr($return, "not supported", 0) Or $return == "" Then
 
-	Else
-		_DeleteTrayMessageBox()
-		extract("qbms", t('TERM_GAME') & t('TERM_PACKAGE'), $gaup, False, True)
+		Else
+			_DeleteTrayMessageBox()
+			extract("qbms", t('TERM_GAME') & t('TERM_PACKAGE'), $gaup, False, True)
+		EndIf
 	EndIf
+
+	$gamefailed = True
 
 	If $silentmode Then
 		Cout("INFO: File may be extractable via BMS script, but user input is needed. Disable silent mode to try this method.")
@@ -2569,11 +2579,12 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "rar"
 			Local $sPassword = 0
-			If StringInStr(FetchStdout($cmd & $rar & ' t "' & $file & '"', $outdir, @SW_HIDE), "Enter password") Then
-				Cout("Loading password list")
+			If StringInStr(FetchStdout($cmd & $rar & ' l "' & $file & '"', $outdir, @SW_HIDE, 0, False), "Enter password") Then
 				$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
-				For $i = 0 To @extended - 1
-					Cout("Trying password " & $i)
+				Local $size = @extended
+				If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
+				For $i = 0 To $size - 1
+;~ 					Cout("Trying password #" & $i)
 					If StringInStr(FetchStdout($cmd & $rar & ' t -p"' & $aPasswords[$i] & '" "' & $file & '"', $outdir, @SW_HIDE, 0, False), "All OK") Then
 						Cout("Password found")
 						$sPassword = $aPasswords[$i]
@@ -3989,8 +4000,8 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 EndFunc
 
 ; Run a program and return stdout/stderr stream
-Func FetchStdout($f, $workingdir, $show_flag, $line = 0, $Output = True)
-	Cout("Executing: " & $f)
+Func FetchStdout($f, $workingdir, $show_flag, $iLine = 0, $bOutput = True)
+	If $bOutput Then Cout("Executing: " & $f)
 	Global $run = 0, $return = ""
 	$run = Run($f, $workingdir, $show_flag, $STDERR_MERGED)
 	$runtitle = _WinGetByPID($run)
@@ -3999,9 +4010,9 @@ Func FetchStdout($f, $workingdir, $show_flag, $line = 0, $Output = True)
 		Sleep(1)
 		$return &= StdoutRead($run)
 	Until @error
-	If $Output Then Cout($return)
+	If $bOutput Then Cout($return)
 	$run = 0
-	If $line <> 0 Then Return _StringGetLine($return, $line)
+	If $iLine <> 0 Then Return _StringGetLine($return, $iLine)
 	Return $return
 EndFunc
 

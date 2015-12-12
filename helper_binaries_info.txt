@@ -78,7 +78,7 @@ Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.2.4		-	-	-	GNU GPL 
 unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com					http://www.kippler.com/win/unalz/
 FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin						http://freearc.org/
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					4.10				x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
+UnRAR										UnRAR.exe					5.21		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										/unrpa directory			1.4 mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				0.5						Freeware				David Eriksson						http://github.com/twogood/unshield/tree/						
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								

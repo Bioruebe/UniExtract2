@@ -50,6 +50,8 @@ Beta 1:
   Fixed help screen closing after 15 seconds when opened from command line
   Fixed some untranslated terms
   Fixed rounding issues in free space check when using batch mode
+  Fixed error when trying to open SQLite database
+  Fixed scan only command being queued if batch mode is active
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now
