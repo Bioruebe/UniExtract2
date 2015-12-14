@@ -20,6 +20,7 @@ Beta 1:
   Added option to always keep GUI in foreground
   Added tooltips to batch queue view
   Added support for password list for .rar archives
+  Added input file not found error message
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found
   Fixed AutoIt error message in first start GUI when no language file was found, now exits with error code 99
@@ -52,6 +53,7 @@ Beta 1:
   Fixed rounding issues in free space check when using batch mode
   Fixed error when trying to open SQLite database
   Fixed scan only command being queued if batch mode is active
+  Fixed log file naming special cases
   Changed percentage indicator detection to include float percentage values
   Changed percentage indicator detection to include pattern x/y
   Changed user input needed message should be more visible now

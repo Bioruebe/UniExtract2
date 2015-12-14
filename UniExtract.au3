@@ -710,7 +710,8 @@ Func ParseCommandLine()
 		If FileExists($cmdline[1]) Then
 			$file = _PathFull($cmdline[1])
 		Else
-			terminate("syntax", "", "notimeout")
+			If _ArraySearch($cmdline, "/silent") > -1 Then $silentmode = True
+			terminate("invalidfile", $cmdline[1], "")
 		EndIf
 		If $cmdline[0] > 1 Then
 			; Silent mode
@@ -2579,7 +2580,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "rar"
 			Local $sPassword = 0
-			If StringInStr(FetchStdout($cmd & $rar & ' l "' & $file & '"', $outdir, @SW_HIDE, 0, False), "Enter password") Then
+			If StringInStr(FetchStdout($cmd & $rar & ' l "' & $file & '"', $outdir, @SW_HIDE, 0, False), "Enter password") Or _
+			StringInStr(FetchStdout($cmd & $rar & ' t "' & $file & '"', $outdir, @SW_HIDE, 0, False), "Enter password") Then
 				$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
 				Local $size = @extended
 				If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
@@ -3193,7 +3195,7 @@ Func terminate($status, $fname, $ID)
 	If Not $silentmode And GetBatchQueue() Then $silentmode = True
 
 	; Create log file if enabled in options
-	If $Log And Not ($status = "silent" Or $status = "syntax" Or $status = "fileinfo" Or $status = "notpacked") Or ($status = "fileinfo" And $silentmode) Then _
+	If $Log And Not ($status = "silent" Or $status = "syntax" Or $status = "fileinfo" Or $status = "notpacked" Or $status = "batch") Or ($status = "fileinfo" And $silentmode) Then _
 		$LogFile = CreateLog($shortStatus)
 
 	SaveStat($shortStatus)
@@ -3240,6 +3242,9 @@ Func terminate($status, $fname, $ID)
 		Case $status == "unknownext"
 			Prompt(16, 'UNKNOWN_EXT', CreateArray($file, $filetype), 0)
 			$exitcode = 4
+		Case $status == "invalidfile"
+			Prompt(16, 'INVALID_FILE', $fname, 0)
+			$exitcode = 5
 		Case $status == "invaliddir"
 			Prompt(16, 'INVALID_DIR', $fname, 0)
 			$exitcode = 5
@@ -3280,7 +3285,7 @@ Func terminate($status, $fname, $ID)
 	; Write error log if in batchmode
 	If $exitcode <> 0 And $silentmode And $extract Then
 		$handle = FileOpen(@ScriptDir & "\log\errorlog.txt", 8 + 1)
-		FileWrite($handle, $filename & "." & $fileext & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
+		FileWrite($handle, ($filename = ""? $fname: $filename & "." & $fileext) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
 		FileClose($handle)
 	EndIf
 
@@ -3836,8 +3841,9 @@ EndFunc   ;==>_GetExtProperty
 ; Dump complete debug content to log file
 Func CreateLog($status)
 	Local $name = @ScriptDir & "\log\" & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
-	If $status <> "success" Then $name &= StringUpper($status) & "_"
-	$name &= ($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext & ".log"
+	If $status <> "success" Then $name &= StringUpper($status)
+	If $file <> "" Then $name &= "_" & ($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext
+	$name &= ".log"
 	$handle = FileOpen($name, 32 + 8 + 2)
 	FileWrite($handle, $debug)
 	FileClose($handle)
