@@ -2580,23 +2580,24 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "rar"
 			Local $sPassword = 0
-			If StringInStr(FetchStdout($cmd & $rar & ' l "' & $file & '"', $outdir, @SW_HIDE, 0, False), "Enter password") Or _
-			StringInStr(FetchStdout($cmd & $rar & ' t "' & $file & '"', $outdir, @SW_HIDE, 0, False), "Enter password") Then
+
+			_Run($cmd & $rar & ' x -p- "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False, True)
+			If @error Then
+				terminate("failed", $file, $arcdisp)
+			ElseIf @extended Then
 				$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
 				Local $size = @extended
 				If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
 				For $i = 0 To $size - 1
-;~ 					Cout("Trying password #" & $i)
 					If StringInStr(FetchStdout($cmd & $rar & ' t -p"' & $aPasswords[$i] & '" "' & $file & '"', $outdir, @SW_HIDE, 0, False), "All OK") Then
 						Cout("Password found")
 						$sPassword = $aPasswords[$i]
 						ExitLoop
 					EndIf
 				Next
+				_Run($cmd & $rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
 			EndIf
 
-			_Run($cmd & $rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
-			If @error Then terminate("failed", $file, $arcdisp)
 
 		Case "rgss3"
 			HasPlugin($rgss3)
@@ -3851,7 +3852,7 @@ Func CreateLog($status)
 EndFunc
 
 ; Executes a program and log output using tee
-Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True)
+Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True, $bReturnOnPasswordPrompt = False)
 	Local $tee = @OSVersion = "WIN_10"? $wtee: $mtee
 	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
 	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
@@ -3872,7 +3873,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		Until ProcessExists($run)
 
 		$runtitle = _WinGetByPID($run)
-		WinSetState($runtitle, "", $show_flag)
+		If $initialShow Then WinSetState($runtitle, "", $show_flag)
 		Cout("Runtitle: " & $runtitle)
 
 		; Wait until logfile exists
@@ -3892,8 +3893,12 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 			If $return <> $state Then
 				$state = $return
 				; Automatically show cmd window when user input needed
-				If StringInStr($return, "password", 0) Or StringInStr($return, "already exist", 0) Or _
-						StringInStr($return, "overwrite", 0) Or StringInStr($return, " replace", 0) Then
+				If $bReturnOnPasswordPrompt And StringInStr($return, "password", 0) Then
+					Cout("Archive is password protected")
+					KillHelper()
+					Return SetExtended(1)
+				ElseIf StringInStr($return, "already exist", 0) Or StringInStr($return, "overwrite", 0) Or StringInStr($return, " replace", 0) Or StringInStr($return, "password", 0) Then
+					Cout("User input needed")
 					WinSetState($runtitle, "", @SW_SHOW)
 					GUICtrlSetFont($TrayMsg_Status, 8.5, 900)
 					GUICtrlSetData($TrayMsg_Status, t('INPUT_NEEDED'))
@@ -3958,7 +3963,9 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
 		; Check for success or failure indicator in log
-		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or _
+		If $bReturnOnPasswordPrompt And StringInStr($return, "wrong password", 0) Then
+			Return SetExtended(1)
+		ElseIf StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or _
 		   StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) And _
 		   StringInStr($return, "No files to extract", 1)) Then
 			SetError(1)
@@ -4033,7 +4040,9 @@ EndFunc
 ; Stop running helper process
 Func KillHelper()
 	If Not $run Then Return
-	$runtitle = _WinGetByPID($run)
+	Cout("Killing helper process " & $run)
+	StdioClose($run)
+;~ 	$runtitle = _WinGetByPID($run)
 
 	If Not @error And Not StringIsSpace($runtitle) Then
 		Cout("Runtitle: " & $runtitle)
