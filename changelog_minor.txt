@@ -19,7 +19,7 @@ Beta 1:
   Added explaining tooltips to some options
   Added option to always keep GUI in foreground
   Added tooltips to batch queue view
-  Added support for password list for .rar archives
+  Added support for password list for .rar, .zip and .7z archives
   Added input file not found error message
   Fixed after update behaviour when other versions of UniExtract are installed
   Fixed last update date not beeing saved when an update was found

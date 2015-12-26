@@ -2021,7 +2021,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 	; Extract archive based on filetype
 	Switch $arctype
 		Case "7z"
-			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
+			Local $sPassword = _FindArchivePassword($cmd & $7z & ' l -p -slt "' & $file & '"', $cmd & $7z & ' t -p"%PASSWORD%" "' & $file & '"', "Encrypted = +", "Wrong password?", 0, "Everything is Ok")
+			_Run($cmd & $7z & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir)
 
 			; Extract inner CPIO for RPMs
 			If StringInStr($filetype, 'RPM Linux Package', 0) Then
@@ -2579,25 +2580,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			If FileExists(@ScriptDir & "\bin\" & $bms) Then FileDelete(@ScriptDir & "\bin\" & $bms)
 
 		Case "rar"
-			Local $sPassword = 0
-
-			_Run($cmd & $rar & ' x -p- "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False, True)
-			If @error Then
-				terminate("failed", $file, $arcdisp)
-			ElseIf @extended Then
-				$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
-				Local $size = @extended
-				If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
-				For $i = 0 To $size - 1
-					If StringInStr(FetchStdout($cmd & $rar & ' t -p"' & $aPasswords[$i] & '" "' & $file & '"', $outdir, @SW_HIDE, 0, False), "All OK") Then
-						Cout("Password found")
-						$sPassword = $aPasswords[$i]
-						ExitLoop
-					EndIf
-				Next
-				_Run($cmd & $rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
-			EndIf
-
+			Local $sPassword = _FindArchivePassword($cmd & $rar & ' lt -p- "' & $file & '"', $cmd & $rar & ' t -p"%PASSWORD%" "' & $file & '"')
+			_Run($cmd & $rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
 
 		Case "rgss3"
 			HasPlugin($rgss3)
@@ -2930,7 +2914,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 
 		Case "zip"
-			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
+			Local $sPassword = _FindArchivePassword($cmd & $7z & ' l -p -slt "' & $file & '"', $cmd & $7z & ' t -p"%PASSWORD%" "' & $file & '"', "Encrypted = +", "Wrong password?", 0, "Everything is Ok")
+			_Run($cmd & $7z & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir)
 			If Not $success Then _Run($cmd & $zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, False)
 
 		Case "zoo"
@@ -3851,8 +3836,31 @@ Func CreateLog($status)
 	Return $name
 EndFunc
 
+; Determine whether the archive is password protected or not and try passwords from list if necessary
+Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encrypted", $sIsProtectedText2 = 0, $iLine = -3, $sTestText = "All OK")
+	; Is archive encrypted?
+	Local $return = FetchStdout($sIsProtectedCmd, $outdir, @SW_HIDE, $iLine)
+	If StringInStr($return, $sIsProtectedText) < 1 And ($sIsProtectedText2 == 0 Or StringInStr($return, $sIsProtectedText2) < 1) Then Return 0
+
+	; Try passwords from list
+	Cout("Archive is password protected")
+	$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
+	If @error Then Return 0
+	Local $size = @extended
+	Local $sPassword = 0
+	If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
+	For $i = 0 To $size - 1
+		If StringInStr(FetchStdout(StringReplace($sTestCmd, "%PASSWORD%", $aPasswords[$i], 1), $outdir, @SW_HIDE, 0, False), $sTestText) Then
+			Cout("Password found")
+			$sPassword = $aPasswords[$i]
+			ExitLoop
+		EndIf
+	Next
+	Return $sPassword
+EndFunc
+
 ; Executes a program and log output using tee
-Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True, $bReturnOnPasswordPrompt = False)
+Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True)
 	Local $tee = @OSVersion = "WIN_10"? $wtee: $mtee
 	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
 	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
@@ -3893,11 +3901,12 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 			If $return <> $state Then
 				$state = $return
 				; Automatically show cmd window when user input needed
-				If $bReturnOnPasswordPrompt And StringInStr($return, "password", 0) Then
-					Cout("Archive is password protected")
-					KillHelper()
-					Return SetExtended(1)
-				ElseIf StringInStr($return, "already exist", 0) Or StringInStr($return, "overwrite", 0) Or StringInStr($return, " replace", 0) Or StringInStr($return, "password", 0) Then
+;~ 				If $bReturnOnPasswordPrompt And StringInStr($return, "password", 0) Then
+;~ 					Cout("Archive is password protected")
+;~ 					KillHelper()
+;~ 					Return SetExtended(1)
+;~ 				Else
+				If StringInStr($return, "already exist", 0) Or StringInStr($return, "overwrite", 0) Or StringInStr($return, " replace", 0) Or StringInStr($return, "password", 0) Then
 					Cout("User input needed")
 					WinSetState($runtitle, "", @SW_SHOW)
 					GUICtrlSetFont($TrayMsg_Status, 8.5, 900)
@@ -3963,9 +3972,10 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
 		; Check for success or failure indicator in log
-		If $bReturnOnPasswordPrompt And StringInStr($return, "wrong password", 0) Then
-			Return SetExtended(1)
-		ElseIf StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or _
+;~ 		If $bReturnOnPasswordPrompt And StringInStr($return, "wrong password", 0) Then
+;~ 			Return SetExtended(1)
+;~ 		Else
+		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or _
 		   StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) And _
 		   StringInStr($return, "No files to extract", 1)) Then
 			SetError(1)
@@ -4048,7 +4058,7 @@ Func KillHelper()
 		Cout("Runtitle: " & $runtitle)
 		; Send SIGINT to console to terminate child processes
 		WinActivate($runtitle)
-		Send("^c")
+		If WinActive($runtitle) Then Send("^c")
 		; Close console
 		WinClose($runtitle)
 	EndIf
