@@ -3524,7 +3524,10 @@ Func _CreateTrayMessageBox($TBText)
 	; Create GUI
 	Global $TBgui = GUICreate($name, $TBwidth, $TBheight, $trayX > -1 ? $trayX : @DesktopWidth - ($TBwidth + $iBetween), $trayY > -1 ? $trayY : $iSpace, _
 			$WS_POPUP, BitOR($WS_EX_TOOLWINDOW, $WS_EX_TOPMOST))
+	GUISetBkColor(0xEEEEEE)
 	_GuiRoundCorners($TBgui, 0, 0, 30, 30)
+
+	; File name label
 	If $filename = "" Then
 		Global $Tray_File = GUICtrlCreateLabel($TBText, $left, $top, $width, 80)
 	ElseIf StringLen(($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext) > $iMaxCharCount Then
@@ -3532,6 +3535,7 @@ Func _CreateTrayMessageBox($TBText)
 	Else
 		Global $Tray_File = GUICtrlCreateLabel(($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
 	EndIf
+
 	Global $TrayMsg_Status = GUICtrlCreateLabel("", $left, 74, $width, 20, $SS_CENTER)
 ;~     DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 250, "long", 0x00080000 )
 	GUISetState(@SW_SHOWNOACTIVATE)
@@ -3844,6 +3848,7 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 
 	; Try passwords from list
 	Cout("Archive is password protected")
+	GUICtrlSetData($TrayMsg_Status, t('SEARCHING_PASSWORD'))
 	$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
 	If @error Then Return 0
 	Local $size = @extended
@@ -3856,6 +3861,7 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 			ExitLoop
 		EndIf
 	Next
+	GUICtrlSetData($TrayMsg_Status, "")
 	Return $sPassword
 EndFunc
 
@@ -3951,7 +3957,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 					EndIf
 				EndIf
 			EndIf
-			; Size of extracted file(s)
+			; Size of extracted file(s) as fallback
 			If $size > -1 Then
 				$size = Round((_DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 ;~ 				Cout("Size: " & $size & @TAB & $lastSize)
@@ -5392,12 +5398,12 @@ Func GUI_FirstStart()
 	GUICtrlSetFont(-1, 14, 800, 0, "MS Sans Serif")
 	Global $FS_Section = GUICtrlCreateLabel("", 16, 85, 382, 28)
 	GUICtrlSetFont(-1, 14, 800, 4, "MS Sans Serif")
+	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 125)
 	Global $FS_Next = GUICtrlCreateButton(t('NEXT_BUT'), 296, 344, 89, 25)
 	Local $FS_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 400, 344, 89, 25)
 	Global $FS_Prev = GUICtrlCreateButton(t('PREV_BUT'), 192, 344, 89, 25)
 	GUICtrlSetState(-1, $GUI_HIDE)
 	Global $FS_Button = GUICtrlCreateButton("", 187, 260, 129, 41)
-	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 125)
 	Global $FS_Progress = GUICtrlCreateLabel("", 80, 350, 21, 17)
 
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_FirstStart_Exit")

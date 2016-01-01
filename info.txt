@@ -10,30 +10,19 @@ Changelog
 --------------------------------
 Main features added in version 2.0.0:
 	Batch mode
-	Scan only mode, using up to 4 different file identyfiers
-	Silent mode
-	Auto Updater
-	New optional status box
-	Better & faster file type detection
-	Improved usability
-	Ressource usage/speed improvements
-	Cascading context menu (only Windows 7 or newer)
-	Improved log file, completely optional
-	Console windows can be hidden
-	First start assistant
-	64 bit support
-	Plugin system
-	New extractors
-	
-New filetypes supported in version 2.0.0:
-	.fsb
-	.dmg
-	.flv, .swf
-	.uif, .daa, .gbi (with converting)
-	.bin/.cue, .img, .nrg, .c2d, .cdi (without converting)
-	several video formats
-	several game files
-	ThinApp/Thinstall portable software (plugin needed)
-	.rgssad, .rgss2a (plugin needed)
+	Silent mode, not showing any prompts
+	Scan only mode to determine file types without extracting
+	Integrated updater
+	100+ new supported file types
+	Audio and video extraction for multimedia files
+	Cascading context menu
+	Support for password list for common archives
+	Improved optional status box with progress indicator
+	New detection methods + more detailed output and error messages
+	Support for some extractors not shipping with UniExtract as plugins
+	Resource usage/speed improvements, lots of fixes
+	First start assistant instead of installer
+	Full functionality available in no-install version
+	Auto-using 64 bit versions of extractors if supported by OS
 	
 For a complete and more detailed log of changes since the last version, see changelog.txt in the Universal Extractor main directory.

@@ -1,6 +1,6 @@
 //If this file is not displayed correctly, open it with notepad++
 
-2.0.0 Beta 1 (2015):
+2.0.0 Beta 1 (01/01/2016):
   Added filter for specific files to file selection dialog (GUI only)
   Added option not to display extraction status box
   Added option to open destination folder after extraction
@@ -32,6 +32,7 @@
   Added timeout (15 seconds) to syntax error dialog to prevent batch mode stopping on unexpected errors
   Added additional check and automatic extraction of all .bin files in filedir (Nullsoft Installer)
   Added official support for Windows 8, 8.1 and 10 (older versions of Universal Extractor should work, too)
+		--> special fixes for Windows 10 have been added, as well as a better-fittiing design
   Added optional cascading context menu (only Windows 7 or newer)
   Added statistics about successful/failed extractions and most opened file types
   Added plugin system
@@ -69,21 +70,21 @@
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for extracting audio and video tracks from most common types of video files using FFmpeg
 		--> binaries have to be downloaded on first use due to the license and to keep the filesize of Universal Extractor small
-  Added support for InstallShield archives using iscab
-		--> files not included as it is commercial software, but supported if files are found in \bin			
+  Added support for InstallShield archives using iscab (plugin)
+		--> files not included as it is commercial software			
   Added jsMSI Unpacker for better .msi extraction (former unsupported files)
   Added unshield as an alternative extraction method for InstallShield archives (also creates log of registry changes during installation as .txt file)
   Added 7z sfx script extraction using 7ZSplit
-  Added support for password list for .rar archives
+  Added support for password list for .rar, .zip and .7z archives
   Added new command line parameters (/help for complete list)
   Added helper binaries info file (incl. version, author, files, license, URL)
   Added scripts to check/update language files/helper binaries (source, used to simplify development)
   Changed status now shown in tray notification window instead of splash text
   Changed tray menu behaviour (e.g. open only when clicking right mouse button)
-  Changed forced message boxes and GUI to always be on top (easier drag and drop)
+  Changed forced message boxes and GUI to always be on top if enabled in options
   Changed Exeinfo PE as replacement for PEiD; PEiD is now only used if file is executable but cannot be recognized by Exeinfo PE
   Changed unix file tool handles file detection	for common and non extractable filetypes (speed improvements)
-  Changed order of file scans (if .exe exeinfo pe first, else trid)
+  Changed order of file scans (if .exe Exeinfo PE first, else TrID)
 		  --> speed improvement, better detection success rate
   Changed after unpacking UPX/ASPack packed files Universal Extractor can try to extract from the received file (prompt)
   Changed file associations and context menu entries now changeable via Universal Extractor GUI
@@ -96,9 +97,10 @@
   Changed i6comp version to 0.2 due to ZD*.dll license problems (http://www.msfn.org/board/topic/136743-zddll-license/)
   Changed from MHTUnp.wcx to MhtUnPack.wcx
   Changed former optional extractors now always included (very small size)
-  Changed cmd window hidden by default, open & auto focus when user input needed (e.g. overwrite prompt)
+  Changed 7-zip generic .exe resource extraction: additional checks of unpacked files
+  Changed cmd window minimized by default, open & auto focus when user input needed (e.g. overwrite prompt)
 		  or manually when clicking on tray icon (experimental)
-  Changed appenext option now changes the extension of all files scanned by TrID
+  Changed appendext option now changes the extension of all files scanned by TrID
   Changed translation files, removed %s variables and introduced numbered placeholders, that can be switched to 
 		  fit a language's word order; added %name shortcut
   Changed inno setup extraction to rename ',1' files to avoid extracted programs not finding some files
@@ -107,13 +109,12 @@
   Fixed message boxes (more information displayed, silent mode compatibility, correct icons and buttons)
   Fixed error detection, error messages now include more details
   Fixed context menu integration for limited users (HKCU instead of HKCR)
-  Fixed general filetype detection (more identification tools, speed improvements, detect some unsupported files)
+  Fixed general filetype detection (more identification tools, speed improvements, detect more formar unsupported files)
   Fixed image file extraction (better detection, extracting without conversation to .iso first)
   Fixed extraction of Microsoft hotfix files (newer versions of 7z do not recognize these files correctly)
   Fixed general success evaluation (e.g. when overwriting files or aborted by user)
 		--> checks console output of helper binary, not possible for all extraction methods
-  Fixed 7-zip generic .exe resource extraction --> additional checks of unpacked files
-  Fixed MSI Administrative Installer
+  Fixed MSI Administrative Installer extraction
   Fixed Stuffit extraction failure message although extracted correctly; overwriting existing files
   Fixed extraction failure for several .msi, Inno Setup and upx packed files
   Fixed output directory field is now autofilling correctly when using drag and drop (optional)
@@ -122,7 +123,7 @@
   Fixed NSIS extraction overwriting existing files; UniExtract still creates not useful output files for some custom NSIS installers
 		but all content is now kept in output directory
   Removed obsolete msi2xml binaries, unneeded lzma binary (source)
-  Removed unneeded/obsolete license/url files (general file cleanup)
+  Removed unneeded/obsolete license/url files
   Removed bin2iso
   Removed nrg2iso
   Removed cdirip
