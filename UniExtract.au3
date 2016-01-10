@@ -86,6 +86,7 @@ Global $appendext = 0
 Global $warnexecute = 1
 Global $freeSpaceCheck = 1
 Global $NoBox = 0
+Global $bHideStatusBoxIfFullscreen = 1
 Global $OpenOutDir = 0
 Global $DeleteOrigFile = 2 ; 0 No  1 Yes  2 Ask
 Global $Timeout = 60000 ; milliseconds
@@ -153,7 +154,7 @@ Const $fsb = "fsbext.exe" 									;0.3.3
 Const $gcf = "GCFScape.exe" ;x64							;1.8.2
 Const $hlp = "helpdeco.exe" 								;2.1
 Const $img = "EXTRNT.EXE" 									;2.10
-Const $inno = "innounp.exe" 								;0.43
+Const $inno = "innounp.exe" 								;0.45
 Const $is6cab = "i6comp.exe" 								;0.2
 Const $isxunp = "IsXunpack.exe" 							;0.99
 Const $kgb = @ScriptDir & "\bin\kgb\kgb2_console.exe" 		;1.2.1.24
@@ -215,8 +216,6 @@ Const $unreal = "extract.exe"
 Const $crage = @ScriptDir & "\bin\crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
 Const $mpq = "mpq.wcx"
-
-;~ If Not @Compiled Then HotKeySet("{^}", "Test")
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -752,6 +751,7 @@ Func ReadPrefs()
 	LoadPref("appendext", $appendext)
 	LoadPref("warnexecute", $warnexecute)
 	LoadPref("nostatusbox", $NoBox)
+	If Not $NoBox Then LoadPref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 	LoadPref("openfolderafterextr", $OpenOutDir)
 	LoadPref("deletesourcefile", $DeleteOrigFile)
 	LoadPref("freespacecheck", $freeSpaceCheck)
@@ -2934,9 +2934,10 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 	; -----Success evaluation----- ;
 
 	; Exit if success returned by _Run function
+	Cout("Extraction finished, success: " & $success)
 	If $success Then
 		; Special actions for 7zip extraction
-		If $arctype == "7z" And ($fileext == "exe" Or StringInStr($filetype, "SFX")) Then
+		If $arctype == "7z" And ($fileext = "exe" Or StringInStr($filetype, "SFX")) Then
 			; Check if sfx archive and extract sfx script using 7ZSplit if possible
 			Cout("Trying to extract sfx script")
 			Run($7zsplit & ' "' & $file & '"', $outdir, @SW_HIDE)
@@ -2958,23 +2959,22 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 			; Check generic .exe ressource extraction
 			If FileExists($outdir & "\[0]") Then
-				; Try to find correct file extensions for unpacked files
+				; Try to extract unpacked file (skip file extension checks)
 				If Prompt(48 + 1, "UNPACK_GENERIC_ZIP", CreateArray($file, "7Zip", $outdir & "\[0]"), 0) Then
+					Cout("Trying to extract unpacked file [0]")
 					$file = $outdir & "\[0]"
 					$outdir = $file & "\"
 					FilenameParse($file)
-					; Try to extract unpacked File (skip file extension checks)
-					StartExtraction(False)
-				Else
+					Return StartExtraction(False)
+				Else	; Try to find correct file extensions for unpacked files
+					Cout("Trying to find correct file extensions for unpacked file [0]")
 					AppendExtensions($outdir)
-					If $returnSuccess Then Return True
-					terminate("success", "", $arctype)
 				EndIf
 			EndIf
-		Else
-			If $returnSuccess Then Return True
-			terminate("success", "", $arctype)
 		EndIf
+
+		If $returnSuccess Then Return True
+		terminate("success", "", $arctype)
 	EndIf
 
 	; Otherwise, check directory size
@@ -3510,6 +3510,12 @@ Func _CreateTrayMessageBox($TBText)
 	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 28
 	If $NoBox = 1 Then Return
 
+	; Hide if in fullscreen
+	If $bHideStatusBoxIfFullscreen Then
+		$aReturn = WinGetPos("[ACTIVE]")
+		If $aReturn[2] = @DesktopWidth And $aReturn[3] = @DesktopHeight Then Return
+	EndIf
+
 	; Determine taskbar size
 	Local $pos = WinGetPos("[CLASS:Shell_TrayWnd]")
 	If @error Then Local $pos[4] = [0, 0, @DesktopWidth, 30]
@@ -3626,13 +3632,12 @@ EndFunc   ;==>SaveBatchQueue
 
 ; Returns first element of batch queue
 Func BatchQueuePop()
-	Cout("Fetching next queue element")
 ;~ 	_ArrayDisplay($queueArray)
 ;~ 	MsgBox(0, "", "UBound: " & UBound($queueArray))
 	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Then GetBatchQueue()
 
 	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Or $queueArray[0] = 0 Then ; Queue empty
-		Cout("Queue empty")
+		Cout("Batch queue empty")
 		EnableBatchMode(False)
 
 		If FileExists($fileScanLogFile) Then ShellExecute($fileScanLogFile)
@@ -3641,14 +3646,15 @@ Func BatchQueuePop()
 		If $handle = -1 Then Return
 		Local $return = FileRead($handle)
 		FileClose($handle)
-
 		FileDelete(@ScriptDir & "\log\errorlog.txt")
+
 		If $return <> "" Then MsgBox($iTopmost + 48, $name, t('BATCH_FINISH', $return))
+		If $KeepOpen Then Run(@ScriptFullPath)
 	Else ; Get next command and execute it
 		Local $element = $queueArray[1]
 		_ArrayDelete($queueArray, 1)
 		$queueArray[0] -= 1
-		Cout($element)
+		Cout("Next batch element: " & $element)
 		SaveBatchQueue()
 		Run(@ScriptFullPath & " " & $element)
 	EndIf
@@ -3923,7 +3929,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 				EndIf
 				; Percentage indicator
 				If $patternSearch = True And $TBgui Then
-					Cout("PATTERN")
+;~ 					Cout("PATTERN")
 					If StringInStr($return, "%", 0, -1) Then ; x %
 						$aReturn = StringRegExp($return, "(\d{1,3})[\d\.,]*%", 1)
 						If UBound($aReturn) > 0 Then
@@ -4104,7 +4110,7 @@ Func CheckUpdate($silent = False)
 			$return = Download($UEURL)
 			If $return == 0 Then Return
 			$handle = FileOpen(@ScriptDir & "\Update.bat", 2)
-			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im " & @ScriptName & " 2>nul" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -o"' & @ScriptDir & '" "' & $return & '"' & _
+			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im " & @ScriptName & " 2>nul" & @CRLF & '"' & @ScriptDir & "\bin\" & $OSArch & "\" & $7z & '" x -y -xr!UniExtract.ini -o"' & @ScriptDir & '" "' & $return & '"' & _
 					@CRLF & @CRLF & "@ping -n 3 localhost> nul" & @CRLF & 'del "' & $return & '"' & @CRLF & 'start "" ".\' & @ScriptName & '" /afterupdate' & @CRLF & "del Update.bat" & @CRLF & "exit")
 			FileClose($handle)
 			Run(@ScriptDir & "\Update.bat", @ScriptDir)
@@ -4146,7 +4152,7 @@ Func _AfterUpdate()
 
 
 	; Add new options to ini file (for options without corresponding GUI control)
-
+	SavePref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 EndFunc
 
 ; Download FFmpeg and move needed files to Universal Extractor directory

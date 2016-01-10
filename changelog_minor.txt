@@ -1,3 +1,7 @@
+Beta 2:
+  Added game mode: status box is not being displayed if a foreground fullscreen application is running
+  Fixed keepopen option not working after batch mode finished
+
 Beta 1:
   Added support for Ren'Py game engine's .rpa archives using unrpa
   Added support for Unreal Engine packages (.u, .uax, .upk) using Unreal Package Extractor (plugin)
