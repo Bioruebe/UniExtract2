@@ -1,6 +1,11 @@
 Beta 2:
   Added game mode: status box is not being displayed if a foreground fullscreen application is running
+  Added /update command line parameter
   Fixed keepopen option not working after batch mode finished
+  Fixed SQLite dlls not being found
+  Fixed help command line parameter
+  Updated innounp to 0.45
+  Updated extraction script for Visionaire files
 
 Beta 1:
   Added support for Ren'Py game engine's .rpa archives using unrpa

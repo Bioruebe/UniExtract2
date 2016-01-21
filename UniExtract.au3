@@ -690,9 +690,16 @@ Func ParseCommandLine()
 		WEnd
 		terminate("silent", "", "")
 
+	ElseIf $cmdline[1] = "/help" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "/h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
+		terminate("syntax", "", "")
+
 	ElseIf $cmdline[1] = "/afterupdate" Then
 		_AfterUpdate()
 		$prompt = 1
+
+	ElseIf $cmdline[1] = "/update" Then
+		CheckUpdate()
+		terminate("silent", "", "")
 
 	ElseIf $cmdline[1] = "/remove" Then
 		; Completely delete registry entries, used by uninstaller
@@ -787,6 +794,7 @@ Func ReadPrefs()
 	If $iTopmost Then $iTopmost = 262144
 
 	LoadPref("updateinterval", $updateinterval)
+	If $updateinterval < 1 Then $updateinterval = 1
 	LoadPref("lastupdate", $lastupdate, False)
 	LoadPref("ID", $ID, False)
 
@@ -1384,7 +1392,7 @@ Func advfilescan($f)
 			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
 			 (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
 			  StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
-			  StringInStr($filetype_curr, "shortcut", 0)
+			  StringInStr($filetype_curr, "shortcut", 0) Or StringInStr($filetype_curr, "SQLite", 0)
 			terminate("notpacked", $file, "")
 	EndSelect
 EndFunc
@@ -1858,15 +1866,10 @@ Func CheckGame($bUseGaup = True)
 
 	; Check if game specific bms script is available
 	_SQLite_Startup()
-	If @error Then
-		Cout("[ERROR] SQLite startup failed with code " & @error)
-		Return
-	EndIf
+	If @error Then Return Cout("[ERROR] SQLite startup failed with code " & @error)
+
 	_SQLite_Open(@ScriptDir & "\bin\BMS.db", $SQLITE_OPEN_READONLY)
-	If @error Then
-		Cout("[ERROR] Failed to open BMS database")
-		Return
-	EndIf
+	If @error Then Return Cout("[ERROR] Failed to open BMS database")
 
 	Local $gameformat, $iRows, $iColumns, $game
 
@@ -3196,6 +3199,7 @@ Func terminate($status, $fname, $ID)
 			$syntax &= t('HELP_PREFS', "/prefs")
 			$syntax &= t('HELP_REMOVE', "/remove")
 			$syntax &= t('HELP_CLEAR', "/batchclear")
+			$syntax &= t('HELP_UPDATE', "/update")
 			$syntax &= t('HELP_FILENAME')
 			$syntax &= t('HELP_DESTINATION')
 			$syntax &= t('HELP_SCAN', "/scan")
@@ -4150,6 +4154,9 @@ Func _AfterUpdate()
 
 	; Remove unused files
 
+	; Move files
+	FileMove(@ScriptDir & "\bin\x86\sqlite3.dll", @ScriptDir)
+	FileMove(@ScriptDir & "\bin\x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
 
 	; Add new options to ini file (for options without corresponding GUI control)
 	SavePref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
