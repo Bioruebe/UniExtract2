@@ -135,7 +135,7 @@
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced cmdTotal with QuickBMS
   Replaced tee with mtee/wintee (adds support for unicode and longer filenames, smaller)
-  Updated translations for English, German, French (partly)
+  Updated translations for English, German, French (partly), Finnish, Portuguese (Portugal)
   Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
   Updated innounp to 0.43
   Updated KGB archiver to 2 beta 2

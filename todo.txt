@@ -30,6 +30,7 @@ arj percentage indicator //tee problem
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 Zip extraction: 'User input needed' message does not disappear
 Extracting to C:/ creates file in @ScriptDir
+Fix plugins, add auto-import/download (#4)
 
 
 // Other:

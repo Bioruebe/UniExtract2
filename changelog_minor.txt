@@ -7,6 +7,8 @@ Beta 2:
   Fixed help command line parameter
   Updated innounp to 0.45
   Updated extraction script for Visionaire files
+  Updated finnish translation, thanks to Jyrki Vesterinen
+  Updated portuguese (Portugal) translation, thanks to Luis Neves
 
 Beta 1:
   Added support for Ren'Py game engine's .rpa archives using unrpa
