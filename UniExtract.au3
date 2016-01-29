@@ -2026,6 +2026,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "7z"
 			Local $sPassword = _FindArchivePassword($cmd & $7z & ' l -p -slt "' & $file & '"', $cmd & $7z & ' t -p"%PASSWORD%" "' & $file & '"', "Encrypted = +", "Wrong password?", 0, "Everything is Ok")
 			_Run($cmd & $7z & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir)
+			If @extended Then terminate('password', $file, $arcdisp)
 
 			; Extract inner CPIO for RPMs
 			If StringInStr($filetype, 'RPM Linux Package', 0) Then
@@ -2585,6 +2586,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "rar"
 			Local $sPassword = _FindArchivePassword($cmd & $rar & ' lt -p- "' & $file & '"', $cmd & $rar & ' t -p"%PASSWORD%" "' & $file & '"')
 			_Run($cmd & $rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
+			If @extended Then terminate('password', $file, $arcdisp)
 
 		Case "rgss3"
 			HasPlugin($rgss3)
@@ -2919,6 +2921,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "zip"
 			Local $sPassword = _FindArchivePassword($cmd & $7z & ' l -p -slt "' & $file & '"', $cmd & $7z & ' t -p"%PASSWORD%" "' & $file & '"', "Encrypted = +", "Wrong password?", 0, "Everything is Ok")
 			_Run($cmd & $7z & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir)
+			If @extended Then terminate('password', $file, $arcdisp)
 			If Not $success Then _Run($cmd & $zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, False)
 
 		Case "zoo"
@@ -3250,6 +3253,9 @@ Func terminate($status, $fname, $ID)
 		Case $status == "timeout"
 			Prompt(48, 'EXTRACT_TIMEOUT', $file)
 			$exitcode = 9
+		Case $status == "password"
+			$exitcode = 10
+			Prompt(48, 'WRONG_PASSWORD', CreateArray($file, StringReplace(t('MENU_EDIT_LABEL'), "&", "")))
 
 			; Display failed attempt information and exit
 		Case $status == "failed"
@@ -3283,7 +3289,7 @@ Func terminate($status, $fname, $ID)
 	If $createdir And $status <> "success" And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
 	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Then
-		If $FB_ask And $extract And Not $silentmode And Prompt(4, 'FEEDBACK_PROMPT', $file, 0) Then
+		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file, 0) Then
 			; Attach input file's first bytes for debug purpose
 			Cout("--------------------------------------------------File dump--------------------------------------------------" & _
 				 @CRLF & _HexDump($file, 1024))
@@ -3888,7 +3894,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		HasPlugin($tee)
 		If Not FileExists(@ScriptDir & "\log\") Then DirCreate(@ScriptDir & "\log\")
 		$run = Run($f & $teeCmd, $workingdir, $initialShow? @SW_MINIMIZE: $show_flag)
-		If @error Then Return
+		If @error Then Return SetError(1)
 		Local $TimerStart = TimerInit()
 		Cout("Pid: " & $run)
 		Do
@@ -3988,12 +3994,11 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
 		; Check for success or failure indicator in log
-;~ 		If $bReturnOnPasswordPrompt And StringInStr($return, "wrong password", 0) Then
-;~ 			Return SetExtended(1)
-;~ 		Else
-		If StringInStr($return, "err code(", 1) OR StringInStr($return, "stacktrace", 1) Or _
-		   StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) And _
-		   StringInStr($return, "No files to extract", 1)) Then
+		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) Then
+			SetError(1, 1)
+		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
+				Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
+				And StringInStr($return, "No files to extract", 1)) Then
 			SetError(1)
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
@@ -4008,7 +4013,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 	Else
 		Cout("Extraction cannot be logged")
 		$run = Run($f, $workingdir, $show_flag)
-		If @error Then Return
+		If @error Then Return SetError(1)
 
 		Do
 			Sleep(10)
