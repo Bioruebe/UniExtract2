@@ -6,6 +6,7 @@ Beta 2:
   Fixed keepopen option not working after batch mode finished
   Fixed SQLite dlls not being found
   Fixed help command line parameter
+  Fixed storeguiposition and checkgame options not being saved
   Updated innounp to 0.45
   Updated extraction script for Visionaire files
   Updated finnish translation, thanks to Jyrki Vesterinen

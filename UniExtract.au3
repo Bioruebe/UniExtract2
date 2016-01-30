@@ -772,7 +772,7 @@ Func ReadPrefs()
 	LoadPref("keepopen", $KeepOpen)
 	LoadPref("feedbackprompt", $FB_ask)
 	LoadPref("log", $Log)
-	LoadPref("CheckGame", $CheckGame)
+	LoadPref("checkgame", $CheckGame)
 	LoadPref("extract", $extract)
 	LoadPref("unicodecheck", $checkUnicode)
 	LoadPref("extractvideotrack", $bExtractVideo)
@@ -839,7 +839,7 @@ Func WritePrefs()
 	SavePref('feedbackprompt', $FB_ask)
 	SavePref('consoleoutput', $Opt_ConsoleOutput)
 	SavePref('log', $Log)
-	SavePref('CheckGame', $CheckGame)
+	SavePref('checkgame', $CheckGame)
 	SavePref("extractvideotrack", $bExtractVideo)
 	SavePref('storeguiposition', $StoreGUIPosition)
 	SavePref('timeout', $Timeout / 1000)
@@ -2132,6 +2132,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			FileClose($ret)
 			_Run($ci & ' ' & $return, $outdir, @SW_SHOW, False, False)
 			FileDelete($return)
+			terminate("silent", "", "")
 
 		Case "crage"
 			HasPlugin($crage)
@@ -4723,6 +4724,8 @@ Func GUI_Prefs_OK()
 	$FB_ask = Number(GUICtrlRead($FeedbackPromptOpt) == $GUI_CHECKED)
 	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
 	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
+	$StoreGUIPosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
+	$CheckGame = Number(GUICtrlRead($CheckGameOpt) == $GUI_CHECKED)
 
 	$return = GUICtrlRead($TopmostOpt) == $GUI_CHECKED? 262144: 0
 	If $iTopmost <> $return Then $redrawgui = True
@@ -5530,7 +5533,7 @@ Func GUI_Plugins()
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z'], _
 		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'], _
 		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip'], _
-		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI'), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html'] _
+		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html'] _
 	]
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1
