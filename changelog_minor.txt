@@ -2,6 +2,7 @@ Beta 2:
   Added game mode: status box is not being displayed if a foreground fullscreen application is running
   Added /update command line parameter
   Added wrong password error message (exit code 10) for rar, 7z extractors
+  Added support for CreateInstall installers (plugin)
   Fixed keepopen option not working after batch mode finished
   Fixed SQLite dlls not being found
   Fixed help command line parameter

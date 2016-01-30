@@ -206,6 +206,7 @@ Const $wtee = "wtee.exe"
 Const $mediainfo = "MediaInfo" & $reg64 & ".dll"			; 0.7.72
 
 ; Not included binaries
+Const $ci = "ci-extractor.exe"
 Const $ffmpeg = "ffmpeg.exe"	;x64
 Const $iscab = "iscab.exe"
 Const $thinstall = "Extractor.exe"
@@ -1608,6 +1609,9 @@ Func advexescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "ARJ SFX", 0)
 			extract("arj", t('TERM_SFX') & ' ARJ ' & t('TERM_ARCHIVE'))
 
+		Case StringInStr($filetype_curr, "CreateInstall", 0)
+			extract("ci", 'CreateInstall ' & t('TERM_INSTALLER'))
+
 		Case StringInStr($filetype_curr, "Gentee Installer", 0)
 			extract("ie", 'Gentee ' & t('TERM_INSTALLER'))
 
@@ -1696,8 +1700,7 @@ Func advexescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "Autoit", 0)
 			terminate("notpacked", $file, "")
 
-		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0) Or _
-			 StringInStr($filetype_curr, "CreateInstall", 0)
+		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0) Or
 			terminate("notsupported", $file, "")
 
 			; Terminate if file cannot be unpacked
@@ -2120,6 +2123,15 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				Until @error
 			EndIf
 			FileClose($dirs)
+
+		Case "ci"
+			HasPlugin($ci)
+			$return = @TempDir & "\ci.txt"
+			$ret = FileOpen($return, 8+2)
+			FileWrite($ret, "1" & @LF & $file & @LF & $outdir & @LF & "3" & @LF & "1")
+			FileClose($ret)
+			_Run($ci & ' ' & $return, $outdir, @SW_SHOW, False, False)
+			FileDelete($return)
 
 		Case "crage"
 			HasPlugin($crage)
@@ -3288,7 +3300,7 @@ Func terminate($status, $fname, $ID)
 	; Delete empty output directory if failed
 	If $createdir And $status <> "success" And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
-	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Then
+	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Then
 		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file, 0) Then
 			; Attach input file's first bytes for debug purpose
 			Cout("--------------------------------------------------File dump--------------------------------------------------" & _
@@ -5508,7 +5520,7 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url
-	Local $aPluginInfo[9][5] = [ _
+	Local $aPluginInfo[10][5] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False], _
@@ -5517,7 +5529,8 @@ Func GUI_Plugins()
 		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625'], _
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z'], _
 		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'], _
-		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip'] _
+		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip'], _
+		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI'), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html'] _
 	]
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1
