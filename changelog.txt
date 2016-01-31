@@ -67,6 +67,7 @@
   Added support for .aac audio files (decompress to wav) using faad (plugin)
   Added support for .flac audio files using flac
   Added support for CreateInstall installers (plugin)
+  Added support for DGCA compressed files (plugin)
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for extracting audio and video tracks from most common types of video files using FFmpeg

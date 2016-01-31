@@ -217,6 +217,7 @@ Const $unreal = "extract.exe"
 Const $crage = @ScriptDir & "\bin\crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
 Const $mpq = "mpq.wcx"
+Const $dgca = "dgcac.exe"
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -621,7 +622,6 @@ Func IsExe()
 
 	; Exit with unknown file type
 	terminate("unknownexe", $file, $filetype)
-
 EndFunc   ;==>IsExe
 
 ; Parse filename
@@ -1095,6 +1095,9 @@ Func filescan($f, $analyze = 1)
 
 		Case StringInStr($filetype_curr, "Wintermute Engine data", 0)
 			extract("dcp", 'Wintermute Engine ' & t('TERM_GAME') & t('TERM_PACKAGE'))
+
+		Case StringInStr($filetype_curr, "DGCA Digital G Codec Archiver", 0)
+			extract("dgca", 'DGCA ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Disk Image (Macintosh)", 0)
 			extract("dmg", 'DMG ' & t('TERM_IMAGE'))
@@ -2164,6 +2167,12 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 			FileClose($handle)
 
+		Case "dgca"
+			HasPlugin($dgca)
+			Local $sPassword = _FindArchivePassword($cmd & $dgca & ' e "' & $file & '"', $cmd & $dgca & ' l -p%PASSWORD% "' & $file & '"', "Archive encrypted.", 0, -2, "-------------------------")
+			_Run($cmd & $dgca & ' e ' & ($sPassword == 0? '"': '-p' & $sPassword & ' "') & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE, True, False, False)
+			If @extended Then terminate('password', $file, $arcdisp)
+
 		Case "dmg"
 			_DeleteTrayMessageBox()
 
@@ -3064,7 +3073,7 @@ Func HasPlugin($plugin, $returnFail = False)
 	Cout("Searching for plugin " & $plugin)
 	If Not StringInStr($plugin, "\bin\") Then $plugin = @ScriptDir & "\bin\" & $plugin
 	If Not FileExists(_PathFull($plugin, @ScriptDir)) Then
-		Cout("Error: plugin not found")
+		Cout("Plugin not found")
 		If $returnFail Then Return False
 		terminate('missingexe', $file, $plugin)
 	EndIf
@@ -4007,7 +4016,8 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		FileDelete(@ScriptDir & "\log\teelog.txt")
 
 		; Check for success or failure indicator in log
-		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) Then
+		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) _
+				Or StringInStr($return, "Archive encrypted.", 0) Then
 			SetError(1, 1)
 		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
 				Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
@@ -4017,7 +4027,8 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 				Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
 				Or StringInStr($return, "All OK") Or StringInStr($return, "done.") _
 				Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") _
-				Or StringInStr($return, "Result:	Successful, errorcode 0") Then
+				Or StringInStr($return, "Result:	Successful, errorcode 0") _
+				Or StringInStr($return, "Extract files [ ") Then
 			Cout("Success evaluation passed")
 			$success = True
 		EndIf
@@ -5522,18 +5533,19 @@ EndFunc   ;==>GUI_FirstStart_Exit
 ; CreatePlugin GUI
 Func GUI_Plugins()
 	; Define plugins
-	; executable|name|description|filetypes|url
-	Local $aPluginInfo[10][5] = [ _
-		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470'], _
-		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar'], _
-		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False], _
-		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'http://cs10.userfiles.me/f/0/1411802749/48096296/0/a18c40637226ca066f472fc6d69fd877/RPGDecrypter-spaces.ru.exe'], _
-		[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/downloads'], _
-		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625'], _
-		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z'], _
-		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip'], _
-		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip'], _
-		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html'] _
+	; executable|name|description|filetypes|url|filemask|extractionfilter|password
+	Local $aPluginInfo[11][8] = [ _
+		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470', 'arc_conv_r*.7z', '', 'I Agree'], _
+		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar', 'Extractor.rar', '', 'h4sh3m'], _
+		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False, '', '', ''], _
+		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'http://cs10.userfiles.me/f/0/1411802749/48096296/0/a18c40637226ca066f472fc6d69fd877/RPGDecrypter-spaces.ru.exe', '', '', ''], _
+		[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/downloads', '', '', ''], _
+		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625', '', '', ''], _
+		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z', 'Crass*.7z', '', ''], _
+		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip', 'faad*.zip', '', ''], _
+		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip', 'wcx_mpq.zip', '', ''], _
+		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html', '', '', ''], _
+		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca, exe (DGCA)', 'http://www.emit.jp/dgca/dgca_v110.zip', 'dgca_v*.zip', '', ''] _
 	]
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1
@@ -5543,7 +5555,7 @@ Func GUI_Plugins()
 	_GuiSetColor()
 	$GUI_Plugins_List = GUICtrlCreateList("", 8, 8, 209, 149)
 	GUICtrlSetData(-1, _ArrayToString($aPluginInfo, "|", -1, -1, "|", 1, 1))
-	$GUI_Plugins_Close = GUICtrlCreateButton(t('FINISH_BUT'), 320, 132, 83, 25)
+	$GUI_Plugins_SelectClose = GUICtrlCreateButton(t('FINISH_BUT'), 320, 132, 83, 25)
 	$GUI_Plugins_Download = GUICtrlCreateButton(t('TERM_DOWNLOAD'), 224, 132, 83, 25)
 	GUICtrlSetState(-1, $GUI_DISABLE)
 	$GUI_Plugins_Description = GUICtrlCreateEdit("", 224, 8, 177, 85, BitOR($ES_AUTOVSCROLL, $ES_WANTRETURN, $ES_READONLY, $ES_NOHIDESEL,$ES_MULTILINE))
@@ -5555,29 +5567,45 @@ Func GUI_Plugins()
 	While 1
 		$nMsg = GUIGetMsg()
 		Switch $nMsg
-			Case $GUI_EVENT_CLOSE, $GUI_Plugins_Close
+			Case $GUI_EVENT_CLOSE
 				ExitLoop
 			Case $GUI_Plugins_List
 				GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes)
-				Local $pos = _GUICtrlListBox_GetCurSel($GUI_Plugins_List)
-				If $pos > -1 Then
-					Local $return = _GUICtrlListBox_GetText($GUI_Plugins_List, $pos)
-					$pos = _ArraySearch($aPluginInfo, $return)
+				Local $current = _GUICtrlListBox_GetCurSel($GUI_Plugins_List)
+				If $current > -1 Then
+					Local $return = _GUICtrlListBox_GetText($GUI_Plugins_List, $current)
+					$current = _ArraySearch($aPluginInfo, $return)
 					If @error Then ContinueLoop
-					$current = $pos
-					If Not StringInStr($aPluginInfo[$pos][0], "\bin\") Then $aPluginInfo[$pos][0] = @ScriptDir & "\bin\" & $aPluginInfo[$pos][0]
-					If FileExists($aPluginInfo[$pos][0]) Then ; Installed
+					If Not StringInStr($aPluginInfo[$current][0], "\bin\") Then $aPluginInfo[$current][0] = @ScriptDir & "\bin\" & $aPluginInfo[$current][0]
+
+					GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
+					GUICtrlSetData($GUI_Plugins_Description, $aPluginInfo[$current][2])
+					GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes & " " & $aPluginInfo[$current][3])
+
+					If FileExists($aPluginInfo[$current][0]) Then ; Installed
 						GUICtrlSetData($GUI_Plugins_Download, t('TERM_INSTALLED'))
-						GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
-					ElseIf $aPluginInfo[$pos][4] = False Then ; No download url available
+						GUICtrlSetData($GUI_Plugins_SelectClose, t('FINISH_BUT'))
+					Else ; Not installed
 						GUICtrlSetData($GUI_Plugins_Download, t('TERM_DOWNLOAD'))
-						GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
-					Else
-						GUICtrlSetData($GUI_Plugins_Download, t('TERM_DOWNLOAD'))
-						GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
+						GUICtrlSetData($GUI_Plugins_SelectClose, t('SELECT_FILE'))
+						If $aPluginInfo[$current][4] Then GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
 					EndIf
-					GUICtrlSetData($GUI_Plugins_Description, $aPluginInfo[$pos][2])
-					GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes & " " & $aPluginInfo[$pos][3])
+				EndIf
+			Case $GUI_Plugins_SelectClose
+				If FileExists($aPluginInfo[$current][0]) Then
+					ExitLoop
+				Else
+					Cout("Adding plugin " & $aPluginInfo[$current][1])
+					$return = FileOpenDialog(t('OPEN_FILE'), @UserProfileDir, $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][5] & ")", 1, "", $GUI_Plugins)
+					If @error Then ContinueLoop
+					Cout("Plugin file selected: " & $return)
+
+					; Determine filetype
+
+					; Move files
+
+					; Unpack archive
+
 				EndIf
 			Case $GUI_Plugins_Download
 				If $current = -1 Then ContinueLoop
@@ -5588,7 +5616,7 @@ Func GUI_Plugins()
 
 	GUIDelete($GUI_Plugins)
 	Opt("GUIOnEventMode", 1)
-EndFunc   ;==>GUI_Plugins
+EndFunc
 
 ; Option to delete all log files
 Func GUI_DeleteLogs()

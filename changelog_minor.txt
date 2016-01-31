@@ -3,6 +3,7 @@ Beta 2:
   Added /update command line parameter
   Added wrong password error message (exit code 10) for rar, 7z extractors
   Added support for CreateInstall installers (plugin)
+  Added support for DGCA compressed files (plugin)
   Fixed keepopen option not working after batch mode finished
   Fixed SQLite dlls not being found
   Fixed help command line parameter

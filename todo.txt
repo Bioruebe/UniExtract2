@@ -17,6 +17,8 @@ lz
 Smart install maker - http://www.nullsecurity.org/tools
 mdf, mds images
 gif, apng
+http://tlwiki.org/index.php?title=Tools
+Advanced Installer
 
 
 // User Interface:
