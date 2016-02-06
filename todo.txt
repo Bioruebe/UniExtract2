@@ -5,9 +5,7 @@ update language files
 check control size for other languages
 
 // Unpacker changes:
-7z support for nifs, fat, vhd, mbr?
-7z support for mslz?
-7z support for APM?
+7z support for nifs, fat, vhd, mbr?, mslz?, APM?
 
 // New unpackers
 lrzip? - http://ck.kolivas.org/apps/lrzip/
@@ -18,7 +16,6 @@ Smart install maker - http://www.nullsecurity.org/tools
 mdf, mds images
 gif, apng
 http://tlwiki.org/index.php?title=Tools
-Advanced Installer
 
 
 // User Interface:
@@ -27,26 +24,30 @@ statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
 
 // Bugs
 jsmsi: .cab not found (working dir?)
-percentage indicator fixed? //inno
+inno: percentage indicator fixed?
 arj percentage indicator //tee problem
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 Zip extraction: 'User input needed' message does not disappear
 Extracting to C:/ creates file in @ScriptDir
-Fix plugins, add auto-import/download (#4)
+Crage logging does not work
+Fix plugins, add auto-import (#4)
 
 
 // Other:
-investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 quickbms logging
-additional file types for arc_conv
-include tridscan gui?
-ntlea?
-Crage logging does not work
+additional file types for arc_conv, ffmpeg
 Disable _Run function's pattern search for extractors that do not provide percentage indicators
 Unicode files are not moved to outdir if using unpack() function
 
 
 // Short term
+
+
+
+// Long Term
+investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
+include tridscan gui?
+ntlea?
 
 
 
@@ -67,9 +68,6 @@ Spoon Installer - http://legroom.net/node/842
 Astrum InstallWizard - http://www.thraexsoftware.com
 LiberalInstaller
 Long Range Zip (lrzip)
-
-
-
 
 
 // Not necessary/declined:

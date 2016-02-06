@@ -1,5 +1,5 @@
 # UniExtract
-Universal Extractor 2 is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). It brings dozens of changes including community-wanted ones such as a batch mode, auto-updater and scan-only-functionality.
+Universal Extractor 2 or Universal Extractor (Bioruebe version) as it is also called to avoid confusion is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forked (modified and maintained by the community) Universal Extractors have arised. This is the most advanced and the only one with a fully transparent development using a public GitHub-powered source code repository.
 
 
 As a short overview, here are some key features, which are new in this release:
@@ -20,3 +20,4 @@ As a short overview, here are some key features, which are new in this release:
 - Auto-using 64 bit versions of extractors if supported by OS
 
 See the changelog for a complete log of all improvements.
+Feel free to submit bug reports or feature requests using the issues tab here or the built-in feedback window in Universal Extractor; look at todo.txt for a list of features which may be included in future releases.

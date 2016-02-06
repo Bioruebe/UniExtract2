@@ -4,14 +4,26 @@ Beta 2:
   Added wrong password error message (exit code 10) for rar, 7z extractors
   Added support for CreateInstall installers (plugin)
   Added support for DGCA compressed files (plugin)
+  Added support for pcm audio tracks in video files and .mxf files
+  Added support for Advanced Installer installers
+  Added support for SQLite databases, creates .sql command file
+  Added fallback extension check for .assets files
+  Added import function to plugin GUI to make adding plugins easier
   Fixed keepopen option not working after batch mode finished
   Fixed SQLite dlls not being found
   Fixed help command line parameter
   Fixed storeguiposition and checkgame options not being saved
+  Fixed extraction failing for Gentee Installer, Installer VISE and Setup Factory
+  Fixed preferences and context menu GUI label width for some translations
+  Changed error message if no tracks to be extracted in video file
+  Changed WarnExecute messages to include full paths instead of untranslated '<outdir>'
   Updated innounp to 0.45
+  Updated unrar to 5.31 Beta 1
+  Updated 7zip to 15.14
   Updated extraction script for Visionaire files
   Updated finnish translation, thanks to Jyrki Vesterinen
   Updated portuguese (Portugal) translation, thanks to Luis Neves
+  Updated russian translation, thanks to the anonymous contributor
 
 Beta 1:
   Added support for Ren'Py game engine's .rpa archives using unrpa

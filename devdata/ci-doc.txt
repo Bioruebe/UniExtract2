@@ -1,0 +1,31 @@
+ci-extractor.exe
+Creates \AppData\Local\Temp\ci-extractor.txt:
+
+0
+C:\Users\Bioruebe\Downloads\ci\cif-setup.exe
+C:\Users\Bioruebe\Downloads\ci\1
+3
+1
+
+
+with parameters:
+1)
+ 0 - list files (html export)
+ 1 - extract
+
+2)
+ setup file path
+ 
+3)
+ output directory
+ 
+4)
+ overwrite files
+ 0 - ask
+ 1 - ask if newer
+ 2 - overwrite
+ 3 - overwrite if newer
+ 4 - skip
+ 
+5)
+ preserve folder stucture?

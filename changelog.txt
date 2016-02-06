@@ -68,6 +68,7 @@
   Added support for .flac audio files using flac
   Added support for CreateInstall installers (plugin)
   Added support for DGCA compressed files (plugin)
+  Added support for Advanced Installer installers
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for extracting audio and video tracks from most common types of video files using FFmpeg
@@ -137,14 +138,15 @@
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced cmdTotal with QuickBMS
   Replaced tee with mtee/wintee (adds support for unicode and longer filenames, smaller)
-  Updated translations for English, German, French (partly), Finnish, Portuguese (Portugal)
+  Updated translations for English, German, French (partly), Finnish, Portuguese (Portugal), Russian
   Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
-  Updated innounp to 0.43
+  Updated 7zip to 15.14
+  Updated innounp to 0.45
   Updated KGB archiver to 2 beta 2
   Updated lzop to 1.03
   Updated PEiD to 0.95; Database files to 2012/04/24
   Updated TrID to 2.10; Definitions to 2014/11/04
-  Updated unrar to 5.21
+  Updated unrar to 5.31 Beta 1
   Updated upx to 3.91
 
 
