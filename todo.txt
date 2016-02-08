@@ -20,24 +20,22 @@ http://tlwiki.org/index.php?title=Tools
 
 // User Interface:
 statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
+inno: percentage indicator fixed?
+arj percentage indicator //tee problem
+Zip extraction: 'User input needed' message does not disappear
 
 
 // Bugs
 jsmsi: .cab not found (working dir?)
-inno: percentage indicator fixed?
-arj percentage indicator //tee problem
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
-Zip extraction: 'User input needed' message does not disappear
 Extracting to C:/ creates file in @ScriptDir
-Crage logging does not work
-Fix plugins, add auto-import (#4)
+Unicode files are not moved to outdir if using unpack() function
 
 
 // Other:
-quickbms logging
+Logging: quickbms, Crage
 additional file types for arc_conv, ffmpeg
 Disable _Run function's pattern search for extractors that do not provide percentage indicators
-Unicode files are not moved to outdir if using unpack() function
 
 
 // Short term

@@ -8,13 +8,14 @@ Beta 2:
   Added support for Advanced Installer installers
   Added support for SQLite databases, creates .sql command file
   Added fallback extension check for .assets files
-  Added import function to plugin GUI to make adding plugins easier
+  Added import function to plugin GUI to simplify plugin setup
   Fixed keepopen option not working after batch mode finished
   Fixed SQLite dlls not being found
   Fixed help command line parameter
   Fixed storeguiposition and checkgame options not being saved
   Fixed extraction failing for Gentee Installer, Installer VISE and Setup Factory
   Fixed preferences and context menu GUI label width for some translations
+  Fixed updating 7zip binaries
   Changed error message if no tracks to be extracted in video file
   Changed WarnExecute messages to include full paths instead of untranslated '<outdir>'
   Updated innounp to 0.45
@@ -23,7 +24,8 @@ Beta 2:
   Updated extraction script for Visionaire files
   Updated finnish translation, thanks to Jyrki Vesterinen
   Updated portuguese (Portugal) translation, thanks to Luis Neves
-  Updated russian translation, thanks to the anonymous contributor
+  Updated russian translation, thanks to an anonymous contributor
+  Updated Portuguese (Brazilian) translation, thanks to Igor Rückert
 
 Beta 1:
   Added support for Ren'Py game engine's .rpa archives using unrpa

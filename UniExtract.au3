@@ -54,7 +54,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 1"
+Const $version = "2.0.0 Beta 2"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -212,13 +212,13 @@ Const $ci = "ci-extractor.exe"
 Const $ffmpeg = "ffmpeg.exe"	;x64
 Const $iscab = "iscab.exe"
 Const $thinstall = "Extractor.exe"
-Const $rgss3 = "RPGDecrypter-spaces.ru.exe"
+Const $rgss3 = "RPGDecrypter.exe"
 Const $arc_conv = "arc_conv.exe"
 Const $dcp = "dcp_unpacker.exe"
 Const $unreal = "extract.exe"
 Const $crage = $bindir & "crass-0.4.14.0\crage.exe"
 Const $faad = "faad.exe"
-Const $mpq = "mpq.wcx"
+Const $mpq = "mpq.wcx" & $reg64
 Const $dgca = "dgcac.exe"
 
 ; Define registry keys
@@ -4185,6 +4185,10 @@ Func _AfterUpdate()
 	; Move files
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
 	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
+	FileMove($bindir & "x86\7z.dll.new", $bindir & "x86\7z.dll", 1)
+	FileMove($bindir & "x86\7z.exe.new", $bindir & "x86\7z.exe", 1)
+	FileMove($bindir & "x64\7z.dll.new", $bindir & "x64\7z.dll", 1)
+	FileMove($bindir & "x64\7z.exe.new", $bindir & "x64\7z.exe", 1)
 
 	; Add new options to ini file (for options without corresponding GUI control)
 	SavePref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
@@ -5528,13 +5532,13 @@ Func GUI_Plugins()
 	Local $aPluginInfo[11][9] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar', 'Extractor.rar', '', '', 'h4sh3m'], _
-		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False, '', '', '', 0], _
-		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'http://cs10.userfiles.me/f/0/1411802749/48096296/0/a18c40637226ca066f472fc6d69fd877/RPGDecrypter-spaces.ru.exe', '', '', '', 0], _
-		[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/downloads', '', '', '', 0], _
-		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625', '', '', '', 0], _
+		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False, 'iscab.exe;ISTools.dll', '', '', 0], _
+		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'https://yadi.sk/d/1BUu6hQmepSWX', 'RPGDecrypter.rar', '', '', 0], _
+		[$unreal, 'Unreal Engine package extractor', t('PLUGIN_UNREAL'), 'u, uax, upk', 'http://www.gildor.org/down/41/umodel/extract.zip', 'extract.zip', '', '', 0], _
+		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625', $dcp, '', '', 0], _
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z', 'Crass*.7z', '', '', 0], _
 		[$faad, 'FAAD2', t('PLUGIN_FAAD'), 'aac', 'http://www.rarewares.org/files/aac/faad2-20100614.zip', 'faad*.zip', '', '', 0], _
-		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip', 'wcx_mpq.zip', '', '', 0], _
+		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip', 'wcx_mpq.zip', 'mpq.wcx|mpq.wcx64', '', 0], _
 		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', 0], _
 		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'http://www.emit.jp/dgca/dgca_v110.zip', 'dgca_v*.zip', 'dgcac.exe', '', 0] _
 	]
@@ -5596,7 +5600,7 @@ Func GUI_Plugins()
 				; Determine filetype
 				$ret = StringRight($return, 3)
 				If $ret = ".7z" Or $ret = "rar" Or $ret = "zip" Then ; Unpack archive
-					Local $command = $cmd & $7z & ' e' & ($aPluginInfo[$current][8] == 0? '': ' -p"' & $aPluginInfo[$current][8] & '"')
+					Local $command = $cmd & $7z & ' x' & ($aPluginInfo[$current][8] == 0? '': ' -p"' & $aPluginInfo[$current][8] & '"')
 					If $aPluginInfo[$current][6] <> "" Then ; Build include command for each file needed
 						$aReturn = StringSplit($aPluginInfo[$current][6], "|", 2)
 						For $sFile In $aReturn
@@ -5621,22 +5625,33 @@ Func GUI_Plugins()
 
 					; Copy files to \bin\
 					If $success Then
-						For $i = 1 To UBound($aReturn) - 1
-							$aReturn[$i] = $aReturn[0] & "\" & $aReturn[$i]
-							Cout("Copying plugin file " & $aReturn[$i] & " to " & $aPluginInfo[$current][7])
-							FileCopy($aReturn[$i], $aPluginInfo[$current][7], 1)
-						Next
+						Local $size = UBound($aReturn)
+						If $size = 1 Then ; Move single file directly
+							Cout("Copying plugin file " & $aReturn[0] & " to " & $aPluginInfo[$current][7])
+							FileCopy($aReturn[0], $aPluginInfo[$current][7], 1)
+						Else ; Multiple files are returned as path|file1|filen
+							For $i = 1 To $size - 1
+								$aReturn[$i] = $aReturn[0] & "\" & $aReturn[$i]
+								Cout("Copying plugin file " & $aReturn[$i] & " to " & $aPluginInfo[$current][7])
+								FileCopy($aReturn[$i], $aPluginInfo[$current][7], 1)
+							Next
+						EndIf
 					EndIf
 				EndIf
 
 				; Refresh GUI
 				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_ENABLE)
-				ControlSend($GUI_Plugins, "", $GUI_Plugins_List, "{DOWN}")
-				ControlSend($GUI_Plugins, "", $GUI_Plugins_List, "{UP}")
+				Local $aReturn = ["{UP}", "{DOWN}"]
+				If $current = _GUICtrlListBox_GetTopIndex($GUI_Plugins_List) Then _ArrayReverse($aReturn)
+				For $i = 0 To 1
+					ControlSend($GUI_Plugins, "", $GUI_Plugins_List, $aReturn[$i])
+				Next
 			Case $GUI_Plugins_Download
 				If $current = -1 Then ContinueLoop
+				GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
 				Cout("Download clicked for plugin " & $aPluginInfo[$current][1])
 				ShellExecute($aPluginInfo[$current][4])
+				GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
 		EndSwitch
 	WEnd
 
