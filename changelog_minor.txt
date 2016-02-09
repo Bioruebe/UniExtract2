@@ -1,3 +1,11 @@
+Beta 3:
+  Fixed crash when clicking finish button in plugin GUI if no item has been selected before
+  Updated Japanese translation, thanks to A. Inaba
+
+Beta 2b:
+  Fixed crash when extracting .exe files
+  Fixed encoding for Swedish language file
+
 Beta 2:
   Added game mode: status box is not being displayed if a foreground fullscreen application is running
   Added /update command line parameter

@@ -54,7 +54,7 @@
 #include "HexDump.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 2"
+Const $version = "2.0.0 Beta 2b"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -1613,7 +1613,7 @@ Func advexescan($f, $analyze = 1)
 		Case StringInStr($filetype_curr, "CreateInstall", 0)
 			extract("ci", 'CreateInstall ' & t('TERM_INSTALLER'))
 
-		Case StringInStr($filetype_curr, "Gentee Installer", 0), StringInStr($filetype_curr, "Installer VISE", 0),
+		Case StringInStr($filetype_curr, "Gentee Installer", 0) Or StringInStr($filetype_curr, "Installer VISE", 0) Or _
 			 StringInStr($filetype_curr, "Setup Factory 6.x", 0)
 			checkIE()
 
@@ -5588,7 +5588,7 @@ Func GUI_Plugins()
 					EndIf
 				EndIf
 			Case $GUI_Plugins_SelectClose
-				If FileExists($aPluginInfo[$current][0]) Then ExitLoop
+				If $current = -1 Or FileExists($aPluginInfo[$current][0]) Then ExitLoop
 
 				Cout("Adding plugin " & $aPluginInfo[$current][1])
 				$return = FileOpenDialog(t('OPEN_FILE'), @WorkingDir, $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][5] & ")", 4+1, "", $GUI_Plugins)
