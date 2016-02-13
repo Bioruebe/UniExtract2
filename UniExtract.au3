@@ -10,6 +10,8 @@
 #AutoIt3Wrapper_Res_Field=Homepage|http://www.legroom.net/software
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
+#AutoIt3Wrapper_Run_Au3Stripper=y
+#Au3Stripper_Parameters=/mo
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 ;
@@ -65,6 +67,8 @@ Const $updateURL = "http://update.bioruebe.com/uniextract/update.php"
 Const $supportURL = "http://support.bioruebe.com/uniextract/upload.php"
 Const $prefs = @ScriptDir & "\UniExtract.ini"
 Const $bindir = @ScriptDir & "\bin\"
+Const $langdir = @ScriptDir & "\lang\"
+Const $logdir = @ScriptDir & "\log\"
 Const $unicodepattern = "(?i)(?m)^[\w\Q @!ß$%&/\()=?,.-:+~'≤≥{[]}*#ﬂ∞^‚Îˆ‰¸ÓÍÙ˚Ô·ÈÌÛ˙‡ËÏÚ˘\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k '
 Const $cmd = @ComSpec & ' /d /c '
@@ -72,12 +76,10 @@ Opt("GUIOnEventMode", 1)
 Opt("TrayOnEventMode", 1)
 Opt("TrayMenuMode", 1 + 2)
 Opt("TrayIconDebug", 1)
-GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO") ; minimum window size for feedback GUI
 
 ; Preferences
-Global $langdir = @ScriptDir & "\lang"
 Global $batchQueue = @ScriptDir & "\batch.queue"
-Global $fileScanLogFile = @ScriptDir & "\log\filescan.txt"
+Global $fileScanLogFile = $logdir & "filescan.txt"
 Global $batchEnabled = 0
 Global $height = @DesktopHeight / 4
 Global $globalprefs = 1
@@ -114,7 +116,7 @@ Global $trayX = -1, $trayY = -1
 
 ; Global variables
 Dim $file, $filename, $filedir, $fileext, $initoutdir, $outdir, $filetype = "", $initdirsize
-Dim $prompt, $packed, $return, $Output, $langlist, $notpacked
+Dim $prompt, $packed, $return, $Output, $notpacked
 Dim $gaDropFiles[1], $queueArray[1]
 Dim $About, $Type, $win7, $silent, $bIsUnicode = False, $reg64 = ""
 Dim $debug = "", $guimain = False, $success = False, $TBgui, $isofile = 0
@@ -205,6 +207,7 @@ Const $sis = "PDunSIS.wcx"
 ; Other
 Const $mtee = "mtee.exe"
 Const $wtee = "wtee.exe"
+Const $tee = @OSVersion = "WIN_10"? $wtee: $mtee
 Const $mediainfo = "MediaInfo" & $reg64 & ".dll"			; 0.7.72
 
 ; Not included binaries
@@ -584,7 +587,7 @@ Func IsExe()
 	EndIf
 
 	; Check executable using Exeinfo PE
-	advexescan($file, $extract)
+	advexescan($file)
 
 	; Check executable using PEiD
 	exescan($file, 'hard', $extract)
@@ -800,34 +803,20 @@ Func ReadPrefs()
 	LoadPref("lastupdate", $lastupdate, False)
 	LoadPref("ID", $ID, False)
 
-	If $language == "" Then $language = _GetOSLanguage()
-
-	If $silentmode Then Cout("Silent mode enabled")
-	If $batchEnabled Then Cout("Batch mode enabled")
-	If Not $extract Then Cout("Scan only mode enabled")
-
-	; Read language files
-	$langlist = ''
-	Dim $langarr[1]
-	$temp = FileFindFirstFile($langdir & '\*.ini')
-	If $temp <> -1 Then
-		Local $langarr = _FileListToArray($langdir, '*.ini', 1)
-		FileClose($temp)
+	If Not HasTranslation($language) Then
+		$language = _WinAPI_GetLocaleInfo(_WinAPI_GetSystemDefaultUILanguage(), $LOCALE_SENGLANGUAGE)
+		If Not HasTranslation($language) Then $language = _GetOSLanguage()
+		If Not HasTranslation($language) Then $language = "English"
+		Cout("language set to " & $language)
+		SavePref('language', $language)
 	EndIf
-	$langarr[0] = 'English.ini'
-	_ArraySort($langarr)
-	For $i = 0 To UBound($langarr) - 1
-		$langlist &= StringTrimRight($langarr[$i], 4) & '|'
-	Next
-	$langlist = StringTrimRight($langlist, 1)
 
 	Cout("Finished loading preferences")
-EndFunc   ;==>ReadPrefs
+EndFunc
 
 ; Write complete preferences
 Func WritePrefs()
 	Cout("Saving preferences")
-
 	SavePref('history', $history)
 	SavePref('language', $language)
 	SavePref('appendext', $appendext)
@@ -981,68 +970,144 @@ Func filescan($f, $analyze = 1)
 	advfilescan($f)
 
 	_CreateTrayMessageBox(t('SCANNING_FILE', "TrID"))
-
-	Cout("Start filescan using TrID")
+	Cout("Starting filescan using TrID")
 	Local $filetype_curr = ""
 
-	; Run TrID and fetch output
-	$return = StringSplit(FetchStdout($cmd & $trid & ' "' & $f & '"' & ($appendext ? " -ce" : "") & ($analyze ? "" : " -v"), $filedir, @SW_HIDE), @CRLF)
-	For $i = 1 To UBound($return) - 1
-		If StringInStr($return[$i], "%") Or (Not $analyze And (StringInStr($return[$i], "Related URL") Or StringInStr($return[$i], "Remarks"))) Then
-			$filetype_curr &= $return[$i] & @CRLF
-		EndIf
-	Next
-	$return = ""
+	If $extract Then
+		Local $return = ""
+		$hDll = DllOpen("TrIDLib.dll")
+		DllCall($hDll, "int", "TrID_LoadDefsPack", "str", $bindir)
+		DllCall($hDll, "int", "TrID_SubmitFileA", "str", $f)
+		DllCall($hDll, "int", "TrID_Analyze")
 
-	; If appendext option enabled, trid fixes the file extension, so the paths may not exist anymore.
-	; We need to find the new name and reparse the file.
-	If $appendext And Not FileExists($f) Then
-		Cout("File was renamed by TrID, trying to determine new filename")
-		Sleep(2000)
-		$return = _FileListToArray($filedir & "\", $filename & ".*", 1, True)
-		If @error Then
-			$error = True
-		ElseIf $return[0] > 1 Then
-			; There may be more files with the same name, but different extensions
-			Local $new = t('TERM_UNKNOWN')
-			Cout("More than one possible new file name found")
-			Local $ret = _StringBetween($filetype_curr, "(", ")")
-			If @error Then
-				$error = True
-			Else
-				$new = $filename & $ret[0]
-				Cout("Estimated filename: " & $new)
-				Local $pos = _ArraySearch($return, $filedir & "\" & $new)
-				If $pos > -1 Then
-					$file = $return[$pos]
-					$f = $return[$pos]
-					Cout("New path: " & $file)
-				Else
-					$error = True
-				EndIf
-			EndIf
-
-			If $error Then
-				Cout("Failed to locate renamed file. Guessed name: " & $new)
-				If Not $silentmode Then MsgBox($iTopmost + 16, $name, t('RENAME_NOTFOUND', CreateArray($new, StringReplace(t('PREFS_APPEND_EXT_LABEL'), "&", ""))))
-				terminate('silent', '', '')
-			EndIf
-		Else
-			$file = $return[1]
-			$f = $return[1]
+		Local $aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 1, "int", 0, "str", $return)
+		If $aReturn[0] = 0 Then
+			Cout("Unknown filetype!")
+			Return _DeleteTrayMessageBox()
 		EndIf
 
-		FilenameParse($file)
+		For $i = 1 To $aReturn[0]
+			$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 2, "int", $i, "str", $return)
+			$filetype_curr &= $aReturn[3] & @CRLF
+			If $analyze Then tridcompare($aReturn[3])
+		Next
+		If Not $analyze Then Cout($filetype_curr)
+
+		If $appendext Then
+			$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 3, "int", 1, "str", $return)
+			$aReturn[3] = StringLower($aReturn[3])
+			Local $ret = $filedir & "\" & $filename & "." & $aReturn[3]
+			Cout($ret)
+			If $ret <> $file Then
+				Cout("Changing file extension from ." & $fileext & " to ." & $aReturn[3])
+				If FileMove($file, $ret) Then FilenameParse($file)
+			EndIf
+		EndIf
+
+	Else ; Run TrID and fetch output to include additional information about the file type
+		$return = StringSplit(FetchStdout($cmd & $trid & ' "' & $f & '"' & ($appendext ? " -ce" : "") & ($analyze ? "" : " -v"), $filedir, @SW_HIDE), @CRLF)
+		For $i = 1 To UBound($return) - 1
+			If StringInStr($return[$i], "%") Or (Not $analyze And (StringInStr($return[$i], "Related URL") Or StringInStr($return[$i], "Remarks"))) Then _
+				$filetype_curr &= $return[$i] & @CRLF
+		Next
+		If $analyze Then tridcompare($filetype_curr)
 	EndIf
 
 	If $filetype_curr <> "" Then $filetype &= $filetype_curr & @CRLF
+	$tridfailed = True
+EndFunc
+
+; Additional file scan using unix file tool
+Func advfilescan($f)
+	Local $filetype_curr = ""
+
+	_CreateTrayMessageBox(t('SCANNING_FILE', "Unix File Tool"))
+
+	Cout("Start filescan using unix file tool")
+	$filetype_curr = StringReplace(StringReplace(FetchStdout($filetool & ' "' & $f & '"', $filedir, @SW_HIDE), $f & "; ", ""), @CRLF, "")
+	If $filetype_curr And $filetype_curr <> "data" Then $filetype &= $filetype_curr & @CRLF & @CRLF
 
 	_DeleteTrayMessageBox()
 
-	; Return filetype without matching if specified
-	If Not $analyze Then Return
+	If Not $extract Then
+		; Text files often lead to wrong detection, so renaming them is not a good idea
+		If $appendext And (StringInStr($filetype_curr, "text", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Then $appendext = False
+		Return
+	EndIf
 
-	; Match known patterns
+	Select
+		Case StringInStr($filetype_curr, "7 zip archive data") Or StringInStr($filetype_curr, "7-zip archive data")
+			extract("7z", '7-Zip ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "RAR archive data")
+			extract("rar", 'RAR ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "lzip compressed data")
+			extract("lz", "LZIP " & t('TERM_COMPRESSED') & " " & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "Zip archive data") And Not StringInStr($filetype_curr, "7")
+			extract("zip", 'ZIP ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "StuffIt Archive")
+			extract("sit", 'StuffIt ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "uuencoded", 0)
+			extract("uu", 'UUencoded ' & t('TERM_ENCODED'))
+		Case StringInStr($filetype_curr, "UHarc archive data", 0)
+			extract("uha", 'UHARC ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "ARC archive data", 0)
+			extract("arc", 'ARC ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "Symbian installation file", 0)
+			extract('qbms', 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
+		Case StringInStr($filetype_curr, "Zoo archive data", 0)
+			extract("zoo", 'ZOO ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "MS Outlook Express DBX file", 0)
+			extract('qbms', 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
+		Case StringInStr($filetype_curr, "bzip2 compressed data", 0)
+			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
+		Case StringInStr($filetype_curr, "ASCII cpio archive", 0)
+			extract("7z", 'CPIO ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "LZX compressed archive", 0)
+			extract("lzx", 'LZX ' & t('TERM_COMPRESSED'))
+		Case StringInStr($filetype_curr, "ARJ archive data", 0)
+			extract("arj", 'ARJ ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "POSIX tar archive", 0)
+			extract("tar", 'Tar ' & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "Microsoft Reader eBook Data", 0)
+			extract("lit", 'Microsoft LIT ' & t('TERM_EBOOK'))
+		Case StringInStr($filetype_curr, "LHa", 0) And StringInStr($filetype_curr, "archive data", 0)
+			extract("7z", 'LZH ' & t('TERM_COMPRESSED'))
+		Case StringInStr($filetype_curr, "Macromedia Flash data", 0)
+			extract("swf", 'Shockwave Flash ' & t('TERM_CONTAINER'))
+		Case StringInStr($filetype_curr, "PowerISO Direct-Access-Archive", 0)
+			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
+		Case StringInStr($filetype_curr, "sfArk compressed Soundfont")
+			extract("sfark", 'sfArk ' & t('TERM_COMPRESSED'))
+		Case StringInStr($filetype_curr, "SQLite", 0)
+			extract("sqlite", 'SQLite ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "MoPaQ", 0)
+			HasPlugin($mpq)
+			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
+		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
+			 StringInStr($filetype_curr, "MPEG sequence")
+			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "AAC,")
+			extract("aac", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "FLAC audio")
+			extract("flac", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
+			CheckIso()
+
+			; Not extractable filetypes
+		Case (StringInStr($filetype_curr, "text", 0) And (StringInStr($filetype_curr, "CRLF", 0) Or _
+			  StringInStr($filetype_curr, "long lines", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Or _
+			  StringInStr($filetype_curr, "batch file")) Or StringInStr($filetype_curr, "source text", 0) Or _
+			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
+			 (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
+			  StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
+			  StringInStr($filetype_curr, "shortcut", 0)
+			terminate("notpacked", $file, "")
+	EndSelect
+EndFunc
+
+; Compare TrID's return to supported file types
+Func tridcompare($filetype_curr)
+	Cout("--> " & $filetype_curr)
 	Select
 		Case StringInStr($filetype_curr, "7-Zip compressed archive", 0)
 			extract("7z", '7-Zip ' & t('TERM_ARCHIVE'))
@@ -1305,96 +1370,6 @@ Func filescan($f, $analyze = 1)
 		; Check for .exe file, only when fileext not .exe
 		Case Not $isexe And (StringInStr($filetype_curr, 'Executable', 0) Or StringInStr($filetype_curr, '(.EXE)', 1))
 			IsExe()
-
-	EndSelect
-	$tridfailed = True
-EndFunc   ;==>filescan
-
-; Additional file scan using unix file tool
-Func advfilescan($f)
-	Local $filetype_curr = ""
-
-	_CreateTrayMessageBox(t('SCANNING_FILE', "Unix File Tool"))
-
-	Cout("Start filescan using unix file tool")
-	$filetype_curr = StringReplace(StringReplace(FetchStdout($filetool & ' "' & $f & '"', $filedir, @SW_HIDE), $f & "; ", ""), @CRLF, "")
-	If $filetype_curr And $filetype_curr <> "data" Then $filetype &= $filetype_curr & @CRLF & @CRLF
-
-	_DeleteTrayMessageBox()
-
-	If Not $extract Then
-		; Text files often lead to wrong detection, so renaming them is not a good idea
-		If $appendext And (StringInStr($filetype_curr, "text", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Then $appendext = False
-		Return
-	EndIf
-
-	Select
-		Case StringInStr($filetype_curr, "7 zip archive data") Or StringInStr($filetype_curr, "7-zip archive data")
-			extract("7z", '7-Zip ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "RAR archive data")
-			extract("rar", 'RAR ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "lzip compressed data")
-			extract("lz", "LZIP " & t('TERM_COMPRESSED') & " " & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "Zip archive data") And Not StringInStr($filetype_curr, "7")
-			extract("zip", 'ZIP ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "StuffIt Archive")
-			extract("sit", 'StuffIt ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "uuencoded", 0)
-			extract("uu", 'UUencoded ' & t('TERM_ENCODED'))
-		Case StringInStr($filetype_curr, "UHarc archive data", 0)
-			extract("uha", 'UHARC ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "ARC archive data", 0)
-			extract("arc", 'ARC ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "Symbian installation file", 0)
-			extract('qbms', 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
-		Case StringInStr($filetype_curr, "Zoo archive data", 0)
-			extract("zoo", 'ZOO ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "MS Outlook Express DBX file", 0)
-			extract('qbms', 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
-		Case StringInStr($filetype_curr, "bzip2 compressed data", 0)
-			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
-		Case StringInStr($filetype_curr, "ASCII cpio archive", 0)
-			extract("7z", 'CPIO ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "LZX compressed archive", 0)
-			extract("lzx", 'LZX ' & t('TERM_COMPRESSED'))
-		Case StringInStr($filetype_curr, "ARJ archive data", 0)
-			extract("arj", 'ARJ ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "POSIX tar archive", 0)
-			extract("tar", 'Tar ' & t('TERM_ARCHIVE'))
-		Case StringInStr($filetype_curr, "Microsoft Reader eBook Data", 0)
-			extract("lit", 'Microsoft LIT ' & t('TERM_EBOOK'))
-		Case StringInStr($filetype_curr, "LHa", 0) And StringInStr($filetype_curr, "archive data", 0)
-			extract("7z", 'LZH ' & t('TERM_COMPRESSED'))
-		Case StringInStr($filetype_curr, "Macromedia Flash data", 0)
-			extract("swf", 'Shockwave Flash ' & t('TERM_CONTAINER'))
-		Case StringInStr($filetype_curr, "PowerISO Direct-Access-Archive", 0)
-			extract("daa", 'DAA/GBI ' & t('TERM_IMAGE'))
-		Case StringInStr($filetype_curr, "sfArk compressed Soundfont")
-			extract("sfark", 'sfArk ' & t('TERM_COMPRESSED'))
-		Case StringInStr($filetype_curr, "SQLite", 0)
-			extract("sqlite", 'SQLite ' & t('TERM_FILE'))
-		Case StringInStr($filetype_curr, "MoPaQ", 0)
-			HasPlugin($mpq)
-			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
-		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
-			 StringInStr($filetype_curr, "MPEG sequence")
-			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
-		Case StringInStr($filetype_curr, "AAC,")
-			extract("aac", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
-		Case StringInStr($filetype_curr, "FLAC audio")
-			extract("flac", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
-		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
-			CheckIso()
-
-			; Not extractable filetypes
-		Case (StringInStr($filetype_curr, "text", 0) And (StringInStr($filetype_curr, "CRLF", 0) Or _
-			  StringInStr($filetype_curr, "long lines", 0) Or StringInStr($filetype_curr, "ASCII", 0)) Or _
-			  StringInStr($filetype_curr, "batch file")) Or StringInStr($filetype_curr, "source text", 0) Or _
-			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
-			 (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
-			  StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "WAVE audio", 0) Or _
-			  StringInStr($filetype_curr, "shortcut", 0)
-			terminate("notpacked", $file, "")
 	EndSelect
 EndFunc
 
@@ -1525,12 +1500,12 @@ Func exescan($f, $scantype, $analyze = 1)
 EndFunc   ;==>exescan
 
 ; Scan file using Exeinfo PE
-Func advexescan($f, $analyze = 1)
+Func advexescan($f)
 	Cout("Start filescan using Exeinfo PE")
-
 	_CreateTrayMessageBox(t('SCANNING_EXE', "Exeinfo PE"))
 
 	Local $filetype_curr = ""
+	Local Const $LogFile = $logdir & "exeinfo.log"
 
 	; Backup existing Exeinfo PE options
 	Local $exerr = RegRead("HKCU\Software\ExEi-pe", "ExeError")
@@ -1555,21 +1530,25 @@ Func advexescan($f, $analyze = 1)
 	RegWrite("HKCU\Software\ExEi-pe", "closeExEi_whenExtRun", "REG_DWORD", 0)
 
 	; Analyze file
-	Run($exeinfope & ' "' & $f & '"', @ScriptDir, @SW_MINIMIZE)
-	WinWait("Exeinfo PE - ver")
-	WinSetState("Exeinfo PE - ver", "", @SW_HIDE)
-	$TimerStart = TimerInit()
-	While ($filetype_curr = "") Or StringInStr($filetype_curr, "File too big") Or StringInStr($filetype_curr, "Antivirus may slow")
-		Sleep(200)
-		$filetype_curr = ControlGetText("Exeinfo PE - ver", "", "TEdit6")
-		$TimerDiff = TimerDiff($TimerStart)
-		If $TimerDiff > $Timeout Then ExitLoop
-	WEnd
+	If $extract Then ; Use log command line for best speed
+		RunWait($exeinfope & ' "' & $f & '*" /sx /log:"' & $LogFile & '"', $bindir, @SW_HIDE)
+		$filetype_curr = _FileRead($LogFile, True)
+	Else ; Run and read GUI fields to get additional information on how to extract for scan only mode
+		Run($exeinfope & ' "' & $f & '"', @ScriptDir, @SW_MINIMIZE)
+		WinWait("Exeinfo PE - ver")
+		WinSetState("Exeinfo PE - ver", "", @SW_HIDE)
+		$TimerStart = TimerInit()
 
-	; Get LamerInfo
-	$filetype_curr &= @CRLF & @CRLF & ControlGetText("Exeinfo PE - ver", "", "TEdit5")
+		While ($filetype_curr = "") Or StringInStr($filetype_curr, "File too big") Or StringInStr($filetype_curr, "Antivirus may slow")
+			Sleep(200)
+			$filetype_curr = ControlGetText("Exeinfo PE - ver", "", "TEdit6")
+			$TimerDiff = TimerDiff($TimerStart)
+			If $TimerDiff > $Timeout Then ExitLoop
+		WEnd
 
-	WinClose("Exeinfo PE - ver")
+		$filetype_curr &= @CRLF & @CRLF & ControlGetText("Exeinfo PE - ver", "", "TEdit5")
+		WinClose("Exeinfo PE - ver")
+	EndIf
 
 	; Restore previous Exeinfo PE options
 	If $exerr Then RegWrite("HKCU\Software\ExEi-pe", "ExeError", "REG_DWORD", $exerr)
@@ -1591,13 +1570,11 @@ Func advexescan($f, $analyze = 1)
 
 	If $filetype_curr <> "" Then $filetype &= $filetype_curr & @CRLF & @CRLF
 
-	Cout($filetype_curr)
-
 	; Otherwise continue exe file procedure
 	$isexe = True
 
 	; Return filetype without matching if specified
-	If Not $analyze Then Return $filetype_curr
+	If Not $extract Then Return $filetype_curr
 
 	; Match known patterns
 	Select
@@ -1680,7 +1657,7 @@ Func advexescan($f, $analyze = 1)
 			extract("wise", 'Wise Installer ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($filetype_curr, "ZIP SFX", 0)
-			$testzip = True
+			extract("zip", t('TERM_SFX') & ' ZIP ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Borland Delphi", 0) And Not StringInStr($filetype_curr, "RAR SFX", 0)
 			$testinno = True
@@ -2002,17 +1979,16 @@ EndFunc   ;==>checkZip
 ; Extract from known archive format
 Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
 	$success = False
-
 	Cout("Starting " & $arctype & " extraction")
-
-	; Display banner and create subdirectory
 	_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
+
+	; Create subdirectory
 	If StringRight($outdir, 1) = '\' Then $outdir = StringTrimRight($outdir, 1)
-	If Not FileExists($outdir) Then
+	If FileExists($outdir) Then
+		$dirmtime = FileGetTime($outdir, 0, 1)
+	Else
 		If Not DirCreate($outdir) Then terminate("invaliddir", $outdir, "")
 		$createdir = True
-	Else
-		$dirmtime = FileGetTime($outdir, 0, 1)
 	EndIf
 
 	HasFreeSpace()
@@ -2404,7 +2380,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 					_CreateTrayMessageBox(t('INIT_WAIT'))
 
 					If $Log Then
-						_Run(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '" /v"/l "' & @ScriptDir & '\log\teelog.txt""'), $filedir, @SW_SHOW, False)
+						_Run(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '" /v"/l "' & $logdir & 'teelog.txt""'), $filedir, @SW_SHOW, False)
 					Else
 						RunWait(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '"'), $filedir)
 					EndIf
@@ -2505,13 +2481,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				; Extract with jsMSI Unpacker
 			ElseIf $choice == "jsMSI Unpacker" Then
 				_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_SHOW, False)
-				If $Log Then
-					Cout("jsMSI log:")
-					$handle = FileOpen($outdir & "\MSI Unpack.log")
-					$debug &= FileRead($handle)
-					FileClose($handle)
-				EndIf
-				FileDelete($outdir & "\MSI Unpack.log")
+				_FileRead($outdir & "\MSI Unpack.log", True)
 
 				; Extract with MSI Total Commander plugin
 			ElseIf $choice == 'MSI TC Packer' Then
@@ -2529,9 +2499,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 				Next
 
 				; Append missing file extensions
-				If $appendext Then
-					AppendExtensions($tempoutdir)
-				EndIf
+				If $appendext Then AppendExtensions($tempoutdir)
 
 				; Move files to output directory and remove tempdir
 				MoveFiles($tempoutdir, $outdir, False, "", True)
@@ -2571,9 +2539,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			Next
 
 			; Append missing file extensions
-			If $appendext Then
-				AppendExtensions($tempoutdir)
-			EndIf
+			If $appendext Then AppendExtensions($tempoutdir)
 
 			; Move files to output directory and remove tempdir
 			MoveFiles($tempoutdir, $outdir, False, "", True)
@@ -2617,10 +2583,8 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			Local $handle2 = WinWait("[CLASS:#32770]", "Extraction completed")
 			WinClose($handle2)
 			WinClose($handle)
-			Local $return = FileRead($outdir & "\extract.log")
+			Local $return = _FileRead($outdir & "\extract.log", True)
 			If @error Then terminate("failed", $file, $arcdisp)
-			FileDelete($outdir & "\extract.log")
-			Cout($return)
 			$success = True
 
 		Case "robo"
@@ -2647,8 +2611,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 		Case "superdat"
 			RunWait(Warn_Execute($file & ' /e "' & $outdir & '"'), $outdir)
-			Cout(FileRead($filedir & '\SuperDAT.log'))
-			FileDelete($filedir & '\SuperDAT.log')
+			_FileRead($filedir & '\SuperDAT.log', True)
 
 		Case "swf"
 			; Run swfextract to get list of contents
@@ -2909,9 +2872,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			EndIf
 
 			; Append missing file extensions
-			If $appendext Then
-				AppendExtensions($outdir)
-			EndIf
+			If $appendext Then AppendExtensions($outdir)
 
 		Case "uha"
 			_Run($cmd & $uharc & ' x -t"' & $outdir & '" "' & $file & '"', $outdir)
@@ -3078,6 +3039,14 @@ Func HasPlugin($plugin, $returnFail = False)
 	Return True
 EndFunc
 
+; Search for translation file for given language and return result
+Func HasTranslation($language)
+	If $language = "English" Then Return True
+	$return = FileExists($langdir & $language & ".ini")
+	If Not $return Then Cout("Language file for " & $language & " does not exist")
+	Return $return
+EndFunc
+
 ; Check if enough free space is available
 Func HasFreeSpace()
 	Local $freeSpace = Round(DriveSpaceFree($outdir), 2)
@@ -3153,32 +3122,22 @@ EndFunc   ;==>MoveFiles
 
 ; Append missing file extensions using TrID
 Func AppendExtensions($dir)
-	Local $files
-	$files = FileSearch($dir)
-	If $files[1] <> '' Then
-		For $i = 1 To $files[0]
-			If Not StringInStr(FileGetAttrib($files[$i]), 'D') Then
-				$filename = StringTrimLeft($files[$i], StringInStr($files[$i], '\', 0, -1))
-				If Not StringInStr($filename, '.') _
-						Or StringLeft($filename, 7) = 'Binary.' _
-						Or StringRight($filename, 4) = '.bin' Then
-					RunWait($cmd & $trid & ' "' & $files[$i] & '" -ae', $dir, @SW_HIDE)
-				EndIf
-			EndIf
-		Next
-	EndIf
-EndFunc   ;==>AppendExtensions
+	Local $files = FileSearch($dir)
+	If $files[1] = '' Then Return
+	For $i = 1 To $files[0]
+		If StringInStr(FileGetAttrib($files[$i]), 'D') Then ContinueLoop
+		$filename = StringTrimLeft($files[$i], StringInStr($files[$i], '\', 0, -1))
+		If StringInStr($filename, '.') And Not (StringLeft($filename, 7) = 'Binary.' Or StringRight($filename, 4) = '.bin') Then ContinueLoop
+		RunWait($cmd & $trid & ' "' & $files[$i] & '" -ae', $dir, @SW_HIDE)
+	Next
+EndFunc
 
 ; Recursively search for given pattern
 ; code by w0uter (http://www.autoitscript.com/forum/index.php?showtopic=16421)
 Func FileSearch($s_Mask = '', $i_Recurse = 1)
 	Local $s_Buf = ''
-	If $i_Recurse Then
-		Local $s_Command = ' /c dir /B /S "'
-	Else
-		Local $s_Command = ' /c dir /B "'
-	EndIf
-	$i_Pid = Run(@ComSpec & $s_Command & $s_Mask & '"', @WorkingDir, @SW_HIDE, 2 + 4)
+	Local $s_Command = Cout(@ComSpec & ' /c dir /B ' & ($i_Recurse? '/S ': '') & '"' & $s_Mask & '"')
+	$i_Pid = Run($s_Command, @WorkingDir, @SW_HIDE, 2 + 4)
 	While Not @error
 		$s_Buf &= StdoutRead($i_Pid)
 	WEnd
@@ -3187,6 +3146,17 @@ Func FileSearch($s_Mask = '', $i_Recurse = 1)
 	If UBound($s_Buf) = 2 And $s_Buf[1] = '' Then SetError(1)
 	Return $s_Buf
 EndFunc   ;==>FileSearch
+
+; Open file and return contents
+Func _FileRead($f, $delete = False)
+	$handle = FileOpen($f)
+	If $handle = -1 Then Return SetError(1, 0, "")
+	$return = FileRead($handle)
+	FileClose($handle)
+	Cout($return)
+	If $delete Then FileDelete($f)
+	Return $return
+EndFunc
 
 ; Handle program termination with appropriate error message
 Func terminate($status, $fname, $ID)
@@ -3300,7 +3270,7 @@ Func terminate($status, $fname, $ID)
 
 	; Write error log if in batchmode
 	If $exitcode <> 0 And $silentmode And $extract Then
-		$handle = FileOpen(@ScriptDir & "\log\errorlog.txt", 8 + 1)
+		$handle = FileOpen($logdir & "errorlog.txt", 8 + 1)
 		FileWrite($handle, ($filename = ""? $fname: $filename & "." & $fileext) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
 		FileClose($handle)
 	EndIf
@@ -3317,9 +3287,6 @@ Func terminate($status, $fname, $ID)
 				 @CRLF & _ArrayToString(_GetExtProperty($file), @CRLF))
 			; Prompt to send feedback
 			GUI_Feedback($status, $file, $debug)
-			Do
-				Sleep(500)
-			Until $FB_finish
 		EndIf
 	EndIf
 
@@ -3670,15 +3637,8 @@ Func BatchQueuePop()
 	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Or $queueArray[0] = 0 Then ; Queue empty
 		Cout("Batch queue empty")
 		EnableBatchMode(False)
-
 		If FileExists($fileScanLogFile) Then ShellExecute($fileScanLogFile)
-
-		$handle = FileOpen(@ScriptDir & "\log\errorlog.txt")
-		If $handle = -1 Then Return
-		Local $return = FileRead($handle)
-		FileClose($handle)
-		FileDelete(@ScriptDir & "\log\errorlog.txt")
-
+		Local $return = _FileRead($logdir & "errorlog.txt", True)
 		If $return <> "" Then MsgBox($iTopmost + 48, $name, t('BATCH_FINISH', $return))
 		If $KeepOpen Then Run(@ScriptFullPath)
 	Else ; Get next command and execute it
@@ -3739,7 +3699,7 @@ Func _GetOSLanguage()
 			"0401 0801 0c01 1001 1401 1801 1c01 2001 2401 2801 2801 3001 3401 3801 3c01 4001", "042b", "0402", "041a", "0405", "0408", _
 			"0412", "0429", "0416", "041b", "0404", "041e", "041f", "0422", "0403", "042a"]
 
-	Local $aLanguage[36] = [35, "English", "Chinese", "Danish", "Dutch", "Estonian", "Finnish", "French", "German", "Hungarian", "Italian", _
+	Local $aLanguage[36] = [35, "English", "Chinese (Simplified)", "Danish", "Dutch", "Estonian", "Finnish", "French", "German", "Hungarian", "Italian", _
 			"Japanese", "Norwegian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Spanish", "Swedish", "Arabic", "Armenian", _
 			"Bulgarian", "Croatian", "Czech", "Greek", "Korean", "Farsi", "Portuguese (Brazilian)", "Slovak", "Taiwanese", "Thai", "Turkish", _
 			"Ukrainian", "Catalan", "Vietnamese"]
@@ -3751,7 +3711,7 @@ Func _GetOSLanguage()
 		EndIf
 	Next
 	Return $aLanguage[1]
-EndFunc   ;==>_GetOSLanguage
+EndFunc
 
 ; Determine whether JRE is installed or not and terminate if not found
 Func IsJavaInstalled()
@@ -3867,7 +3827,7 @@ EndFunc   ;==>_GetExtProperty
 
 ; Dump complete debug content to log file
 Func CreateLog($status)
-	Local $name = @ScriptDir & "\log\" & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
+	Local $name = $logdir & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
 	If $status <> "success" Then $name &= StringUpper($status)
 	If $file <> "" Then $name &= "_" & ($bIsUnicode? $sUnicodeName: $filename) & "." & $fileext
 	$name &= ".log"
@@ -3904,8 +3864,8 @@ EndFunc
 
 ; Executes a program and log output using tee
 Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSearch = True, $initialShow = True)
-	Local $tee = @OSVersion = "WIN_10"? $wtee: $mtee
-	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & @ScriptDir & '\log\teelog.txt"'
+	Local Const $LogFile = $logdir & "teelog.txt"
+	Local $teeCmd = ' 2>&1 | ' & $tee & ' "' & $LogFile & '"'
 	Cout("Executing: " & $f & ($useTee? $teeCmd: "") & " with options: useTee = " & $useTee & ", patternSearch = " & $patternSearch)
 	Global $run = 0, $runtitle = 0
 	Local $return = "", $pos = 0, $size = 1, $lastSize = 0
@@ -3913,7 +3873,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 	; Create log
 	If $useTee Then
 		HasPlugin($tee)
-		If Not FileExists(@ScriptDir & "\log\") Then DirCreate(@ScriptDir & "\log\")
+		If Not FileExists($logdir) Then DirCreate($logdir)
 		$run = Run($f & $teeCmd, $workingdir, $initialShow? @SW_MINIMIZE: $show_flag)
 		If @error Then Return SetError(1)
 		Local $TimerStart = TimerInit()
@@ -3933,8 +3893,8 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		Do
 			Sleep(10)
 			If TimerDiff($TimerStart) > 5000 Then ExitLoop
-		Until FileExists(@ScriptDir & "\log\teelog.txt")
-		$handle = FileOpen(@ScriptDir & "\log\teelog.txt")
+		Until FileExists($LogFile)
+		$handle = FileOpen($LogFile)
 		$state = ""
 
 		; Show progress (percentage) in status box
@@ -4012,7 +3972,7 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 		$return = FileRead($handle)
 		If Not StringIsSpace($return) Then Cout("Teelog:" & @CRLF & $return)
 		FileClose($handle)
-		FileDelete(@ScriptDir & "\log\teelog.txt")
+		FileDelete($LogFile)
 
 		; Check for success or failure indicator in log
 		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) _
@@ -4145,7 +4105,7 @@ Func CheckUpdate($silent = False)
 			FileWrite($handle, "@ping -n 3 localhost> nul" & @CRLF & "taskkill -f -im " & @ScriptName & " 2>nul" & @CRLF & '"' & $bindir & $OSArch & "\" & $7z & '" x -y -xr!UniExtract.ini -o"' & @ScriptDir & '" "' & $return & '"' & _
 					@CRLF & @CRLF & "@ping -n 3 localhost> nul" & @CRLF & 'del "' & $return & '"' & @CRLF & 'start "" ".\' & @ScriptName & '" /afterupdate' & @CRLF & "del Update.bat" & @CRLF & "exit")
 			FileClose($handle)
-			Run(@ScriptDir & "\Update.bat", @ScriptDir)
+			Run(@ScriptDir & '\Update.bat > "' & $logdir & 'update.log"', @ScriptDir)
 			Exit
 		EndIf
 	EndIf
@@ -4171,6 +4131,14 @@ EndFunc
 
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
+	; Success evaluation
+	$return = _FileRead($logdir & "update.log", True)
+	If Not @error And Not StringInStr($return, "Everything is Ok") Then
+		MsgBox($iTopmost + 48, $title, t('UPDATE_FAILED'))
+		If $FB_ask Then GUI_Feedback("UPDATE", "", $debug)
+		Return
+	EndIf
+
 	; Open most recent changelog
 	$1 = FileGetTime("changelog_minor.txt", 0, 1)
 	$2 = FileGetTime("changelog.txt", 0, 1)
@@ -4181,6 +4149,10 @@ Func _AfterUpdate()
 	EndIf
 
 	; Remove unused files
+	FileDelete($bindir & "languages\ChineseBig5_v0038.lng")
+	FileDelete($bindir & "languages\exeinfope_Neutral_v0038.lng")
+	FileDelete($bindir & "languages\exeinfope_turkish.lng")
+	FileDelete($bindir & "languages\exeinfopeCHS.lng")
 
 	; Move files
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
@@ -4588,6 +4560,15 @@ EndFunc   ;==>GUI_KeepOpen
 ; Build and display preferences GUI
 Func GUI_Prefs()
 	Cout("Creating preferences GUI")
+
+	; Load language list
+	Local $aReturn = _FileListToArray($langdir, '*.ini', 1), $langlist = ""
+	$aReturn[0] = 'English.ini'
+	_ArraySort($aReturn)
+	For $i = 0 To UBound($aReturn) - 1
+		$langlist &= StringTrimRight($aReturn[$i], 4) & '|'
+	Next
+
 	; Create GUI
 	Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 470, -1, -1, -1, -1, $guimain)
 	_GuiSetColor()
@@ -4599,7 +4580,7 @@ Func GUI_Prefs()
 	; Language controls
 	Local $langlabel = GUICtrlCreateLabel(t('PREFS_LANG_LABEL'), 10, 45, -1, 15)
 	Local $langselectpos = GetPos($guiprefs, $langlabel, -8)
-	Global $langselect = GUICtrlCreateCombo("", $langselectpos, 42, 245 - $langselectpos - 4, 20 * CharCount($langlist, '|'), $CBS_DROPDOWNLIST)
+	Global $langselect = GUICtrlCreateCombo("", $langselectpos, 42, 245 - $langselectpos - 8, -1, $CBS_DROPDOWNLIST)
 
 	; Timeout and update interval controls
 	Local $TimeoutLabel = GUICtrlCreateLabel(t('PREFS_TIMEOUT_LABEL'), 10, 72, -1, 15)
@@ -4978,7 +4959,7 @@ Func GUI_Feedback($Type = "", $file = "", $Output = "")
 	GUICtrlSetData(-1, t('FEEDBACK_TYPE_OPTIONS'))
 	;GUICtrlSetData(-1, $Type)
 	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 120, 8, -1, 15)
-	Global $FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & " " & @OSServicePack & ", Lang: " & @OSLang & ", UE: " & $language, 120, 24, 121, 21)
+	Global $FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 120, 24, 121, 21)
 	GUICtrlCreateLabel(t('FEEDBACK_FILE_LABEL'), 8, 56, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
 	Global $FB_FileCont = GUICtrlCreateInput($file, 8, 72, 233, 21)
@@ -5010,7 +4991,14 @@ Func GUI_Feedback($Type = "", $file = "", $Output = "")
 	GUICtrlSetOnEvent($FB_Cancel, "GUI_Feedback_Exit")
 	GUICtrlSetOnEvent($FB_Send, "GUI_Feedback_Send")
 	GUICtrlSetOnEvent($hSelectAll, "GUI_Edit_SelectAll")
-EndFunc   ;==>GUI_Feedback
+
+	; Set minimum window size
+	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO")
+
+	Do
+		Sleep(500)
+	Until $FB_finish
+EndFunc
 
 ; Exit feedback GUI if OK clicked
 Func GUI_Feedback_Send()
@@ -5039,7 +5027,7 @@ Func GUI_Feedback_Send()
 
 	$FB_Text = $name & " Feedback: " & $FB_Type & @CRLF & _
 			"------------------------------------------------------------------------------------------------" _
-			 & @CRLF & "System Information: " & $FB_Sys & @CRLF & @CRLF & "Sample File: " & $FB_File & @CRLF _
+			 & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample File: " & $FB_File & @CRLF _
 			 & @CRLF & $name & " Output:" & @CRLF & $FB_Output & @CRLF & @CRLF & _
 			"------------------------------------------------------------------------------------------------" _
 			 & @CRLF & $FB_Message & @CRLF & @CRLF & "Sent by: " & @CRLF & $ID
@@ -5665,13 +5653,13 @@ Func GUI_DeleteLogs()
 	Cout("Deleting log files")
 	Local $handle, $return, $i
 
-	$handle = FileFindFirstFile(@ScriptDir & "\log\*.log")
+	$handle = FileFindFirstFile($logdir & "*.log")
 	If $handle == -1 Then Return
 
 	While 1
 		$return = FileFindNextFile($handle)
 		If @error Then ExitLoop
-		FileDelete(@ScriptDir & "\log\" & $return)
+		FileDelete($logdir & $return)
 		$i += 1
 	WEnd
 
@@ -5711,17 +5699,18 @@ EndFunc
 
 ; Create about GUI
 Func GUI_About()
+	Local Const $width = 437, $height = 285
 	Cout("Creating about GUI")
-	$About = GUICreate($title & " " & $codename, 397, 270, -1, -1, -1, -1, $guimain)
+	$About = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, -1, $guimain)
 	_GuiSetColor()
-	GUICtrlCreateLabel($name, 24, 16, 348, 52, $SS_CENTER)
+	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 30, 400, 0, "MS Sans Serif")
-	GUICtrlCreateLabel(t('ABOUT_VERSION', $version), 16, 72, 362, 17, $SS_CENTER)
-	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", $website, "GNU GPLv2")), 16, 104, 364, 113, $SS_CENTER)
-	GUICtrlCreateLabel($ID, 5, 255, 175, 15)
+	GUICtrlCreateLabel(t('ABOUT_VERSION', $version), 16, 72, $width - 32, 17, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
+	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")
-	GUICtrlCreatePic(".\support\Icons\Bioruebe.jpg", 295, 212, 89, 50)
-	$About_OK = GUICtrlCreateButton(t('OK_BUT'), 154, 222, 89, 25)
+	GUICtrlCreatePic(".\support\Icons\Bioruebe.jpg", $width - 89 - 10, $height - 55, 89, 50)
+	$About_OK = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
 	GUISetState(@SW_SHOW)
 
 	GUICtrlSetOnEvent($About_OK, "GUI_About_Exit")

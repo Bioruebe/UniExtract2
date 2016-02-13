@@ -1,6 +1,12 @@
 Beta 3:
+  Added update log and success evaluation
+  Changed .exe detection logic for speed improvements
+  Changed file type detection: TrIDLib is now used for extraction, TrID for scan only mode, the library
+		  version is much faster but returns less additional information
   Fixed crash when clicking finish button in plugin GUI if no item has been selected before
+  Updated ExeInfoPE to 0.0.4.1
   Updated Japanese translation, thanks to A. Inaba
+  Updated Chinese (Simplified) translation, thanks to SeaHOH
 
 Beta 2b:
   Fixed crash when extracting .exe files

@@ -18,11 +18,12 @@ gif, apng
 http://tlwiki.org/index.php?title=Tools
 
 
-// User Interface:
+// Usability:
 statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
 inno: percentage indicator fixed?
 arj percentage indicator //tee problem
 Zip extraction: 'User input needed' message does not disappear
+cleanup after extraction, e.g. {app}
 
 
 // Bugs
