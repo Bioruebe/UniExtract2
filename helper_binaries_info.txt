@@ -27,7 +27,7 @@ disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https:
 Catacombae DMGExtractor						dmgextractor.jar			0.7			x	x	o	GNU GPL v3				Erik Larsson						http://www.catacombae.org/dmgx.html								
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.4.1		---------	Freeware				A.S.L.								http://users.cjb.net/exeinfope/									
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.4.1		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											exeinfopeRUN.cfg			-------		---------	-------					-------								-------															
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 											\plugins directory			-------		---------	-------					-------								-------															
@@ -39,7 +39,6 @@ extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland			
 FFmpeg										x86\ffmpeg.exe				newest		-		-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
-flac										x86\flac.exe				1.3.1		x	x	-	GNU GPL v2+				Josh Coalson, Xiph.Org Foundation	https://xiph.org/flac/index.html
 FLV Extract CL								FLVExtractCL.exe			1.6.2					GNU GPL v2				J.D.Purcell							http://moitah.net												
 FSB files extractor							fsbext.exe					0.3.4a					GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
 GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http://nemesis.thewavelength.net/index.php?p=25					

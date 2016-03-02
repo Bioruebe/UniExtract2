@@ -42,7 +42,6 @@ Disable _Run function's pattern search for extractors that do not provide percen
 // Short term
 
 
-
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 include tridscan gui?

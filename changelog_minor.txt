@@ -1,9 +1,24 @@
 Beta 3:
-  Added update log and success evaluation
+  Added support for .mp3 and .wma files
+  Added status box to sfx script extraction
   Changed .exe detection logic for speed improvements
   Changed file type detection: TrIDLib is now used for extraction, TrID for scan only mode, the library
 		  version is much faster but returns less additional information
+  Changed settings directory: if UniExtract detects insufficient write permissions to its directory,
+		  all settings are stored in %APPDATA%; this way multiple users on the same local system can
+		  also have different preferences
   Fixed crash when clicking finish button in plugin GUI if no item has been selected before
+  Fixed helper binaries execution failing if %comspec% environment variable is unset
+  Fixed .chm extraction
+  Fixed registry keys are now being deleted after scanning if they did not exist before for ExeInfo, PEid
+  Fixed settings not being saved if UniExtract lays in program files directory due to lacking permission
+  Fixed updating/FFMPEG download if user has no write permissions to UniExtract's directory
+  Fixed free space check failing if output directory does not exist
+  Fixed not enough free space dialog's 'Abort' button not working
+  Fixed download progress indicator not being on top of first start GUI
+  Fixed first start GUI now shows 'Installed' if FFMPEG already exists
+  Removed globalprefs option and preference storage in registry
+  Removed faad and flac, extraction is now handled by FFMPEG
   Updated ExeInfoPE to 0.0.4.1
   Updated Japanese translation, thanks to A. Inaba
   Updated Chinese (Simplified) translation, thanks to SeaHOH
