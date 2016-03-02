@@ -22,4 +22,4 @@ As a short overview, here are some key features, which are new in this release:
 See the changelog for a complete log of all improvements.
 Feel free to submit bug reports or feature requests using the issues tab here or the built-in feedback window in Universal Extractor; look at todo.txt for a list of features which may be included in future releases.
 
-Universal Extractor uses [TrIDLib by Marco Pontello](http://mark0.net/code-tridlib-e.html) and many other great tools and libraries to support as many file formats as possible. A detailed list can be found here.
+Universal Extractor uses [TrIDLib by Marco Pontello](http://mark0.net/code-tridlib-e.html) and many other great tools and libraries to support as many file formats as possible. A detailed list can be found [here](https://github.com/Bioruebe/UniExtract2/blob/master/helper_binaries_info.txt).
