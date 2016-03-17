@@ -124,7 +124,7 @@ Dim $test, $testarj, $testace, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed = 0, $gamefailed
 Dim $oldpath, $oldoutdir, $sUnicodeName
 Dim $createdir, $dirmtime
-Dim $FB_finish = False, $FS_GUI = False, $TrayMsg_Status, $BatchBut, $Tray_File
+Dim $FS_GUI = False, $TrayMsg_Status, $BatchBut, $Tray_File
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $queueArray[0]
 
@@ -297,17 +297,15 @@ If _Singleton($name & " " & $version, 1) = 0 And Not $extract Then
 	terminate("silent", '', '')
 EndIf
 
-StartExtraction($extract)
+StartExtraction()
 
 ; -------------------------- Begin Custom Functions ---------------------------
 
 ; Start extraction process
-Func StartExtraction($checkext = True)
+Func StartExtraction()
 	Cout("------------------------------------------------------------")
-
 	$bIsUnicode = False
 
-	; Parse filename
 	FilenameParse($file)
 
 	; Collect file information, for log/feedback only
@@ -327,34 +325,11 @@ Func StartExtraction($checkext = True)
 	EndIf
 	Cout("Output directory: " & $outdir)
 
-	; Set filename as tray icon tooltip
+	; Set filename as tray icon tooltip and event handler
 	TraySetToolTip($filename & "." & $fileext)
-
-	; Check for unicode characters in path
-	If $checkUnicode Then
-		If Not StringRegExp($file, $unicodepattern, 0) Then
-			Cout("File name seems to be unicode")
-			$bIsUnicode = True
-			$sUnicodeName = $filename
-			$oldoutdir = $outdir
-			$oldpath = $file
-
-			If StringRegExp($filedir, $unicodepattern, 0) Then
-				$file = _TempFile($filedir, "Unicode_", $fileext)
-			Else
-				Cout("File path seems to be unicode")
-				$file = _TempFile(@TempDir, "Unicode_", $fileext)
-			EndIf
-
-			Cout('Renaming "' & $sUnicodeName & '" to "' & $file & '"')
-			FileMove($oldpath, $file)
-			FilenameParse($file)
-			$outdir = $initoutdir
-		EndIf
-	EndIf
-
-	; Register tray function
 	TraySetOnEvent($TRAY_EVENT_PRIMARYUP, "Tray_ShowHide")
+
+	CheckUnicode()
 
 	; Reset variables
 	$isexe = False
@@ -376,7 +351,7 @@ Func StartExtraction($checkext = True)
 	$filetype = ""
 
 	; Extract contents from known file types
-	;
+
 	; UniExtract uses four methods of detection (in order):
 	; 1. File extensions for special cases
 	; 2. Binary file analysis of files using TrID if file extension is not .exe
@@ -384,26 +359,9 @@ Func StartExtraction($checkext = True)
 	; 4. Extra analysis using PeID if executable is not recognized by Exeinfo PE
 	; 5. Binary file analysis of files using TrID
 	; 6. File extensions
-	;
-	; If detection fails, extraction is always attempted 7-Zip and InfoZip
 
 	; First, check for file extensions that require special actions
-	If $checkext Then
-		;Cout("Extension check")
-		; Compound compressed files that require multiple actions
-		If $fileext = "ipk" Or $fileext = "tbz2" Or $fileext = "tgz" _
-				Or $fileext = "tz" Or $fileext = "tlz" Or $fileext = "txz" Then
-			extract("ctar", 'Compressed Tar ' & t('TERM_ARCHIVE'))
-			; image files - TrID is not always reliable with these formats
-		ElseIf $fileext = "bin" Or $fileext = "cue" Or $fileext = "cdi" Then
-			CheckIso()
-		ElseIf $fileext = "dmg" Then
-			extract("dmg", 'DMG ' & t('TERM_IMAGE'))
-		ElseIf $fileext = "iso" Then
-			check7z()
-			CheckIso()
-		EndIf
-	EndIf
+	InitialCheckExt()
 
 	; If file is an .exe, scan with Exeinfo PE and PEiD
 	If $fileext = "exe" Or $fileext = "dll" Then IsExe()
@@ -422,155 +380,14 @@ Func StartExtraction($checkext = True)
 	If Not $gamefailed Then CheckGame()
 
 	; Use file extension if signature not recognized
-	If $checkext Then
-		Switch $fileext
-		Case "1", "lib"
-			extract("is3arc", 'InstallShield 3.x ' & t('TERM_ARCHIVE'))
-
-		Case "7z"
-			extract("7z", '7-Zip ' & t('TERM_ARCHIVE'))
-
-		Case "ace"
-			extract("ace", 'ACE ' & t('TERM_ARCHIVE'))
-
-		Case "arc"
-			extract("arc", 'ARC ' & t('TERM_ARCHIVE'))
-
-		Case "arj"
-			extract("arj", 'ARJ ' & t('TERM_ARCHIVE'))
-
-		Case "assets"
-			extract("unity", 'Unity Engine Asset ' & t('TERM_FILE'))
-
-		Case "b64"
-			extract("uu", 'Base64 ' & t('TERM_ENCODED'))
-
-		Case "bz2"
-			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
-
-		Case "cab"
-			If StringInStr(FetchStdout($cmd & $7z & ' l "' & $file & '"', $filedir, @SW_HIDE), "Listing archive:", 0) Then
-				extract("cab", 'Microsoft CAB ' & t('TERM_ARCHIVE'))
-			Else
-				extract("iscab", 'InstallShield CAB ' & t('TERM_ARCHIVE'))
-			EndIf
-
-		Case "chm"
-			extract("chm", 'Compiled HTML ' & t('TERM_HELP'))
-
-		Case "cpio"
-			extract("7z", 'CPIO ' & t('TERM_ARCHIVE'))
-
-		Case "dbx"
-			extract('qbms', 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
-
-		Case "deb"
-			extract("7z", 'Debian ' & t('TERM_PACKAGE'))
-
-		Case "gz"
-			extract("gz", 'gzip ' & t('TERM_COMPRESSED'))
-
-		Case "hlp"
-			extract("hlp", 'Windows ' & t('TERM_HELP'))
-
-		Case "imf"
-			extract("cab", 'IncrediMail ' & t('TERM_ECARD'))
-
-		Case "img"
-			extract("img", 'Floppy ' & t('TERM_DISK') & ' ' & t('TERM_IMAGE'))
-
-		Case "kgb", "kge"
-			extract("kgb", 'KGB ' & t('TERM_ARCHIVE'))
-
-		Case "lit"
-			extract("lit", 'Microsoft LIT ' & t('TERM_EBOOK'))
-
-		Case "lzh", "lha"
-			extract("7z", 'LZH ' & t('TERM_COMPRESSED'))
-
-		Case "lzo"
-			extract("lzo", 'LZO ' & t('TERM_COMPRESSED'))
-
-		Case "lzx"
-			extract("lzx", 'LZX ' & t('TERM_COMPRESSED'))
-
-		Case "mht"
-			extract("mht", 'MHTML ' & t('TERM_ARCHIVE'))
-
-		Case "msi"
-			extract("msi", 'Windows Installer (MSI) ' & t('TERM_PACKAGE'))
-
-		Case "msm"
-			extract("msm", 'Windows Installer (MSM) ' & t('TERM_MERGE_MODULE'))
-
-		Case "msp"
-			extract("msp", 'Windows Installer (MSP) ' & t('TERM_PATCH'))
-
-		Case "nbh"
-			extract("nbh", 'NBH ' & t('TERM_IMAGE'))
-
-		Case "pea"
-			extract("pea", 'Pea ' & t('TERM_ARCHIVE'))
-
-		Case "rar", "001", "cbr"
-			extract("rar", 'RAR ' & t('TERM_ARCHIVE'))
-
-		Case "rpm"
-			extract("7z", 'RPM ' & t('TERM_PACKAGE'))
-
-		Case "sis"
-			extract('qbms', 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
-
-		Case "sit"
-			extract("sit", 'StuffIt ' & t('TERM_ARCHIVE'))
-
-		Case "tar"
-			extract("tar", 'Tar ' & t('TERM_ARCHIVE'))
-
-		Case "uha"
-			extract("uha", 'UHARC ' & t('TERM_ARCHIVE'))
-
-		Case "uif"
-			extract("uif", 'UIF ' & t('TERM_IMAGE'))
-
-		Case "uu", "uue", "xx", "xxe"
-			extract("uu", 'UUencode ' & t('TERM_ENCODED'))
-
-		Case "vpk", "gcf", "ncf", "wad", "xzp"
-			extract("gcf", 'Valve ' & $fileext & " " & t('TERM_PACKAGE'))
-
-		Case "wim"
-			extract("7z", 'WIM ' & t('TERM_IMAGE'))
-
-		Case "yenc", "ntx"
-			extract("uu", 'yEnc ' & t('TERM_ENCODED'))
-
-		Case "z"
-			If Not check7z() Then extract("is3arc", 'InstallShield 3.x ' & t('TERM_ARCHIVE'))
-
-		Case "zip", "cbz", "jar", "xpi", "wz"
-			extract("zip", 'ZIP ' & t('TERM_ARCHIVE'))
-
-		Case "zoo"
-			extract("zoo", 'ZOO ' & t('TERM_ARCHIVE'))
-
-		Case "wolf"
-			extract("arc_conv", "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
-
-		Case "rgss", "rgss2a"
-			extract("arc_conv", "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
-
-		Case "rgss3a"
-			extract("rgss3", "RPG Maker VX Ace " & t('TERM_GAME') & t('TERM_ARCHIVE'))
-		EndSwitch
-	EndIf
+	CheckExt()
 
 	check7z()
 
 	; Cannot determine filetype, all checks failed - abort
 	_DeleteTrayMessageBox()
 	terminate("unknownext", $file, "")
-EndFunc   ;==>StartExtraction
+EndFunc
 
 ; Extract if exe file detected
 Func IsExe()
@@ -1032,7 +849,7 @@ Func advfilescan($f)
 			HasPlugin($mpq)
 			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
 		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
-			 StringInStr($filetype_curr, "MPEG sequence")
+			 StringInStr($filetype_curr, "MPEG sequence") Or StringInStr($filetype_curr, "Microsoft ASF")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
 			extract("audio", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
@@ -1312,7 +1129,8 @@ Func tridcompare($filetype_curr)
 			extract("audio", 'Windows Media ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($filetype_curr, "Video", 0) Or StringInStr($filetype_curr, "QuickTime Movie", 0) Or _
-			 StringInStr($filetype_curr, "Matroska", 0) Or StringInStr($filetype_curr, "Material Exchange Format", 0)
+			 StringInStr($filetype_curr, "Matroska", 0) Or StringInStr($filetype_curr, "Material Exchange Format", 0) Or _
+			 StringInStr($filetype_curr, "Windows Media (generic)")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
 		; Not supported filetypes
@@ -1554,6 +1372,9 @@ Func advexescan($f)
 		Case StringInStr($filetype_curr, "ARJ SFX", 0)
 			extract("arj", t('TERM_SFX') & ' ARJ ' & t('TERM_ARCHIVE'))
 
+		Case StringInStr($filetype_curr, "FreeArc", 0)
+			extract("freearc", 'FreeArc ' & t('TERM_ARCHIVE'))
+
 		Case StringInStr($filetype_curr, "CreateInstall", 0)
 			extract("ci", 'CreateInstall ' & t('TERM_INSTALLER'))
 
@@ -1637,7 +1458,7 @@ Func advexescan($f)
 			$isexe = False
 
 			; not supported filetypes
-		Case StringInStr($filetype_curr, "Autoit", 0)
+		Case StringInStr($filetype_curr, "Autoit", 0) Or StringInStr($filetype_curr, "Not packed , try")
 			terminate("notpacked", $file, "")
 
 		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0)
@@ -1647,7 +1468,7 @@ Func advexescan($f)
 		Case StringInStr($filetype_curr, "Not packed") And Not StringInStr($filetype_curr, "Microsoft Visual C++")
 			$notpacked = True
 	EndSelect
-EndFunc   ;==>advexescan
+EndFunc
 
 ; Scan file using MediaInfo dll, only used in scan only mode
 Func MediaFileScan($f)
@@ -1942,6 +1763,194 @@ Func checkZip()
 	$zipfailed = True
 	Return False
 EndFunc   ;==>checkZip
+
+; If detection fails, try to determine file type by extension
+Func CheckExt()
+	If Not $extract Then Return
+	Switch $fileext
+		Case "1", "lib"
+			extract("is3arc", 'InstallShield 3.x ' & t('TERM_ARCHIVE'))
+
+		Case "7z"
+			extract("7z", '7-Zip ' & t('TERM_ARCHIVE'))
+
+		Case "ace"
+			extract("ace", 'ACE ' & t('TERM_ARCHIVE'))
+
+		Case "arc"
+			extract("arc", 'ARC ' & t('TERM_ARCHIVE'))
+
+		Case "arj"
+			extract("arj", 'ARJ ' & t('TERM_ARCHIVE'))
+
+		Case "assets"
+			extract("unity", 'Unity Engine Asset ' & t('TERM_FILE'))
+
+		Case "b64"
+			extract("uu", 'Base64 ' & t('TERM_ENCODED'))
+
+		Case "bz2"
+			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
+
+		Case "cab"
+			If StringInStr(FetchStdout($cmd & $7z & ' l "' & $file & '"', $filedir, @SW_HIDE), "Listing archive:", 0) Then
+				extract("cab", 'Microsoft CAB ' & t('TERM_ARCHIVE'))
+			Else
+				extract("iscab", 'InstallShield CAB ' & t('TERM_ARCHIVE'))
+			EndIf
+
+		Case "chm"
+			extract("chm", 'Compiled HTML ' & t('TERM_HELP'))
+
+		Case "cpio"
+			extract("7z", 'CPIO ' & t('TERM_ARCHIVE'))
+
+		Case "dbx"
+			extract('qbms', 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
+
+		Case "deb"
+			extract("7z", 'Debian ' & t('TERM_PACKAGE'))
+
+		Case "gz"
+			extract("gz", 'gzip ' & t('TERM_COMPRESSED'))
+
+		Case "hlp"
+			extract("hlp", 'Windows ' & t('TERM_HELP'))
+
+		Case "imf"
+			extract("cab", 'IncrediMail ' & t('TERM_ECARD'))
+
+		Case "img"
+			extract("img", 'Floppy ' & t('TERM_DISK') & ' ' & t('TERM_IMAGE'))
+
+		Case "kgb", "kge"
+			extract("kgb", 'KGB ' & t('TERM_ARCHIVE'))
+
+		Case "lit"
+			extract("lit", 'Microsoft LIT ' & t('TERM_EBOOK'))
+
+		Case "lzh", "lha"
+			extract("7z", 'LZH ' & t('TERM_COMPRESSED'))
+
+		Case "lzo"
+			extract("lzo", 'LZO ' & t('TERM_COMPRESSED'))
+
+		Case "lzx"
+			extract("lzx", 'LZX ' & t('TERM_COMPRESSED'))
+
+		Case "mht"
+			extract("mht", 'MHTML ' & t('TERM_ARCHIVE'))
+
+		Case "msi"
+			extract("msi", 'Windows Installer (MSI) ' & t('TERM_PACKAGE'))
+
+		Case "msm"
+			extract("msm", 'Windows Installer (MSM) ' & t('TERM_MERGE_MODULE'))
+
+		Case "msp"
+			extract("msp", 'Windows Installer (MSP) ' & t('TERM_PATCH'))
+
+		Case "nbh"
+			extract("nbh", 'NBH ' & t('TERM_IMAGE'))
+
+		Case "pea"
+			extract("pea", 'Pea ' & t('TERM_ARCHIVE'))
+
+		Case "rar", "001", "cbr"
+			extract("rar", 'RAR ' & t('TERM_ARCHIVE'))
+
+		Case "rpm"
+			extract("7z", 'RPM ' & t('TERM_PACKAGE'))
+
+		Case "sis"
+			extract('qbms', 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
+
+		Case "sit"
+			extract("sit", 'StuffIt ' & t('TERM_ARCHIVE'))
+
+		Case "tar"
+			extract("tar", 'Tar ' & t('TERM_ARCHIVE'))
+
+		Case "uha"
+			extract("uha", 'UHARC ' & t('TERM_ARCHIVE'))
+
+		Case "uif"
+			extract("uif", 'UIF ' & t('TERM_IMAGE'))
+
+		Case "uu", "uue", "xx", "xxe"
+			extract("uu", 'UUencode ' & t('TERM_ENCODED'))
+
+		Case "vpk", "gcf", "ncf", "wad", "xzp"
+			extract("gcf", 'Valve ' & $fileext & " " & t('TERM_PACKAGE'))
+
+		Case "wim"
+			extract("7z", 'WIM ' & t('TERM_IMAGE'))
+
+		Case "yenc", "ntx"
+			extract("uu", 'yEnc ' & t('TERM_ENCODED'))
+
+		Case "z"
+			If Not check7z() Then extract("is3arc", 'InstallShield 3.x ' & t('TERM_ARCHIVE'))
+
+		Case "zip", "cbz", "jar", "xpi", "wz"
+			extract("zip", 'ZIP ' & t('TERM_ARCHIVE'))
+
+		Case "zoo"
+			extract("zoo", 'ZOO ' & t('TERM_ARCHIVE'))
+
+		Case "wolf"
+			extract("arc_conv", "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+
+		Case "rgss", "rgss2a"
+			extract("arc_conv", "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+
+		Case "rgss3a"
+			extract("rgss3", "RPG Maker VX Ace " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+	EndSwitch
+EndFunc
+
+; Perform special actions for some file types
+Func InitialCheckExt()
+	If Not $extract Then Return
+	; Compound compressed files that require multiple actions
+	Switch $fileext
+		Case "ipk", "tbz2", "tgz", "tz", "tlz", "txz"
+			extract("ctar", 'Compressed Tar ' & t('TERM_ARCHIVE'))
+		; image files - TrID is not always reliable with these formats
+		Case "bin", "cue", "cdi"
+			CheckIso()
+		Case "dmg"
+			extract("dmg", 'DMG ' & t('TERM_IMAGE'))
+		Case "iso"
+			check7z()
+			CheckIso()
+	EndSwitch
+EndFunc
+
+; Check for unicode characters in path
+Func CheckUnicode()
+	If $checkUnicode Or StringRegExp($file, $unicodepattern, 0) Then Return
+
+	Cout("File name seems to be unicode")
+	$oldpath = $file
+
+	If StringRegExp($filedir, $unicodepattern, 0) Then
+		$file = _TempFile($filedir, "Unicode_", $fileext)
+	Else
+		Cout("File path seems to be unicode")
+		If Not StringRegExp(@TempDir, $unicodepattern, 0) Then Return Cout("Temp directory contains unicode characters, aborting")
+		$file = _TempFile(@TempDir, "Unicode_", $fileext)
+	EndIf
+
+	$bIsUnicode = True
+	$sUnicodeName = $filename
+	$oldoutdir = $outdir
+
+	Cout('Renaming "' & $sUnicodeName & '" to "' & $file & '"')
+	FileMove($oldpath, $file)
+	FilenameParse($file)
+	$outdir = $initoutdir
+EndFunc
 
 ; Extract from known archive format
 Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
@@ -3183,6 +3192,7 @@ Func terminate($status, $fname, $ID)
 		FileMove($file, $oldpath, 1)
 		DirMove($outdir, $oldoutdir)
 		$fname = $oldpath
+		$file = $oldpath
 	EndIf
 
 	Cout("Terminating - Status: " & $status)
@@ -3428,26 +3438,25 @@ Func MethodSelect($format, $splashdisp)
 	; Display GUI and wait for action
 	GUISetState(@SW_SHOW)
 	While 1
-		$action = GUIGetMsg()
-		Select
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
 			; Set extract command
-			Case $action == $ok
+			Case $ok
 				For $i = 0 To UBound($method) - 1
 					If GUICtrlRead($select[$i]) == $GUI_CHECKED Then
 						GUIDelete($guimethod)
+						Opt("GUIOnEventMode", 1)
 						_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $splashdisp)
 						Return $method[$i][0]
 					EndIf
 				Next
-
 				; Exit if Cancel clicked or window closed
-			Case $action == $GUI_EVENT_CLOSE Or $action == $cancel
+			Case $GUI_EVENT_CLOSE, $cancel
 				If $createdir Then DirRemove($outdir, 0)
 				terminate("silent", '', '')
-
-		EndSelect
+		EndSwitch
 	WEnd
-EndFunc   ;==>MethodSelect
+EndFunc
 
 ; Create GUI to select game and return selection
 Func GameSelect($sEntries, $sStandard)
@@ -3476,6 +3485,7 @@ Func GameSelect($sEntries, $sStandard)
 		EndSwitch
 	WEnd
 	GUIDelete($GameSelectGUI)
+	Opt("GUIOnEventMode", 1)
 	Return $sSelection
 EndFunc
 
@@ -4939,79 +4949,68 @@ EndFunc   ;==>WM_DROPFILES_UNICODE_FUNC
 ; Create Feedback GUI
 Func GUI_Feedback($Type = "", $file = "", $Output = "")
 	Cout("Creating feedback GUI")
-	Global $FB_finish = False
-	; Create Feedback GUI
-	If $guimain Then
-		Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 251, 370, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
-	Else
-		Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 251, 370, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1)
-	EndIf
-
+	Opt("GUIOnEventMode", 0)
+	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 251, 370, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateLabel(t('FEEDBACK_TYPE_LABEL'), 8, 8, -1, 15)
 	If $Type == "" Then
-		Global $FB_TypeCont = GUICtrlCreateCombo(t('FEEDBACK_TYPE_STANDARD'), 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+		$FB_TypeCont = GUICtrlCreateCombo(t('FEEDBACK_TYPE_STANDARD'), 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
 	Else
-		Global $FB_TypeCont = GUICtrlCreateCombo($Type, 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
+		$FB_TypeCont = GUICtrlCreateCombo($Type, 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
 		GUICtrlSetData(-1, t('FEEDBACK_TYPE_STANDARD'))
 	EndIf
 	GUICtrlSetData(-1, t('FEEDBACK_TYPE_OPTIONS'))
-	;GUICtrlSetData(-1, $Type)
 	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 120, 8, -1, 15)
-	Global $FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 120, 24, 121, 21)
+	$FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 120, 24, 121, 21)
 	GUICtrlCreateLabel(t('FEEDBACK_FILE_LABEL'), 8, 56, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
-	Global $FB_FileCont = GUICtrlCreateInput($file, 8, 72, 233, 21)
+	$FB_FileCont = GUICtrlCreateInput($file, 8, 72, 233, 21)
 	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
 	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 104, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
-	Global $FB_OutputCont = GUICtrlCreateEdit("", 8, 120, 233, 49, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
+	$FB_OutputCont = GUICtrlCreateEdit("", 8, 120, 233, 49, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetData(-1, $Output)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
 	GUICtrlCreateLabel(t('FEEDBACK_MESSAGE_LABEL'), 8, 176, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
-	Global $FB_MessageCont = GUICtrlCreateEdit("", 8, 192, 233, 73, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
+	$FB_MessageCont = GUICtrlCreateEdit("", 8, 192, 233, 73, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
 	GUICtrlCreateLabel(t('FEEDBACK_EMAIL_LABEL'), 8, 272, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_EMAIL_TOOLTIP'), "", 0, 1)
-	Global $FB_MailCont = GUICtrlCreateInput("", 8, 288, 233, 21)
+	$FB_MailCont = GUICtrlCreateInput("", 8, 288, 233, 21)
 	GUICtrlSetTip(-1, t('FEEDBACK_EMAIL_TOOLTIP'), "", 0, 1)
 	$FB_Send = GUICtrlCreateButton(t('SEND_BUT'), 55, 318, 60, 20)
 	$FB_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 135, 318, 60, 20)
-	; Dummy for accelerator key to activate
 	$hSelectAll = GUICtrlCreateDummy()
-	GUISetState(@SW_SHOW)
-	GUICtrlSetState($FB_MessageCont, $GUI_FOCUS)
+
 	Local $accelKeys[1][2] = [["^a", $hSelectAll]]
 	GUISetAccelerators($accelKeys)
-
-	; Set events
-	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Feedback_Exit")
-	GUICtrlSetOnEvent($FB_Cancel, "GUI_Feedback_Exit")
-	GUICtrlSetOnEvent($FB_Send, "GUI_Feedback_Send")
-	GUICtrlSetOnEvent($hSelectAll, "GUI_Edit_SelectAll")
+	GUICtrlSetState($FB_MessageCont, $GUI_FOCUS)
 
 	; Set minimum window size
 	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO")
+	GUISetState(@SW_SHOW)
 
-	Do
-		Sleep(500)
-	Until $FB_finish
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $FB_Send
+				GUI_Feedback_Send(_GUICtrlComboBox_GetCurSel($FB_TypeCont), GUICtrlRead($FB_SysCont), GUICtrlRead($FB_FileCont), GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont), GUICtrlRead($FB_MailCont))
+				ExitLoop
+			Case $GUI_EVENT_CLOSE, $FB_Cancel
+				ExitLoop
+			Case $hSelectAll
+				GUI_Edit_SelectAll()
+		EndSwitch
+	WEnd
+
+	GUIDelete($FB_GUI)
+	Opt("GUIOnEventMode", 1)
 EndFunc
 
 ; Exit feedback GUI if OK clicked
-Func GUI_Feedback_Send()
-	$FB_Type = _GUICtrlComboBox_GetCurSel($FB_TypeCont)
-	$FB_Sys = GUICtrlRead($FB_SysCont)
-	$FB_File = GUICtrlRead($FB_FileCont)
-	$FB_Output = GUICtrlRead($FB_OutputCont)
-	$FB_Message = GUICtrlRead($FB_MessageCont)
-	$FB_Mail = GUICtrlRead($FB_MailCont)
-
-	If $FB_File = "" And $FB_Output = "" And $FB_Message = "" Then
-		MsgBox($iTopmost + 16, $name, t('FEEDBACK_EMPTY'))
-		Return
-	EndIf
+Func GUI_Feedback_Send($FB_Type, $FB_Sys, $FB_File, $FB_Output, $FB_Message, $FB_Mail)
+	If $FB_File = "" And $FB_Output = "" And $FB_Message = "" Then Return MsgBox($iTopmost + 16, $name, t('FEEDBACK_EMPTY'))
 
 	; Opt-in privacy agreement
 	If Not Prompt(64+4, 'FEEDBACK_PRIVACY', 0, 0) Then Return
@@ -5056,15 +5055,7 @@ Func GUI_Feedback_Send()
 	EndIf
 
 	GUISetState(@SW_SHOW, $guimain)
-	$FB_finish = True
-EndFunc   ;==>GUI_Feedback_Send
-
-; Exit feedback GUI if Cancel clicked or window closed
-Func GUI_Feedback_Exit()
-	GUIDelete($FB_GUI)
-	$FB_finish = True
-	Cout("Closing feedback GUI")
-EndFunc   ;==>GUI_Feedback_Exit
+EndFunc
 
 ; Due to a bug in the Windows API, ctrl+a does not work for edit controls
 ; Workaround by Zedna (http://www.autoitscript.com/forum/topic/97473-hotkey-ctrla-for-select-all-in-the-selected-edit-box/#entry937287)
@@ -5072,7 +5063,7 @@ Func GUI_Edit_SelectAll()
 	$hWnd = _WinAPI_GetFocus()
 	$class = _WinAPI_GetClassName($hWnd)
 	If $class = 'Edit' Then _GUICtrlEdit_SetSel($hWnd, 0, -1)
-EndFunc   ;==>GUI_Edit_SelectAll
+EndFunc
 
 ; Saves current position of main GUI
 Func GUIGetPosition()
