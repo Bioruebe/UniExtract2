@@ -19,6 +19,8 @@ Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Rope
 ARJ32										arj.exe						3.10		!	x	!	GNU GPL v2				Andrew Belov							http://arj.sourceforge.net/										
 AspackDie									AspackDie.exe				1.41					Open Source				yoda								http://scifi.pages.at/yoda9k/									
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
+BCM											x86\bcm.exe					1.00		-	-	-	Public Domain			Ilya Muravyov						http://sourceforge.net/projects/bcm/
+											x64\bcm.exe					-------		---------	-------					-------								-------
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
 disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
@@ -58,7 +60,7 @@ MediaInfo 									MediaInfo.dll				0.7.72		---------	MediaInfo(Lib) License	Med
 MsiX										MsiX.exe					1.0						Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
 mtee										mtee.exe					2.1			---------	MIT						Ritchie Lawrence					http://sourceforge.net/projects/mtee
 NBHextract									NBHextract.exe				1.0						Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
-PeaZip										pea.exe						0.12/1.0				Open Source				Giorgio Tani						http://peazip.sourceforge.net/									
+PeaZip										pea.exe						0.53/1.0				GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
 QuickBMS									quickbms.exe				0.6.5		!	o	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
@@ -94,7 +96,9 @@ UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
 XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke						http://www.winace.com/											
-
+ZPAQ										x86\zpaq.exe				7.70		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html
+											x86\zpaqxp.exe				-------		---------	-------					-------								-------
+											x64\zpaq.exe				-------		---------	-------					-------								-------
 
 Total Commander plugins:
    DBX plugin								dbxplug.wcx					1.2				x		Freeware				Dmitri R. Letichevski				http://www.totalcmd.net/plugring/dbx.html						

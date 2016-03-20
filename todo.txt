@@ -65,6 +65,7 @@ Anything from Clickteam //grrr...
 Spoon Installer - http://legroom.net/node/842
 Astrum InstallWizard - http://www.thraexsoftware.com
 LiberalInstaller
+BitRock InstallBuilder
 Long Range Zip (lrzip)
 
 

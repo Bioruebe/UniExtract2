@@ -73,6 +73,7 @@ Const $unicodepattern = "(?i)(?m)^[\w\Q @!ß$%&/\()=?,.-:+~'≤≥{[]}*#ﬂ∞^‚Îˆ‰¸ÓÍÙ˚Ô
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
 Const $OPTION_KEEP = 0, $OPTION_DELETE = 1, $OPTION_ASK = 2, $OPTION_MOVE = 2
 Const $HISTORY_FILE = "File History", $HISTORY_DIR = "Directory History"
+Const $PACKER_UPX = 1, $PACKER_ASPACK = 2
 
 Opt("GUIOnEventMode", 1)
 Opt("TrayOnEventMode", 1)
@@ -116,12 +117,12 @@ Global $trayX = -1, $trayY = -1
 
 ; Global variables
 Dim $file, $filename, $filedir, $fileext, $initoutdir, $outdir, $filetype = "", $initdirsize
-Dim $prompt, $packed, $return, $Output, $notpacked
+Dim $prompt, $return, $Output
 Dim $gaDropFiles[1], $queueArray[1]
 Dim $About, $Type, $win7, $silent, $bIsUnicode = False, $reg64 = ""
 Dim $debug = "", $guimain = False, $success = False, $TBgui, $isofile = 0
 Dim $test, $testarj, $testace, $test7z, $testzip, $testie, $testinno
-Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed = 0, $gamefailed
+Dim $innofailed, $arjfailed, $acefailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed = 0, $gamefailed, $unpackfailed
 Dim $oldpath, $oldoutdir, $sUnicodeName
 Dim $createdir, $dirmtime
 Dim $FS_GUI = False, $TrayMsg_Status, $BatchBut, $Tray_File
@@ -137,63 +138,66 @@ Else
 EndIf
 
 ; Extractors
-Const $7z = '7z.exe' ;x64									;15.14
-Const $7zsplit = "7ZSplit.exe" 								;0.2
-Const $ace = "xace.exe" 									;2.6
-Const $alz = "unalz.exe" 									;0.64
-Const $arc = "arc.exe" 										;5.21i
-Const $arj = "arj.exe" 										;3.10
-Const $aspack = "AspackDie.exe" 							;1.4.1
-Const $daa = "daa2iso.exe" 									;0.1.7e
-Const $dmg = "dmgextractor.jar" 							;0.70	;Java
-Const $ethornell = "ethornell.exe" 							;unknown
-Const $exeinfope = "exeinfope.exe" 							;0.0.3.7
-Const $filetool = $bindir & "file\bin\file.exe" 			;5.03
-Const $flv = "FLVExtractCL.exe" 							;1.6.2
-Const $freearc = "unarc.exe"								;0.666
-Const $fsb = "fsbext.exe" 									;0.3.3
-Const $gcf = "GCFScape.exe" ;x64							;1.8.2
-Const $hlp = "helpdeco.exe" 								;2.1
-Const $img = "EXTRNT.EXE" 									;2.10
-Const $inno = "innounp.exe" 								;0.45
-Const $is6cab = "i6comp.exe" 								;0.2
-Const $isxunp = "IsXunpack.exe" 							;0.99
-Const $kgb = $bindir & "kgb\kgb2_console.exe" 				;1.2.1.24
-Const $lit = "clit.exe" 									;1.8
-Const $lzo = "lzop.exe" 									;1.03
-Const $lzx = "unlzx.exe" 									;1.21
-Const $mht = "extractMHT.exe" 								;1.0
-Const $msi_msix = "MsiX.exe" 								;1.0
-Const $msi_jsmsix = "jsMSIx.exe" 							;1.11.0704
-Const $nbh = "NBHextract.exe" 								;1.0
-Const $pea = "pea.exe" 										;0.12/1.0
-Const $peid = "peid.exe" 									;0.95   2012/04/24
-Const $quickbms = "quickbms.exe" 							;0.6.4
-Const $rai = "RAIU.EXE" 									;0.1a
-Const $rar = "unrar.exe" 									;5.21
-Const $sfark = "sfarkxtc.exe"								;3.0 	;modified
-Const $sit = "Expander.exe" 								;6.0
-Const $sqlite = "sqlite3.exe"								;3.10.2
-Const $stix = "stix_d.exe" 									;2001/06/13
-Const $swf = "swfextract.exe" 								;0.9.1
-Const $trid = "trid.exe" 									;2.10	2012/05/06
-Const $ttarch = "ttarchext.exe"								;0.2.4
-Const $uharc = "UNUHARC06.EXE" 								;0.6b
-Const $uharc04 = "UHARC04.EXE" 								;0.4
-Const $uharc02 = "UHARC02.EXE" 								;0.2
-Const $uif = "uif2iso.exe" 									;0.1.7c
-Const $unity = "disunity.bat" 								;0.3.2
-Const $unshield = "unshield.exe" 							;0.5
-Const $upx = "upx.exe" 										;3.08w
-Const $rpa = $bindir & "unrpa\unrpa.exe"					;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
-Const $uu = "uudeview.exe" 									;0.5pl20
-Const $wise_ewise = "e_wise_w.exe" 							;2002/07/01
-Const $wise_wun = "wun.exe" 								;0.90A
-Const $zip = "unzip.exe" 									;6.00
-Const $zoo = "unzoo.exe" 									;4.5
+Const $7z = '7z.exe' ;x64															;15.14
+Const $7zsplit = "7ZSplit.exe" 														;0.2
+Const $ace = "xace.exe" 															;2.6
+Const $alz = "unalz.exe" 															;0.64
+Const $arc = "arc.exe" 																;5.21i
+Const $arj = "arj.exe" 																;3.10
+Const $aspack = "AspackDie.exe" 													;1.4.1
+Const $bcm = "bcm.exe"																;1.00
+Const $daa = "daa2iso.exe" 															;0.1.7e
+Const $dmg = "dmgextractor.jar" ;Java												;0.70
+Const $ethornell = "ethornell.exe" 													;unknown
+Const $exeinfope = "exeinfope.exe" 													;0.0.3.7
+Const $filetool = $bindir & "file\bin\file.exe" 									;5.03
+Const $flv = "FLVExtractCL.exe" 													;1.6.2
+Const $freearc = "unarc.exe"														;0.666
+Const $fsb = "fsbext.exe" 															;0.3.3
+Const $gcf = "GCFScape.exe" ;x64													;1.8.2
+Const $hlp = "helpdeco.exe" 														;2.1
+Const $img = "EXTRNT.EXE" 															;2.10
+Const $inno = "innounp.exe" 														;0.45
+Const $is6cab = "i6comp.exe" 														;0.2
+Const $isxunp = "IsXunpack.exe" 													;0.99
+Const $kgb = $bindir & "kgb\kgb2_console.exe" 										;1.2.1.24
+Const $lit = "clit.exe" 															;1.8
+Const $lzo = "lzop.exe" 															;1.03
+Const $lzx = "unlzx.exe" 															;1.21
+Const $mht = "extractMHT.exe" 														;1.0
+Const $msi_msix = "MsiX.exe" 														;1.0
+Const $msi_jsmsix = "jsMSIx.exe" 													;1.11.0704
+Const $nbh = "NBHextract.exe" 														;1.0
+Const $pea = "pea.exe" 																;0.53/1.0
+Const $peid = "peid.exe" 															;0.95   2012/04/24
+Const $quickbms = "quickbms.exe" 													;0.6.4
+Const $rai = "RAIU.EXE" 															;0.1a
+Const $rar = "unrar.exe" 															;5.21
+Const $sfark = "sfarkxtc.exe"														;3.0 	;modified
+Const $sit = "Expander.exe" 														;6.0
+Const $sqlite = "sqlite3.exe"														;3.10.2
+Const $stix = "stix_d.exe" 															;2001/06/13
+Const $swf = "swfextract.exe" 														;0.9.1
+Const $trid = "trid.exe" 															;2.10	2012/05/06
+Const $ttarch = "ttarchext.exe"														;0.2.4
+Const $uharc = "UNUHARC06.EXE" 														;0.6b
+Const $uharc04 = "UHARC04.EXE" 														;0.4
+Const $uharc02 = "UHARC02.EXE" 														;0.2
+Const $uif = "uif2iso.exe" 															;0.1.7c
+Const $unity = "disunity.bat" 														;0.3.2
+Const $unshield = "unshield.exe" 													;0.5
+Const $upx = "upx.exe" 																;3.08w
+Const $rpa = $bindir & "unrpa\unrpa.exe"											;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
+Const $uu = "uudeview.exe" 															;0.5pl20
+Const $wise_ewise = "e_wise_w.exe" 													;2002/07/01
+Const $wise_wun = "wun.exe" 														;0.90A
+Const $zip = "unzip.exe" 															;6.00
+Const $zpaq = StringInStr(@OSVersion, "WIN_XP")? "zpaqxp.exe": "zpaq.exe" ;x64		;7.07
+Const $zoo = "unzoo.exe" 															;4.5
 
 ; Plugins
 Const $bms = "BMS.bms"
+Const $bootimg = "bootimg.exe"
 Const $dbx = "dbxplug.wcx"
 Const $gaup = "gaup_pro.wcx"
 Const $ie = "InstExpl.wcx"
@@ -206,7 +210,7 @@ Const $sis = "PDunSIS.wcx"
 Const $mtee = "mtee.exe"
 Const $wtee = "wtee.exe"
 Const $tee = @OSVersion = "WIN_10"? $wtee: $mtee
-Const $mediainfo = "MediaInfo" & $reg64 & ".dll"			; 0.7.72
+Const $mediainfo = "MediaInfo" & $reg64 & ".dll"									; 0.7.72
 
 ; Not included binaries
 Const $ci = "ci-extractor.exe"
@@ -341,13 +345,13 @@ Func StartExtraction()
 	$iefailed = False
 	$isfailed = False
 	$gamefailed = False
+	$unpackfailed = False
 	$testinno = False
 	$testarj = False
 	$testace = False
 	$test7z = False
 	$testzip = False
 	$testie = False
-	$packed = False
 	$filetype = ""
 
 	; Extract contents from known file types
@@ -421,9 +425,6 @@ Func IsExe()
 
 	If Not $iefailed Then checkIE()
 
-	; Unpack (vs. extract) packed file
-	If $packed Then unpack()
-
 	; Try 7-Zip and Unzip if all else fails
 	If Not $7zfailed Then check7z()
 	If Not $zipfailed Then checkZip()
@@ -431,8 +432,6 @@ Func IsExe()
 	If $fileext <> "exe" Or $isexe == False Then Return
 
 	CheckGame()
-
-	If $notpacked Then terminate("notpacked", $file, "")
 
 	; Scan using TrID
 	filescan($file)
@@ -843,12 +842,14 @@ Func advfilescan($f)
 			extract("sfark", 'sfArk ' & t('TERM_COMPRESSED'))
 		Case StringInStr($filetype_curr, "SQLite", 0)
 			extract("sqlite", 'SQLite ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "XZ compressed data")
+			extract("xz", 'XZ ' & t('TERM_COMPRESSED'))
 		Case StringInStr($filetype_curr, "MS Windows HtmlHelp Data")
 			extract("chm", 'Compiled HTML ' & t('TERM_HELP'))
 		Case StringInStr($filetype_curr, "MoPaQ", 0)
 			HasPlugin($mpq)
 			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
-		Case StringInStr($filetype_curr, "video", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
+		Case StringInStr($filetype_curr, "RIFF", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
 			 StringInStr($filetype_curr, "MPEG sequence") Or StringInStr($filetype_curr, "Microsoft ASF")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
@@ -868,7 +869,7 @@ Func advfilescan($f)
 			  StringInStr($filetype_curr, "Rich ")) Or _
 			  StringInStr($filetype_curr, "image", 0) Or StringInStr($filetype_curr, "icon resource", 0) Or _
 			  (StringInStr($filetype_curr, "bitmap", 0) And Not StringInStr($filetype_curr, "MGR bitmap")) Or _
-			  StringInStr($filetype_curr, "WAVE audio", 0) Or _
+			  StringInStr($filetype_curr, "WAVE audio", 0) Or StringInStr($filetype_curr, "boot sector;") Or _
 			  StringInStr($filetype_curr, "shortcut", 0) Or StringInStr($filetype_curr, "empty")
 			terminate("notpacked", $file, "")
 	EndSelect
@@ -885,11 +886,14 @@ Func tridcompare($filetype_curr)
 				Or StringInStr($filetype_curr, "ACE Self-Extracting Archive", 0)
 			extract("ace", t('TERM_SFX') & ' ACE ' & t('TERM_ARCHIVE'))
 
+		Case StringInStr($filetype_curr, "Android boot image")
+			extract("bootimg", ' Android boot ' & t('TERM_IMAGE'))
+
 		Case StringInStr($filetype_curr, "ALZip compressed archive")
 			CheckAlz()
 
 		Case StringInStr($filetype_curr, "LZIP compressed archive")
-			extract("lz", "LZIP " & t('TERM_COMPRESSED') & " " & t('TERM_ARCHIVE'))
+			extract("lz", "LZIP " & t('TERM_COMPRESSED'))
 
 		Case StringInStr($filetype_curr, "FreeArc compressed archive", 0)
 			extract("freearc", 'FreeArc ' & t('TERM_ARCHIVE'))
@@ -899,6 +903,9 @@ Func tridcompare($filetype_curr)
 
 		Case StringInStr($filetype_curr, "ARJ compressed archive", 0)
 			extract("arj", 'ARJ ' & t('TERM_ARCHIVE'))
+
+		Case StringInStr($filetype_curr, "BCM compressed file")
+			extract("bcm", 'BCM ' & t('TERM_COMPRESSED'))
 
 		Case StringInStr($filetype_curr, "bzip2 compressed archive", 0)
 			extract("bz2", 'bzip2 ' & t('TERM_COMPRESSED'))
@@ -944,7 +951,7 @@ Func tridcompare($filetype_curr)
 			extract("fsb", 'FMOD ' & t('TERM_CONTAINER'))
 
 		Case StringInStr($filetype_curr, "Gentee Installer executable", 0) Or StringInStr($filetype_curr, "Installer VISE executable", 0) Or _
-			 StringInStr($filetype_curr, "Setup Factory 6.x Installer", 0)
+			 StringInStr($filetype_curr, "Setup Factory", 0)
 			checkIE()
 
 		Case StringInStr($filetype_curr, "GZipped File", 0)
@@ -1010,7 +1017,7 @@ Func tridcompare($filetype_curr)
 		Case StringInStr($filetype_curr, "Outlook Express E-mail folder", 0)
 			extract('qbms', 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
 
-		Case StringInStr($filetype_curr, "PEA archive", 0)
+		Case StringInStr($filetype_curr, "PEA compressed archive", 0)
 			extract("pea", 'Pea ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "RAR Archive", 0)
@@ -1133,8 +1140,12 @@ Func tridcompare($filetype_curr)
 			 StringInStr($filetype_curr, "Windows Media (generic)")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
+		Case StringInStr($filetype_curr, "null bytes", 0)
+			terminate("notpacked", $file, "")
+
 		; Not supported filetypes
-		Case StringInStr($filetype_curr, "Spoon Installer", 0) Or StringInStr($filetype_curr, "Long Range ZIP", 0)
+		Case StringInStr($filetype_curr, "Spoon Installer", 0) Or StringInStr($filetype_curr, "Long Range ZIP", 0) Or _
+			 StringInStr($filetype_curr, "Kremlin Encrypted File")
 			terminate("notsupported", $f, "")
 
 		; Check for .exe file, only when fileext not .exe
@@ -1193,11 +1204,6 @@ Func exescan($f, $scantype, $analyze = 1)
 
 	; Match known patterns
 	Select
-		; Check if packed first
-		Case StringInStr($filetype_curr, "upx", 0) Or StringInStr($filetype_curr, "aspack", 0)
-			unpack()
-			;$packed = true
-
 		Case StringInStr($filetype_curr, "ARJ SFX", 0)
 			extract("arj", t('TERM_SFX') & ' ARJ ' & t('TERM_ARCHIVE'))
 
@@ -1267,6 +1273,12 @@ Func exescan($f, $scantype, $analyze = 1)
 
 		Case StringInStr($filetype_curr, "ZIP SFX", 0)
 			extract("zip", t('TERM_SFX') & ' ZIP ' & t('TERM_ARCHIVE'))
+
+		Case StringInStr($filetype_curr, "upx", 0)
+			unpack($PACKER_UPX)
+
+		Case StringInStr($filetype_curr, "aspack", 0)
+			unpack($PACKER_ASPACK)
 
 		Case StringInStr($filetype_curr, "Unable to open file", 0)
 			$isexe = False
@@ -1363,9 +1375,6 @@ Func advexescan($f)
 
 	; Match known patterns
 	Select
-		Case StringInStr($filetype_curr, "upx", 0) Or StringInStr($filetype_curr, "aspack", 0)
-			$packed = True
-
 		Case StringInStr($filetype_curr, "Advanced Installer", 0)
 			extract("ai", 'Advanced Installer ' & t('TERM_PACKAGE'))
 
@@ -1457,16 +1466,24 @@ Func advexescan($f)
 		Case StringInStr($filetype_curr, "CAB archive", 0)
 			$isexe = False
 
+		Case StringInStr($filetype_curr, "upx", 0)
+			unpack($PACKER_UPX)
+
+		Case StringInStr($filetype_curr, "aspack", 0)
+			unpack($PACKER_ASPACK)
+
 			; not supported filetypes
-		Case StringInStr($filetype_curr, "Autoit", 0) Or StringInStr($filetype_curr, "Not packed , try")
+		Case StringInStr($filetype_curr, "Autoit", 0) Or StringInStr($filetype_curr, "Not packed , try") Or _
+			 StringInStr($filetype_curr, "Microsoft Visual C# / Basic.NET")
 			terminate("notpacked", $file, "")
 
-		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0)
+		Case StringInStr($filetype_curr, "Astrum InstallWizard", 0) Or StringInStr($filetype_curr, "clickteam", 0) Or _
+			 StringInStr($filetype_curr, "BitRock InstallBuilder", 0)
 			terminate("notsupported", $file, "")
 
 			; Terminate if file cannot be unpacked
 		Case StringInStr($filetype_curr, "Not packed") And Not StringInStr($filetype_curr, "Microsoft Visual C++")
-			$notpacked = True
+			terminate("notpacked", $file, "")
 	EndSelect
 EndFunc
 
@@ -1680,15 +1697,16 @@ Func checkIE()
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' InstallExplorer ' & t('TERM_INSTALLER'))
 	$return = FetchStdout($cmd & $quickbms & ' -l "' & $bindir & $ie & '" "' & $file & '"', $filedir, @SW_HIDE)
 	_DeleteTrayMessageBox()
+
 	If StringInStr($return, "Target directory:", 0) Or StringInStr($return, "0 files found", 0) Or StringInStr($return, "Error", 0) _
-			Or StringInStr($return, "exception occured", 0) Or StringInStr($return, "not supported", 0) Or StringInStr($return, "crash occurred", 0) _
-			Or $return == "" Then
+	Or StringInStr($return, "exception occured", 0) Or StringInStr($return, "not supported", 0) Or StringInStr($return, "crash occurred", 0) _
+	Or $return == "" Then
 		$iefailed = True
 		Return False
-	Else
-		extract("qbms", 'InstallExplorer ' & t('TERM_INSTALLER'), $ie)
 	EndIf
-EndFunc   ;==>checkIE
+
+	extract("qbms", 'InstallExplorer ' & t('TERM_INSTALLER'), $ie)
+EndFunc
 
 ; Determine if file is Inno Setup installer
 Func checkInno()
@@ -1929,17 +1947,18 @@ EndFunc
 
 ; Check for unicode characters in path
 Func CheckUnicode()
-	If $checkUnicode Or StringRegExp($file, $unicodepattern, 0) Then Return
+	If Not $checkUnicode Or StringRegExp($file, $unicodepattern, 0) Then Return
 
 	Cout("File name seems to be unicode")
+	If StringRegExp($file, ".*part\d+\.rar", 0) Or StringRegExp($fileext, "\d{3}", 0) Then Return Cout("File seems to be multipart archive, not moving")
 	$oldpath = $file
 
 	If StringRegExp($filedir, $unicodepattern, 0) Then
 		$file = _TempFile($filedir, "Unicode_", $fileext)
 	Else
-		Cout("File path seems to be unicode")
+		Cout("Path seems to be unicode")
 		If Not StringRegExp(@TempDir, $unicodepattern, 0) Then Return Cout("Temp directory contains unicode characters, aborting")
-		$file = _TempFile(@TempDir, "Unicode_", $fileext)
+		$file = StringRegExp($filename, $unicodepattern, 0)? @TempDir & "\" & $filename & "." & $fileext: _TempFile(@TempDir, "Unicode_", $fileext)
 	EndIf
 
 	$bIsUnicode = True
@@ -2050,6 +2069,14 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		Case "audio"
 			HasFFMPEG()
 			_Run($cmd & $ffmpeg & ' -i "' & $file & '" "' & ($bIsUnicode? $sUnicodeName: $filename) & '.wav"', $outdir, @SW_HIDE)
+
+		Case "bcm"
+			_Run($cmd & $bcm & ' -d "' & $file & '" "' & $outdir & '\' & ($bIsUnicode? $sUnicodeName: $filename) & '"', $filedir, @SW_HIDE, True, False)
+
+		Case "bootimg"
+			HasPlugin($bootimg)
+;~ 			FileCopy($bootimg, $outdir)
+			; TODO
 
 		Case "bz2"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
@@ -2283,7 +2310,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 
 			; Change output directory structure
 			Cleanup($outdir & "\install_script.iss")
-			Local $aReturn[2] = [$outdir & "\embedded", $outdir & "\{tmp}"]
+			Local $aReturn[2] = [$outdir & "\embedded", $outdir & "\{tmp}", $outdir & "\{commonappdata}"]
 			Cleanup($aReturn, True)
 			MoveFiles($outdir & "\{app}", $outdir, True, '', True)
 
@@ -2893,6 +2920,9 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 			FileMove($tempoutdir & '\' & $filename & '.' & $fileext, $file)
 			MoveFiles($tempoutdir, $outdir, False, "", True)
 
+		Case "zpaq"
+			_Run($cmd & $zpaq & ' x "' & $file & '" -to "' & $outdir & '"', $outdir, @SW_SHOW, True, False)
+
 		Case Else
 			Cout("Unknown arctype: " & $arctype & ". Feature not implemented!")
 	EndSwitch
@@ -2907,7 +2937,7 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 		; Special actions for 7zip extraction
 		If $arctype == "7z" And ($fileext = "exe" Or StringInStr($filetype, "SFX")) Then
 			; Check if sfx archive and extract sfx script using 7ZSplit if possible
-			_CreateTrayMessageBox(t('SCANNING_FILE') & @CRLF & "7z SFX Archives splitter")
+			_CreateTrayMessageBox(t('SCANNING_FILE', "7z SFX Archives splitter"))
 			Cout("Trying to extract sfx script")
 			Run($7zsplit & ' "' & $file & '"', $outdir, @SW_HIDE)
 			WinWait("7z SFX Archives splitter")
@@ -2970,30 +3000,27 @@ Func extract($arctype, $arcdisp, $additionalParameters = "", $returnSuccess = Fa
 EndFunc   ;==>extract
 
 ; Unpack packed executable
-Func unpack()
-	Local $packer
-	If StringInStr($filetype, "UPX", 0) Or $fileext = "dll" Then
-		$packer = "UPX"
-	ElseIf StringInStr($filetype, "ASPack", 0) Then
-		$packer = "ASPack"
-	EndIf
+Func unpack($packer)
+	If $unpackfailed Then Return
+	$unpackfailed = True ; Don't display the prompt multiple times
 
 	; Prompt to continue
 	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') _
 			 & "." & $fileext), 0) Then Return
 
 	; Unpack file
-	If $packer == "UPX" Then
-		_Run($cmd & $upx & ' -d -k "' & $file & '"', $filedir)
-		$tempext = StringTrimRight($fileext, 1) & '~'
-		If FileExists($filedir & "\" & $filename & "." & $tempext) Then
-			FileMove($file, $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext)
-			FileMove($filedir & "\" & $filename & "." & $tempext, $file)
-		EndIf
-	ElseIf $packer == "ASPack" Then
-		RunWait($cmd & $aspack & ' "' & $file & '" "' & $filedir & '\' & $filename & '_' & t('TERM_UNPACKED') & _
-				$fileext & '" /NO_PROMPT', $filedir)
-	EndIf
+	Switch $packer
+		Case $PACKER_UPX
+			_Run($cmd & $upx & ' -d -k "' & $file & '"', $filedir)
+			$tempext = StringTrimRight($fileext, 1) & '~'
+			If FileExists($filedir & "\" & $filename & "." & $tempext) Then
+				FileMove($file, $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext)
+				FileMove($filedir & "\" & $filename & "." & $tempext, $file)
+			EndIf
+		Case $PACKER_ASPACK
+			RunWait($cmd & $aspack & ' "' & $file & '" "' & $filedir & '\' & $filename & '_' & t('TERM_UNPACKED') & _
+					$fileext & '" /NO_PROMPT', $filedir)
+	EndSwitch
 
 	; Success evaluation
 	If FileExists($filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext) Then
@@ -3008,7 +3035,7 @@ Func unpack()
 	Else
 		Prompt(16, 'UNPACK_FAILED', $file, 1)
 	EndIf
-EndFunc   ;==>unpack
+EndFunc
 
 ; Perform outdir cleanup: move/delete given files according to $iCleanup setting
 Func Cleanup($aFiles, $bIsFolder = False, $iMode = $iCleanup, $dir = 0)
@@ -4013,6 +4040,9 @@ Func _Run($f, $workingdir, $show_flag = @SW_MINIMIZE, $useTee = True, $patternSe
 			$success = True
 		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
 			Cout("At least one output file already existed")
+			; Folder size will most likely stay the same if files are overwritten,
+			; so let's disable the check to avoid 'failed' message
+			$success = True
 		EndIf
 
 	; Do not create log
@@ -4285,7 +4315,6 @@ Func CreateGUI()
 	GUICtrlCreateMenuItem("", $filemenu)
 	Local $quititem = GUICtrlCreateMenuItem(t('MENU_FILE_QUIT_LABEL'), $filemenu)
 	Local $editmenu = GUICtrlCreateMenu(t('MENU_EDIT_LABEL'))
-	Global $keepitem = GUICtrlCreateMenuItem(t('MENU_EDIT_KEEP_LABEL'), $editmenu)
 	Global $silentitem = GUICtrlCreateMenuItem(t('MENU_EDIT_SILENT_MODE_LABEL'), $editmenu)
 	GUICtrlCreateMenuItem("", $editmenu)
 	Local $passworditem = GUICtrlCreateMenuItem(t('MENU_EDIT_PASSWORD_LABEL'), $editmenu)
@@ -4315,28 +4344,17 @@ Func CreateGUI()
 	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), 5, 4, -1, 15)
 	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 5), 3, Default, 15)
 	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), 3, Default, 15)
+	GUICtrlSetState($extract? $GUI_Main_Extract: $GUI_Main_Scan, $GUI_CHECKED)
 
-	If $extract Then
-		GUICtrlSetState($GUI_Main_Extract, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($GUI_Main_Scan, $GUI_CHECKED)
-	EndIf
-
-	If $history Then
-		Global $filecont = GUICtrlCreateCombo("", 5, 20, 260, 20)
-	Else
-		Global $filecont = GUICtrlCreateInput("", 5, 20, 260, 20)
-	EndIf
+	Global $filecont = $history? GUICtrlCreateCombo("", 5, 20, 260, 20): GUICtrlCreateInput("", 5, 20, 260, 20)
 	Local $filebut = GUICtrlCreateButton("...", 270, 20, 25, 20)
 
 	; Directory controls
-	GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, -1, 15)
-	If $history Then
-		Global $dircont = GUICtrlCreateCombo("", 5, 60, 260, 20)
-	Else
-		Global $dircont = GUICtrlCreateInput("", 5, 60, 260, 20)
-	EndIf
+	Local $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, -1, 15)
+	Global $dircont = $history? GUICtrlCreateCombo("", 5, 60, 260, 20): GUICtrlCreateInput("", 5, 60, 260, 20)
 	Local $dirbut = GUICtrlCreateButton("...", 270, 60, 25, 20)
+	Global $GUI_Main_Lock = GUICtrlCreateCheckbox(t('MAIN_DIRECTORY_LOCK'), GetPos($guimain, $GUI_Main_Destination_Label, 5), 44, Default, 15)
+	GUICtrlSetTip($GUI_Main_Lock, t('MAIN_DIRECTORY_LOCK_TOOLTIP'))
 
 	; Buttons
 	Global $ok = GUICtrlCreateButton(t('OK_BUT'), 10, 90, 80, 20)
@@ -4349,25 +4367,15 @@ Func CreateGUI()
 	GUICtrlSetState($dropzone, $GUI_DROPACCEPTED)
 	GUICtrlSetState($filecont, $GUI_FOCUS)
 	GUICtrlSetState($ok, $GUI_DEFBUTTON)
-	If $KeepOutdir Then
-		GUICtrlSetState($keepitem, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($keepitem, $GUI_UNCHECKED)
-	EndIf
-	If $KeepOpen Then
-		GUICtrlSetState($keepopenitem, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($keepopenitem, $GUI_UNCHECKED)
-	EndIf
-	If $silentmode Then
-		GUICtrlSetState($silentitem, $GUI_CHECKED)
-	Else
-		GUICtrlSetState($silentitem, $GUI_UNCHECKED)
-	EndIf
+	GUICtrlSetState($GUI_Main_Lock, $KeepOutdir? $GUI_CHECKED: $GUI_UNCHECKED)
+	GUICtrlSetState($keepopenitem, $KeepOpen? $GUI_CHECKED: $GUI_UNCHECKED)
+	GUICtrlSetState($silentitem, $silentmode: $GUI_CHECKED: $GUI_UNCHECKED)
+
 	If $batchEnabled = 0 Then
 		GUICtrlSetState($showitem, $GUI_DISABLE)
 		GUICtrlSetState($clearitem, $GUI_DISABLE)
 	EndIf
+
 	If $file <> "" Then
 		FilenameParse($file)
 		If $history Then
@@ -4394,7 +4402,7 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($showitem, "GUI_Batch_Show")
 	GUICtrlSetOnEvent($clearitem, "GUI_Batch_Clear")
 	GUICtrlSetOnEvent($logitem, "GUI_DeleteLogs")
-	GUICtrlSetOnEvent($keepitem, "GUI_KeepOutdir")
+	GUICtrlSetOnEvent($GUI_Main_Lock, "GUI_KeepOutdir")
 	GUICtrlSetOnEvent($GUI_Main_Extract, "GUI_ScanOnly")
 	GUICtrlSetOnEvent($GUI_Main_Scan, "GUI_ScanOnly")
 	GUICtrlSetOnEvent($silentitem, "GUI_Silent")
@@ -4521,16 +4529,9 @@ EndFunc   ;==>GUI_Directory
 
 ; Option to keep the destination directory
 Func GUI_KeepOutdir()
-	If BitAND(GUICtrlRead($keepitem), $GUI_CHECKED) = $GUI_CHECKED Then
-		GUICtrlSetState($keepitem, $GUI_UNCHECKED)
-		$KeepOutdir = 0
-	Else
-		GUICtrlSetState($keepitem, $GUI_CHECKED)
-		$KeepOutdir = 1
-	EndIf
-
+	$KeepOutdir = Int(BitAND(GUICtrlRead($GUI_Main_Lock), $GUI_CHECKED) = $GUI_CHECKED)
 	SavePref('keepoutputdir', $KeepOutdir)
-EndFunc   ;==>GUI_KeepOutdir
+EndFunc
 
 ; Option to scan file without extracting
 Func GUI_ScanOnly()

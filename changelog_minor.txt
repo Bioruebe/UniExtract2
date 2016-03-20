@@ -1,5 +1,7 @@
 Beta 3:
   Added support for .mp3, .wmv and .wma files
+  Added support for bcm compressed files using bcm
+  Added support for zpaq archives using zpaq
   Added status box to sfx script extraction
   Changed .exe detection logic for speed improvements
   Changed file type detection: TrIDLib is now used for extraction, TrID for scan only mode, the library
@@ -9,8 +11,11 @@ Beta 3:
 		  also have different preferences
   Changed .exe extraction: UniExtract will now terminate with a NOTPACKED error instead of using 
 		  generic 7z extraction, which produces useless files
+  Changed success evaluation: if files were overwritten the extraction was often evaluated as failed
+  Changed keepopen option: moved from edit menu to main GUI for better usability
   Fixed crash when clicking finish button in plugin GUI if no item has been selected before
   Fixed helper binaries execution failing if %comspec% environment variable is unset
+  Fixed .pea detection
   Fixed .chm extraction
   Fixed FreeArc extraction
   Fixed registry keys are now being deleted after scanning if they did not exist before for ExeInfo, PEid
@@ -21,10 +26,14 @@ Beta 3:
   Fixed download progress indicator not being on top of first start GUI
   Fixed first start GUI now shows 'Installed' if FFMPEG already exists
   Fixed error message display bug for unicode files
+  Fixed some wrong detections
+  Fixed unicode multipart rar/7z archive extraction
+  Fixed unpack prompt in some cases being displayed again after the user clicked 'no'
   Removed globalprefs option and preference storage in registry
   Removed faad and flac, extraction is now handled by FFMPEG
   Removed unnecessary input file moves
   Updated ExeInfoPE to 0.0.4.1
+  Updated peazip to 0.53/1.0
   Updated ttarchext to 0.2.9
   Updated Japanese translation, thanks to A. Inaba
   Updated Chinese (Simplified) translation, thanks to SeaHOH
