@@ -2,6 +2,7 @@ Beta 3:
   Added support for .mp3, .wmv and .wma files
   Added support for bcm compressed files using bcm
   Added support for zpaq archives using zpaq
+  Added support for Android boot images using bootimg (plugin)
   Added status box to sfx script extraction
   Changed .exe detection logic for speed improvements
   Changed file type detection: TrIDLib is now used for extraction, TrID for scan only mode, the library
@@ -13,6 +14,7 @@ Beta 3:
 		  generic 7z extraction, which produces useless files
   Changed success evaluation: if files were overwritten the extraction was often evaluated as failed
   Changed keepopen option: moved from edit menu to main GUI for better usability
+  Changed success evaluation: improved failure detection
   Fixed crash when clicking finish button in plugin GUI if no item has been selected before
   Fixed helper binaries execution failing if %comspec% environment variable is unset
   Fixed .pea detection
@@ -29,6 +31,7 @@ Beta 3:
   Fixed some wrong detections
   Fixed unicode multipart rar/7z archive extraction
   Fixed unpack prompt in some cases being displayed again after the user clicked 'no'
+  Fixed 7zip check often returning true, even if the file cannot be extracted, leading to 'failed' extraction result
   Removed globalprefs option and preference storage in registry
   Removed faad and flac, extraction is now handled by FFMPEG
   Removed unnecessary input file moves

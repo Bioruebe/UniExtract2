@@ -97,8 +97,8 @@ wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https:
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
 XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke						http://www.winace.com/											
 ZPAQ										x86\zpaq.exe				7.70		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html
-											x86\zpaqxp.exe				-------		---------	-------					-------								-------
 											x64\zpaq.exe				-------		---------	-------					-------								-------
+											zpaqxp.exe					-------		---------	-------					-------								-------
 
 Total Commander plugins:
    DBX plugin								dbxplug.wcx					1.2				x		Freeware				Dmitri R. Letichevski				http://www.totalcmd.net/plugring/dbx.html						
