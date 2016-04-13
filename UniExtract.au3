@@ -573,15 +573,13 @@ Func ReadPrefs()
 		Cout("Using current user's settings")
 	Else
 		; Test file permissions, e.g. when UniExtract is in program files directory,
-		; user settings are stored in %appdata% du to permission issues
-		$handle = FileOpen($globalIni, 1)
-		If $handle == -1 Then
+		; user settings are stored in %appdata% due to permission issues
+		If CanAccess($globalIni) Then
+			Cout("Using global settings")
+			Global $settingsdir = @ScriptDir
+		Else
 			Cout("Cannot write to " & $globalIni & ", using %appdata%")
 			FileCopy($globalIni, $userIni, 8)
-		Else
-			Cout("Using global settings")
-			FileClose($handle)
-			Global $settingsdir = @ScriptDir
 		EndIf
 	EndIf
 
@@ -2001,6 +1999,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	If StringRight($outdir, 1) = '\' Then $outdir = StringTrimRight($outdir, 1)
 	If FileExists($outdir) Then
 		$dirmtime = FileGetTime($outdir, 0, 1)
+		If Not CanAccess($outdir) Then terminate("invaliddir", $outdir, "")
 	Else
 		If Not DirCreate($outdir) Then terminate("invaliddir", $outdir, "")
 		$createdir = True
@@ -3136,6 +3135,27 @@ Func Cleanup($aFiles, $bIsFolder = False, $iMode = $iCleanup, $dir = 0)
 	Next
 EndFunc
 
+; Check write permissions for specified file or folder
+Func CanAccess($sPath)
+	Local $bIsTemp = False
+	If Not FileExists($sPath) Then Return SetError(1)
+
+	Cout("Checking permissions for path " & $sPath)
+	If StringInStr(FileGetAttrib($sPath), "D") Then
+		$bIsTemp = True
+		$sPath = _TempFile($sPath)
+	EndIf
+
+	$handle = FileOpen($sPath, 1)
+	If $handle == -1 Then
+		Cout("Access denied")
+		Return False
+	EndIf
+	FileClose($handle)
+	If $bIsTemp Then FileDelete($sPath)
+	Return True
+EndFunc
+
 ; Terminate if specified plugin was not found
 Func HasPlugin($plugin, $returnFail = False)
 	Cout("Searching for plugin " & $plugin)
@@ -4213,10 +4233,11 @@ Func CheckUpdate($silent = False)
 	Cout("Local: " & $version)
 	Cout("Server: " & $return)
 
-	If $return <> $version Then
+	If StringLen($return) > 0 And $return <> $version Then
 		Cout("Update available")
 		$found = True
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($version, $return), 0) Then
+		$sInfo = _INetGetSource($updateURL & "?get=info&id=" & $ID)
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($version, $return, @CRLF & $sInfo & @CRLF), 0) Then
 			$UEURL = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
 			If @error Or $UEURL = "" Then Return $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATE_FAILED'))
 			$return = Download($UEURL)

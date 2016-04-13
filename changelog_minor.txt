@@ -4,6 +4,8 @@ Beta 3:
   Added support for zpaq archives using zpaq
   Added support for Android boot images using bootimg (plugin)
   Added status box to sfx script extraction
+  Added output directory permission check
+  Added update summary to update prompt
   Changed .exe detection logic for speed improvements
   Changed file type detection: TrIDLib is now used for extraction, TrID for scan only mode, the library
 		  version is much faster but returns less additional information
@@ -13,8 +15,8 @@ Beta 3:
   Changed .exe extraction: UniExtract will now terminate with a NOTPACKED error instead of using 
 		  generic 7z extraction, which produces useless files
   Changed success evaluation: if files were overwritten the extraction was often evaluated as failed
-  Changed keepopen option: moved from edit menu to main GUI for better usability
   Changed success evaluation: improved failure detection
+  Changed keepopen option: moved from edit menu to main GUI for better usability
   Fixed crash when clicking finish button in plugin GUI if no item has been selected before
   Fixed helper binaries execution failing if %comspec% environment variable is unset
   Fixed .pea detection
