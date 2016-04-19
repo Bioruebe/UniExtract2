@@ -7,7 +7,7 @@ Binaries:
 															(Success Evaluation|Fast Detection|Percentage Indicator)
 Name										Files						Version		Features	License					Author								Website
 															
-7Zip										x86\7z.exe					15.14		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
+7Zip										x86\7z.exe					15.05		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
 											x64\7z.exe					-------		---------	(+ unRAR restriction)	-------								-------															
 											x86\7z.dll					-------		---------	-------					-------								-------															
 											x64\7z.dll					-------		---------	-------					-------								-------															
@@ -80,6 +80,7 @@ TrID definations							TrIDDefs.TRD				2012/05/06	---------	-------					-------	
 Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.2.9		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
 unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com					http://www.kippler.com/win/unalz/
 FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin						http://freearc.org/
+Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
 UnRAR										UnRAR.exe					5.31 Beta 1	x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										/unrpa directory			1.4 mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
