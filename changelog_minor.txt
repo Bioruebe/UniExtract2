@@ -37,6 +37,10 @@ Beta 3:
   Fixed unicode multipart rar/7z archive extraction
   Fixed unpack prompt in some cases being displayed again after the user clicked 'no'
   Fixed 7zip check often returning true, even if the file cannot be extracted, leading to 'failed' extraction result
+  Fixed crash in update message when UniExtract is run from command line and 'No' is clicked
+  Fixed syntax help dialog closing automatically
+  Fixed possible false positives when using checkNSIS function
+  Fixed password detection for some .rar files
   Removed globalprefs option and preference storage in registry
   Removed faad and flac, extraction is now handled by FFMPEG
   Removed unnecessary input file moves

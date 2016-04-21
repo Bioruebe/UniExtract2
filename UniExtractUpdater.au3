@@ -17,8 +17,10 @@
 ; Script Start - Add your code below here
 
 Const $sTitle = "Universal Extractor Updater"
+Const $sUniExtract = "UniExtract.exe"
 
-If $cmdline[0] < 1 Then Exit MsgBox(16, $sTitle, "Updater called with invalid number of arguments.")
+If Not FileExists($sUniExtract) Then Exit MsgBox(16, $sTitle, "Universal Extractor main executable not found in current directory.")
+If $cmdline[0] < 1 Then Exit ShellExecute($sUniExtract, "/update")
 If Not FileExists($cmdline[1]) Then Exit MsgBox(16, $sTitle, "Invalid update package passed to updater.")
 $OSArch = @OSArch = 'X64'? 'x64': 'x86'
 
@@ -29,7 +31,7 @@ Else
 EndIf
 
 Func _UpdateUniExtract()
-	If Not ProcessWaitClose("UniExtract.exe", 10) Then Exit MsgBox(16, $sTitle, "Failed to close Universal Extractor. Please terminate the process manually and try again.")
+	If Not ProcessWaitClose($sUniExtract, 10) Then Exit MsgBox(16, $sTitle, "Failed to close Universal Extractor. Please terminate the process manually and try again.")
 
 	$sCmd = @ScriptDir & '\bin\' & $OSArch & '\7z.exe x -y -xr!UniExtract.ini -o"' & @ScriptDir & '" "' & $cmdline[1] & '"'
 	;~ MsgBox(262144, 'Debug line ~' & @ScriptLineNumber, 'Selection:' & @CRLF & '$sCmd' & @CRLF & @CRLF & 'Return:' & @CRLF & $sCmd) ;### Debug MSGBOX
