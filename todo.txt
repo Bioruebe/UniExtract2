@@ -19,15 +19,18 @@ gif, apng
 http://tlwiki.org/index.php?title=Tools
 
 // New formats
-100.0% (.ISZ) ISo Zipped format (4000/1)
+
+
+// Extraction logic updates
+Add cleanup function call if necessary
+Disable _Run function's pattern search for extractors that do not provide percentage indicators
+Use definition files if possible
 
 
 // Usability:
 statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
 inno: percentage indicator fixed?
 arj percentage indicator //tee problem
-Zip extraction: 'User input needed' message does not disappear
-cleanup after extraction, e.g. {app}
 
 
 // Bugs
@@ -35,12 +38,12 @@ jsmsi: .cab not found (working dir?)
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 Extracting to C:/ creates file in @ScriptDir
 Unicode files are not moved to outdir if using unpack() function
+$is6cab extractor might crash ('... is not working anymore'), resulting in batch processing stop
 
 
 // Other:
 Logging: quickbms, Crage
 additional file types for arc_conv, ffmpeg
-Disable _Run function's pattern search for extractors that do not provide percentage indicators
 
 
 // Short term
@@ -50,7 +53,6 @@ Disable _Run function's pattern search for extractors that do not provide percen
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 include tridscan gui?
 ntlea?
-
 
 
 // Known bugs:
