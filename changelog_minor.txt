@@ -1,3 +1,10 @@
+Beta 4:
+  Added support for InstallAware installers
+  Added support for .gif files (FFMPEG)
+  Fixed multiple error messages being displayed on failed update check
+  Fixed update message display problem
+  Updated language files for Portuguese, Russian, Swedish
+
 Beta 3:
 
   Beta 3 brings a brand new updater, fixes several errors related to missing permissions 

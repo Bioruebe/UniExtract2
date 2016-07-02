@@ -194,7 +194,7 @@ Const $rpa = $bindir & "unrpa\unrpa.exe"											;1.4 @Git-13 Dec 2014	;modifi
 Const $wise_ewise = "e_wise_w.exe" 													;2002/07/01
 Const $wise_wun = "wun.exe" 														;0.90A
 Const $zip = "unzip.exe" 															;6.00
-Const $zpaq = StringInStr(@OSVersion, "WIN_XP")? "zpaqxp.exe": "zpaq.exe" ;x64		;7.07
+Const $zpaq = _IsWinXP("zpaqxp.exe", "zpaq.exe")						 ;x64		;7.07
 Const $zoo = "unzoo.exe" 															;4.5
 
 ; Plugins
@@ -854,7 +854,8 @@ Func filecompare($filetype_curr)
 			HasPlugin($mpq)
 			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
 		Case StringInStr($filetype_curr, "RIFF", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
-			 StringInStr($filetype_curr, "MPEG sequence") Or StringInStr($filetype_curr, "Microsoft ASF")
+			 StringInStr($filetype_curr, "MPEG sequence") Or StringInStr($filetype_curr, "Microsoft ASF") Or _
+			 StringInStr($filetype_curr, "GIF image")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
 			extract("audio", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
@@ -1139,7 +1140,7 @@ Func tridcompare($filetype_curr)
 
 		Case StringInStr($filetype_curr, "Video", 0) Or StringInStr($filetype_curr, "QuickTime Movie", 0) Or _
 			 StringInStr($filetype_curr, "Matroska", 0) Or StringInStr($filetype_curr, "Material Exchange Format", 0) Or _
-			 StringInStr($filetype_curr, "Windows Media (generic)")
+			 StringInStr($filetype_curr, "Windows Media (generic)") Or StringInStr($filetype_curr, "GIF animated")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($filetype_curr, "null bytes", 0)
@@ -1421,6 +1422,10 @@ Func advexescan($f)
 
 		Case StringInStr($filetype_curr, "Inno Setup", 0)
 			checkInno()
+
+		; Needs to be before InstallShield
+		Case StringInStr($filetype_curr, "InstallAware", 0)
+			extract("7z", 'InstallAware ' & t('TERM_INSTALLER') & ' ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($filetype_curr, "InstallShield", 0)
 			If Not $isfailed Then extract("isexe", 'InstallShield ' & t('TERM_INSTALLER'))
@@ -2725,7 +2730,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($cmd & $unreal & ' -out="' & $outdir & '" "' & $file & '"', $outdir)
 
 		Case "video"
-			; Prompt to download FFmpeg if file not found
 			HasFFMPEG()
 
 			; Collect information about number of tracks
@@ -2743,7 +2747,14 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$Streams[$i] = StringRegExpReplace($Streams[$i], "(?i)(?s).*?#(\d:\d)(.*?): (\w+): (\w+).*", "$3,$4,$1,$2")
 ;~ 				_ArrayDisplay($Streams)
 				$StreamType = StringSplit($Streams[$i], ",")
+;~ 				_ArrayDisplay($StreamType)
 				If $StreamType[1] == "Video" Then
+					If $StreamType[2] == "gif" Then
+						_Run($command & ' "' & ($bIsUnicode? $sUnicodeName: $filename) & '%05d.png"', $outdir, @SW_HIDE, True, False)
+						$iVideo += 1
+						ContinueLoop
+					EndIf
+
 					If Not $bExtractVideo Then ContinueLoop
 					$iVideo += 1
 					If $StreamType[2] == "h264" Then
@@ -3071,8 +3082,6 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 		Dim $aFiles[1] = [$return]
 	EndIf
 
-	Cout("Starting cleanup procedure")
-
 	If $iMode = $OPTION_MOVE Then
 		If $dir == 0 Then $dir = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
 		If Not FileExists($dir) Then DirCreate($dir)
@@ -3082,14 +3091,14 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 		If Not FileExists($sFile) Then ContinueLoop
 		$bIsFolder = StringInStr(FileGetAttrib($sFile), "D")
 		If $iMode = $OPTION_DELETE Then
-			Cout("Deleting " & $sFile)
+			Cout("Cleanup: Deleting " & $sFile)
 			If $bIsFolder Then
 				DirRemove($sFile, 1)
 			Else
 				FileDelete($sFile)
 			EndIf
 		Else
-			Cout("Moving " & $sFile & " to " & $dir)
+			Cout("Cleanup: Moving " & $sFile & " to " & $dir)
 			If $bIsFolder Then
 				DirMove($sFile, $dir, 1)
 			Else
@@ -3765,10 +3774,16 @@ Func IsJavaInstalled()
 	terminate('missingexe', $file, "Java Runtime Environment")
 EndFunc   ;==>IsJavaInstalled
 
-; Determine whether Windows version >= Windows 7, used for cascading context menu support
+; Determine whether Windows version >= Windows 7 or not; used for cascading context menu support
 Func _IsWin7()
 	Global $win7 = @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Or @OSVersion = "WIN_10"
 	Return $win7
+EndFunc
+
+; Determine whether Windows version is XP or not
+Func _IsWinXP($sTrue = "", $sFalse = "")
+	$return = StringInStr(@OSVersion, "WIN_XP")
+	Return @NumParams == 0? $return: ($return? $sTrue: $sFalse)
 EndFunc
 
 ; Determine if a key exists in registry
@@ -4136,10 +4151,10 @@ Func CheckUpdate($silent = False, $bCheckInterval = False)
 
 	; Universal Extractor
 	$return = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
-	If @error Then $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
+	If @error Then Return $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
 
 	$aReturn = StringSplit($return, @CRLF)
-	If @error Then $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
+	If @error Then Return $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
 
 	$return = $aReturn[1]
 
@@ -4149,7 +4164,8 @@ Func CheckUpdate($silent = False, $bCheckInterval = False)
 	If StringLen($return) > 0 And $return <> $version Then
 		Cout("Update available")
 		$found = True
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($version, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
+		; $Because FFMPEG uses the same update message, we cannot use the %name constant here 
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
 			$return = Download($aReturn[$aReturn[0]])
 			If $return == 0 Then Return
 			ShellExecute($updater, Quote($return))
@@ -4162,12 +4178,12 @@ Func CheckUpdate($silent = False, $bCheckInterval = False)
 		; Determine FFmpeg version
 		$return = FetchStdout($ffmpeg, @ScriptDir, @SW_HIDE)
 		$ffmpegvers = _StringBetween($return, "ffmpeg version ", " Copyright")
-		$return = _INetGetSource($updateURL & "?get=ffversion")
+		$return = _INetGetSource($updateURL & "?get=ffversion" & _IsWinXP("&xp"))
 		; Download new
-		If IsArray($ffmpegvers) And $return > $ffmpegvers[0] Then
+		If IsArray($ffmpegvers) And $return <> $ffmpegvers[0] Then
 			$found = True
 			Cout("Found update for FFmpeg")
-			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $ffmpegvers[0], $return), 0) Then GetFFmpeg()
+			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $ffmpegvers[0], $return, ""), 0) Then GetFFmpeg()
 		EndIf
 	EndIf
 
@@ -4210,7 +4226,7 @@ EndFunc
 
 ; Download FFmpeg and move needed files to Universal Extractor directory
 Func GetFFmpeg()
-	$FFmpegURL = _INetGetSource($updateURL & "?get=ffmpeg&OSarch=" & @OSArch & "&id=" & $ID)
+	$FFmpegURL = _INetGetSource($updateURL & "?get=ffmpeg&OSarch=" & @OSArch & "&id=" & $ID & _IsWinXP("&xp"))
 	$return = Download($FFmpegURL)
 	If @error Then Return SetError(1, 0, 0)
 
@@ -4253,6 +4269,13 @@ Func Download($f)
 
 	; Download File
 	Local $DownloadedFile = @TempDir & "\" & StringTrimLeft($f, StringInStr($f, "/", 0, -1))
+
+	If FileExists($DownloadedFile) Then
+		GUIDelete($DownloadGUI)
+		Cout("The file to download already exists")
+		Return $DownloadedFile
+	EndIf
+
 	Local $Download = InetGet($f, $DownloadedFile, 1, 1)
 
 	; Update progress bar
