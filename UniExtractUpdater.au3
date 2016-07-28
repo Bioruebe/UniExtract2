@@ -19,7 +19,7 @@
 Const $sTitle = "Universal Extractor Updater"
 Const $sUniExtract = @ScriptDir & "\UniExtract.exe"
 
-If Not FileExists($sUniExtract) Then Exit MsgBox(16, $sTitle, "Universal Extractor main executable not found in current directory.")
+If Not FileExists($sUniExtract) Then Exit MsgBox(16, $sTitle, "Universal Extractor main executable not found in current directory." & @CRLF & @CRLF & "Path is " & $sUniExtract)
 If $cmdline[0] < 1 Then Exit ShellExecute($sUniExtract, "/update")
 $OSArch = @OSArch = 'X64'? 'x64': 'x86'
 
@@ -39,7 +39,7 @@ Func _UpdateUniExtract()
 	RunWait($sCmd)
 	Sleep(100)
 	FileDelete($cmdline[1])
-	Run(@ScriptDir & "\UniExtract.exe /afterupdate")
+	Run($sUniExtract & " /afterupdate")
 EndFunc
 
 Func _UpdateFFMPEG()
@@ -50,5 +50,6 @@ Func _UpdateFFMPEG()
 
 	; License files
 	If $cmdline[2] <> 0 Then FileMove($cmdline[2], @ScriptDir & "\docs\FFmpeg\FFmpeg_license.html", 8 + 1)
+	Run($sUniExtract)
 EndFunc
 

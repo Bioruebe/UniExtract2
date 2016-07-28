@@ -1,8 +1,19 @@
 Beta 4:
   Added support for InstallAware installers
   Added support for .gif files (FFMPEG)
+  Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
+  Added support for Ghost Installer Studio installers
+  Added status box when moving/copying unicode files to temp directory
+  Changed forcing a single instance and auto-adding is now disabled if the extraction
+		  is already finished and only the result message box is opened
+  Changed unicode path logic: file is now copied instead of moved if it is on a different
+		  drive than the temp directory
   Fixed multiple error messages being displayed on failed update check
   Fixed update message display problem
+  Fixed possible problems when entering relative paths in main GUI input fields
+  Fixed extraction not working when file directory contains unicode characters and
+		there is not enough free space on the drive containing the temp folder
+  Fixed free space check not taking unicode file moving into account
   Updated language files for Portuguese, Russian, Swedish
 
 Beta 3:

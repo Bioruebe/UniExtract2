@@ -97,6 +97,7 @@ UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
 XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke						http://www.winace.com/											
+Xor											xor.exe						0.2			-	-	-	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm
 ZPAQ										x86\zpaq.exe				7.70		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html
 											x64\zpaq.exe				-------		---------	-------					-------								-------
 											zpaqxp.exe					-------		---------	-------					-------								-------
