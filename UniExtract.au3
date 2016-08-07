@@ -171,6 +171,7 @@ Const $lzx = "unlzx.exe" 															;1.21
 Const $mht = "extractMHT.exe" 														;1.0
 Const $msi_msix = "MsiX.exe" 														;1.0
 Const $msi_jsmsix = "jsMSIx.exe" 													;1.11.0704
+Const $msi_lessmsi = $bindir & "lessmsi\lessmsi.exe"									;1.4
 Const $nbh = "NBHextract.exe" 														;1.0
 Const $pea = "pea.exe" 																;0.53/1.0
 Const $peid = "peid.exe" 															;0.95   2012/04/24
@@ -1179,7 +1180,7 @@ Func exescan($f, $scantype, $analyze = 1)
 	Local Const $key = "HKCU\Software\PEiD"
 
 	Cout("Start filescan using PEiD")
-	CreateTrayMessageBox(t('SCANNING_EXE', "PEiD (" & $scantype & ")"))
+	_CreateTrayMessageBox(t('SCANNING_EXE', "PEiD (" & $scantype & ")"))
 
 	; Backup existing PEiD options
 	Local $exsig = RegRead($key, "ExSig")
@@ -2021,7 +2022,8 @@ EndFunc
 Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
 	$success = $RESULT_UNKNOWN
 	Cout("Starting " & $arctype & " extraction")
-	_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & ($arcdisp == 0? "." & $fileext & " " & t('TERM_FILE'): $arcdisp))
+	If $arcdisp == 0 Then $arcdisp = "." & $fileext & " " & t('TERM_FILE')
+	_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 
 	; Create subdirectory
 	If StringRight($outdir, 1) = '\' Then $outdir = StringTrimRight($outdir, 1)
@@ -2544,40 +2546,44 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case "msi"
-			Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
-			$choice = MethodSelect($aReturn, $arcdisp)
+			If HasNetFramework(4) Then
+				_Run($cmd & $msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_SHOW, True)
+			Else
+				Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
+				$choice = MethodSelect($aReturn, $arcdisp)
 
-			Switch $choice
-				Case 1 ; jsMSI Unpacker
-					_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_SHOW, False)
-					_FileRead($outdir & "\MSI Unpack.log", True)
+				Switch $choice
+					Case 1 ; jsMSI Unpacker
+						_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_SHOW, False)
+						_FileRead($outdir & "\MSI Unpack.log", True)
 
-				Case 2 ; MsiX
-					Local $appendargs = $appendext? '/ext': ''
-					_Run($cmd & $msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendargs, $filedir)
+					Case 2 ; MsiX
+						Local $appendargs = $appendext? '/ext': ''
+						_Run($cmd & $msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendargs, $filedir)
 
-				Case 3 ; MSI Total Commander plugin
-					extract('qbms', $arcdisp, $msi_plug, True)
+					Case 3 ; MSI Total Commander plugin
+						extract('qbms', $arcdisp, $msi_plug, True)
 
-					; Extract files from extracted CABs
-					$cabfiles = FileSearch($tempoutdir)
-					For $i = 1 To $cabfiles[0]
-						filescan($cabfiles[$i], 0)
-						If StringInStr($filetype, "Microsoft Cabinet Archive", 0) Then
-							_Run($cmd & $7z & ' x "' & $cabfiles[$i] & '"', $outdir)
-							FileDelete($cabfiles[$i])
-						EndIf
-					Next
+						; Extract files from extracted CABs
+						$cabfiles = FileSearch($tempoutdir)
+						For $i = 1 To $cabfiles[0]
+							filescan($cabfiles[$i], 0)
+							If StringInStr($filetype, "Microsoft Cabinet Archive", 0) Then
+								_Run($cmd & $7z & ' x "' & $cabfiles[$i] & '"', $outdir)
+								FileDelete($cabfiles[$i])
+							EndIf
+						Next
 
-					; Append missing file extensions
-					If $appendext Then AppendExtensions($tempoutdir)
+						; Append missing file extensions
+						If $appendext Then AppendExtensions($tempoutdir)
 
-					; Move files to output directory and remove tempdir
-					MoveFiles($tempoutdir, $outdir, False, "", True)
+						; Move files to output directory and remove tempdir
+						MoveFiles($tempoutdir, $outdir, False, "", True)
 
-				Case 4 ; Administrative install
-					RunWait(Warn_Execute('msiexec.exe /a "' & $file & '" /qb TARGETDIR="' & $outdir & '"'), $filedir, @SW_SHOW)
-			EndSwitch
+					Case 4 ; Administrative install
+						RunWait(Warn_Execute('msiexec.exe /a "' & $file & '" /qb TARGETDIR="' & $outdir & '"'), $filedir, @SW_SHOW)
+				EndSwitch
+			EndIf
 
 		Case "msm"
 			Local $appendargs = ''
@@ -2620,7 +2626,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case "NSIS"
 			; Rename duplicates and extract
 			_Run($cmd & $7z & ' x -aou' & ' "' & $file & '"', $outdir)
-			Local $aReturn[] = [$outdir & "\[NSIS].nsi", $outdir & "\[LICENSE].txt", $outdir & "\$PLUGINSDIR", $outdir & "\$TEMP", $outdir & "\uninstall.exe"]
+			Local $aReturn[] = [$outdir & "\[NSIS].nsi", $outdir & "\[LICENSE].txt", $outdir & "\$PLUGINSDIR", $outdir & "\$TEMP", $outdir & "\uninstall.exe", $outdir & "\[LICENSE]"]
 			Cleanup($aReturn)
 
 			; Determine if there are .bin files in filedir
@@ -3153,6 +3159,7 @@ EndFunc
 Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 	If Not $iMode Then Return
 	If Not IsArray($aFiles) Then
+		If Not FileExists($aFiles) Then Return
 		$return = $aFiles
 		Dim $aFiles[1] = [$return]
 	EndIf
@@ -3511,21 +3518,19 @@ EndFunc
 
 ; Function to prompt user for choice of extraction method
 Func MethodSelect($aData, $arcdisp)
-	_DeleteTrayMessageBox()
-	Local $base_height = 130, $base_radio = 100
-	Local $size = UBound($aData) - 1
-	Local $select[$size]
-
 	; Auto choose first extraction method in silent mode
 	If $silentmode Then
 		Cout("Extractor selected automatically - run again in normal mode if not extracted correctly")
-		_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 		Return 1
 	EndIf
 
+	_DeleteTrayMessageBox()
+	Local Const $base_height = 130, $base_radio = 100
+	Local $size = UBound($aData) - 1, $select[$size]
+
 	; Create GUI and set header information
 	Opt("GUIOnEventMode", 0)
-	Local $guimethod = GUICreate($title, 330, $base_height + ($size * 20))
+	Local $hGUI = GUICreate($title, 330, $base_height + ($size * 20))
 	_GuiSetColor()
 	$header = GUICtrlCreateLabel(t('METHOD_HEADER', $aData[0]), 5, 5, 320, 20)
 	GUICtrlSetFont(-1, -1, 1200)
@@ -3554,7 +3559,7 @@ Func MethodSelect($aData, $arcdisp)
 			Case $idOk
 				For $i = 0 To $size - 1
 					If GUICtrlRead($select[$i]) == $GUI_CHECKED Then
-						GUIDelete($guimethod)
+						GUIDelete($hGUI)
 						Opt("GUIOnEventMode", 1)
 						_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 						Return $i + 1
@@ -3854,7 +3859,38 @@ Func IsJavaInstalled()
 		Return True
 	EndIf
 	terminate('missingexe', $file, "Java Runtime Environment")
-EndFunc   ;==>IsJavaInstalled
+EndFunc
+
+; Determine versions of installed .NET frameworks
+; Modified version of (https://www.autoitscript.com/forum/topic/164455-check-net-framework-4-or-45-is-installed/#comment-1199620)
+Func HasNetFramework($iVersion)
+	Local $sKey, $sBaseKeyName, $sBVersion, $sBBVersion, $z = 0, $i = 0
+    $sKey = "HKLM" & $reg64 & "\SOFTWARE\Microsoft\NET Framework Setup\NDP"
+
+    Do
+        $z += 1
+        $sBaseKeyName = RegEnumKey($sKey, $z)
+        If @error Or StringLeft($sBaseKeyName,1) <> "v" Then ContinueLoop
+
+        $sBVersion = RegRead($sKey & "\" & $sBaseKeyName, "Version")
+		If Not @error Then
+			If Number($sBVersion) >= $iVersion Then Return True
+		Else
+			$i = 0
+			Do
+				$i += 1
+				$sKeyName = RegEnumKey($sKey & "\" & $sBaseKeyName, $i)
+				If @error Then ExitLoop
+
+				$sBBVersion = RegRead($sKey & "\" & $sBaseKeyName & "\" & $sKeyName, "Version")
+			Until $sKeyName = '' Or $sBBVersion <> ''
+
+			If $sBBVersion <> '' And Number($sBBVersion) >= $iVersion Then Return True
+		EndIf
+    Until $sBaseKeyName = ''
+
+    Return False
+EndFunc
 
 ; Determine whether Windows version >= Windows 7 or not; used for cascading context menu support
 Func _IsWin7()
@@ -4060,7 +4096,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 							GUICtrlSetData($TrayMsg_Status, _ArrayPop($aReturn) & "%")
 						EndIf
 					ElseIf StringInStr($return, "/", 0, -1) Then
-						$aReturn = StringRegExp($return, " (\d+)/(\d+)", 1) ; x/y
+						$aReturn = StringRegExp($return, "(\d+)/(\d+) ", 1) ; x/y
 						If UBound($aReturn) > 1 Then
 							$size = -1
 							$Num = _ArrayPop($aReturn)
@@ -4443,7 +4479,7 @@ Func CreateGUI()
 	; File controls
 	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), 5, 4, -1, 15)
 	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 5), 3, Default, 15)
-	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), 3, Default, 15)
+	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), 3, 100, 15)
 	GUICtrlSetState($extract? $GUI_Main_Extract: $GUI_Main_Scan, $GUI_CHECKED)
 
 	Global $filecont = $history? GUICtrlCreateCombo("", 5, 20, 260, 20): GUICtrlCreateInput("", 5, 20, 260, 20)

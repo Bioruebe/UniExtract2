@@ -3,6 +3,7 @@ Beta 4:
   Added support for .gif files (FFMPEG)
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
   Added support for Ghost Installer Studio installers
+  Added lessmsi for improved support for .msi files
   Added status box when moving/copying unicode files to temp directory
   Changed forcing a single instance and auto-adding is now disabled if the extraction
 		  is already finished and only the result message box is opened
