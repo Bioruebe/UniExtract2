@@ -51,6 +51,7 @@ additional file types for arc_conv, ffmpeg
 
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
+add 'UniExtract to last directory' context menu
 include tridscan gui?
 ntlea?
 

@@ -15,7 +15,9 @@ Beta 4:
   Fixed extraction not working when file directory contains unicode characters and
 		there is not enough free space on the drive containing the temp folder
   Fixed free space check not taking unicode file moving into account
+  Fixed .sit extraction
   Updated language files for Portuguese, Russian, Swedish
+  Removed DMGExtractor and replaced it with 7z
 
 Beta 3:
 

@@ -60,7 +60,7 @@
   Added support for .alz files using unalz
   Added support for .fsb files using FSB files extractor
   Added support for newer .kgb files using version 2 of KGB archiver
-  Added support for .dmg files using Catacombae DMGExtractor
+  Added support for .dmg files using 7zip
   Added support for .sfArk files using sfarkxtc
   Added support for .flv files using FLV Extract
   Added support for .swf files using swfextract (slow)
