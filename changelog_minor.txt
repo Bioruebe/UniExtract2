@@ -4,6 +4,7 @@ Beta 4:
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
   Added support for Ghost Installer Studio installers
   Added lessmsi for improved support for .msi files
+  Added statistics GUI
   Added status box when moving/copying unicode files to temp directory
   Changed forcing a single instance and auto-adding is now disabled if the extraction
 		  is already finished and only the result message box is opened
@@ -18,6 +19,9 @@ Beta 4:
   Fixed .sit extraction
   Updated language files for Portuguese, Russian, Swedish
   Removed DMGExtractor and replaced it with 7z
+  Updated fsbext to 0.3.5
+  Updated QuickBMS to 0.7.5
+  Updated ttarchext to 0.2.10
 
 Beta 3:
 

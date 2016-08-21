@@ -8,6 +8,7 @@ check control size for other languages
 7z support for nifs, fat, vhd, mbr?, mslz?, APM?
 dll for ace extraction?
 
+
 // New unpackers
 lrzip? - http://ck.kolivas.org/apps/lrzip/
 sqx
@@ -15,8 +16,9 @@ paq, zpaq
 lz
 Smart install maker - http://www.nullsecurity.org/tools
 mdf, mds images
-gif, apng
+apng
 http://tlwiki.org/index.php?title=Tools
+
 
 // New formats
 
@@ -24,26 +26,24 @@ http://tlwiki.org/index.php?title=Tools
 // Extraction logic updates
 Add cleanup function call if necessary
 Disable _Run function's pattern search for extractors that do not provide percentage indicators
-Use definition files if possible
+Use definition files instead of hardcoded mapping if possible
+additional file types for arc_conv, ffmpeg
 
 
 // Usability:
-statistics GUI	http://www.autoitscript.com/forum/topic/161750-pie-chart/
 inno: percentage indicator fixed?
 arj percentage indicator //tee problem
+add 'UniExtract to last directory' context menu
 
 
 // Bugs
-jsmsi: .cab not found (working dir?)
-qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 Extracting to C:/ creates file in @ScriptDir
 Unicode files are not moved to outdir if using unpack() function
-$is6cab extractor might crash ('... is not working anymore'), resulting in batch processing stop
+is6cab extractor might crash ('... is not working anymore'), resulting in batch processing stop
 
 
 // Other:
 Logging: quickbms, Crage
-additional file types for arc_conv, ffmpeg
 
 
 // Short term
@@ -51,7 +51,7 @@ additional file types for arc_conv, ffmpeg
 
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
-add 'UniExtract to last directory' context menu
+smart extraction - archive contains: single file/folder -> file dir; multiple files -> sub dir
 include tridscan gui?
 ntlea?
 
@@ -62,6 +62,7 @@ Overwriting files in general depends on extractor (sometimes asks, sometimes ove
 Error messages appear sometimes althought extracted correctly
 7z generic .exe extraction mostly results in not useful files //not a bug
 batch mode might stop depending on the extractor, when user input is needed //make sure files do not exist before starting batch mode to avoid this
+qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 
 !!Compiling 64 bit version results in drag & drop application error!!
 
@@ -91,6 +92,7 @@ new CD image converter - http://iat.berlios.de/ - 832
 replace booz with unzoo (http://archives.math.utk.edu/software/multi-platform/gap/util/unzoo.c) //"LZD not yet implemented" error
 TTComp archive data decompressor (http://www.exelana.com/techie/c/ttdecomp.html) //output mostly unusable, only one single file extractable
 FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765 //There seems to be no fast enough and reliable way to do that
+jsmsi: .cab not found // extractor only used as fallback on older systems
 
 
 // Done:

@@ -55,6 +55,7 @@
 #include <WinAPIShPath.au3>
 #include <WindowsConstants.au3>
 #include "HexDump.au3"
+#include "Pie.au3"
 
 Const $name = "Universal Extractor"
 Const $version = "2.0.0 Beta 3"
@@ -1047,6 +1048,9 @@ Func tridcompare($filetype_curr)
 
 		Case StringInStr($filetype_curr, "YU-RIS Script Engine", 0)
 			extract("arc_conv", "YU-RIS Script Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+
+		Case StringInStr($filetype_curr, "ClsFileLink", 0)
+			extract("arc_conv", t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Ethornell", 0)
 			extract("ethornell", "Ethornell Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
@@ -4439,7 +4443,6 @@ Func CreateGUI()
 	Local $forumitem = GUICtrlCreateMenuItem(t('MENU_HELP_FORUM_LABEL'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $statsitem = GUICtrlCreateMenuItem(t('MENU_HELP_STATS_LABEL'), $helpmenu)
-	GUICtrlSetState(-1, $GUI_DISABLE)
 	Local $programdiritem = GUICtrlCreateMenuItem(t('MENU_HELP_PROGDIR_LABEL'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $aboutitem = GUICtrlCreateMenuItem(t('MENU_HELP_ABOUT_LABEL'), $helpmenu)
@@ -5252,8 +5255,8 @@ Func GUI_ContextMenu()
 	Local $CM_OK = GUICtrlCreateButton(t('OK_BUT'), 112, 565, 89, 25)
 	Local $CM_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 232, 565, 89, 25)
 	GUICtrlSetState($CM_Simple_Radio, $GUI_CHECKED)
-	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_ContextMenu_Exit")
-	GUICtrlSetOnEvent($CM_Cancel, "GUI_ContextMenu_Exit")
+	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Close")
+	GUICtrlSetOnEvent($CM_Cancel, "GUI_Close")
 	GUICtrlSetOnEvent($CM_OK, "GUI_ContextMenu_OK")
 	GUICtrlSetOnEvent($CM_Checkbox_enabled, "GUI_ContextMenu_activate")
 	GUICtrlSetOnEvent($CM_Checkbox_add, "GUI_ContextMenu_activate")
@@ -5513,12 +5516,6 @@ Func GUI_ContextMenu_remove()
 	; File associations
 	If $addassocenabled Then GUI_ContextMenu_fileassoc(0)
 EndFunc   ;==>GUI_ContextMenu_remove
-
-; Close context menu GUI
-Func GUI_ContextMenu_Exit()
-	Cout("Closing context menu GUI")
-	GUIDelete($CM_GUI)
-EndFunc   ;==>GUI_ContextMenu_Exit
 
 ; Perform special actions if Universal Extractor is started the first time
 Func GUI_FirstStart()
@@ -5801,9 +5798,81 @@ EndFunc
 
 ; Display usage statistics
 Func GUI_Stats()
+	Local $aReturn = IniReadSection($prefs, "Statistics")
+	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + 48, $name, t(''))
+	Local $ret = t('MENU_HELP_STATS_LABEL')
+	$GUI_Stats = GUICreate($ret, 730, 434, 315, 209)
+	$GUI_Stats_Status_Pie = GUICtrlCreatePic("", 8, 72, 209, 209)
+	$GUI_Stats_Types_Pie = GUICtrlCreatePic("", 368, 72, 353, 353)
+	$GUI_Stats_Types_Legend = GUICtrlCreatePic("", 8, 312, 337, 113)
+	$GUI_Stats_Status_Legend = GUICtrlCreatePic("", 232, 72, 113, 209)
+	GUICtrlCreateLabel($ret, 8, 8, 715, 33, $SS_CENTER)
+	GUICtrlSetFont(-1, 18, 500, 0, "Arial")
+	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 340, 24, $SS_CENTER)
+	GUICtrlSetFont(-1, 12, 300, 0, "Arial")
+	GUICtrlCreateLabel(t('STATS_HEADER_TYPE'), 368, 48, 354, 24, $SS_CENTER)
+	GUICtrlSetFont(-1, 12, 300, 0, "Arial")
+	GUISetBkColor(0xFFFFFF)
+	GUICtrlSetDefBkColor(0xFFFFFF)
+	GUISetState(@SW_SHOW)
 
+	Local $GUI_Stats_Types[0], $GUI_Stats_Status = [[0, t('STATS_STATUS_SUCCESS'), $COLOR_GREEN], [0, t('STATS_STATUS_FAILED'), $COLOR_RED], [0, t('STATS_STATUS_FILEINFO'), $COLOR_PURPLE], [0, t('STATS_STATUS_UNKNOWN'), $COLOR_GRAY]]
 
-EndFunc   ;==>GUI_Stats
+	For $i = 1 To $aReturn[0][0]
+		Switch $aReturn[$i][0]
+			Case $STATUS_FILEINFO
+				$GUI_Stats_Status[2][0] += $aReturn[$i][1]
+			Case $STATUS_NOTSUPPORTED, $STATUS_UNKNOWNEXE, $STATUS_UNKNOWNEXT
+				$GUI_Stats_Status[3][0] += $aReturn[$i][1]
+			Case $STATUS_FAILED, $STATUS_INVALIDDIR, $STATUS_INVALIDFILE, $STATUS_MISSINGDEF, $STATUS_MISSINGEXE, $STATUS_TIMEOUT
+				$GUI_Stats_Status[1][0] += $aReturn[$i][1]
+			Case $STATUS_SUCCESS, $STATUS_NOTPACKED, $STATUS_PASSWORD
+				$GUI_Stats_Status[0][0] += $aReturn[$i][1]
+			Case $STATUS_BATCH, $STATUS_SILENT, $STATUS_SYNTAX
+				; Skip
+			Case Else
+				$iSize = UBound($GUI_Stats_Types)
+				ReDim $GUI_Stats_Types[$iSize + 1][2]
+				$GUI_Stats_Types[$iSize][0] = Number($aReturn[$i][1])
+				$GUI_Stats_Types[$iSize][1] = $aReturn[$i][0]
+		EndSwitch
+	Next
+
+	_ArraySort($GUI_Stats_Status, 1)
+	_ArraySort($GUI_Stats_Types, 1)
+	If UBound($GUI_Stats_Types) > 9 Then ReDim $GUI_Stats_Types[9][2]
+
+	; Prepare values for the pie chart and setup GDI+ for both picture controls
+	$GUI_Stats_Types_Handles = _Pie_Prepare($GUI_Stats_Types_Pie, $GUI_Stats_Types)
+	$GUI_Stats_Types_Handles_Legend = _Pie_CreateContext($GUI_Stats_Types_Legend, 0)
+	$GUI_Stats_Status_Handles = _Pie_Prepare($GUI_Stats_Status_Pie, $GUI_Stats_Status)
+	$GUI_Stats_Status_Handles_Legend = _Pie_CreateContext($GUI_Stats_Status_Legend, 0)
+
+	; Draw the initial pie chart and legend
+	_Pie_Draw($GUI_Stats_Types_Handles, $GUI_Stats_Types, 1, 0)
+	_Pie_Draw_Legend($GUI_Stats_Types_Handles_Legend, $GUI_Stats_Types)
+	_Pie_Draw($GUI_Stats_Status_Handles, $GUI_Stats_Status, 1, 0)
+	_Pie_Draw_Legend($GUI_Stats_Status_Handles_Legend, $GUI_Stats_Status, 20, 1, 8)
+
+	Opt("GUIOnEventMode", 0)
+
+	Local $GUI_Stats_Types_Rotation = 0, $GUI_Stats_Types_Aspect = 1, $GUI_Stats_Status_Rotation = 0, $GUI_Stats_Status_Aspect = 1
+	While GUIGetMsg() <> $GUI_EVENT_CLOSE
+		Sleep(10)
+
+		_MouseOverRotation($GUI_Stats_Types_Rotation, $GUI_Stats_Types_Aspect, $GUI_Stats_Types_Handles, $GUI_Stats_Types, $GUI_Stats, $GUI_Stats_Types_Handles[4], 0, 0.5)
+		_MouseOverRotation($GUI_Stats_Status_Rotation, $GUI_Stats_Status_Aspect, $GUI_Stats_Status_Handles, $GUI_Stats_Status, $GUI_Stats, $GUI_Stats_Status_Handles[4], 0, 0.7)
+	WEnd
+
+	Opt("GUIOnEventMode", 1)
+
+	; Cleanup
+	_Pie_Shutdown($GUI_Stats_Types_Handles, $GUI_Stats_Types, False)
+	_Pie_Shutdown($GUI_Stats_Status_Handles, $GUI_Stats_Status, False)
+	_Pie_Shutdown($GUI_Stats_Types_Handles_Legend, False)
+	_Pie_Shutdown($GUI_Stats_Status_Handles_Legend)
+	GUIDelete($GUI_Stats)
+EndFunc
 
 ; Open password list file
 Func GUI_Password()
@@ -5835,15 +5904,14 @@ Func GUI_About()
 	$About_OK = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
 	GUISetState(@SW_SHOW)
 
-	GUICtrlSetOnEvent($About_OK, "GUI_About_Exit")
-	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_About_Exit")
+	GUICtrlSetOnEvent($About_OK, "GUI_Close")
+	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Close")
 EndFunc
 
-; Exit about GUI if OK clicked or window closed
-Func GUI_About_Exit()
-	Cout("Closing about GUI")
-	GUIDelete($About)
-EndFunc   ;==>GUI_About_Exit
+; Delete GUI if OK clicked or window closed
+Func GUI_Close()
+	GUIDelete()
+EndFunc
 
 ; Launch Universal Extractor website if help menu item clicked
 Func GUI_Website()

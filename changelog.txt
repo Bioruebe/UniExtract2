@@ -24,6 +24,7 @@
   Added filename to tray icon tooltip and status box (useful for batch mode)
   Added more useful functionality to menu + tray
   Added input GUI for feedback, including optional prompt after failed extraction
+  Added statistics GUI
   Added progress indicator to status box
 		--> depending on helper binary, e.g. rar & uha in percent, others only have output file size indicator
 		--> see helper binaries info file for further information
