@@ -176,7 +176,7 @@ Const $lzx = "unlzx.exe" 															;1.21
 Const $mht = "extractMHT.exe" 														;1.0
 Const $msi_msix = "MsiX.exe" 														;1.0
 Const $msi_jsmsix = "jsMSIx.exe" 													;1.11.0704
-Const $msi_lessmsi = $bindir & "lessmsi\lessmsi.exe"									;1.4
+Const $msi_lessmsi = $bindir & "lessmsi\lessmsi.exe"								;1.4
 Const $nbh = "NBHextract.exe" 														;1.0
 Const $pea = "pea.exe" 																;0.53/1.0
 Const $peid = "peid.exe" 															;0.95   2012/04/24
@@ -222,20 +222,21 @@ Const $mediainfo = "MediaInfo" & $reg64 & ".dll"									; 0.7.72
 Const $xor = "xor.exe"
 
 ; Not included binaries
+Const $arc_conv = "arc_conv.exe"
 Const $bootimg = "bootimg.exe"
 Const $ci = "ci-extractor.exe"
+Const $crage = $bindir & "crass-0.4.14.0\crage.exe"
+Const $dcp = "dcp_unpacker.exe"
+Const $dgca = "dgcac.exe"
 Const $enigma = "EnigmaVBUnpacker.exe"
 Const $ffmpeg = "ffmpeg.exe"	;x64
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
-Const $thinstall = "Extractor.exe"
-Const $rgss3 = "RPGDecrypter.exe"
-Const $arc_conv = "arc_conv.exe"
-Const $dcp = "dcp_unpacker.exe"
-Const $unreal = "extract.exe"
-Const $crage = $bindir & "crass-0.4.14.0\crage.exe"
 Const $mpq = "mpq.wcx" & $reg64
-Const $dgca = "dgcac.exe"
+Const $rgss3 = "RPGDecrypter.exe"
+Const $sim = "sim_unpacker.exe"
+Const $thinstall = "Extractor.exe"
+Const $unreal = "extract.exe"
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -860,7 +861,8 @@ Func filecompare($filetype_curr)
 			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
 		Case StringInStr($filetype_curr, "RIFF", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
 			 StringInStr($filetype_curr, "MPEG sequence") Or StringInStr($filetype_curr, "Microsoft ASF") Or _
-			 StringInStr($filetype_curr, "GIF image")
+			 StringInStr($filetype_curr, "GIF image") Or StringInStr($filetype_curr, "PNG image") Or _
+			 StringInStr($filetype_curr, "MNG video")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
 			extract("audio", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
@@ -1436,6 +1438,9 @@ Func advexescan()
 			$file = $return
 			Global $iDeleteOrigFile = $OPTION_DELETE
 			check7z()
+
+		Case StringInStr($filetype_curr, "Smart Install Maker")
+			extract("sim", 'Smart Install Maker ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($filetype_curr, "SPx Method", 0) Or StringInStr($filetype_curr, "Microsoft SFX CAB", 0)
 			extract("cab", t('TERM_SFX') & ' Microsoft CAB ' & t('TERM_ARCHIVE'))
@@ -2647,6 +2652,48 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case "sfark"
 			_Run($cmd & $sfark & ' "' & $file & '" "' & $outdir & '\' & $filename & '.sf2"', $filedir, @SW_SHOW)
 
+		Case "sim"
+			HasPlugin($sim)
+			_Run($cmd & $sim & ' "' & $file & '" "' & $outdir & '"', $outdir, @SW_SHOW)
+
+			; Extract cab files
+			$ret = $outdir & "\data.cab"
+			_Run($cmd & $7z & ' x "' & $ret & '"', $outdir, @SW_SHOW, True, True, True)
+			Cleanup($ret, $OPTION_DELETE)
+
+			; Restore original file names and folder structure
+			$ret = _FileRead($outdir & "\installer.config", False, 16)
+			If @error Then
+				$success = $RESULT_FAILED
+			Else
+				Local $j = 0, $aReturn = StringSplit($ret, "00402426253034", 1)
+				For $i = 1 To $aReturn[0]
+					If StringLeft($aReturn[$i], 2) <> "5C" Then ContinueLoop
+
+					$ret = StringRight($aReturn[$i], 4)
+					$bNext = $ret = "0031" Or $ret = "0032"
+					If Not $bNext And $i <> $aReturn[0] Then ContinueLoop
+
+					; Get file/directory name
+					$ret = StringReplace(StringSplit($aReturn[$i], "0031", 1)[1], "0032", "")
+					$ret = $outdir & BinaryToString("0x" & $ret)
+
+					; Rename files/create sub directory
+					$return = $outdir & "\" & $j
+					If FileExists($return) Then
+						FileMove($return, $ret, 9)
+					Else
+						DirCreate($ret)
+					EndIf
+
+					; Update next file name variable
+					If $bNext Then $j += 1
+				Next
+			EndIf
+
+			Local $aReturn = [$outdir & "\runtime.cab", $outdir & "\installer.config"]
+			Cleanup($aReturn)
+
 		Case "sit"
 			FileMove($file, $tempoutdir, 8)
 			$return = $tempoutdir & $filename & '.' & $fileext
@@ -2803,7 +2850,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$StreamType = StringSplit($Streams[$i], ",")
 ;~ 				_ArrayDisplay($StreamType)
 				If $StreamType[1] == "Video" Then
-					If $StreamType[2] == "gif" Then
+					If $StreamType[2] == "gif" Or $StreamType[2] == "apng" Or $StreamType[2] == "webp" Then
 						_Run($command & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & '%05d.png"', $outdir, @SW_HIDE, True, False)
 						$iVideo += 1
 						ContinueLoop
@@ -3086,8 +3133,8 @@ Func ReplacePlaceholders($sString, $bQuote = True)
 EndFunc
 
 ; Encapsulate a string with "
-Func Quote($Message)
-	Return '"' & $Message & '"'
+Func Quote($sString)
+	Return '"' & $sString & '"'
 EndFunc
 
 ; Unpack packed executable
@@ -3132,7 +3179,7 @@ EndFunc
 Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 	If Not $iMode Then Return
 	If Not IsArray($aFiles) Then
-		If Not FileExists($aFiles) Then Return
+		If Not FileExists($aFiles) Then Return SetError(1, 0, 0)
 		$return = $aFiles
 		Dim $aFiles[1] = [$return]
 	EndIf
@@ -3320,8 +3367,8 @@ Func FileSearch($s_Mask = '', $i_Recurse = 1)
 EndFunc
 
 ; Open file and return contents
-Func _FileRead($f, $delete = False)
-	$handle = FileOpen($f)
+Func _FileRead($f, $delete = False, $iFlag = 0)
+	$handle = FileOpen($f, $iFlag)
 	If $handle = -1 Then Return SetError(1, 0, "")
 	$return = FileRead($handle)
 	FileClose($handle)
@@ -5630,7 +5677,7 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[12][9] = [ _
+	Local $aPluginInfo[13][9] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar', 'Extractor.rar', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False, 'iscab.exe;ISTools.dll', '', '', 0], _
@@ -5642,7 +5689,8 @@ Func GUI_Plugins()
 		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', 0], _
 		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'http://www.emit.jp/dgca/dgca_v110.zip', 'dgca_v*.zip', 'dgcac.exe', '', 0], _
 		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'http://forum.xda-developers.com/redmi-1s/general/guide-unpack-repack-kernel-t2908458', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
-		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'ftp://ftp.elf.stuba.sk/pub/pc/pack/i5comp21.rar', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0] _
+		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'ftp://ftp.elf.stuba.sk/pub/pc/pack/i5comp21.rar', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
+		[$sim, 'Smart Install Maker unpacker', t('PLUGIN_SIM'), 'exe (Smart Install Maker)', 'http://www.nullsecurity.org/download/ca5e3aeb12615212258cabeeb17ef0d8', 'sim_unpacker.7z', $sim, '', 0] _
 	]
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1, $sWorkingdir = @WorkingDir, $aReturn[0]
@@ -5808,7 +5856,7 @@ Func GUI_Stats()
 	$GUI_Stats_Status_Legend = GUICtrlCreatePic("", 232, 72, 113, 209)
 	GUICtrlCreateLabel($ret, 8, 8, 715, 33, $SS_CENTER)
 	GUICtrlSetFont(-1, 18, 500, 0, "Arial")
-	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 340, 24, $SS_CENTER)
+	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 212, 24, $SS_CENTER)
 	GUICtrlSetFont(-1, 12, 300, 0, "Arial")
 	GUICtrlCreateLabel(t('STATS_HEADER_TYPE'), 368, 48, 354, 24, $SS_CENTER)
 	GUICtrlSetFont(-1, 12, 300, 0, "Arial")
@@ -5843,9 +5891,9 @@ Func GUI_Stats()
 	If UBound($GUI_Stats_Types) > 9 Then ReDim $GUI_Stats_Types[9][2]
 
 	; Prepare values for the pie chart and setup GDI+ for both picture controls
-	$GUI_Stats_Types_Handles = _Pie_Prepare($GUI_Stats_Types_Pie, $GUI_Stats_Types)
+	$GUI_Stats_Types_Handles = _Pie_PrepareValues($GUI_Stats_Types, $GUI_Stats_Types_Pie)
 	$GUI_Stats_Types_Handles_Legend = _Pie_CreateContext($GUI_Stats_Types_Legend, 0)
-	$GUI_Stats_Status_Handles = _Pie_Prepare($GUI_Stats_Status_Pie, $GUI_Stats_Status)
+	$GUI_Stats_Status_Handles = _Pie_PrepareValues($GUI_Stats_Status, $GUI_Stats_Status_Pie)
 	$GUI_Stats_Status_Handles_Legend = _Pie_CreateContext($GUI_Stats_Status_Legend, 0)
 
 	; Draw the initial pie chart and legend

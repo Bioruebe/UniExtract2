@@ -14,9 +14,7 @@ lrzip? - http://ck.kolivas.org/apps/lrzip/
 sqx
 paq, zpaq
 lz
-Smart install maker - http://www.nullsecurity.org/tools
 mdf, mds images
-apng
 http://tlwiki.org/index.php?title=Tools
 
 

@@ -1,8 +1,9 @@
 Beta 4:
   Added support for InstallAware installers
-  Added support for .gif files (FFMPEG)
+  Added support for .gif and apng files (FFMPEG)
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
   Added support for Ghost Installer Studio installers
+  Added support for Smart Install Maker installers (plugin)
   Added lessmsi for improved support for .msi files
   Added statistics GUI
   Added status box when moving/copying unicode files to temp directory

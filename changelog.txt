@@ -71,10 +71,11 @@
   Added support for CreateInstall installers (plugin)
   Added support for DGCA compressed files (plugin)
   Added support for Android boot images (plugin)
-  Added support for Advanced Installer installers
+  Added support for Advanced Installer executables
   Added support for Excelsior Installer executables
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
   Added support for Ghost Installer Studio installers
+  Added support for Smart Install Maker installers (plugin)
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for audio decompression to wav using FFmpeg
