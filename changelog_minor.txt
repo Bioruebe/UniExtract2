@@ -7,6 +7,7 @@ Beta 4:
   Added lessmsi for improved support for .msi files
   Added statistics GUI
   Added status box when moving/copying unicode files to temp directory
+  Added timeout to some scan functions to prevent delays caused by unresponsive helper binaries
   Changed forcing a single instance and auto-adding is now disabled if the extraction
 		  is already finished and only the result message box is opened
   Changed unicode path logic: file is now copied instead of moved if it is on a different

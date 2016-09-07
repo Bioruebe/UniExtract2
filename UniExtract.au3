@@ -305,10 +305,10 @@ If $history Then
 EndIf
 
 ; Prevent multiple instances to avoid errors
-; Only necessary when extract starts
+; Only necessary when extraction starts
 ; Do not do this in StartExtraction, the function can be called twice
 $hMutex = _Singleton($name & " " & $version, 1)
-If $hMutex = 0 And Not $extract Then
+If $hMutex = 0 And $extract Then
 	AddToBatch()
 	terminate($STATUS_SILENT, '', '')
 EndIf
@@ -500,7 +500,7 @@ EndFunc
 Func ParseCommandLine()
 	Cout("Command line parameters: " & _ArrayToString($cmdline, " ", 1))
 
-	$extract = 1
+	$extract = True
 	$OpenOutDir = 0
 
 	If $cmdline[1] = "/prefs" Then
@@ -4230,13 +4230,18 @@ Func FetchStdout($f, $sWorkingdir, $show_flag, $iLine = 0, $bOutput = True)
 	Global $run = 0, $return = ""
 	$run = Run($f, $sWorkingdir, $show_flag, $STDERR_MERGED)
 	$runtitle = _WinGetByPID($run)
-;~ 	Cout("PID: " & $run)
+	$TimerStart = TimerInit()
+
 	Do
 		Sleep(1)
+		If TimerDiff($TimerStart) > $Timeout Then ExitLoop
 		$return &= StdoutRead($run)
 	Until @error
+
 	If $bOutput Then Cout($return)
+	If ProcessExists($run) Then ProcessClose($run)
 	$run = 0
+
 	If $iLine <> 0 Then Return _StringGetLine($return, $iLine)
 	Return $return
 EndFunc
