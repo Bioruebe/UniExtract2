@@ -2904,7 +2904,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "wise"
 			Local $aReturn = ['Wise ' & t('TERM_INSTALLER'), t('METHOD_UNPACKER_RADIO', 'E_Wise'), t('METHOD_UNPACKER_RADIO', 'WUN'), t('METHOD_SWITCH_RADIO', 'Wise Installer /x'), t('METHOD_EXTRACTION_RADIO', 'Wise MSI'), t('METHOD_EXTRACTION_RADIO', 'Unzip')]
-			$choice = MethodSelect($arctype, $arcdisp)
+			$choice = MethodSelect($aReturn, $arcdisp)
 
 			Switch $choice
 				; Extract with E_WISE

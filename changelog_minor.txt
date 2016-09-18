@@ -19,6 +19,7 @@ Beta 4:
 		there is not enough free space on the drive containing the temp folder
   Fixed free space check not taking unicode file moving into account
   Fixed .sit extraction
+  Fixed crash when trying to extract wise installers
   Updated language files for Portuguese, Russian, Swedish
   Removed DMGExtractor and replaced it with 7z
   Updated fsbext to 0.3.5
