@@ -250,8 +250,13 @@ ReadPrefs()
 ; On top to make remove via command line parameter possible
 ; After ReadPrefs!
 ; shell	| commandline parameter | translation
-Global $CM_Shells[4][3] = [['uniextract_files', '', t('EXTRACT_FILES')], ['uniextract_here', ' .', t('EXTRACT_HERE')], _
-		['uniextract_sub', ' /sub', t('EXTRACT_SUB')], ['uniextract_scan', ' /scan', t('SCAN_FILE')]]
+Global $CM_Shells[5][3] = [ _
+	['uniextract_files', '', t('EXTRACT_FILES')], _
+	['uniextract_here', ' .', t('EXTRACT_HERE')], _
+	['uniextract_sub', ' /sub', t('EXTRACT_SUB')], _
+	['uniextract_last', ' /last', t('EXTRACT_LAST')], _
+	['uniextract_scan', ' /scan', t('SCAN_FILE')] _
+]
 
 Cout("Starting " & $name & " " & $version)
 
@@ -298,12 +303,6 @@ If $prompt Then
 	WEnd
 EndIf
 
-; Update history
-If $history Then
-	WriteHist('file', $file)
-	WriteHist('directory', $outdir)
-EndIf
-
 ; Prevent multiple instances to avoid errors
 ; Only necessary when extraction starts
 ; Do not do this in StartExtraction, the function can be called twice
@@ -332,6 +331,8 @@ Func StartExtraction()
 	; Set full output directory
 	If $outdir = '/sub' Then
 		$outdir = $initoutdir
+	ElseIf $outdir = '/last' Then
+		$outdir = GetLastOutdir()
 	ElseIf StringMid($outdir, 2, 1) <> ":" Then
 		If StringLeft($outdir, 1) == '\' And StringMid($outdir, 2, 1) <> '\' Then
 			$outdir = StringLeft($filedir, 2) & $outdir
@@ -340,6 +341,12 @@ Func StartExtraction()
 		EndIf
 	EndIf
 	Cout("Output directory: " & $outdir)
+
+	; Update history
+	If $history Then
+		WriteHist($HISTORY_FILE, $file)
+		WriteHist($HISTORY_DIR, $outdir)
+	EndIf
 
 	; Set filename as tray icon tooltip and event handler
 	TraySetToolTip($filename & "." & $fileext)
@@ -508,7 +515,7 @@ Func ParseCommandLine()
 		While $guiprefs
 			Sleep(250)
 		WEnd
-		terminate($STATUS_SILENT, "", "")
+		terminate($STATUS_SILENT)
 
 	ElseIf $cmdline[1] = "/help" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "/h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
 		terminate($STATUS_SYNTAX, "", $cmdline[0] > 1)
@@ -519,7 +526,7 @@ Func ParseCommandLine()
 
 	ElseIf $cmdline[1] = "/update" Then
 		CheckUpdate()
-		terminate($STATUS_SILENT, "", "")
+		terminate($STATUS_SILENT)
 
 	ElseIf $cmdline[1] = "/plugins" Then
 		$prompt = 1
@@ -530,11 +537,11 @@ Func ParseCommandLine()
 		_IsWin7()
 		GUI_ContextMenu_remove()
 		GUI_ContextMenu_fileassoc(0)
-		terminate($STATUS_SILENT, '', '')
+		terminate($STATUS_SILENT)
 
 	ElseIf $cmdline[1] = "/batchclear" Then
 		GUI_Batch_Clear()
-		terminate($STATUS_SILENT, '', '')
+		terminate($STATUS_SILENT)
 
 	Else
 		If FileExists($cmdline[1]) Then
@@ -706,32 +713,40 @@ Func LoadPref($name, ByRef $value, $int = True)
 EndFunc   ;==>LoadPref
 
 ; Read history
-Func ReadHist($field)
+Func ReadHist($sSection)
 	Local $items
 
 	; Read from .ini file
 	For $i = 0 To 9
-		$value = IniRead($prefs, $field, $i, "")
+		$value = IniRead($prefs, $sSection, $i, "")
 		If $value <> "" Then $items &= '|' & $value
 	Next
 
-	; return trimmed results
 	Return StringTrimLeft($items, 1)
 EndFunc
 
 ; Write history
-Func WriteHist($field, $new)
-	$histarr = StringSplit(ReadHist($field), '|')
-	IniWrite($prefs, $field, "0", $new)
+Func WriteHist($sSection, $new)
+	$histarr = StringSplit(ReadHist($sSection), '|')
+	IniWrite($prefs, $sSection, "0", $new)
 	If $histarr[1] == "" Then Return
 	For $i = 1 To $histarr[0]
 		If $i > 9 Then ExitLoop
 		If $histarr[$i] = $new Then
-			IniDelete($prefs, $field, String($i))
+			IniDelete($prefs, $sSection, String($i))
 			ContinueLoop
 		EndIf
-		IniWrite($prefs, $field, String($i), $histarr[$i])
+		IniWrite($prefs, $sSection, String($i), $histarr[$i])
 	Next
+EndFunc
+
+; Read last used directory from history and terminate if an error occurs
+Func GetLastOutdir()
+	$return = IniRead($prefs, $HISTORY_DIR, "0", -1)
+	If $return <> -1 Then Return $return
+
+	MsgBox(48, $title, t('NO_HISTORY', CreateArray($file, StringReplace(t('PREFS_HISTORY_LABEL'), "&", ""))))
+	terminate($STATUS_SILENT)
 EndFunc
 
 ; Scan file using TrID
@@ -2337,7 +2352,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 			; Inno setup files can contain multiple versions of files, they are named ',1', ',2',... after extraction
-			; Rename the first file(s), so extracted programs do not fail with not found exceptions
+			; rename the first file(s), so extracted programs do not fail with not found exceptions
 			; This is a convenience function, so the user does not have to rename them manually
 			$return = $outdir & "\{app}\"
 			$aReturn = _FileListToArrayRec($return, "*,1.*", 1, 1)
@@ -2349,17 +2364,17 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Next
 			EndIf
 
-			; Remove ',2' files and install_script.iss
+			; (Re)move ',2' files and install_script.iss
 			$aReturn = _FileListToArrayRec($return, "*,2.*", 1, 1, 0, 2)
 			_ArrayDelete($aReturn, 0)
 			Cleanup($aReturn)
 			Cleanup($outdir & "\install_script.iss")
 
 			; Change output directory structure
-			Local $aReturn[] = [$outdir & "\embedded", $outdir & "\{tmp}", $outdir & "\{commonappdata}", $outdir & "\{cf}"]
+			Local $aReturn[] = [$outdir & "\embedded", $outdir & "\{tmp}", $outdir & "\{commonappdata}", $outdir & "\{cf}", $outdir & "\{cf32}", $outdir & "\{{userappdata}}", $outdir & "\{{userdocs}}"]
 			Cleanup($aReturn)
 			MoveFiles($outdir & "\{app}", $outdir, True, '', True)
-			; TODO: {syswow64}, {sys}, {cf32} - move files to outdir as dlls might be needed by the program?
+			; TODO: {syswow64}, {sys} - move files to outdir as dlls might be needed by the program?
 
 		Case "is3arc"
 			$aReturn = ['InstallShield 3.x ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', 'STIX'), t('METHOD_EXTRACTION_RADIO', 'unshield')]
@@ -3378,7 +3393,7 @@ Func _FileRead($f, $delete = False, $iFlag = 0)
 EndFunc
 
 ; Handle program termination with appropriate error message
-Func terminate($status, $fname, $ID)
+Func terminate($status, $fname = '', $ID = '')
 	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = $STATUS_SUCCESS)? $ID: $status
 
 	; Rename unicode file
@@ -3408,6 +3423,7 @@ Func terminate($status, $fname, $ID)
 
 	; Save statistics
 	IniWrite($prefs, "Statistics", $status, Number(IniRead($prefs, "Statistics", $status, 0)) + 1)
+	If $status = $STATUS_SUCCESS Then IniWrite($prefs, "Statistics", $ID, Number(IniRead($prefs, "Statistics", $ID, 0)) + 1)
 
 	; Remove singleton
 	If $hMutex <> 0 Then DllCall("kernel32.dll", "bool", "CloseHandle", "handle", $hMutex)
@@ -3429,6 +3445,7 @@ Func terminate($status, $fname, $ID)
 			$syntax &= t('HELP_SILENT', "/silent")
 			$syntax &= t('HELP_BATCH', "/batch")
 			$syntax &= t('HELP_SUB', "/sub")
+			$syntax &= t('HELP_LAST', "/last")
 			$syntax &= t('HELP_EXAMPLE1')
 			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
 			$syntax &= t('HELP_NOARGS')
@@ -3667,27 +3684,26 @@ Func _CreateTrayMessageBox($TBText)
 
 	If $NoBox = 1 Then Return
 
-	Local $iSpace = -1
-	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 28
-
 	; Hide if in fullscreen
 	If $bHideStatusBoxIfFullscreen Then
 		$aReturn = WinGetPos("[ACTIVE]")
 		If $aReturn[2] = @DesktopWidth And $aReturn[3] = @DesktopHeight Then Return
 	EndIf
 
+	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 28, $bDark = True
+
 	; Determine taskbar size
 	Local $pos = WinGetPos("[CLASS:Shell_TrayWnd]")
 	If @error Then Local $pos[4] = [0, 0, @DesktopWidth, 30]
-	$iSpace = ($pos[0] = $pos[1])? $pos[3] + $iBetween: $pos[1] - $TBheight - $iBetween
+	Local $iSpace = ($pos[0] = $pos[1])? $pos[3] + $iBetween: $pos[1] - $TBheight - $iBetween
 
 	If $iSpace < 0 Or $iSpace > @DesktopHeight Then $iSpace = @DesktopHeight - $TBheight - $iBetween
 
 	; Create GUI
 	Global $TBgui = GUICreate($name, $TBwidth, $TBheight, $trayX > -1 ? $trayX : @DesktopWidth - ($TBwidth + $iBetween), $trayY > -1 ? $trayY : $iSpace, _
 			$WS_POPUP, BitOR($WS_EX_TOOLWINDOW, $WS_EX_TOPMOST))
-	GUISetBkColor(0xEEEEEE)
-	_GuiRoundCorners($TBgui, 0, 0, 30, 30)
+	GUISetBkColor($bDark? 0x2D2D2D: 0xEEEEEE)
+	_GuiRoundCorners($TBgui, 0, 0, 5, 5)
 
 	; File name label
 	If $filename = "" Then
@@ -3699,11 +3715,20 @@ Func _CreateTrayMessageBox($TBText)
 	EndIf
 
 	Global $TrayMsg_Status = GUICtrlCreateLabel("", $left, 74, $width, 20, $SS_CENTER)
+
+	GUICtrlSetFont($Tray_File, 9, 500, 0, "Arial")
+	GUICtrlSetFont($TrayMsg_Status, 9, 500, 0, "Arial")
+
+	If $bDark Then
+		GUICtrlSetColor($Tray_File, 0xFFFFFF)
+		GUICtrlSetColor($TrayMsg_Status, 0xFFFFFF)
+	EndIf
+
 ;~     DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 250, "long", 0x00080000 )
 	GUISetState(@SW_SHOWNOACTIVATE)
 
 	; Workaround to keep corners round while fading in
-	For $i = 0 To 255 Step 10
+	For $i = 0 To 225 Step 10
 		WinSetTrans($TBgui, "", $i)
 		Sleep(1)
 	Next
@@ -3716,7 +3741,7 @@ Func _DeleteTrayMessageBox()
 	;DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 300, "long", 0x00090000 )
 
 	; Workaround to keep corners round while fading out
-	For $i = 255 To 0 Step -10
+	For $i = 225 To 0 Step -10
 		WinSetTrans($TBgui, "", $i)
 		Sleep(1)
 	Next
@@ -4595,10 +4620,10 @@ Func CreateGUI()
 EndFunc   ;==>CreateGUI
 
 ; Return control width (for dynamic positioning)
-Func GetPos($hGUI, $hControl, $iOffset = 0)
-	$return = ControlGetPos($hGUI, '', $hControl)
+Func GetPos($hGUI, $hControl, $iOffset = 0, $bX = True)
+	$aReturn = ControlGetPos($hGUI, '', $hControl)
 	If @error Then Return SetError(1, '', $iOffset)
-	Return $return[0] + $return[2] + $iOffset
+	Return ($bX? $aReturn[0] + $aReturn[2]: $aReturn[1] + $aReturn[3]) + $iOffset
 EndFunc
 
 ; Return number of times a character appears in a string
@@ -5277,46 +5302,50 @@ EndFunc   ;==>GUI_Create_Tooltip
 ; Create GUI to change context menu
 Func GUI_ContextMenu()
 	Cout("Creating context menu GUI")
-	Global $CM_Checkbox[4], $CM_Picture = False
+	Local $iSize = UBound($CM_Shells) - 1
+	Global $CM_Checkbox[$iSize + 1], $CM_Picture = False
 
-	If $guimain Then
-		Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 600, -1, -1, -1, -1, $guimain)
-	Else
-		Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 600)
-	EndIf
-
+	Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, -1, $guimain)
 	_GuiSetColor()
-	GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 5, 0, 440, 470)
-	Global $CM_Checkbox_enabled = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 16, -1, 17)
-	Global $CM_Checkbox_allusers = GUICtrlCreateCheckbox(t('CONTEXT_ALL_USERS_LABEL'), GetPos($CM_GUI, $CM_Checkbox_enabled, 25), 16, -1, 17)
-	GUICtrlSetState(-1, $GUI_DISABLE)
-	Global $CM_Simple_Radio = GUICtrlCreateRadio(t('CONTEXT_SIMPLE_RADIO'), 96, 48, 145, 17)
-	Global $CM_Cascading_Radio = GUICtrlCreateRadio(t('CONTEXT_CASCADING_RADIO'), 296, 48, 137, 17)
-	$CM_Checkbox[0] = GUICtrlCreateCheckbox(t('EXTRACT_FILES'), 25, 426)
-	$CM_Checkbox[1] = GUICtrlCreateCheckbox(t('EXTRACT_HERE'), GetPos($CM_GUI, $CM_Checkbox[0], 125), 426)
-	$CM_Checkbox[2] = GUICtrlCreateCheckbox(t('EXTRACT_SUB'), 25, 446)
-	$CM_Checkbox[3] = GUICtrlCreateCheckbox(t('SCAN_FILE'), GetPos($CM_GUI, $CM_Checkbox[0], 125), 446)
-	Global $CM_Picture = GUICtrlCreatePic("", 55, 75, 0, 0, -1, $WS_EX_LAYERED)
+
+	GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 8, 4, 434, 495)
+	Global $CM_Checkbox_enabled = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 22, -1, 17)
+	Global $CM_Checkbox_allusers = GUICtrlCreateCheckbox(t('CONTEXT_ALL_USERS_LABEL'), GetPos($CM_GUI, $CM_Checkbox_enabled, 25), 22, -1, 17)
+	Global $CM_Simple_Radio = GUICtrlCreateRadio(t('CONTEXT_SIMPLE_RADIO'), 96, 50, 145, 17)
+	Global $CM_Cascading_Radio = GUICtrlCreateRadio(t('CONTEXT_CASCADING_RADIO'), 296, 50, 137, 17)
+	Global $CM_Picture = GUICtrlCreatePic("", 55, 78, 0, 0, -1, $WS_EX_LAYERED)
+
+	Local $pos = 0, $iY = 428
+	For $i = 0 To $iSize Step 2
+		$CM_Checkbox[$i] = GUICtrlCreateCheckbox($CM_Shells[$i][2], 25, $iY)
+		If $pos == 0 Then $pos = GetPos($CM_GUI, $CM_Checkbox[0], 125)
+		If $i == $iSize Then ExitLoop
+		$CM_Checkbox[$i+1] = GUICtrlCreateCheckbox($CM_Shells[$i+1][2], $pos, $iY)
+		$iY += 20
+	Next
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
-	GUICtrlCreateGroup(t('CONTEXT_FILE_ASSOC_LABEL'), 5, 475, 440, 80)
-	Global $CM_Checkbox_add = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 495, -1, 17)
-	Global $CM_Checkbox_allusers2 = GUICtrlCreateCheckbox(t('CONTEXT_ALL_USERS_LABEL'), GetPos($CM_GUI, $CM_Checkbox_enabled, 25), 495, -1, 17)
-	GUICtrlSetState(-1, $GUI_DISABLE)
-	Global $CM_add_input = GUICtrlCreateInput("", 24, 520, 401, 21)
+
+	GUICtrlCreateGroup(t('CONTEXT_FILE_ASSOC_LABEL'), 8, 505, 434, 80)
+	Global $CM_Checkbox_add = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 525, -1, 17)
+	Global $CM_Checkbox_allusers2 = GUICtrlCreateCheckbox(t('CONTEXT_ALL_USERS_LABEL'), GetPos($CM_GUI, $CM_Checkbox_enabled, 25), 525, -1, 17)
+	Global $CM_add_input = GUICtrlCreateInput("", 24, 550, 401, 21)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
-	Local $CM_OK = GUICtrlCreateButton(t('OK_BUT'), 112, 565, 89, 25)
-	Local $CM_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 232, 565, 89, 25)
+
+	$CM_OK = GUICtrlCreateButton(t('OK_BUT'), 112, 595, 89, 25)
+	$CM_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 232, 595, 89, 25)
+
+	GUICtrlSetState($CM_Checkbox_allusers, $GUI_DISABLE)
+	GUICtrlSetState($CM_Checkbox_allusers2, $GUI_DISABLE)
 	GUICtrlSetState($CM_Simple_Radio, $GUI_CHECKED)
+
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Close")
 	GUICtrlSetOnEvent($CM_Cancel, "GUI_Close")
 	GUICtrlSetOnEvent($CM_OK, "GUI_ContextMenu_OK")
 	GUICtrlSetOnEvent($CM_Checkbox_enabled, "GUI_ContextMenu_activate")
 	GUICtrlSetOnEvent($CM_Checkbox_add, "GUI_ContextMenu_activate")
 
-	;_ArrayDisplay($CM_Shells)
-
 	; Check which commands are activated
-	For $i = 0 To 3
+	For $i = 0 To $iSize
 		If RegExists($regall & $CM_Shells[$i][0], "") Then
 			Global $reguser = $regall
 			GUICtrlSetState($CM_Checkbox_allusers, $GUI_CHECKED)
@@ -5331,10 +5360,10 @@ Func GUI_ContextMenu()
 		EndIf
 	Next
 
-	; Disable Cascading context menu for non Win 7 / Win 8 users as it is not supported
+	; Disable Cascading context menu for non Win 7+ users as it is not supported
 	If _IsWin7() Then
 		; Check if Cascading context menu entries are enabled
-		For $i = 0 To 3
+		For $i = 0 To $iSize
 			If RegExists($regall & "\Uniextract\Shell\" & $CM_Shells[$i][0], "") Then
 				Global $reguser = $regall
 				GUICtrlSetState($CM_Checkbox[$i], $GUI_CHECKED)
@@ -5386,6 +5415,7 @@ EndFunc   ;==>GUI_ContextMenu_ChangePic
 
 ; Close GUI and create context menu entries
 Func GUI_ContextMenu_OK()
+	Local $iSize = UBound($CM_Shells) - 1
 	Sleep(100)
 	GUISetState(@SW_HIDE)
 
@@ -5398,15 +5428,11 @@ Func GUI_ContextMenu_OK()
 	If GUICtrlRead($CM_Checkbox_enabled) == $GUI_CHECKED Then
 
 		; Select registry key
-		If GUICtrlRead($CM_Checkbox_allusers) == $GUI_CHECKED Then
-			Global $reguser = $regall
-		Else
-			Global $reguser = $regcurrent
-		EndIf
+		Global $reguser = GUICtrlRead($CM_Checkbox_allusers) == $GUI_CHECKED? $regall: $regcurrent
 
 		; simple
 		If GUICtrlRead($CM_Simple_Radio) == $GUI_CHECKED Then
-			For $i = 0 To 3
+			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
 				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
 					RegWrite($reguser & $CM_Shells[$i][0], "", "REG_SZ", $CM_Shells[$i][2])
@@ -5416,13 +5442,13 @@ Func GUI_ContextMenu_OK()
 				EndIf
 			Next
 
-			; cascading
+		; cascading
 		ElseIf $win7 And GUICtrlRead($CM_Cascading_Radio) == $GUI_CHECKED Then
 			RegWrite($reguser & "uniextract", "MUIVerb", "REG_SZ", "Universal Extractor")
 			RegWrite($reguser & "uniextract", "Icon", "REG_SZ", @ScriptFullPath & ",0")
 			RegWrite($reguser & "uniextract", "SubCommands", "REG_SZ", "")
 
-			For $i = 0 To 3
+			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
 				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
 					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0], "", "REG_SZ", $CM_Shells[$i][2])
@@ -5449,16 +5475,12 @@ EndFunc   ;==>GUI_ContextMenu_OK
 ; (De)activate controls if enabled but not checked
 Func GUI_ContextMenu_activate()
 	; Set state according to main enable checkbox
-	If GUICtrlRead($CM_Checkbox_enabled) = $GUI_CHECKED Then
-		Local $state = $GUI_ENABLE
-	Else
-		Local $state = $GUI_DISABLE
-	EndIf
+	Local $state = GUICtrlRead($CM_Checkbox_enabled) = $GUI_CHECKED? $GUI_ENABLE: $GUI_DISABLE
 
 	If IsAdmin() Then GUICtrlSetState($CM_Checkbox_allusers, $state)
 	GUICtrlSetState($CM_Simple_Radio, $state)
 
-	For $i = 0 To 3
+	For $i = 0 To UBound($CM_Shells) - 1
 		GUICtrlSetState($CM_Checkbox[$i], $state)
 	Next
 
@@ -5554,7 +5576,7 @@ EndFunc   ;==>_ShellFile_Uninstall
 Func GUI_ContextMenu_remove()
 	Cout("Deregistering context menu entries")
 	; Context menu
-	For $i = 0 To 3
+	For $i = 0 To UBound($CM_Shells) - 1
 		If RegExists($regall & $CM_Shells[$i][0], "") Then RegDelete($regall & $CM_Shells[$i][0])
 		If RegExists($regcurrent & $CM_Shells[$i][0], "") Then RegDelete($regcurrent & $CM_Shells[$i][0])
 	Next
@@ -5852,7 +5874,8 @@ EndFunc
 ; Display usage statistics
 Func GUI_Stats()
 	Local $aReturn = IniReadSection($prefs, "Statistics")
-	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + 48, $name, t(''))
+	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + 48, $name, t('STATS_NO_DATA'))
+
 	Local $ret = t('MENU_HELP_STATS_LABEL')
 	$GUI_Stats = GUICreate($ret, 730, 434, 315, 209)
 	$GUI_Stats_Status_Pie = GUICtrlCreatePic("", 8, 72, 209, 209)

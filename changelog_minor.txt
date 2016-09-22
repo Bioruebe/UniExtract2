@@ -8,6 +8,7 @@ Beta 4:
   Added statistics GUI
   Added status box when moving/copying unicode files to temp directory
   Added timeout to some scan functions to prevent delays caused by unresponsive helper binaries
+  Added extraction to last used directory command line option and context menu
   Changed forcing a single instance and auto-adding is now disabled if the extraction
 		  is already finished and only the result message box is opened
   Changed unicode path logic: file is now copied instead of moved if it is on a different
@@ -23,6 +24,7 @@ Beta 4:
   Updated language files for Portuguese, Russian, Swedish
   Removed DMGExtractor and replaced it with 7z
   Updated fsbext to 0.3.5
+  Updated innounp to 0.46
   Updated QuickBMS to 0.7.5
   Updated ttarchext to 0.2.10
 

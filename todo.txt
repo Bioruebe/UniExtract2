@@ -31,7 +31,6 @@ additional file types for arc_conv, ffmpeg
 // Usability:
 inno: percentage indicator fixed?
 arj percentage indicator //tee problem
-add 'UniExtract to last directory' context menu
 
 
 // Bugs
