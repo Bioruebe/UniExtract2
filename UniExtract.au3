@@ -58,7 +58,7 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 3"
+Const $version = "2.0.0 Beta 4"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -1827,7 +1827,7 @@ Func checkNSIS()
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' NSIS ' & t('TERM_INSTALLER'))
 
 	$return = FetchStdout($cmd & $7z & ' l "' & $file & '"', $filedir, @SW_HIDE)
-	If StringInStr($return, "Listing archive:") And Not StringInStr($return, "Can not open the file as archive") Then _
+	If StringInStr($return, "Listing archive:") And Not StringInStr($return, "Can not open the file as") Then _
 		extract("NSIS", 'NSIS ' & t('TERM_INSTALLER'))
 
 	_DeleteTrayMessageBox()
@@ -2176,14 +2176,14 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "chm"
 			_Run($cmd & $7z & ' x "' & $file & '"', $outdir)
-			Local $aReturn[2] = [$outdir & '\#*', $outdir & '\$*']
+			Local $aReturn[2] = ['#*', '$*']
 			Cleanup($aReturn)
 			$handle = FileFindFirstFile($outdir & '\*')
 			If $handle <> -1 Then
 				$dir = FileFindNextFile($handle)
 				Do
 					$char = StringLeft($dir, 1)
-					If $char == '#' Or $char == '$' Then Cleanup($outdir & '\' & $dir)
+					If $char == '#' Or $char == '$' Then Cleanup($dir)
 					$dir = FileFindNextFile($handle)
 				Until @error
 			EndIf
@@ -2332,7 +2332,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				DirRemove($tempoutdir, 1)
 			EndIf
 
-			; failsafe in case TrID misidentifies MS SFX hotfixes
+		; failsafe in case TrID misidentifies MS SFX hotfixes
 		Case "hotfix"
 			RunWait(Warn_Execute(Quote($file & '" /q /x:"' & $outdir)), $outdir)
 
@@ -2368,10 +2368,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$aReturn = _FileListToArrayRec($return, "*,2.*", 1, 1, 0, 2)
 			_ArrayDelete($aReturn, 0)
 			Cleanup($aReturn)
-			Cleanup($outdir & "\install_script.iss")
+			Cleanup("install_script.iss")
 
 			; Change output directory structure
-			Local $aReturn[] = [$outdir & "\embedded", $outdir & "\{tmp}", $outdir & "\{commonappdata}", $outdir & "\{cf}", $outdir & "\{cf32}", $outdir & "\{{userappdata}}", $outdir & "\{{userdocs}}"]
+			Local $aReturn[] = ["embedded", "{tmp}", "{commonappdata}", "{cf}", "{cf32}", "{{userappdata}}", "{{userdocs}}"]
 			Cleanup($aReturn)
 			MoveFiles($outdir & "\{app}", $outdir, True, '', True)
 			; TODO: {syswow64}, {sys} - move files to outdir as dlls might be needed by the program?
@@ -2449,11 +2449,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						; Run installer and wait for temp files to be copied
 						_CreateTrayMessageBox(t('INIT_WAIT'))
 
-						If $Log Then
-							_Run(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '" /v"/l "' & $logdir & 'teelog.txt""'), $filedir, @SW_SHOW, False)
-						Else
-							RunWait(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '"'), $filedir)
-						EndIf
+;~ 						If $Log Then
+;~ 							_Run(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '" /v /l "' & $logdir & 'teelog.txt"'), $filedir, @SW_SHOW, False)
+;~ 						Else
+;~ 							RunWait(Warn_Execute('"' & $file & '" /b"' & $tempoutdir & '"'), $filedir)
+;~ 						EndIf
+						$run = Run(Warn_Execute($cmd & $file & ' /b"' & $tempoutdir & '"'), $filedir, @SW_SHOW)
 
 						; TODO: Rewrite
 						; Wait for matching windows for up to 30 seconds (60 * .5)
@@ -2494,11 +2495,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 								ExitLoop
 							EndIf
 						Next
+						$run = 0
 
 						; Not a supported installer
 						If Not $success Then
 							_DeleteTrayMessageBox()
-							Prompt(16, 'INIT_COMPLETE', 0)
+							Prompt(64, 'INIT_COMPLETE', 0)
 						EndIf
 					; Not InstallShield
 					Case 4
@@ -2619,7 +2621,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case "NSIS"
 			; Rename duplicates and extract
 			_Run($cmd & $7z & ' x -aou' & ' "' & $file & '"', $outdir)
-			Local $aReturn[] = [$outdir & "\[NSIS].nsi", $outdir & "\[LICENSE].txt", $outdir & "\$PLUGINSDIR", $outdir & "\$TEMP", $outdir & "\uninstall.exe", $outdir & "\[LICENSE]"]
+
+			If $success == $RESULT_FAILED Then checkIE()
+
+			Local $aReturn[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
 			Cleanup($aReturn)
 
 			; Determine if there are .bin files in filedir
@@ -2637,6 +2642,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case "qbms"
 			_Run($cmd & $quickbms & ' "' & $bindir & $additionalParameters & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, False)
 			If FileExists($bindir & $bms) Then FileDelete($bindir & $bms)
+
+			If $additionalParameters == $ie Then
+				Local $aReturn[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
+				Cleanup($aReturn)
+			EndIf
 
 		Case "rar"
 			Local $sPassword = _FindArchivePassword($cmd & $rar & ' lt -p- "' & $file & '"', $cmd & $rar & ' t -p"%PASSWORD%" "' & $file & '"', "encrypted", 0, 0)
@@ -2706,7 +2716,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Next
 			EndIf
 
-			Local $aReturn = [$outdir & "\runtime.cab", $outdir & "\installer.config"]
+			Local $aReturn = ["runtime.cab", "installer.config"]
 			Cleanup($aReturn)
 
 		Case "sit"
@@ -3199,12 +3209,10 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 		Dim $aFiles[1] = [$return]
 	EndIf
 
-	If $iMode = $OPTION_MOVE Then
-		If $dir == 0 Then $dir = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
-		If Not FileExists($dir) Then DirCreate($dir)
-	EndIf
+	If $iMode = $OPTION_MOVE And $dir == 0 Then $dir = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
 
 	For $sFile In $aFiles
+		If Not StringInStr($sFile, $outdir) Then $sFile = $outdir & "\" & $sFile
 		If Not FileExists($sFile) Then ContinueLoop
 		$bIsFolder = StringInStr(FileGetAttrib($sFile), "D")
 		If $iMode = $OPTION_DELETE Then
@@ -3215,6 +3223,7 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 				FileDelete($sFile)
 			EndIf
 		Else
+			If Not FileExists($dir) Then DirCreate($dir)
 			Cout("Cleanup: Moving " & $sFile & " to " & $dir)
 			If $bIsFolder Then
 				DirMove($sFile, $dir, 1)
@@ -4194,7 +4203,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 			SetError(1, 1)
 		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
 			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
-			   And StringInStr($return, "No files to extract", 1)) Then
+			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") Then
 			$success = $RESULT_FAILED
 			SetError(1)
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
