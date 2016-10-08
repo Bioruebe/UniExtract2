@@ -21,8 +21,9 @@ Beta 4:
   Fixed free space check not taking unicode file moving into account
   Fixed .sit extraction
   Fixed crash when trying to extract wise installers
-  Updated language files for Portuguese, Russian, Swedish
+  Updated language files for Portuguese, Russian, Swedish, Italian
   Removed DMGExtractor and replaced it with 7z
+  Updated ExeInfoPE to 0.0.4.3
   Updated fsbext to 0.3.5
   Updated innounp to 0.46
   Updated QuickBMS to 0.7.5

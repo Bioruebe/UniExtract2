@@ -135,7 +135,7 @@ Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed
 Dim $oldpath, $oldoutdir, $sUnicodeName
 Dim $createdir, $dirmtime
-Dim $FS_GUI = False, $TrayMsg_Status, $BatchBut, $Tray_File
+Dim $FS_GUI = False, $idTrayStatusExt, $BatchBut
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
 
@@ -2129,11 +2129,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			While WinExists("arc_conv")
 				$current = WinGetText("arc_conv")
 				If $current <> $last Then
-					If StringInStr($current, "/") Then
-						GUICtrlSetData($TrayMsg_Status, $current)
-					Else
-						GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " #" & $current)
-					EndIf
+					GUICtrlSetData($idTrayStatusExt, StringInStr($current, "/")? $current: (t('TERM_FILE') & " #" & $current))
 					$last = $current
 					Sleep(10)
 				EndIf
@@ -3508,13 +3504,7 @@ Func terminate($status, $fname = '', $ID = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $ID), 0) Then
-				If $LogFile Then
-					ShellExecute($LogFile)
-				Else
-					ShellExecute(CreateLog($status))
-				EndIf
-			EndIf
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $ID), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
 			$exitcode = 1
 
 			; Exit successfully
@@ -3699,7 +3689,7 @@ Func _CreateTrayMessageBox($TBText)
 		If $aReturn[2] = @DesktopWidth And $aReturn[3] = @DesktopHeight Then Return
 	EndIf
 
-	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 15, $width = 195, $iBetween = 5, $iMaxCharCount = 28, $bDark = True
+	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 12, $width = 195, $iBetween = 5, $iMaxCharCount = 28, $bDark = True
 
 	; Determine taskbar size
 	Local $pos = WinGetPos("[CLASS:Shell_TrayWnd]")
@@ -3714,23 +3704,21 @@ Func _CreateTrayMessageBox($TBText)
 	GUISetBkColor($bDark? 0x2D2D2D: 0xEEEEEE)
 	_GuiRoundCorners($TBgui, 0, 0, 5, 5)
 
-	; File name label
-	If $filename = "" Then
-		Global $Tray_File = GUICtrlCreateLabel($TBText, $left, $top, $width, 80)
-	ElseIf StringLen(($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext) > $iMaxCharCount Then
-		Global $Tray_File = GUICtrlCreateLabel(StringLeft(($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext, $iMaxCharCount) & " [...]" & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
-	Else
-		Global $Tray_File = GUICtrlCreateLabel(($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext & @CRLF & @CRLF & $TBText, $left, $top, $width, 80)
-	EndIf
+	; Labels
+	Local $fname = $filename == ""? "": ($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext
+	If StringLen($fname) > $iMaxCharCount Then $fname = StringLeft($fname, $iMaxCharCount) & " [...]"
+	Local $idTrayFileName = GUICtrlCreateLabel($fname, $left, $top, $width, 16)
+	Local $idTrayStatus = GUICtrlCreateLabel($TBText, $left, GetPos($TBgui, $idTrayFileName, 6, False), $width, 30)
+	Global $idTrayStatusExt = GUICtrlCreateLabel("", $left, GetPos($TBgui, $idTrayStatus, 8, False), $width, 20, $SS_CENTER)
 
-	Global $TrayMsg_Status = GUICtrlCreateLabel("", $left, 74, $width, 20, $SS_CENTER)
-
-	GUICtrlSetFont($Tray_File, 9, 500, 0, "Arial")
-	GUICtrlSetFont($TrayMsg_Status, 9, 500, 0, "Arial")
+	GUICtrlSetFont($idTrayFileName, 9, 500, 0, "Arial")
+	GUICtrlSetFont($idTrayStatus, 9, 500, 0, "Arial")
+	GUICtrlSetFont($idTrayStatusExt, 9, 500, 0, "Arial")
 
 	If $bDark Then
-		GUICtrlSetColor($Tray_File, 0xFFFFFF)
-		GUICtrlSetColor($TrayMsg_Status, 0xFFFFFF)
+		GUICtrlSetColor($idTrayFileName, 0xFFFFFF)
+		GUICtrlSetColor($idTrayStatus, 0xFFFFFF)
+		GUICtrlSetColor($idTrayStatusExt, 0xFFFFFF)
 	EndIf
 
 ;~     DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 250, "long", 0x00080000 )
@@ -3757,7 +3745,7 @@ Func _DeleteTrayMessageBox()
 
 	GUIDelete($TBgui)
 	$TBgui = 0
-EndFunc   ;==>_DeleteTrayMessageBox
+EndFunc
 
 ; Create command line for current file
 Func GetCmd($silent = True)
@@ -4065,13 +4053,17 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 	Local $return = FetchStdout($sIsProtectedCmd, $outdir, @SW_HIDE, $iLine)
 	If Not StringInStr($return, $sIsProtectedText) And ($sIsProtectedText2 == 0 Or Not StringInStr($return, $sIsProtectedText2)) Then Return 0
 
-	; Try passwords from list
 	Cout("Archive is password protected")
-	GUICtrlSetData($TrayMsg_Status, t('SEARCHING_PASSWORD'))
+	GUICtrlSetData($idTrayStatusExt, t('SEARCHING_PASSWORD'))
 	$aPasswords = FileReadToArray($sPasswordFile)
-	If @error Then Return 0
-	Local $size = @extended
-	Local $sPassword = 0
+	If @error Then
+		Cout("Error reading password file " & $sPasswordFile)
+		$aPasswords = FileReadToArray(@ScriptDir & "\passwords.txt")
+		If @error Then Return 0
+	EndIf
+
+	; Try passwords from list
+	Local $size = @extended, $sPassword = 0
 	If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
 	For $i = 0 To $size - 1
 		If StringInStr(FetchStdout(StringReplace($sTestCmd, "%PASSWORD%", $aPasswords[$i], 1), $outdir, @SW_HIDE, 0, False), $sTestText) Then
@@ -4080,7 +4072,8 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 			ExitLoop
 		EndIf
 	Next
-	GUICtrlSetData($TrayMsg_Status, "")
+
+	GUICtrlSetData($idTrayStatusExt, "")
 	Return $sPassword
 EndFunc
 
@@ -4134,8 +4127,8 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 				If StringInStr($return, "already exist", 0) Or StringInStr($return, "overwrite", 0) Or StringInStr($return, " replace", 0) Or StringInStr($return, $STATUS_PASSWORD, 0) Then
 					Cout("User input needed")
 					WinSetState($runtitle, "", @SW_SHOW)
-					GUICtrlSetFont($TrayMsg_Status, 8.5, 900)
-					GUICtrlSetData($TrayMsg_Status, t('INPUT_NEEDED'))
+					GUICtrlSetFont($idTrayStatusExt, 8.5, 900)
+					GUICtrlSetData($idTrayStatusExt, t('INPUT_NEEDED'))
 					WinActivate($runtitle)
 					$lastSize = Round((_DirGetSize($outdir, 0) - $initdirsize) / 1024 / 1024, 3)
 					ContinueLoop
@@ -4147,28 +4140,28 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 						$aReturn = StringRegExp($return, "(\d{1,3})[\d\.,]*%", 1)
 						If UBound($aReturn) > 0 Then
 							$size = -1
-							GUICtrlSetData($TrayMsg_Status, _ArrayPop($aReturn) & "%")
+							GUICtrlSetData($idTrayStatusExt, _ArrayPop($aReturn) & "%")
 						EndIf
 					ElseIf StringInStr($return, "/", 0, -1) Then
 						$aReturn = StringRegExp($return, "(\d+)/(\d+) ", 1) ; x/y
 						If UBound($aReturn) > 1 Then
 							$size = -1
 							$Num = _ArrayPop($aReturn)
-							GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " " & _ArrayPop($aReturn) & "/" & $Num)
+							GUICtrlSetData($idTrayStatusExt, t('TERM_FILE') & " " & _ArrayPop($aReturn) & "/" & $Num)
 						EndIf
 					Else
 						$aReturn = StringRegExp($return, "\[(\d+) on (\d+)\]", 1) ; [x on y]
 						If UBound($aReturn) > 1 Then
 							$size = -1
 							$Num = _ArrayPop($aReturn)
-							GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " " & _ArrayPop($aReturn) & "/" & $Num)
+							GUICtrlSetData($idTrayStatusExt, t('TERM_FILE') & " " & _ArrayPop($aReturn) & "/" & $Num)
 						Else ; # x
 							$pos = StringInStr($return, "#", 0, -1)
 							If $pos Then
 								$Num = Number(StringMid($return, $pos + 1), 1)
 								If $Num > 0 Then
 									$size = -1
-									GUICtrlSetData($TrayMsg_Status, t('TERM_FILE') & " #" & $Num)
+									GUICtrlSetData($idTrayStatusExt, t('TERM_FILE') & " #" & $Num)
 								EndIf
 							EndIf
 							Sleep(50)
@@ -4182,7 +4175,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 ;~ 				Cout("Size: " & $size & @TAB & $lastSize)
 				If $size > 0 And $size <> $lastSize Then
 					Cout("Size: " & $size & @TAB & $lastSize)
-					GUICtrlSetData($TrayMsg_Status, $size & " MB")
+					GUICtrlSetData($idTrayStatusExt, $size & " MB")
 				EndIf
 				$lastSize = $size
 				Sleep(50)
@@ -4242,7 +4235,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 		While ProcessExists($run)
 			$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 			If $size > 0 Then
-				If $TBgui Then GUICtrlSetData($TrayMsg_Status, $size & " MB")
+				If $TBgui Then GUICtrlSetData($idTrayStatusExt, $size & " MB")
 			Else
 				If $TimerStart And TimerDiff($TimerStart) > 60000 Then
 					WinSetState($runtitle, "", @SW_SHOW)
@@ -4315,6 +4308,12 @@ Func Cout($Data)
 	$debug &= $Output
 EndFunc
 
+; Open URL and evaluate success
+Func OpenURL($sURL, $handle = 0)
+	ShellExecute($sURL)
+	If @error Then InputBox($title, t('OPEN_URL_FAILED'), $sURL, "", -1, -1, Default, Default, 0, $handle)
+EndFunc
+
 ; Check for new version
 Func CheckUpdate($silent = False, $bCheckInterval = False)
 	If @NumParams > 1 And $bCheckInterval And _DateDiff("D", $lastupdate, _NowCalc()) < $updateinterval Then Return
@@ -4373,11 +4372,7 @@ Func _AfterUpdate()
 	; Open most recent changelog
 	$1 = FileGetTime("changelog_minor.txt", 0, 1)
 	$2 = FileGetTime("changelog.txt", 0, 1)
-	If $1 > $2 Then
-		ShellExecute("changelog_minor.txt")
-	Else
-		ShellExecute("changelog.txt")
-	EndIf
+	ShellExecute($1 > $2? "changelog_minor.txt": "changelog.txt")
 
 	; Remove unused files
 	FileDelete($bindir & "languages\ChineseBig5_v0038.lng")
@@ -5843,7 +5838,7 @@ Func GUI_Plugins()
 				If $current = -1 Then ContinueLoop
 				GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
 				Cout("Download clicked for plugin " & $aPluginInfo[$current][1])
-				ShellExecute($aPluginInfo[$current][4])
+				OpenURL($aPluginInfo[$current][4])
 				GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
 		EndSwitch
 	WEnd
@@ -6001,25 +5996,25 @@ EndFunc
 ; Launch Universal Extractor website if help menu item clicked
 Func GUI_Website()
 	Cout("Opening website")
-	ShellExecute($website)
+	OpenURL($website)
 EndFunc
 
 ; Launch Universal Extractor 2 website if help menu item clicked
 Func GUI_Website2()
 	Cout("Opening version 2 website")
-	ShellExecute($website2)
+	OpenURL($website2)
 EndFunc
 
 ; Launch Universal Extractor 2 Github website if help menu item clicked
 Func GUI_Website_Github()
 	Cout("Opening Github website")
-	ShellExecute($websiteGithub)
+	OpenURL($websiteGithub)
 EndFunc
 
 ; Launch developer forum website if help menu item selected
 Func GUI_Forum()
 	Cout("Opening forum")
-	ShellExecute($forum)
+	OpenURL($forum)
 EndFunc
 
 ; Exit if Cancel clicked or window closed
