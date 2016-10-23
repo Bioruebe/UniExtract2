@@ -7,7 +7,7 @@ Binaries:
 															(Success Evaluation|Fast Detection|Percentage Indicator)
 Name										Files						Version		Features	License					Author								Website
 															
-7Zip										x86\7z.exe					15.05		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
+7Zip										x86\7z.exe					16.04		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
 											x64\7z.exe					-------		---------	(+ unRAR restriction)	-------								-------															
 											x86\7z.dll					-------		---------	-------					-------								-------															
 											x64\7z.dll					-------		---------	-------					-------								-------															

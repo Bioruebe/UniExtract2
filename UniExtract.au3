@@ -2748,7 +2748,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					$j = 3
 					Do
 						;Cout("$j = " & $j & @TAB & $swf_arr[$j])
-						$swf_obj = 0
 						$swf_obj = StringInStr($swf_arr[$j], "-")
 						If $swf_obj Then
 							For $k = StringMid($swf_arr[$j], 1, $swf_obj - 1) To StringMid($swf_arr[$j], $swf_obj + 1)
@@ -2757,18 +2756,27 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 							$swf_arr[0] = UBound($swf_arr) - 1
 ;~ 							_ArrayDisplay($swf_arr)
 						Else
-							_Run($cmd & $swf & " " & $swf_arr[1] & " " & StringStripWS($swf_arr[$j], 1) & ' "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
-							; Rename and move file to subfolder
-;~							_ArrayDisplay($swf_arr)
-							If $swf_arr[2] = "Sound" Then
-								FileMove($outdir & "\output.mp3", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".mp3", 8 + 1)
+							; Progress indicator
+							GUICtrlSetData($idTrayStatusExt, $swf_arr[2] & ": " & $j & "/" & $swf_arr[0] + 1)
+
+							; Set output file name
+							$swf_arr[$j] = StringStripWS($swf_arr[$j], 1)
+							$fname = $swf_arr[$j]
+
+							If $swf_arr[2] = "Sounds" Or $swf_arr[2] = "Embedded MP3s" Then
+								$fname &= ".mp3"
 							ElseIf $swf_arr[2] = "PNGs" Then
-								FileMove($outdir & "\output.png", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".png", 8 + 1)
-							ElseIf $swf_arr[2] = "JPEG" Then
-								FileMove($outdir & "\output.jpg", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".jpg", 8 + 1)
+								$fname &= ".png"
+							ElseIf $swf_arr[2] = "JPEGs" Then
+								$fname &= ".jpg"
 							Else
-								FileMove($outdir & "\output.swf", $outdir & "\" & $swf_arr[2] & "\" & $swf_arr[$j] & ".swf", 8 + 1)
+								$fname &= ".swf"
 							EndIf
+
+							_Run($cmd & $swf & " " & $swf_arr[1] & " " & $swf_arr[$j] & ' -o ' & $fname & ' "' & $file & '"', $outdir, @SW_HIDE, True, -1, False)
+;~							_ArrayDisplay($swf_arr)
+
+							FileMove($outdir & "\" & $fname, $outdir & "\" & $swf_arr[2] & "\", 8 + 1)
 						EndIf
 						$j += 1
 					Until $j = $swf_arr[0] + 1
@@ -4170,7 +4178,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 				EndIf
 			EndIf
 			; Size of extracted file(s) as fallback
-			If $size > -1 Then
+			If $size > -1 And $patternSearch > -1 Then
 				$size = Round((_DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 ;~ 				Cout("Size: " & $size & @TAB & $lastSize)
 				If $size > 0 And $size <> $lastSize Then
@@ -4196,7 +4204,8 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 			SetError(1, 1)
 		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
 			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
-			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") Then
+			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
+			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Then
 			$success = $RESULT_FAILED
 			SetError(1)
 		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
