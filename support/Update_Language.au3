@@ -156,6 +156,6 @@ Func _Strip(ByRef $arr)
 		$pos = 0
 		$pos = StringInStr($arr[$i], "=")
 		If $pos Then $arr[$i] = StringLeft($arr[$i], $pos)
-		If StringInStr($arr[$i], "Written for") Then $version = StringReplace($arr[$i], "; Written for ", "")
+		If StringInStr($arr[$i], "Written for") Then $version = StringReplace($arr[$i], "; Written for Universal Extractor ", "")
 	Next
 EndFunc

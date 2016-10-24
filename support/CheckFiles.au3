@@ -4,7 +4,7 @@
  Author:         Bioruebe
 
  Script Function:
-	Checks if files in /bin directory are listed in helper binaries info file
+	Returns files in /bin directory, which are not listed in helper binaries info file
 
 #ce ----------------------------------------------------------------------------
 

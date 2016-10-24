@@ -1,10 +1,10 @@
 #cs ----------------------------------------------------------------------------
 
  AutoIt Version: 3.3.14.1
- Author:         myName
+ Author:         Bioruebe
 
  Script Function:
-	Template AutoIt script.
+	Creates an update package with all changed files since last run
 
 #ce ----------------------------------------------------------------------------
 
@@ -20,7 +20,7 @@ $sSnapshotFile = "Snapshot.csv" ; path, hash
 $sMainFile = "..\UniExtract.au3"
 $sOutdir = ".\Update\"
 $s7z = "..\bin\x64\7z.exe"
-$sFilter = "*|*.au3;*.xcf;standard.ini;UniExtract.ini;English_old.ini;passwords.txt;list.txt;.gitignore;ffmpeg.exe;arc_conv.exe;bootimg.exe;ci-extractor.exe;dcp_unpacker.exe;dgcac.exe;EnigmaVBUnpacker.exe;iscab.exe;i5comp.exe;mpq.wcx*;RPGDecrypter.exe;sim_unpacker.exe;Extractor.exe;extract.exe;ZD50149.DLL;ZD51145.DLL;gea.dll;gentee.dll;" & $sSnapshotFile & "|.git;backup;devdata;homepage;log;test;userlogs;Update;crass-0.4.14.0;IS_Languages;FFmpeg"
+$sFilter = "*|*.au3;*.xcf;standard.ini;UniExtract.ini;English_old.ini;passwords.txt;list.txt;.gitignore;ffmpeg.exe;arc_conv.exe;bootimg.exe;ci-extractor.exe;dcp_unpacker.exe;dgcac.exe;EnigmaVBUnpacker.exe;iscab.exe;i5comp.exe;mpq.wcx*;RPGDecrypter.exe;sim_unpacker.exe;Extractor.exe;extract.exe;ZD50149.DLL;ZD51145.DLL;gea.dll;gentee.dll;" & $sSnapshotFile & ";" & $sSnapshotFile & ".bak" & "|.git;backup;devdata;homepage;log;test;userlogs;Update;crass-0.4.14.0;IS_Languages;FFmpeg"
 
 $aVersion = _StringBetween(FileRead($sMainFile), 'version = "', '"')
 If @error Then Dim $aVersion = ["Update"]
@@ -67,7 +67,8 @@ If FileExists($sArchive) Then Exit MsgBox(48, "Error", "File already exists: " &
 
 Cout("Copying files")
 For $sFile In $aChanged
-	FileCopy($sDir & $sFile, $sOutdir & $sFile, $FC_CREATEPATH)
+	; 7zip cannot replace itself, so to extract new versions of 7zip, it has to be renamed
+	FileCopy($sDir & $sFile, $sOutdir & $sFile & (StringInStr($sFile, "\7z.")? ".new": ""), $FC_CREATEPATH)
 Next
 
 Cout("Compressing")

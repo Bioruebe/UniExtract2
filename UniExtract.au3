@@ -700,6 +700,7 @@ Func LoadPref($name, ByRef $value, $int = True)
 	Local $return = IniRead($prefs, "UniExtract Preferences", $name, "")
 	If @error Or $return = "" Then
 		Cout("Error reading option " & $name & " --> " & $value)
+		SavePref($name, $value)
 		Return SetError(1, "", -1)
 	EndIf
 
@@ -4386,6 +4387,7 @@ Func _AfterUpdate()
 	; Remove unused files
 	FileDelete($bindir & "languages\ChineseBig5_v0038.lng")
 	FileDelete($bindir & "languages\exeinfope_Neutral_v0038.lng")
+	FileDelete($bindir & "languages\exeinfope_Neutral_v0041.lng")
 	FileDelete($bindir & "languages\exeinfope_turkish.lng")
 	FileDelete($bindir & "languages\exeinfopeCHS.lng")
 	FileDelete($bindir & "faad.exe")
@@ -4400,9 +4402,6 @@ Func _AfterUpdate()
 	FileMove($bindir & "x86\7z.exe.new", $bindir & "x86\7z.exe", 1)
 	FileMove($bindir & "x64\7z.dll.new", $bindir & "x64\7z.dll", 1)
 	FileMove($bindir & "x64\7z.exe.new", $bindir & "x64\7z.exe", 1)
-
-	; Add new options to ini file (for options without corresponding GUI control)
-	SavePref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 EndFunc
 
 ; Download FFmpeg and move needed files to Universal Extractor directory
