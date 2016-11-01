@@ -1,4 +1,16 @@
+Beta 4b:
+  Beta 4b is a bugfix update adressing failing msi extractions
+  
+  Fixed msi extraction when UniExtract is installed in a directory, which contains spaces
+  Fixed progress indicator for msi extractions
+  Fixed rare error opening changelog after update
+
 Beta 4:
+  
+  Beta 4 is planned to be the last beta version before the final release. It adds support for 
+  several new installer types, a new context menu entry 'Extract to last used directory', 
+  improved user interface, a statistics display and multiple bugfixes.
+
   Added support for InstallAware installers
   Added support for .gif and apng files (FFMPEG)
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
@@ -256,14 +268,3 @@ Alpha 3:
 Alpha 2.1:
   Added minor changelog
   Fixed cascading context menu
-  
-  
-Notes:
-  Some features are not yet available in development versions; they will be added during beta test.
-	- Some extractions are already supported, but the filetype is only recognized with custom trid definitions.
-	  These will be added as soon as the stable version is ready to be released.
-	
-	
-	
-	
-	

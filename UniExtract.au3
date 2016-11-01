@@ -58,7 +58,7 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 4"
+Const $version = "2.0.0 Beta 4b"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -159,7 +159,7 @@ Const $bcm = "bcm.exe"																;1.00
 Const $daa = "daa2iso.exe" 															;0.1.7e
 Const $ethornell = "ethornell.exe" 													;unknown
 Const $exeinfope = "exeinfope.exe" 													;0.0.3.7
-Const $filetool = $bindir & "file\bin\file.exe" 									;5.03
+Const $filetool = $bindir & "file\bin\file.exe"										;5.03
 Const $freearc = "unarc.exe"														;0.666
 Const $fsb = "fsbext.exe" 															;0.3.3
 Const $gcf = "GCFScape.exe" ;x64													;1.8.2
@@ -169,14 +169,14 @@ Const $inno = "innounp.exe" 														;0.45
 Const $is6cab = "i6comp.exe" 														;0.2
 Const $isxunp = "IsXunpack.exe" 													;0.99
 Const $isz = "unisz.exe"															;?
-Const $kgb = $bindir & "kgb\kgb2_console.exe" 										;1.2.1.24
+Const $kgb = '""' & $bindir & 'kgb\kgb2_console.exe"'								;1.2.1.24
 Const $lit = "clit.exe" 															;1.8
 Const $lzo = "lzop.exe" 															;1.03
 Const $lzx = "unlzx.exe" 															;1.21
 Const $mht = "extractMHT.exe" 														;1.0
 Const $msi_msix = "MsiX.exe" 														;1.0
 Const $msi_jsmsix = "jsMSIx.exe" 													;1.11.0704
-Const $msi_lessmsi = $bindir & "lessmsi\lessmsi.exe"								;1.4
+Const $msi_lessmsi = '""' & $bindir & 'lessmsi\lessmsi.exe"'						;1.4
 Const $nbh = "NBHextract.exe" 														;1.0
 Const $pea = "pea.exe" 																;0.53/1.0
 Const $peid = "peid.exe" 															;0.95   2012/04/24
@@ -2539,7 +2539,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "msi"
 			If HasNetFramework(4) Then
-				_Run($cmd & $msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_SHOW, True)
+				_Run($cmd & $msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_SHOW, True, True)
 			Else
 				Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
 				$choice = MethodSelect($aReturn, $arcdisp)
@@ -4152,7 +4152,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useTee = True,
 							GUICtrlSetData($idTrayStatusExt, _ArrayPop($aReturn) & "%")
 						EndIf
 					ElseIf StringInStr($return, "/", 0, -1) Then
-						$aReturn = StringRegExp($return, "(\d+)/(\d+) ", 1) ; x/y
+						$aReturn = StringRegExp($return, "(\d+)/(\d+)", 1) ; x/y
 						If UBound($aReturn) > 1 Then
 							$size = -1
 							$Num = _ArrayPop($aReturn)
@@ -4382,7 +4382,7 @@ Func _AfterUpdate()
 	; Open most recent changelog
 	$1 = FileGetTime("changelog_minor.txt", 0, 1)
 	$2 = FileGetTime("changelog.txt", 0, 1)
-	ShellExecute($1 > $2? "changelog_minor.txt": "changelog.txt")
+	ShellExecute(@ScriptDir & "\" & ($1 > $2? "changelog_minor.txt": "changelog.txt"))
 
 	; Remove unused files
 	FileDelete($bindir & "languages\ChineseBig5_v0038.lng")

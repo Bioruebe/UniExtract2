@@ -50,6 +50,7 @@ Logging: quickbms, Crage
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 smart extraction - archive contains: single file/folder -> file dir; multiple files -> sub dir; folder with same name as filedir && filedir only contains archive -> files into filedir
+global ignore list, e.g. don't extract .url files, readme.txt, etc.
 include tridscan gui?
 ntlea?
 

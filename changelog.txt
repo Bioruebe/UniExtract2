@@ -1,6 +1,6 @@
 //If this file is not displayed correctly, open it with notepad++
 
-2.0.0 (2016):
+2.0.0 (2017):
   Added filter for specific files to file selection dialog (GUI only)
   Added option not to display extraction status box
   Added option to open destination folder after extraction
