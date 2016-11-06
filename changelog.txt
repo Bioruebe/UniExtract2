@@ -76,6 +76,7 @@
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
   Added support for Ghost Installer Studio installers
   Added support for Smart Install Maker installers (plugin)
+  Added support for InstallAware installers
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for audio decompression to wav using FFmpeg

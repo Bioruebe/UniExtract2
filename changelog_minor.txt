@@ -1,3 +1,9 @@
+2.0.0:
+  Fixed MS SFX hotfix extraction
+  Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
+  Changed feedback GUI to always pre-fill output field
+  Changed .nrg extraction method to use 7zip for improved unicode support
+
 Beta 4b:
   Beta 4b is a bugfix update adressing failing msi extractions
   

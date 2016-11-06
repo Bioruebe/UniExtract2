@@ -263,12 +263,7 @@ Cout("Starting " & $name & " " & $version)
 ; Set environment options for Windows NT, automatically reverted on exit
 Cout("Setting path environment variable: " & EnvSet("PATH", $archdir & ';' & $bindir & ';' & EnvGet("PATH")))
 
-; Check commandline parameters
-If $cmdline[0] = 0 Then
-	$prompt = 1
-Else
-	ParseCommandLine()
-EndIf
+ParseCommandLine()
 
 ; Create tray menu items
 $Tray_Statusbox = TrayCreateItem(t('PREFS_HIDE_STATUS_LABEL'))
@@ -505,10 +500,12 @@ EndFunc
 
 ; Parse command line
 Func ParseCommandLine()
-	Cout("Command line parameters: " & _ArrayToString($cmdline, " ", 1))
+	If $cmdline[0] = 0 Then
+		$prompt = 1
+		Return
+	EndIf
 
-	$extract = True
-	$OpenOutDir = 0
+	Cout("Command line parameters: " & _ArrayToString($cmdline, " ", 1))
 
 	If $cmdline[1] = "/prefs" Then
 		GUI_Prefs()
@@ -561,6 +558,8 @@ Func ParseCommandLine()
 					$Log = False
 				Else ; Outdir specified
 					$outdir = $cmdline[2]
+					; When executed from context menu, opening the outdir is not wanted
+					$OpenOutDir = 0
 				EndIf
 				If $cmdline[0] > 2 And $cmdline[3] = "/silent" Then $silentmode = 1
 			EndIf
@@ -1811,6 +1810,7 @@ Func CheckIso()
 	Cout("Testing image file")
 	_CreateTrayMessageBox(t('TERM_TESTING') & " " & t('TERM_IMAGE') & " " & t('TERM_FILE'))
 	If $fileext = "cue" And FileExists(StringTrimRight($file, 3) & "bin") Then $file = StringTrimRight($file, 3) & "bin"
+
 	$return = FetchStdout($cmd & $quickbms & ' -l "' & $bindir & $iso & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
 	_DeleteTrayMessageBox()
 	If StringInStr($return, "Target directory:", 0) Or StringInStr($return, "0 files found", 0) Or StringInStr($return, "Error", 0) _
@@ -2003,7 +2003,7 @@ Func InitialCheckExt()
 			CheckIso()
 		Case "dmg"
 			extract("7z", 'DMG ' & t('TERM_IMAGE'))
-		Case "iso"
+		Case "iso", "nrg"
 			check7z()
 			CheckIso()
 	EndSwitch
@@ -2331,7 +2331,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		; failsafe in case TrID misidentifies MS SFX hotfixes
 		Case "hotfix"
-			RunWait(Warn_Execute(Quote($file & '" /q /x:"' & $outdir)), $outdir)
+			Cout("Executing: " & Warn_Execute(Quote($file & '" /q /x:"' & $outdir)))
+			ShellExecuteWait($file, '/q /x:' & Quote($outdir), $outdir)
 
 		Case "img"
 			_Run($cmd & $img & ' -x "' & $file & '"', $outdir)
@@ -3544,7 +3545,7 @@ Func terminate($status, $fname = '', $ID = '')
 			Cout("------------------------------------------------File metadata------------------------------------------------" & _
 				 @CRLF & _ArrayToString(_GetExtProperty($file), @CRLF))
 			; Prompt to send feedback
-			GUI_Feedback($status, $file, $debug)
+			GUI_Feedback($status, $file)
 		EndIf
 	EndIf
 
@@ -4982,7 +4983,7 @@ EndFunc
 
 ; Add file to batch queue
 Func GUI_Batch()
-	If GUI_OK_Set() Then
+	If GUI_OK_Set(True) Then
 		AddToBatch()
 		GUICtrlSetData($filecont, "")
 		If Not $KeepOutdir Then GUICtrlSetData($dircont, "")
@@ -5159,7 +5160,7 @@ Func WM_DROPFILES_UNICODE_FUNC($hWnd, $msgID, $wParam, $lParam)
 EndFunc   ;==>WM_DROPFILES_UNICODE_FUNC
 
 ; Create Feedback GUI
-Func GUI_Feedback($Type = "", $file = "", $Output = "")
+Func GUI_Feedback($Type = "", $file = "")
 	Cout("Creating feedback GUI")
 	Opt("GUIOnEventMode", 0)
 	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 251, 370, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
@@ -5181,7 +5182,7 @@ Func GUI_Feedback($Type = "", $file = "", $Output = "")
 	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 104, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
 	$FB_OutputCont = GUICtrlCreateEdit("", 8, 120, 233, 49, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
-	GUICtrlSetData(-1, $Output)
+	GUICtrlSetData(-1, $debug)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
 	GUICtrlCreateLabel(t('FEEDBACK_MESSAGE_LABEL'), 8, 176, -1, 15)
 	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
@@ -5983,7 +5984,7 @@ Func GUI_About()
 	$About = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, -1, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
-	GUICtrlSetFont(-1, 30, 400, 0, "MS Sans Serif")
+	GUICtrlSetFont(-1, 25, 400, 0, "Arial")
 	GUICtrlCreateLabel(t('ABOUT_VERSION', $version), 16, 72, $width - 32, 17, $SS_CENTER)
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
