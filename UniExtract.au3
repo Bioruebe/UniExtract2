@@ -2258,6 +2258,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			WinWait("EnigmaVBUnpacker")
 			WinClose("EnigmaVBUnpacker")
 			FileMove($filedir & "\" & $filename & "_unpacked.exe", $outdir & "\" & $filename & "_unpacked.exe")
+			DirMove($filedir & "\%DEFAULT FOLDER%", $outdir & "\%DEFAULT FOLDER%")
 			; TODO: move folders
 
 		Case "fead"
