@@ -3,6 +3,8 @@
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
+  Updated Bulgarian translation, thanks to Jekov J.K.
+  Updated French translation, thanks to zorbao
 
 Beta 4b:
   Beta 4b is a bugfix update adressing failing msi extractions
