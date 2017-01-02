@@ -90,8 +90,8 @@ UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http:
 											UNUHARC06.EXE				0.6b		x	x	x	-------					-------								-------
 unzoo										unzoo.exe					4.5			-	x	-	Public Domain			Martin Schoenert					http://archives.math.utk.edu/software/multi-platform/gap/util/
 Info-ZIPs UnZip								unzip.exe					6.00		-	x	-	Open Source				Info-ZIP							http://www.info-zip.org/pub/infozip/							
-uif2iso										uif2iso.exe					0.1.7c					GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#uif2iso				
-UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w					modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		http://upx.sourceforge.net/										
+uif2iso										uif2iso.exe					0.1.7c		-	-	x	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#uif2iso				
+UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w		-	-	?	modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		http://upx.sourceforge.net/										
 											---------					-------		---------	(UPX License)			Markus Oberhumer					-------															
 UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/

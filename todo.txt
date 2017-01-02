@@ -44,7 +44,8 @@ Logging: quickbms, Crage
 
 
 // Short term
-
+Test normal Run function for paths with spaces
+Change timeout var to seconds for WinWait
 
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
