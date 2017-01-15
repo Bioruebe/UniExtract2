@@ -77,7 +77,7 @@ Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe')
 Const $OPTION_KEEP = 0, $OPTION_DELETE = 1, $OPTION_ASK = 2, $OPTION_MOVE = 2
 Const $HISTORY_FILE = "File History", $HISTORY_DIR = "Directory History"
 Const $PACKER_UPX = "UPX", $PACKER_ASPACK = "Aspack"
-Const $RESULT_UNKNOWN = 0, $RESULT_SUCCESS = 1, $RESULT_FAILED = 2
+Const $RESULT_UNKNOWN = 0, $RESULT_SUCCESS = 1, $RESULT_FAILED = 2, $RESULT_CANCELED = 3
 Const $UNICODE_NONE = 0, $UNICODE_MOVE = 1, $UNICODE_COPY = 2
 Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNEXE = "unknownexe", $STATUS_UNKNOWNEXT = "unknownext", _
 	  $STATUS_INVALIDFILE = "invalidfile", $STATUS_INVALIDDIR = "invaliddir", $STATUS_NOTPACKED = "notpacked", $STATUS_BATCH = "batch", _
@@ -200,6 +200,7 @@ Const $upx = "upx.exe" 																;3.08w
 Const $rpa = $bindir & "unrpa\unrpa.exe"											;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
 Const $wise_ewise = "e_wise_w.exe" 													;2002/07/01
 Const $wise_wun = "wun.exe" 														;0.90A
+Const $wix = $bindir & "dark\dark.exe"												;3.10.3.3007
 Const $zip = "unzip.exe" 															;6.00
 Const $zpaq = _IsWinXP("zpaqxp.exe", $archdir & "zpaq.exe")	;x64					;7.07
 Const $zoo = "unzoo.exe" 															;4.5
@@ -1364,6 +1365,8 @@ Func advexescan()
 
 	_DeleteTrayMessageBox()
 
+	$filetype_curr = StringReplace($filetype_curr, $filename & "." & $fileext & "   - ", "")
+
 	; Return if not .exe file
 	If StringInStr($filetype_curr, "NOT EXE") Then Return
 
@@ -1418,10 +1421,6 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "KGB SFX", 0)
 			extract("kgb", t('TERM_SFX') & ' KGB ' & t('TERM_PACKAGE'))
 
-		Case StringInStr($filetype_curr, "Microsoft Visual C++", 0) And Not StringInStr($filetype_curr, "SPx Method", 0) And Not StringInStr($filetype_curr, "Custom", 0) And Not StringInStr($filetype_curr, "7.0", 0)
-			$test7z = True
-			$testie = True
-
 		Case StringInStr($filetype_curr, "Microsoft Visual C++ 7.0", 0) And StringInStr($filetype_curr, "Custom", 0) And Not StringInStr($filetype_curr, "Hotfix", 0)
 			extract("vssfx", 'Visual C++ ' & t('TERM_SFX') & ' ' & t('TERM_INSTALLER'))
 
@@ -1442,6 +1441,9 @@ Func advexescan()
 
 		Case StringInStr($filetype_curr, "RoboForm Installer", 0)
 			extract("robo", 'RoboForm ' & t('TERM_INSTALLER'))
+
+		Case StringInStr($filetype_curr, "WiX Installer")
+			extract("wix", 'WiX ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($filetype_curr, "Microsoft SFX CAB", 0) And StringInStr($filetype_curr, "rename file *.exe as *.cab", 0)
 			Prompt(1, "FILE_COPY", $file, 1)
@@ -1485,6 +1487,10 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "aspack", 0)
 			unpack($PACKER_ASPACK)
 
+		Case StringInStr($filetype_curr, "Microsoft Visual C++", 0) And Not StringInStr($filetype_curr, "SPx Method", 0) And Not StringInStr($filetype_curr, "Custom", 0) And Not StringInStr($filetype_curr, "7.0", 0)
+			$test7z = True
+			$testie = True
+
 			; not supported filetypes
 		Case StringInStr($filetype_curr, "Autoit") Or StringInStr($filetype_curr, "Not packed , try") Or _
 			 StringInStr($filetype_curr, "Microsoft Visual C# / Basic.NET")
@@ -1498,6 +1504,8 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "Not packed") And Not StringInStr($filetype_curr, "Microsoft Visual C++")
 			terminate($STATUS_NOTPACKED, $file, "")
 	EndSelect
+
+	Cout("No matches for known Exeinfo PE types")
 EndFunc
 
 ; Open ExeInfo PE and return an array containing initial registry values
@@ -2515,6 +2523,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case "msi"
 			If HasNetFramework(4) Then
 				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_SHOW, True, True, True)
+				MoveFiles($outdir & "\SourceDir", $outdir, False, '', True)
 			Else
 				Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
 				$choice = MethodSelect($aReturn, $arcdisp)
@@ -2966,6 +2975,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Append missing file extensions
 			If $appendext Then AppendExtensions($outdir)
 
+		Case "wix"
+			If Not HasNetFramework(4) Then terminate($STATUS_MISSINGEXE, $file, ".Net Framework 4")
+			_Run($wix & ' -x "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False)
+
 		Case "zip"
 			Local $sPassword = _FindArchivePassword($7z & ' l -p -slt "' & $file & '"', $7z & ' t -p"%PASSWORD%" "' & $file & '"', "Encrypted = +", "Wrong password?", 0, "Everything is Ok")
 			_Run($7z & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_HIDE, True, True, True, True)
@@ -3057,6 +3070,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				EndIf
 			EndIf
 		Case $RESULT_FAILED
+
+		Case $RESULT_CANCELED
 
 		Case $RESULT_UNKNOWN
 			; Otherwise, check directory size
@@ -4162,13 +4177,10 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 		   Or StringInStr($return, "Archive encrypted.", 0) Then
 			$success = $RESULT_FAILED
 			SetError(1, 1)
-		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
-			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
-			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
-			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) Then
-			$success = $RESULT_FAILED
-			SetError(1)
-		ElseIf StringInStr($return, "Everything is Ok") Or StringInStr($return, "Break signaled") _
+		ElseIf StringInStr($return, "Break signaled") Then
+			Cout("Cancelled by user")
+			$success = $RESULT_CANCELED
+		ElseIf StringInStr($return, "Everything is Ok") _
 			   Or StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") _
 			   Or StringInStr($return, "All OK") Or StringInStr($return, "done.") _
 			   Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") _
@@ -4176,6 +4188,12 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 			   Or StringInStr($return, "Extract files [ ") Then
 			Cout("Success evaluation passed")
 			$success = $RESULT_SUCCESS
+		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
+			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
+			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
+			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) Then
+			$success = $RESULT_FAILED
+			SetError(1)
 		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
 			Cout("At least one output file already existed")
 			; Folder size will most likely stay the same if files are overwritten,
@@ -4397,7 +4415,7 @@ Func GetFFmpeg()
 	Cout("Moving FFmpeg files")
 	ShellExecuteWait($updater, Quote(StringTrimRight($return, 3) & '" "' & $ret2))
 
-	Cout("FFmpeg succesfully loaded")
+	If HasPlugin($ffmpeg, True) Then Cout("FFmpeg succesfully loaded")
 	If $FS_GUI Then GUI_FirstStart_Next()
 	Return 1
 EndFunc

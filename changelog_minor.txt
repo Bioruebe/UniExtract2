@@ -1,10 +1,12 @@
 2.0.0:
+  Added support for wix installers
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
   Fixed error message after failed iso extraction: choices were mixed-up
   Fixed missing file type information in NOTPACKED error message for FFMPEG extraction
   Fixed missing packer name in unpack prompt
+  Fixed extractors not being found on some systems
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
@@ -50,7 +52,6 @@ Beta 4:
   Fixed .sit extraction
   Fixed crash when trying to extract wise installers
   Fixed swf extraction ignoring some images and sounds
-  Fixed extractors not being found on some systems
   Updated language files for Portuguese, Russian, Swedish, Italian
   Removed DMGExtractor and replaced it with 7z
   Updated 7zip to 16.04
