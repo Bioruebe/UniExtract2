@@ -7,11 +7,13 @@
   Fixed missing file type information in NOTPACKED error message for FFMPEG extraction
   Fixed missing packer name in unpack prompt
   Fixed extractors not being found on some systems
+  Fixed pea extraction writing to wrong directory
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
   Changed .hlp extraction: improved logging, localized file name
   Removed redundant 64-bit MediaInfo dll
+  Updated TrID to 2.24
   Updated Bulgarian translation, thanks to Jekov J.K.
   Updated French translation, thanks to zorbao
 
