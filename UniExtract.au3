@@ -158,7 +158,7 @@ Const $aspack = "AspackDie.exe" 													;1.4.1
 Const $bcm = Quote($archdir & "bcm.exe", True) ;x64									;1.00
 Const $daa = "daa2iso.exe" 															;0.1.7e
 Const $ethornell = "ethornell.exe" 													;unknown
-Const $exeinfope = Quote($bindir & "exeinfope.exe", False)							;0.0.3.7
+Const $exeinfope = Quote($bindir & "exeinfope.exe")									;0.0.3.7
 Const $filetool = Quote($bindir & "file\bin\file.exe", True)						;5.03
 Const $freearc = "unarc.exe"														;0.666
 Const $fsb = "fsbext.exe" 															;0.3.3
@@ -178,8 +178,8 @@ Const $msi_msix = "MsiX.exe" 														;1.0
 Const $msi_jsmsix = "jsMSIx.exe" 													;1.11.0704
 Const $msi_lessmsi = Quote($bindir & 'lessmsi\lessmsi.exe', True)					;1.4
 Const $nbh = "NBHextract.exe" 														;1.0
-Const $pea = Quote($bindir & "pea.exe", False) 										;0.53/1.0
-Const $peid = Quote($bindir & "peid.exe", False)									;0.95   2012/04/24
+Const $pea = Quote($bindir & "pea.exe") 											;0.53/1.0
+Const $peid = Quote($bindir & "peid.exe")											;0.95   2012/04/24
 Const $quickbms = Quote($bindir & "quickbms.exe", True)								;0.6.4
 Const $rai = "RAIU.EXE" 															;0.1a
 Const $rar = "unrar.exe" 															;5.21
@@ -234,7 +234,7 @@ Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)	;x64
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
 Const $mpq = "mpq.wcx" & $reg64
-Const $rgss3 = Quote($bindir & "RPGDecrypter.exe", True)
+Const $rgss3 = Quote($bindir & "RPGDecrypter.exe")
 Const $sim = "sim_unpacker.exe"
 Const $thinstall = Quote($bindir & "Extractor.exe", True)
 Const $unreal = "extract.exe"
@@ -3898,7 +3898,7 @@ EndFunc
 
 ; Determine whether Windows version >= Windows 7 or not; used for cascading context menu support
 Func _IsWin7()
-	Global $win7 = @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Or @OSVersion = "WIN_10"
+	Global $win7 = @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Or @OSVersion = "WIN_10" Or @OSVersion = "WIN_2016" Or @OSVersion = "WIN_2012R2" Or @OSVersion = "WIN_2012"
 	Return $win7
 EndFunc
 

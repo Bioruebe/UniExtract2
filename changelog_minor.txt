@@ -1,5 +1,7 @@
 2.0.0:
   Added support for wix installers
+  Added support for .rpgmvp files
+  Added support for .utage files
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
@@ -8,12 +10,14 @@
   Fixed missing packer name in unpack prompt
   Fixed extractors not being found on some systems
   Fixed pea extraction writing to wrong directory
+  Fixed cascading context menu for supported Windows Server operating system versions
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
   Changed .hlp extraction: improved logging, localized file name
   Removed redundant 64-bit MediaInfo dll
   Updated TrID to 2.24
+  Updated unshield to 1.4
   Updated Bulgarian translation, thanks to Jekov J.K.
   Updated French translation, thanks to zorbao
 
