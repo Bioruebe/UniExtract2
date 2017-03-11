@@ -71,7 +71,7 @@ Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
 Const $updater = @ScriptDir & '\UniExtractUpdater.exe'
-Const $unicodepattern = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
+Const $unicodepattern = "(?i)(?m)^[\w\Q @!Â§$%&/\()=?,.-:+~'Â²Â³{[]}*#ÃŸÂ°^Ã¢Ã«Ã¶Ã¤Ã¼Ã®ÃªÃ´Ã»Ã¯Ã¡Ã©Ã­Ã³ÃºÃ Ã¨Ã¬Ã²Ã¹\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k '
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
 Const $OPTION_KEEP = 0, $OPTION_DELETE = 1, $OPTION_ASK = 2, $OPTION_MOVE = 2
@@ -4469,9 +4469,9 @@ Func CreateGUI()
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 300, 135, $posx, $posy, -1, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
+		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
 	Else
-		Global $guimain = GUICreate($title, 300, 135, -1, -1, -1, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
+		Global $guimain = GUICreate($title, 310, 160, -1, -1, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
 	EndIf
 
 	_GuiSetColor()
