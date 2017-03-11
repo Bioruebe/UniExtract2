@@ -4462,11 +4462,20 @@ EndFunc
 
 ; ------------------------ Begin GUI Control Functions ------------------------
 
+Func WM_GETMINMAXINFO_maingui($hwnd, $Msg, $wParam, $lParam)
+    $tagMaxinfo = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
+    DllStructSetData($tagMaxinfo, 7, 320) ; min X
+    DllStructSetData($tagMaxinfo, 8, 170) ; min Y
+    ;DllStructSetData($tagMaxinfo, 9, 1200); max X
+    ;DllStructSetData($tagMaxinfo, 10, 160) ; max Y
+    ;Return 0
+EndFunc
+
 ; Build and display GUI if necessary
 Func CreateGUI()
 	Cout("Creating main GUI")
 	GUIRegisterMsg($WM_DROPFILES, "WM_DROPFILES_UNICODE_FUNC")
-
+	GUIRegisterMsg($WM_GETMINMAXINFO, "WM_GETMINMAXINFO_maingui")
 	; Create GUI
 	If $StoreGUIPosition Then
 		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
