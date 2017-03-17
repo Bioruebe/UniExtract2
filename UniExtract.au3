@@ -229,7 +229,7 @@ Const $ci = "ci-extractor.exe"
 Const $crage = Quote($bindir & "crass-0.4.14.0\crage.exe", True)
 Const $dcp = "dcp_unpacker.exe"
 Const $dgca = "dgcac.exe"
-Const $enigma = Quote($bindir & "EnigmaVBUnpacker.exe", True)
+Const $enigma = Quote($bindir & "EnigmaVBUnpacker.exe")
 Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)	;x64
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
@@ -450,7 +450,7 @@ Func FilenameParse($f)
 	If StringInStr($filename, '.') Then
 		$fileext = StringTrimLeft($filename, StringInStr($filename, '.', 0, -1))
 		$filename = StringTrimRight($filename, StringLen($fileext) + 1)
-		$initoutdir = $filedir & '\' & $filename
+		$initoutdir = $filedir & '\' & StringReplace($filename, ".", "_")
 	Else
 		$fileext = ''
 		$initoutdir = $filedir & '\' & $filename & '_' & t('TERM_UNPACKED')
@@ -887,7 +887,7 @@ Func filecompare($filetype_curr)
 			extract("audio", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "FLAC audio")
 			extract("audio", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
-		Case StringInStr($filetype_curr, "Audio file", 0)
+		Case StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "Dolby Digital stream", 0)
 			extract("audio", t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
 			CheckIso()
@@ -1070,7 +1070,7 @@ Func tridcompare($filetype_curr)
 		Case StringInStr($filetype_curr, "YU-RIS Script Engine", 0)
 			extract("arc_conv", "YU-RIS Script Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
-		Case StringInStr($filetype_curr, "ClsFileLink", 0)
+		Case StringInStr($filetype_curr, "ClsFileLink", 0) Or StringInStr($filetype_curr, "ERISA archive file", 0)
 			extract("arc_conv", t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Ethornell", 0)
@@ -1163,6 +1163,9 @@ Func tridcompare($filetype_curr)
 		Case StringInStr($filetype_curr, "Windows Media (generic)", 0)
 			extract("audio", 'Windows Media ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
+		Case StringInStr($filetype_curr, "Smacker movie/video")
+			extract("video_convert", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
+
 		Case StringInStr($filetype_curr, "Video") Or StringInStr($filetype_curr, "QuickTime Movie") Or _
 			 StringInStr($filetype_curr, "Matroska") Or StringInStr($filetype_curr, "Material Exchange Format") Or _
 			 StringInStr($filetype_curr, "Windows Media (generic)") Or StringInStr($filetype_curr, "GIF animated")
@@ -1172,9 +1175,8 @@ Func tridcompare($filetype_curr)
 			terminate($STATUS_NOTPACKED, $file, "")
 
 		; Not supported filetypes
-		Case StringInStr($filetype_curr, "Spoon Installer") Or StringInStr($filetype_curr, "Long Range ZIP") Or _
-			 StringInStr($filetype_curr, "Kremlin Encrypted File")
-			terminate($STATUS_NOTSUPPORTED, $f, "")
+		Case StringInStr($filetype_curr, "Long Range ZIP") Or StringInStr($filetype_curr, "Kremlin Encrypted File")
+			terminate($STATUS_NOTSUPPORTED, $file, "")
 
 		; Check for .exe file, only when fileext not .exe
 		Case Not $isexe And (StringInStr($filetype_curr, 'Executable', 0) Or StringInStr($filetype_curr, '(.EXE)', 1))
@@ -1610,7 +1612,8 @@ Func check7z()
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' 7-Zip')
 	$return = FetchStdout($7z & ' l "' & $file & '"', $filedir, @SW_HIDE)
 
-	If StringInStr($return, "Listing archive:") And Not StringInStr($return, "Can not open the file as archive") Then
+	If StringInStr($return, "Listing archive:") And Not (StringInStr($return, "Can not open the file as ") Or _
+	StringInStr($return, "There are data after the end of archive")) Then
 		; Failsafe in case TrID misidentifies MS SFX
 		If StringInStr($return, "_sfx_manifest_") Then
 			_DeleteTrayMessageBox()
@@ -1974,7 +1977,7 @@ Func InitialCheckExt()
 		Case "ipk", "tbz2", "tgz", "tz", "tlz", "txz"
 			extract("ctar", 'Compressed Tar ' & t('TERM_ARCHIVE'))
 		; image files - TrID is not always reliable with these formats
-		Case "bin", "cue", "cdi"
+		Case "bin", "cue", "cdi", "mdf"
 			CheckIso()
 		Case "dmg"
 			extract("7z", 'DMG ' & t('TERM_IMAGE'))
@@ -2032,6 +2035,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	; Create subdirectory
 	If StringRight($outdir, 1) = '\' Then $outdir = StringTrimRight($outdir, 1)
 	If FileExists($outdir) Then
+		If Not StringInStr(FileGetAttrib($outdir), "D") Then terminate($STATUS_INVALIDDIR, $outdir, "")
 		$dirmtime = FileGetTime($outdir, 0, 1)
 		If Not CanAccess($outdir) Then terminate($STATUS_INVALIDDIR, $outdir, "")
 	Else
@@ -2176,7 +2180,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "crage"
 			HasPlugin($crage)
-			_Run($crage & ' -p "' & $file & '" -o "' & $outdir & '" -v', $bindir & "crass-0.4.14.0", @SW_SHOW, True, False, False)
+			_Run($crage & ' -v -p "' & $file & '" -o "' & $outdir & '"', $bindir & "crass-0.4.14.0", @SW_SHOW, True, False, False)
 
 		Case "ctar"
 			$oldfiles = ReturnFiles($outdir)
@@ -2843,6 +2847,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$StreamType = StringSplit($Streams[$i], ",")
 ;~ 				_ArrayDisplay($StreamType)
 				If $StreamType[1] == "Video" Then
+					; Split gif files into single images
 					If $StreamType[2] == "gif" Or $StreamType[2] == "apng" Or $StreamType[2] == "webp" Then
 						_Run($command & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & '%05d.png"', $outdir, @SW_HIDE, True, False)
 						$iVideo += 1
@@ -2862,7 +2867,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						ElseIf StringInStr($StreamType[2], "v8") Then
 							$StreamType[2] = "webm"
 						EndIf
-						_Run($command & ' -vcodec copy -an -map ' & $StreamType[3] & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+						_Run($command & ' -vcodec copy -an -map ' & $StreamType[3] & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & "_" & t('TERM_VIDEO') & StringFormat("_%02s", $iVideo) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, True, False)
 					EndIf
 				ElseIf $StreamType[1] == "Audio" Then
 					$iAudio += 1
@@ -2875,12 +2880,17 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						$StreamType[2] = "wav"
 					EndIf
 
-					_Run($command & ' -acodec copy -vn -map ' & $StreamType[3] & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, False)
+					_Run($command & ' -acodec copy -vn -map ' & $StreamType[3] & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & "_" & t('TERM_AUDIO') & StringFormat("_%02s", $iAudio) & $StreamType[4] & "." & $StreamType[2] & '"', $outdir, @SW_HIDE, True, True, False)
 				Else
 					Cout("Unknown stream type: " & $StreamType[1])
 				EndIf
 			Next
 			If $iVideo + $iAudio < 1 Then terminate($STATUS_NOTPACKED, $file, $arcdisp)
+
+		Case "video_convert"
+			HasFFMPEG()
+
+			_Run($ffmpeg & ' -i "' & $file & '" "' & ($iUnicodeMode? $sUnicodeName: $filename) & '.mp4"', $outdir, @SW_HIDE, True, True, False)
 
 		Case "vssfx"
 			FileMove($file, $outdir)
@@ -3122,30 +3132,30 @@ EndFunc
 Func unpack($packer)
 	If $unpackfailed Then Return
 	$unpackfailed = True ; Don't display the prompt multiple times
+	$ret = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext
 
 	; Prompt to continue
-	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') _
-			 & "." & $fileext), 0) Then Return
+	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, $ret), 0) Then Return
 
 	; Unpack file
 	Switch $packer
 		Case $PACKER_UPX
-			_Run($cmd & $upx & ' -d -k "' & $file & '"', $filedir)
+			_Run($upx & ' -d -k "' & $file & '"', $filedir)
 			$tempext = StringTrimRight($fileext, 1) & '~'
 			If FileExists($filedir & "\" & $filename & "." & $tempext) Then
-				FileMove($file, $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext)
+				FileMove($file, $ret)
 				FileMove($filedir & "\" & $filename & "." & $tempext, $file)
 			EndIf
 		Case $PACKER_ASPACK
-			RunWait($cmd & $aspack & ' "' & $file & '" "' & $filedir & '\' & $filename & '_' & t('TERM_UNPACKED') & _
+			RunWait($aspack & ' "' & $file & '" "' & $filedir & '\' & $filename & '_' & t('TERM_UNPACKED') & _
 					$fileext & '" /NO_PROMPT', $filedir)
 	EndSwitch
 
 	; Success evaluation
-	If FileExists($filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext) Then
+	If FileExists($ret) Then
 		; Prompt if unpacked file should be scanned
 		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($file, $filename & '_' & t('TERM_UNPACKED') & "." & $fileext), 0) Then
-			$file = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext
+			$file = $ret
 			$outdir = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "\"
 			StartExtraction()
 		Else
@@ -3361,7 +3371,6 @@ EndFunc
 ; Handle program termination with appropriate error message
 Func terminate($status, $fname = '', $ID = '')
 	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = $STATUS_SUCCESS)? $ID: $status
-	$filetype = StringStripWS($filetype, 4+2+1)
 
 	; Rename unicode file
 	If $iUnicodeMode Then
@@ -3420,7 +3429,7 @@ Func terminate($status, $fname = '', $ID = '')
 
 		; Display file type information and exit
 		Case $STATUS_FILEINFO
-			If $filetype == "" Then
+			If StringStripWS($filetype, 4+2+1) == "" Then
 				$exitcode = 4
 				$filetype = t('UNKNOWN_EXT', CreateArray($file, ""))
 			EndIf
@@ -4167,7 +4176,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 			   Or StringInStr($return, "All OK") Or StringInStr($return, "done.") _
 			   Or StringInStr($return, "Done ...") Or StringInStr($return, ": done") _
 			   Or StringInStr($return, "Result:	Successful, errorcode 0") _
-			   Or StringInStr($return, "Extract files [ ") Then
+			   Or StringInStr($return, "Extract files [ ") Or StringInStr($return, "Done; file is OK") Then
 			Cout("Success evaluation passed")
 			$success = $RESULT_SUCCESS
 		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _

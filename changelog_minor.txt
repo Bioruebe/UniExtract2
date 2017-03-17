@@ -1,7 +1,11 @@
-2.0.0:
+RC 1:
   Added support for wix installers
+  Added support for Spoon installers
   Added support for .rpgmvp files
   Added support for .utage files
+  Added support for MDF image files
+  Added support for Smacker video files
+  Added support for ECM compressed disk images
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
@@ -15,6 +19,7 @@
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
   Changed .hlp extraction: improved logging, localized file name
+  Changed extraction to subdirectory: "."-character is now replaced to prevent collisions with existing files
   Removed redundant 64-bit MediaInfo dll
   Updated TrID to 2.24
   Updated unshield to 1.4

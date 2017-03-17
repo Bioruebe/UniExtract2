@@ -10,11 +10,9 @@ dll for ace extraction?
 
 
 // New unpackers
-lrzip? - http://ck.kolivas.org/apps/lrzip/
 sqx
-paq, zpaq
+paq
 lz
-mdf, mds images
 http://tlwiki.org/index.php?title=Tools
 
 
@@ -47,12 +45,12 @@ Logging: quickbms, Crage
 Test normal Run function for paths with spaces
 Change timeout var to seconds for WinWait
 
+
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 smart extraction - archive contains: single file/folder -> file dir; multiple files -> sub dir; folder with same name as filedir && filedir only contains archive -> files into filedir
 global ignore list, e.g. don't extract .url files, readme.txt, etc.
 include tridscan gui?
-ntlea?
 
 
 // Known bugs:
@@ -64,15 +62,6 @@ qbms process seems to hang (with increased cpu usage) on large files with gaup_p
 
 !!Compiling 64 bit version results in drag & drop application error!!
 
-
-//Not supported Installers/Archives:
-Deploymaster - http://www.deploymaster.com
-Anything from Clickteam //grrr...
-Spoon Installer - http://legroom.net/node/842
-Astrum InstallWizard - http://www.thraexsoftware.com
-LiberalInstaller
-BitRock InstallBuilder
-Long Range Zip (lrzip)
 
 
 // Not necessary/declined:
