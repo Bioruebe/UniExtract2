@@ -1,4 +1,4 @@
-#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+﻿#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=.\Support\Icons\uniextract_exe.ico
 #AutoIt3Wrapper_Outfile=.\UniExtract.exe
 #AutoIt3Wrapper_Outfile_x64=.\UniExtract64.exe
@@ -58,7 +58,7 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta 4b"
+Const $version = "2.0.0 Beta RC 1"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " v" & $version
 Const $website = "http://www.legroom.net/software/uniextract"
@@ -185,7 +185,7 @@ Const $rai = "RAIU.EXE" 															;0.1a
 Const $rar = "unrar.exe" 															;5.21
 Const $rpa = Quote($bindir & "unrpa\unrpa.exe", True)								;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
 Const $sfark = "sfarkxtc.exe"														;3.0 	;modified
-Const $sit = Quote($bindir & "Expander.exe", True)									;6.0
+Const $sit = Quote($bindir & "Expander.exe")										;6.0
 Const $sqlite = "sqlite3.exe"														;3.10.2
 Const $stix = "stix_d.exe" 															;2001/06/13
 Const $swf = "swfextract.exe" 														;0.9.1
@@ -2412,22 +2412,14 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Case 2
 						; Run installer and wait for temp files to be copied
 						_CreateTrayMessageBox(t('INIT_WAIT'))
-
-						If $Log Then
-							_Run(Warn_Execute(FileGetShortName($file) & ' /b"' & $tempoutdir & '" /v /l "' & $logdir & 'teelog.txt"'), $filedir, @SW_SHOW, True)
-						Else
-							RunWait(Warn_Execute(FileGetShortName($file) & ' /b"' & $tempoutdir & '"'), $filedir)
-						EndIf
-
+						ShellExecute($file, '/b"' & $tempoutdir & '"' & ($Log? ' /v /l "' & $logdir & 'teelog.txt"': ''), $filedir)
 
 						; TODO: Rewrite
 						; Wait for matching windows for up to 30 seconds (60 * .5)
 						Opt("WinTitleMatchMode", 4)
 						Local $success
 						For $i = 1 To $Timeout / 500
-							If Not WinExists("classname=MsiDialogCloseClass") Then
-								Sleep(500)
-							Else
+							If WinExists("classname=MsiDialogCloseClass") Then
 								; Search temp directory for MSI support and copy to tempoutdir
 								$msihandle = FileFindFirstFile($tempoutdir & "*.msi")
 								If Not @error Then
@@ -2458,6 +2450,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 								$success = $RESULT_SUCCESS
 								ExitLoop
 							EndIf
+
+							Sleep(500)
 						Next
 						$run = 0
 
@@ -4471,20 +4465,12 @@ EndFunc
 
 ; ------------------------ Begin GUI Control Functions ------------------------
 
-Func WM_GETMINMAXINFO_maingui($hwnd, $Msg, $wParam, $lParam)
-    $tagMaxinfo = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
-    DllStructSetData($tagMaxinfo, 7, 320) ; min X
-    DllStructSetData($tagMaxinfo, 8, 170) ; min Y
-    ;DllStructSetData($tagMaxinfo, 9, 1200); max X
-    ;DllStructSetData($tagMaxinfo, 10, 160) ; max Y
-    ;Return 0
-EndFunc
-
 ; Build and display GUI if necessary
 Func CreateGUI()
 	Cout("Creating main GUI")
 	GUIRegisterMsg($WM_DROPFILES, "WM_DROPFILES_UNICODE_FUNC")
-	GUIRegisterMsg($WM_GETMINMAXINFO, "WM_GETMINMAXINFO_maingui")
+	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Main")
+
 	; Create GUI
 	If $StoreGUIPosition Then
 		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
@@ -5196,7 +5182,7 @@ Func GUI_Feedback($Type = "", $file = "")
 	GUICtrlSetState($FB_MessageCont, $GUI_FOCUS)
 
 	; Set minimum window size
-	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO")
+	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Feedback")
 	GUISetState(@SW_SHOW)
 
 	While 1
@@ -5281,14 +5267,22 @@ Func GUIGetPosition()
 	SavePref('posy', $pos[1])
 EndFunc   ;==>GUIGetPosition
 
-; Set minimal size of feedback GUI for resizing
-Func GUI_WM_GETMINMAXINFO($hWnd, $Msg, $wParam, $lParam)
+; Set minimal size of main GUI
+Func GUI_WM_GETMINMAXINFO_Main($hwnd, $Msg, $wParam, $lParam)
+    $tagMaxinfo = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
+    DllStructSetData($tagMaxinfo, 7, 320) ; min X
+    DllStructSetData($tagMaxinfo, 8, 170) ; min Y
+    ;DllStructSetData($tagMaxinfo, 9, 1200); max X
+    ;DllStructSetData($tagMaxinfo, 10, 160) ; max Y
+EndFunc
+
+; Set minimal size of feedback GUI
+Func GUI_WM_GETMINMAXINFO_Feedback($hWnd, $Msg, $wParam, $lParam)
 	$tagMaxinfo = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
 	DllStructSetData($tagMaxinfo, 7, 270) ; min width
 	DllStructSetData($tagMaxinfo, 8, 380) ; min height
 	;DllStructSetData($tagMaxinfo,  9, ) ; max width
 	;DllStructSetData($tagMaxinfo, 10, )  ; max height
-	Return 0
 EndFunc
 
 ; Tooltip does not work for disabled controls, so here's a workaround

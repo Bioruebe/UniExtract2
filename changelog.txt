@@ -67,7 +67,11 @@
   Added support for .swf files using swfextract (slow)
   Added support for .uif image files using uif2iso
   Added support for .daa, .gbi image files using daa2iso
+  Added support for .rpgmvp files
+  Added support for .utage files
   Added support for ISO zipped image files using unisz
+  Added support for MDF image files
+  Added support for ECM compressed disk images
   Added support for CreateInstall installers (plugin)
   Added support for DGCA compressed files (plugin)
   Added support for Android boot images (plugin)
@@ -76,6 +80,8 @@
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
   Added support for Ghost Installer Studio installers
   Added support for Smart Install Maker installers (plugin)
+  Added support for wix installers
+  Added support for Spoon installers
   Added support for InstallAware installers
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
@@ -155,7 +161,7 @@
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced cmdTotal with QuickBMS
   Replaced tee with mtee/wintee (adds support for unicode and longer filenames, smaller)
-  Updated translations for English, German, French, Finnish, Portuguese (Portugal), Portuguese (Brazilian), Russian, Japanese (partly), Chinese (Simplified), Swedish, Bulgarian, Ukrainian
+  Updated translations for English, German, French, Finnish, Portuguese (Portugal), Portuguese (Brazilian), Russian, Japanese (partly), Chinese (Simplified), Swedish, Bulgarian, Ukrainian, Chinese (Traditional), Greek
   Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
   Updated 7zip to 15.14
   Updated innounp to 0.45
