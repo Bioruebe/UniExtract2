@@ -15,6 +15,7 @@ RC 1:
   Fixed extractors not being found on some systems
   Fixed pea extraction writing to wrong directory
   Fixed cascading context menu for supported Windows Server operating system versions
+  Fixed 'Always on top' option not being saved
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj

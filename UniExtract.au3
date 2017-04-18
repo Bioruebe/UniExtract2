@@ -646,7 +646,7 @@ Func ReadPrefs()
 	LoadPref("addassoc", $addassoc, False)
 	LoadPref("addassocallusers", $addassocallusers)
 	LoadPref("topmost", $iTopmost)
-	If $iTopmost Then $iTopmost = 262144
+	If $iTopmost Then $iTopmost = $WS_EX_TOPMOST
 
 	LoadPref("updateinterval", $updateinterval)
 	If $updateinterval < 1 Then $updateinterval = 1
@@ -974,7 +974,7 @@ Func tridcompare($filetype_curr)
 			extract("dgca", 'DGCA ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Disk Image (Macintosh)", 0)
-			extract("7z", 'DMG ' & t('TERM_IMAGE'))
+			extract("7z", 'Macintosh ' & t('TERM_DISK') & ' ' & t('TERM_IMAGE'))
 
 		Case StringInStr($filetype_curr, "FMOD Sample Bank Format")
 			extract("fsb", 'FMOD ' & t('TERM_CONTAINER'))
@@ -3776,7 +3776,6 @@ EndFunc   ;==>SaveBatchQueue
 ; Returns first element of batch queue
 Func BatchQueuePop()
 ;~ 	_ArrayDisplay($queueArray)
-;~ 	MsgBox(0, "", "UBound: " & UBound($queueArray))
 	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Then GetBatchQueue()
 
 	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Or $queueArray[0] = 0 Then ; Queue empty
@@ -4176,7 +4175,8 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
 			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
 			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
-			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) Then
+			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) _
+			   Or StringInStr($return, "Open ERROR: Can not open the file as") Then
 			$success = $RESULT_FAILED
 			SetError(1)
 		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
@@ -4473,9 +4473,9 @@ Func CreateGUI()
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
+		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost))
 	Else
-		Global $guimain = GUICreate($title, 310, 160, -1, -1, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost? $WS_EX_TOPMOST: 0))
+		Global $guimain = GUICreate($title, 310, 160, -1, -1, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost))
 	EndIf
 
 	_GuiSetColor()
@@ -4759,13 +4759,13 @@ Func GUI_Topmost()
 		$iTopmost = 0
 	Else
 		GUICtrlSetState($topmostitem, $GUI_CHECKED)
-		$iTopmost = 262144
+		$iTopmost = $WS_EX_TOPMOST
 	EndIf
 
 	GUIDelete($guimain)
 	CreateGUI()
 
-	SavePref('keepopen', $KeepOpen)
+	SavePref('topmost', Number($iTopmost > 0))
 EndFunc
 
 ; Build and display preferences GUI
