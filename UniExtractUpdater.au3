@@ -44,8 +44,8 @@ EndFunc
 
 Func _UpdateFFMPEG()
 	; Binaries
-	FileMove($cmdline[1] & "\bin\ffmpeg.exe", @ScriptDir & "\bin\" & $OSArch & "\ffmpeg.exe", 1)
-	FileMove($cmdline[1] & "\licenses\*", @ScriptDir & "\docs\FFmpeg\", 8+1)
+	FileMove($cmdline[1] & "\ffmpeg.exe", @ScriptDir & "\bin\" & $OSArch & "\ffmpeg.exe", 1)
+	FileMove($cmdline[1] & "\*.txt", @ScriptDir & "\docs\FFmpeg\", 8+1)
 	DirRemove($cmdline[1], 1)
 
 	; License files

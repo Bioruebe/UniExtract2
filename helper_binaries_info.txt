@@ -26,6 +26,7 @@ daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma					
 disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
 											disunity.bat				-------		---------	-------					-------								-------
 											\lib directory				-------		---------	-------					-------								-------
+Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.41a		x	-	-	Freeware				kao									https://lifeinhex.com/updated-enigma-virtualbox-unpacker-again
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
 Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.4.3		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				

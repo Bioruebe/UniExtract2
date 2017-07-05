@@ -104,7 +104,7 @@ Global $OpenOutDir = 0
 Global $iDeleteOrigFile = $OPTION_KEEP
 Global $Timeout = 60000 ; milliseconds
 Global $updateinterval = 1 ; days
-Global $lastupdate = "2010/12/05" ; release date of last version
+Global $lastupdate = "2010/12/05" ; last official version
 Global $addassocenabled = 0
 Global $addassocallusers = 0
 Global $addassoc = ""
@@ -132,9 +132,8 @@ Dim $gaDropFiles[1], $queueArray[1]
 Dim $About, $Type, $win7, $silent, $iUnicodeMode = False, $reg64 = ""
 Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui, $isofile = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
-Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed
-Dim $oldpath, $oldoutdir, $sUnicodeName
-Dim $createdir, $dirmtime
+Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed, $exefailed
+Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Dim $FS_GUI = False, $idTrayStatusExt, $BatchBut
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
@@ -229,7 +228,7 @@ Const $ci = "ci-extractor.exe"
 Const $crage = Quote($bindir & "crass-0.4.14.0\crage.exe", True)
 Const $dcp = "dcp_unpacker.exe"
 Const $dgca = "dgcac.exe"
-Const $enigma = Quote($bindir & "EnigmaVBUnpacker.exe")
+Const $enigma = "EnigmaVBUnpacker.exe"
 Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)	;x64
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
@@ -352,6 +351,7 @@ Func StartExtraction()
 
 	; Reset variables
 	$isexe = False
+	$exefailed = False
 	$tridfailed = False
 	$innofailed = False
 	$arjfailed = False
@@ -408,6 +408,7 @@ EndFunc
 
 ; Extract if exe file detected
 Func IsExe()
+	If $exefailed Then Return
 	Cout("File seems to be executable")
 
 	; Just for fun
@@ -434,6 +435,9 @@ Func IsExe()
 	If Not $iefailed Then checkIE()
 
 	CheckGame()
+
+	; Make sure TrID doesn't call IsExe again
+	$exefailed = True
 
 	; Scan using TrID
 	filescan($file)
@@ -887,6 +891,8 @@ Func filecompare($filetype_curr)
 			extract("audio", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "FLAC audio")
 			extract("audio", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+		Case StringInStr($filetype_curr, "Ogg data, Vorbis audio")
+			extract("audio", 'OGG Vorbis ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "Audio file", 0) Or StringInStr($filetype_curr, "Dolby Digital stream", 0)
 			extract("audio", t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "ISO", 0) And StringInStr($filetype_curr, "filesystem", 0)
@@ -1149,19 +1155,28 @@ Func tridcompare($filetype_curr)
 		Case StringInStr($filetype_curr, "ZPAQ compressed archive", 0)
 			extract("zpaq", 'ZPAQ ' & t('TERM_ARCHIVE'))
 
-			; Forced to bottom of list due to false positives
+		; Forced to bottom of list due to false positives
 		Case StringInStr($filetype_curr, "LZMA compressed archive", 0)
 			check7z()
+
+		Case StringInStr($filetype_curr, "Enigma Virtual Box virtualized executable")
+			extract("enigma", 'Enigma Virtual Box ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($filetype_curr, "InstallShield setup", 0)
 			;extract("isexe", 'InstallShield ' & t('TERM_INSTALLER'))
 			checkInstallShield()
+
+		Case  StringInStr($filetype_curr, "MP3 audio", 0)
+			extract("audio", 'MP3 ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($filetype_curr, "FLAC lossless", 0)
 			extract("audio", 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($filetype_curr, "Windows Media (generic)", 0)
 			extract("audio", 'Windows Media ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+
+		Case StringInStr($filetype_curr, "OGG Vorbis audio", 0)
+			extract("audio", 'OGG Vorbis ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($filetype_curr, "Smacker movie/video")
 			extract("video_convert", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
@@ -1257,7 +1272,7 @@ Func exescan($f, $scantype, $analyze = 1)
 	Select
 		; ExeInfo cannot detect big files, so PEiD is used as a fallback here
 		Case StringInStr($filetype_curr, "Enigma Virtual Box")
-			extract("enigma", ' Enigma Virtual Box ' & t('TERM_EXECUTABLE'))
+			extract("enigma", 'Enigma Virtual Box ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($filetype_curr, "ARJ SFX", 0)
 			extract("7z", t('TERM_SFX') & ' ARJ ' & t('TERM_ARCHIVE'))
@@ -1396,9 +1411,6 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "CreateInstall", 0)
 			extract("ci", 'CreateInstall ' & t('TERM_INSTALLER'))
 
-		Case StringInStr($filetype_curr, "Enigma Virtual Box")
-			extract("enigma", 'Enigma Virtual Box ' & t('TERM_EXECUTABLE'))
-
 		Case StringInStr($filetype_curr, "Excelsior Installer", 0)
 			extract("ei", 'Excelsior Installer ' & t('TERM_INSTALLER'))
 
@@ -1463,6 +1475,9 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "SuperDAT", 0)
 			extract("superdat", 'McAfee SuperDAT ' & t('TERM_UPDATER'))
 
+		Case StringInStr($filetype_curr, "Overlay :  SWF flash object ver", 0)
+			extract("swfexe", 'Shockwave Flash ' & t('TERM_CONTAINER'))
+
 		Case StringInStr($filetype_curr, "VMware ThinApp", 0) Or StringInStr($filetype_curr, "Thinstall", 0) Or StringInStr($filetype_curr, "ThinyApp Packager", 0)
 			extract("thinstall", "ThinApp/Thinstall" & t('TERM_ARCHIVE'))
 
@@ -1475,6 +1490,9 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "Borland Delphi", 0) And Not StringInStr($filetype_curr, "RAR SFX", 0)
 			$testinno = True
 			$testzip = True
+
+		Case StringInStr($filetype_curr, "Enigma Virtual Box")
+			extract("enigma", 'Enigma Virtual Box ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($filetype_curr, ".dmg  Mac OS", 0)
 			extract("7z", 'DMG ' & t('TERM_IMAGE'))
@@ -2027,6 +2045,7 @@ EndFunc
 
 ; Extract from known archive format
 Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
+	Local $dirmtime = -1
 	$success = $RESULT_UNKNOWN
 	Cout("Starting " & $arctype & " extraction")
 	If $arcdisp == 0 Then $arcdisp = "." & $fileext & " " & t('TERM_FILE')
@@ -2037,6 +2056,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	If FileExists($outdir) Then
 		If Not StringInStr(FileGetAttrib($outdir), "D") Then terminate($STATUS_INVALIDDIR, $outdir, "")
 		$dirmtime = FileGetTime($outdir, 0, 1)
+		If @error Then $dirmtime = -1
 		If Not CanAccess($outdir) Then terminate($STATUS_INVALIDDIR, $outdir, "")
 	Else
 		If Not DirCreate($outdir) Then terminate($STATUS_INVALIDDIR, $outdir, "")
@@ -2234,10 +2254,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($ethornell & ' "' & $file & '" "' & $outdir & '"', $outdir)
 
 		Case "enigma"
-			Run($enigma & ' "' & $file & '"', $outdir)
-			WinWait("EnigmaVBUnpacker")
-			WinClose("EnigmaVBUnpacker")
-			WinWaitClose("EnigmaVBUnpacker")
+			_Run($enigma & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 			FileMove($filedir & "\" & $filename & "_unpacked.exe", $outdir & "\" & $filename & "_unpacked.exe")
 			DirMove($filedir & "\%DEFAULT FOLDER%", $outdir & "\%DEFAULT FOLDER%")
 			; TODO: move other folders
@@ -2297,7 +2314,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "hlp"
 			_Run($hlp & ' "' & $file & '"', $outdir)
-			If DirGetSize($outdir) > $initdirsize Then
+			If _DirGetSize($outdir, $initdirsize + 1) > $initdirsize Then
 				DirCreate($tempoutdir)
 				_Run($hlp & ' /r /n "' & $file & '"', $tempoutdir)
 				FileMove($tempoutdir & $filename & '.rtf', $outdir & '\' & $filename & '_' & t('TERM_RECONSTRUCTED') & '.rtf')
@@ -2372,7 +2389,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 					; If successful, extract contents of InstallShield cabs file-by-file
 					If $return > 0 Then
-						RunWait($cmd & $is6cab & ' x "' & $file & '"', $outdir, @SW_MINIMIZE)
+						RunWait(MakeCommand($is6cab & ' x "' & $file & '"', True), $outdir, @SW_MINIMIZE)
 					Else
 						; Otherwise, attempt to extract with unshield
 						_Run($unshield & ' -d "' & $outdir & '" x "' & $file & '"', $outdir)
@@ -2412,7 +2429,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Case 2
 						; Run installer and wait for temp files to be copied
 						_CreateTrayMessageBox(t('INIT_WAIT'))
-						ShellExecute($file, '/b"' & $tempoutdir & '"' & ($Log? ' /v /l "' & $logdir & 'teelog.txt"': ''), $filedir)
+						DirCreate($tempoutdir)
+						ShellExecute($file, '/b"' & $tempoutdir, $filedir)
 
 						; TODO: Rewrite
 						; Wait for matching windows for up to 30 seconds (60 * .5)
@@ -2699,7 +2717,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case "swf"
 			; Run swfextract to get list of contents
 			$return = StringSplit(FetchStdout($swf & ' "' & $file & '"', $filedir, @SW_HIDE), @CRLF)
-			;_ArrayDisplay($return)
+;~ 			_ArrayDisplay($return)
 			For $i = 2 To $return[0]
 				$line = $return[$i]
 				; Extract files
@@ -2737,7 +2755,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 								$fname &= ".swf"
 							EndIf
 
-							_Run($swf & " " & $swf_arr[1] & " " & $swf_arr[$j] & ' -o ' & $fname & ' "' & $file & '"', $outdir, @SW_HIDE, True, -1, False)
+							_Run($swf & " " & $swf_arr[1] & " " & $swf_arr[$j] & ' -o ' & $fname & ' "' & $file & '"', $outdir, @SW_HIDE, True, True, -1, False)
 ;~							_ArrayDisplay($swf_arr)
 
 							FileMove($outdir & "\" & $fname, $outdir & "\" & $swf_arr[2] & "\", 8 + 1)
@@ -2746,6 +2764,34 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Until $j = $swf_arr[0] + 1
 				EndIf
 			Next
+
+		Case "swfexe"
+			$ret = $outdir & "\" & $filename & "." & $fileext
+			Cout("Moving file to " & $ret)
+			FileMove($file, $ret)
+
+			$aReturn = OpenExeInfo($ret)
+
+			MouseMove(0, 0, 0)
+			ControlClick($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]")
+			ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]", "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{ENTER}")
+
+			Local $handle = WinWait("[TITLE:s; CLASS:TSViewer]", "", $Timeout)
+			Local $hControl = ControlGetHandle($handle, "", "TListBox1")
+
+			$TimerStart = TimerInit()
+			$return = -1
+
+			While $return < 0
+				Sleep(200)
+				$return = _GUICtrlListBox_FindString($hControl, "--- End of file ---")
+				If TimerDiff($TimerStart) > $Timeout Then ExitLoop
+			WEnd
+
+			CloseExeInfo($aReturn)
+
+			Cout("Moving file back")
+			FileMove($ret, $filedir & "\")
 
 		Case "tar"
 			_Run($7z & ' x "' & $file & '"', $outdir)
@@ -2796,9 +2842,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "uha"
 			_Run($uharc & ' x -t"' & $outdir & '" "' & $file & '"', $outdir)
-			If Not $success And DirGetSize($outdir) <= $initdirsize Then
+			If Not $success And _DirGetSize($outdir, $initdirsize + 1) <= $initdirsize Then
 				_Run($uharc04 & ' x -t"' & $outdir & '" "' & $file & '"', $outdir)
-				If Not $success And DirGetSize($outdir) <= $initdirsize Then _
+				If Not $success And _DirGetSize($outdir, $initdirsize + 1) <= $initdirsize Then _
 					_Run($uharc02 & ' x -t' & FileGetShortName($outdir) & ' ' & FileGetShortName($file), $outdir)
 			EndIf
 
@@ -2902,7 +2948,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				; Extract with E_WISE
 				Case 1
 					_Run($wise_ewise & ' "' & $file & '" "' & $outdir & '"', $filedir)
-					If DirGetSize($outdir) > $initdirsize Then
+					If _DirGetSize($outdir, $initdirsize + 1) > $initdirsize Then
 						RunWait($cmd & '00000000.BAT', $outdir, @SW_HIDE)
 						FileDelete($outdir & '\00000000.BAT')
 					EndIf
@@ -3061,7 +3107,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $RESULT_UNKNOWN
 			; Otherwise, check directory size
-			If ($initdirsize > -1 And DirGetSize($outdir) <= $initdirsize) Or (FileGetTime($outdir, 0, 1) == $dirmtime) Then
+			If ($initdirsize > -1 And _DirGetSize($outdir, $initdirsize + 1) <= $initdirsize) Or (FileGetTime($outdir, 0, 1) == $dirmtime) Then
 				If $arctype = "ace" And $fileext = "exe" Then Return False
 				$success = $RESULT_FAILED
 			EndIf
@@ -4206,7 +4252,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 		; Size of extracted file(s)
 		While ProcessExists($run)
 			$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
-			If $size > 0 Then
+			If $size > 0 And $patternSearch > -1 Then
 				If $TBgui Then GUICtrlSetData($idTrayStatusExt, $size & " MB")
 			Else
 				If $TimerStart And TimerDiff($TimerStart) > 60000 Then
@@ -4393,8 +4439,9 @@ Func GetFFmpeg()
 
 	; Extract files, move them to scriptdir and delete files from tempdir
 	Cout("Extracting FFmpeg")
-	Local $ret = RunWait($cmd & $7z & ' x "' & $return & '"', @TempDir)
-	FileDelete($return)
+	Local $outdir = StringTrimRight(_TempFile(@TempDir, 'FFMPEG_', ""), 1)
+	Local $ret = RunWait($cmd & $7z & ' e -ir!ffmpeg.exe -ir!licenses -y -o"' & $outdir & '" "' & $return & '"', @TempDir)
+	FileDelete(@TempDir & $return)
 	If $ret <> 0 Then
 		MsgBox($iTopmost + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip")))
 		Return SetError(1, 0, 0)
@@ -4405,7 +4452,7 @@ Func GetFFmpeg()
 	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then $ret2 = Download("http://ffmpeg.org/legal.html")
 
 	Cout("Moving FFmpeg files")
-	ShellExecuteWait($updater, Quote(StringTrimRight($return, 3) & '" "' & $ret2))
+	ShellExecuteWait($updater, Quote($outdir & '" "' & $ret2))
 
 	If HasPlugin($ffmpeg, True) Then Cout("FFmpeg succesfully loaded")
 	If $FS_GUI Then GUI_FirstStart_Next()
@@ -4473,9 +4520,9 @@ Func CreateGUI()
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost))
+		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost))
 	Else
-		Global $guimain = GUICreate($title, 310, 160, -1, -1, $WS_SIZEBOX, BitOR($WS_EX_ACCEPTFILES, $iTopmost))
+		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost))
 	EndIf
 
 	_GuiSetColor()
