@@ -51,6 +51,7 @@ investigate archive listing - req 44 // Add file list display for extractors tha
 smart extraction - archive contains: single file/folder -> file dir; multiple files -> sub dir; folder with same name as filedir && filedir only contains archive -> files into filedir
 global ignore list, e.g. don't extract .url files, readme.txt, etc.
 include tridscan gui?
+generic error message for failed extraction: check if only some file has errors and display different error message
 
 
 // Known bugs:

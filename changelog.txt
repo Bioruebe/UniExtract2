@@ -77,7 +77,8 @@
   Added support for Android boot images (plugin)
   Added support for Advanced Installer executables
   Added support for Excelsior Installer executables
-  Added support for Enigma Virtual Box executables using EnigmaVB unpacker (plugin)
+  Added support for Enigma Virtual Box executables using EnigmaVB unpacker
+  Added support for Mole Box executables
   Added support for Ghost Installer Studio installers
   Added support for Smart Install Maker installers (plugin)
   Added support for wix installers
@@ -97,6 +98,7 @@
   Added new command line parameters (/help for complete list)
   Added helper binaries info file (incl. version, author, files, license, URL)
   Added scripts to check/update language files/helper binaries (source, used to simplify development)
+  Added support for UNC paths
   Changed status now shown in tray notification window instead of splash text
   Changed tray menu behaviour (e.g. open only when clicking right mouse button)
   Changed forced message boxes and GUI to always be on top if enabled in options

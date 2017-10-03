@@ -8,6 +8,11 @@ RC 1:
   Added support for ECM compressed disk images
   Added support for swf executables
   Added support for OGG Vorbis audio files
+  Added support for Mole Box executables
+  Added support for NScripter version 2 archives using ns2dec
+  Added 'Open Log Directory' menu item
+  Added support for UNC paths
+  Added detection support for encrypted fsb files
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
@@ -23,6 +28,8 @@ RC 1:
   Fixed status box for .swf extraction
   Fixed extraction being detected as failed if the putput directory is a drive, not a folder
   Fixed FFMPEG download/installation problems
+  Fixed progress display performance in status box and pattern detection
+  Fixed certain files being ignored by cleanup function
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
@@ -30,6 +37,7 @@ RC 1:
   Changed extraction to subdirectory: "."-character is now replaced to prevent collisions with existing files
   Removed redundant 64-bit MediaInfo dll
   Updated EnigmaVB unpacker to 0.41a, changed logic to use new command line parameter
+  Updated unrpa to 1.4.2
   Updated TrID to 2.24
   Updated unshield to 1.4
   Updated Bulgarian translation, thanks to Jekov J.K.
