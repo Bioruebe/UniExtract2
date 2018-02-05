@@ -68,6 +68,7 @@
   Added support for .uif image files using uif2iso
   Added support for .daa, .gbi image files using daa2iso
   Added support for .rpgmvp files
+  Added support for .sgbpack files
   Added support for .utage files
   Added support for ISO zipped image files using unisz
   Added support for MDF image files
