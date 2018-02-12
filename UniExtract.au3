@@ -71,7 +71,7 @@ Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
 Const $updater = @ScriptDir & '\UniExtractUpdater.exe'
-Const $unicodepattern = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
+Const $notAsciiPattern = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k '
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
 Const $OPTION_KEEP = 0, $OPTION_DELETE = 1, $OPTION_ASK = 2, $OPTION_MOVE = 2
@@ -157,7 +157,7 @@ Const $arj = "arj.exe" 																;3.10
 Const $aspack = "AspackDie.exe" 													;1.4.1
 Const $bcm = Quote($archdir & "bcm.exe", True) ;x64									;1.00
 Const $daa = "daa2iso.exe" 															;0.1.7e
-Const $enigma = "EnigmaVBUnpacker.exe"												;0.41a
+Const $enigma = "EnigmaVBUnpacker.exe"												;0.44
 Const $ethornell = "ethornell.exe" 													;unknown
 Const $exeinfope = Quote($bindir & "exeinfope.exe")									;0.0.3.7
 Const $filetool = Quote($bindir & "file\bin\file.exe", True)						;5.03
@@ -184,9 +184,9 @@ Const $pea = Quote($bindir & "pea.exe") 											;0.53/1.0
 Const $peid = Quote($bindir & "peid.exe")											;0.95   2012/04/24
 Const $quickbms = Quote($bindir & "quickbms.exe", True)								;0.6.4
 Const $rai = "RAIU.EXE" 															;0.1a
-Const $rar = "unrar.exe" 															;5.21
-Const $rpa = Quote($bindir & "unrpa\unrpa.exe", True)								;1.4 @Git-13 Dec 2014	;modified to include a progress indicator
-Const $sfark = "sfarkxtc.exe"														;3.0 	;modified
+Const $rar = "unrar.exe" 															;5.50
+Const $rpa = "unrpa.exe"															;1.5.2
+Const $sfark = "sfarkxtc.exe"														;3.0
 Const $sit = Quote($bindir & "Expander.exe")										;6.0
 Const $sqlite = "sqlite3.exe"														;3.10.2
 Const $stix = "stix_d.exe" 															;2001/06/13
@@ -704,9 +704,9 @@ EndFunc
 
 ; Load single preference
 Func LoadPref($name, ByRef $value, $int = True)
-	Local $return = IniRead($prefs, "UniExtract Preferences", $name, "")
-	If @error Or $return = "" Then
-		Cout("Error reading option " & $name & " --> " & $value)
+	Local $return = IniRead($prefs, "UniExtract Preferences", $name, "#Error#")
+	If @error Or $return = "#Error#" Then
+		Cout("Failed to read option " & $name)
 		SavePref($name, $value)
 		Return SetError(1, "", -1)
 	EndIf
@@ -718,7 +718,7 @@ Func LoadPref($name, ByRef $value, $int = True)
 	EndIf
 
 	Cout("Option: " & $name & " = " & $value)
-EndFunc   ;==>LoadPref
+EndFunc
 
 ; Read history
 Func ReadHist($sSection)
@@ -885,10 +885,10 @@ Func filecompare($filetype_curr)
 		Case StringInStr($filetype_curr, "MoPaQ", 0)
 			HasPlugin($mpq)
 			extract("qbms", 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
-		Case StringInStr($filetype_curr, "RIFF", 0) Or StringInStr($filetype_curr, "MPEG v", 0) Or _
-			 StringInStr($filetype_curr, "MPEG sequence") Or StringInStr($filetype_curr, "Microsoft ASF") Or _
-			 StringInStr($filetype_curr, "GIF image") Or StringInStr($filetype_curr, "PNG image") Or _
-			 StringInStr($filetype_curr, "MNG video")
+		Case (StringInStr($filetype_curr, "RIFF", 0) And Not StringInStr($filetype_curr, "WAVE audio", 0)) Or _
+			 StringInStr($filetype_curr, "MPEG v", 0) Or StringInStr($filetype_curr, "MPEG sequence") Or _
+			 StringInStr($filetype_curr, "Microsoft ASF") Or StringInStr($filetype_curr, "GIF image") Or _
+			 StringInStr($filetype_curr, "PNG image") Or StringInStr($filetype_curr, "MNG video")
 			extract("video", t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($filetype_curr, "AAC,")
 			extract("audio", 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
@@ -1069,6 +1069,9 @@ Func tridcompare($filetype_curr)
 
 		Case StringInStr($filetype_curr, "RPG Maker", 0)
 			extract("arc_conv", "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+
+		Case StringInStr($filetype_curr, "Smile Game Builder", 0)
+			extract("sgb", "Smile Game Builder " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Telltale Games ressource archive", 0)
 			extract("ttarch", "Telltale " & t('TERM_GAME') & t('TERM_ARCHIVE'))
@@ -2016,19 +2019,20 @@ Func MoveInputFileIfNecessary()
 	$bIsUnc = _WinAPI_PathIsUNC($file)
 
 	Local $new = 0
-	If $checkUnicode And StringRegExp($file, $unicodepattern, 0) Then
+	If $checkUnicode And Not StringRegExp($file, $notAsciiPattern, 0) Then
 		Cout("File name seems to be unicode")
 
-		If StringRegExp($filedir, $unicodepattern, 0) Then
+		If StringRegExp($filedir, $notAsciiPattern, 0) Then
+			; Directory is ASCII, only rename file
 			$new = _TempFile($filedir, "Unicode_", $fileext)
 		Else
 			Cout("Path seems to be unicode")
-			If Not StringRegExp(@TempDir, $unicodepattern, 0) Then Return Cout("Temp directory contains unicode characters, aborting")
-			$new = StringRegExp($filename, $unicodepattern, 0)? @TempDir & "\" & $filenamefull: _TempFile(@TempDir, "Unicode_", $fileext)
+			If Not StringRegExp(@TempDir, $notAsciiPattern, 0) Then Return Cout("Temp directory contains unicode characters, aborting")
+			$new = StringRegExp($filename, $notAsciiPattern, 0)? @TempDir & "\" & $filenamefull: _TempFile(@TempDir, "Unicode_", $fileext)
 		EndIf
 	EndIf
 
-	If $new = 0 Then
+	If $new == 0 Then
 		If Not $bIsUnc Then Return
 		$new = @TempDir & "\" & $filenamefull
 	EndIf
@@ -2704,6 +2708,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case "sfark"
 			_Run($sfark & ' "' & $file & '" "' & $outdir & '\' & $filename & '.sf2"', $filedir, @SW_SHOW)
+
+		Case "sgb"
+			$return = _Run($7z & ' x "' & $file & '"', $outdir, @SW_HIDE)
+			; Effect.sgr cannot be extracted by 7zip, that should not be considered failed extraction as all other files are OK
+			If StringInStr($return, "Headers Error : Effect.sgr") And StringInStr($return, "Sub items Errors: 1") Then $success = $RESULT_SUCCESS
 
 		Case "sim"
 			HasPlugin($sim)
@@ -4287,8 +4296,10 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 			Sleep(100)
 		WEnd
 	EndIf
+
 	; Reset run var so no wrong process is closed on tray exit
 	$run = 0
+	Return $return
 EndFunc
 
 ; Search console output for progress indicator patterns and update status box
@@ -4298,7 +4309,7 @@ Func _PatternSearch($sString)
 
 ;~ 	Cout("x %")
 	If StringInStr($sString, "%", 0, -1) Then
-		$aReturn = StringRegExp($sString, "(\d{1,3})[\d\.,]*%", 3)
+		$aReturn = StringRegExp($sString, "(\d{1,3})[\d\.,]* ?%", 3)
 ;~ 		_ArrayDisplay($aReturn)
 		If UBound($aReturn) > 0 Then Return GUICtrlSetData($idTrayStatusExt, _ArrayPop($aReturn) & "%")
 	EndIf
@@ -4441,7 +4452,7 @@ Func CheckUpdate($silent = False, $bCheckInterval = False)
 	Cout("Local: " & $version)
 	Cout("Server: " & $return)
 
-	If StringLen($return) > 0 And $return <> $version Then
+	If StringLen($return) > 0 And $return > $version Then
 		Cout("Update available")
 		$found = True
 		; $Because FFMPEG uses the same update message, we cannot use the %name constant here
@@ -4460,7 +4471,7 @@ Func CheckUpdate($silent = False, $bCheckInterval = False)
 		$ffmpegvers = _StringBetween($return, "ffmpeg version ", " Copyright")
 		$return = _INetGetSource($updateURL & "?get=ffversion" & _IsWinXP("&xp"))
 		; Download new
-		If IsArray($ffmpegvers) And $return <> $ffmpegvers[0] Then
+		If IsArray($ffmpegvers) And $return > $ffmpegvers[0] Then
 			$found = True
 			Cout("Found update for FFmpeg")
 			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $ffmpegvers[0], $return, ""), 0) Then GetFFmpeg()
@@ -4490,6 +4501,7 @@ Func _AfterUpdate()
 	FileDelete($langdir & "Chinese.ini")
 	FileDelete($bindir & "MediaInfo64.dll")
 	FileDelete($bindir & "extract.exe")
+	DirRemove($bindir & "unrpa", 1)
 
 	; Move files
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)

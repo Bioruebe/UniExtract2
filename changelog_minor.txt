@@ -10,6 +10,7 @@ RC 1:
   Added support for OGG Vorbis audio files
   Added support for Mole Box executables
   Added support for NScripter version 2 archives using ns2dec
+  Added support for Smile Game Builder archives
   Added 'Open Log Directory' menu item
   Added support for UNC paths
   Added detection support for encrypted fsb files
@@ -30,14 +31,18 @@ RC 1:
   Fixed FFMPEG download/installation problems
   Fixed progress display performance in status box and pattern detection
   Fixed certain files being ignored by cleanup function
+  Fixed updater reporting old version as update if local version is more current than the server's
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
   Changed .hlp extraction: improved logging, localized file name
   Changed extraction to subdirectory: "."-character is now replaced to prevent collisions with existing files
+  Replaced Unreal Engine package extractor with Umodel
   Removed redundant 64-bit MediaInfo dll
-  Updated EnigmaVB unpacker to 0.41a, changed logic to use new command line parameter
-  Updated unrpa to 1.4.2
+  Updated EnigmaVB unpacker to 0.44, changed logic to use new command line parameter
+  Updated Exeinfo PE to 0.0.4.8
+  Updated unrar to 5.50
+  Updated unrpa to 1.5.2
   Updated TrID to 2.24
   Updated unshield to 1.4
   Updated Bulgarian translation, thanks to Jekov J.K.

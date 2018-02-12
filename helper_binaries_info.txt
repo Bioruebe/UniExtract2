@@ -23,13 +23,14 @@ BCM											x86\bcm.exe					1.00		-	-	-	Public Domain			Ilya Muravyov						htt
 											x64\bcm.exe					-------		---------	-------					-------								-------
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
+demoleition									demoleition.exe				0.55		x	-	-	Freeware				kao									https://lifeinhex.com/category/tools/
 disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
 											disunity.bat				-------		---------	-------					-------								-------
 											\lib directory				-------		---------	-------					-------								-------
-Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.41a		x	-	-	Freeware				kao									https://lifeinhex.com/updated-enigma-virtualbox-unpacker-again
+Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.44		x	-	-	Freeware				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.4.3		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.4.8		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											exeinfopeRUN.cfg			-------		---------	-------					-------								-------															
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 											\plugins directory			-------		---------	-------					-------								-------															
@@ -64,6 +65,7 @@ NBHextract									NBHextract.exe				1.0						Freeware				pof and TheBlasphemer	
 Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation						https://github.com/HaxeFoundation/neko
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
+ns2dec (ONScripter Tools)					ns2dec						2010-09-15	-	-	x	GNU GPL v2				"Uncle" Mion Sonozaki				http://unclemion.com/onscripter/releases/
 PeaZip										pea.exe						0.53/1.0				GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
@@ -83,7 +85,7 @@ STIX										STIX_D.exe					2001/06/13				Freeware				Veit Kannegieser					http
 											WDOSXLE.exe					-------		---------	-------					-------								-------															
 swfextract	(part of swftools)				swfextract.exe				0.9.2					GNU GPL v3				Ricardo Pedroso?					http://www.swftools.org/										
 											---------					-------		---------	-------					-------								http://unxutils.sourceforge.net/								
-TrID										trid.exe					2.20		---------	Freeware				Marco Pontello						http://mark0.net/soft-trid-e.html								
+TrID										trid.exe					2.24		---------	Freeware				Marco Pontello						http://mark0.net/soft-trid-e.html								
 TrIDLib - Free version						TrIDLib.dll					1.02		---------	TrIDLib license			Marco Pontello						http://mark0.net/soft-trid-e.html
 TrID definations							TrIDDefs.TRD				2012/05/06	---------	-------					-------								-------															
 Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.2.10		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
@@ -92,8 +94,8 @@ FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin	
 unecm										unecm.exe					1.0			x	-	x	GNU GPL v2				Neill Corlett						http://www.neillcorlett.com/ecm
 Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					5.31 Beta 1	x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
-unrpa										/unrpa directory			1.4 mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
+UnRAR										UnRAR.exe					5.50		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
+unrpa										unrpa.exe					1.4.2		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				1.4						Freeware				David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
 											UHARC04.EXE					0.4			?	x	?	-------					-------								http://www.klaimsoft.com/forum/index.php?showtopic=25			
