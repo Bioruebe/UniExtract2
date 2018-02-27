@@ -1,12 +1,13 @@
-#RequireAdmin
 #Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=support\Icons\uniextract_exe.ico
+#AutoIt3Wrapper_Outfile=UniExtractUpdater_NoAdmin.exe
 #AutoIt3Wrapper_Res_Description=Update utility for Universal Extractor
-#AutoIt3Wrapper_Res_Fileversion=1.0.0
+#AutoIt3Wrapper_Res_Fileversion=2.0.0.0
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
+
 #cs ----------------------------------------------------------------------------
 
- AutoIt Version: 3.3.14.1
+ AutoIt Version: 3.3.14.2
  Author:         Bioruebe
 
  Script Function:
@@ -16,40 +17,111 @@
 
 ; Script Start - Add your code below here
 
-Const $sTitle = "Universal Extractor Updater"
+#include <GUIConstants.au3>
+#include <Inet.au3>
+
+Const $sUpdaterTitle = "Universal Extractor Updater"
+Const $sUpdateURL = "https://update.bioruebe.com/uniextract/data/UniExtract.exe"
+Const $sGetLinkURL = "https://update.bioruebe.com/uniextract/geturl.php?q="
 Const $sUniExtract = @ScriptDir & "\UniExtract.exe"
 
-If Not FileExists($sUniExtract) Then Exit MsgBox(16, $sTitle, "Universal Extractor main executable not found in current directory." & @CRLF & @CRLF & "Path is " & $sUniExtract)
-If $cmdline[0] < 1 Then Exit ShellExecute($sUniExtract, "/update")
-$OSArch = @OSArch = 'X64'? 'x64': 'x86'
+If Not FileExists($sUniExtract) Then
+	If MsgBox(16+4, $sUpdaterTitle, "Universal Extractor main executable not found in current directory." & @CRLF & @CRLF & "Path is " & $sUniExtract & @CRLF & @CRLF & "Do you want to redownload Universal Extractor?") == 6 Then _
+		_UpdateUniExtract()
+	Exit
+EndIf
 
-If $cmdline[0] == 2 Then
-	_UpdateFFMPEG()
-ElseIf $cmdline[1] == "/pluginst" Then
+If $cmdline[0] < 1 Then Exit ShellExecute($sUniExtract, "/update")
+
+Sleep(50)
+
+If $cmdline[1] == "/pluginst" Then
+	; To install plugins we just start UniExtract elevated
 	Exit ShellExecute($sUniExtract, "/plugins")
-Else
-	If Not FileExists($cmdline[1]) Then Exit MsgBox(16, $sTitle, "Invalid update package passed to updater.")
+ElseIf $cmdline[1] == "/main" Then
 	_UpdateUniExtract()
+ElseIf $cmdline[1] == "/helper" Then
+	Exit ShellExecute($sUniExtract, "/updatehelper")
+ElseIf $cmdline[1] == "/ffmpeg" Then
+	_GetFFMPEG()
 EndIf
 
 Func _UpdateUniExtract()
-	If Not ProcessWaitClose($sUniExtract, 10) Then Exit MsgBox(16, $sTitle, "Failed to close Universal Extractor. Please terminate the process manually and try again.")
+	If Not ProcessWaitClose($sUniExtract, 10) Then Exit MsgBox(16, $sUpdaterTitle, "Failed to close Universal Extractor. Please terminate the process manually and try again.")
 
-	$sCmd = @ScriptDir & '\bin\' & $OSArch & '\7z.exe x -y -xr!UniExtract.ini -o"' & @ScriptDir & '" "' & $cmdline[1] & '"'
-	RunWait($sCmd)
+	_Download($sUpdateURL)
+	$error = @error
+
 	Sleep(100)
-	FileDelete($cmdline[1])
-	Run($sUniExtract & " /afterupdate")
+	Exit ShellExecute($sUniExtract, $error? "": "/afterupdate")
 EndFunc
 
-Func _UpdateFFMPEG()
-	; Binaries
-	FileMove($cmdline[1] & "\ffmpeg.exe", @ScriptDir & "\bin\" & $OSArch & "\ffmpeg.exe", 1)
-	FileMove($cmdline[1] & "\*.txt", @ScriptDir & "\docs\FFmpeg\", 8+1)
-	DirRemove($cmdline[1], 1)
+Func _GetFFMPEG()
+	Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
+	Const $sOSArchDir = @ScriptDir & "\bin\" & @OSArch = 'X64'? 'x64\': 'x86\'
+	Const $sDocsDir = @ScriptDir & "\docs\FFmpeg\"
+	Const $7z = '""' & $sOSArchDir & '7z.exe"'
+
+	$FFmpegURL = _INetGetSource($sGetLinkURL & "ffmpeg" & StringInStr(@OSVersion, "WIN_XP")? "xp": @OSArch)
+	$return = _Download($FFmpegURL, @TempDir, False)
+	If @error Then Exit 1
+
+	; Extract files, move them to scriptdir and delete files from tempdir
+	Local $ret = RunWait($cmd & $7z & ' e -ir!ffmpeg.exe -ir!licenses -y -o"' & $sOSArchDir & '" "' & $return & '"', @TempDir)
+	FileDelete(@TempDir & $return)
+	If $ret <> 0 Then Exit MsgBox(48 + 1, $sUpdaterTitle, "Failed to extract update package " & $return & "." & @CRLF & @CRLF & "Make sure Universal Extractor is up to date and try again, or unpack the file manually to " & $sOSArchDir)
+	FileMove($cmdline[1] & "\*.txt", $sDocsDir, 8+1)
+
+	; Download license information
+	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then _Download("https://ffmpeg.org/legal.html", $sDocsDir, False)
 
 	; License files
 	If $cmdline[2] <> 0 Then FileMove($cmdline[2], @ScriptDir & "\docs\FFmpeg\FFmpeg_license.html", 8 + 1)
 	Run($sUniExtract)
 EndFunc
 
+Func _Download($sURL, $sDir = @ScriptDir, $bCreateBackup = True)
+	; Create GUI with progressbar
+	Local $hGUI = GUICreate("Downloading", 466, 109, -1, -1, $WS_POPUPWINDOW, -1)
+	GUICtrlCreateLabel($sURL, 8, 16, 446, 17, $SS_CENTER)
+	Local $idProgress = GUICtrlCreateProgress(8, 46, 446, 25)
+	GUISetState(@SW_SHOW)
+
+	; Get file size
+	Local $iBytesReceived = 0
+	Local $iBytesTotal = InetGetSize($sURL)
+	Local $idSize = GUICtrlCreateLabel($iBytesReceived & "/" & $iBytesTotal & " kb", 8, 76, 446, 17, $SS_CENTER)
+
+	; Download File
+	Local $sFile = $sDir & "\" & StringTrimLeft($sURL, StringInStr($sURL, "/", 0, -1))
+	Local $sBackupFile = $sFile & ".bak"
+
+	If $bCreateBackup And FileExists($sFile) Then FileMove($sFile, $sBackupFile)
+
+	Local $hDownload = InetGet($sURL, $sFile, 1, 1)
+
+	; Update progress bar
+	While Not InetGetInfo($hDownload, 2)
+		Sleep(50)
+		If InetGetInfo($hDownload, 4) <> 0 Then
+			GUIDelete($hGUI)
+			If $bCreateBackup Then FileMove($sBackupFile, $sFile, 1)
+			MsgBox(48, $sUpdaterTitle, 'The file ' & $sURL & ' could not be downloaded. Please ensure that you are connected to the internet and try again.')
+			Return SetError(1, 0, 0)
+		EndIf
+		$iBytesReceived = InetGetInfo($hDownload, 0)
+		GUICtrlSetData($idProgress, Int($iBytesReceived / $iBytesTotal * 100))
+		GUICtrlSetData($idSize, $iBytesReceived & "/" & $iBytesTotal & " kb")
+	WEnd
+
+	; Close GUI
+	GUIDelete($hGUI)
+	If Not FileExists($sFile) Then
+		If $bCreateBackup Then FileMove($sBackupFile, $sFile, 1)
+		MsgBox(48, $sUpdaterTitle, 'The file ' & $sURL & ' could not be downloaded. Please ensure that you are connected to the internet and try again.')
+		Return SetError(1, 0, 0)
+	EndIf
+
+	If $bCreateBackup Then FileDelete($sBackupFile)
+	Return $sFile
+EndFunc
