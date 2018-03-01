@@ -58,22 +58,22 @@ EndFunc
 
 Func _GetFFMPEG()
 	Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
-	Const $sOSArchDir = @ScriptDir & "\bin\" & @OSArch = 'X64'? 'x64\': 'x86\'
+	Const $sOSArchDir = @ScriptDir & "\bin\" & (@OSArch = 'X64'? 'x64\': 'x86\')
+	Const $sOSArch = @OSArch = 'X64'? '64': '32'
 	Const $sDocsDir = @ScriptDir & "\docs\FFmpeg\"
 	Const $7z = '""' & $sOSArchDir & '7z.exe"'
 
-	$FFmpegURL = _INetGetSource($sGetLinkURL & "ffmpeg" & StringInStr(@OSVersion, "WIN_XP")? "xp": @OSArch)
+	$FFmpegURL = _INetGetSource($sGetLinkURL & "ffmpeg" & (StringInStr(@OSVersion, "WIN_XP")? "xp": "") & $sOSArch & "&r=0")
 	$return = _Download($FFmpegURL, @TempDir, False)
 	If @error Then Exit 1
 
 	; Extract files, move them to scriptdir and delete files from tempdir
-	Local $ret = RunWait($cmd & $7z & ' e -ir!ffmpeg.exe -ir!licenses -y -o"' & $sOSArchDir & '" "' & $return & '"', @TempDir)
+	Local $ret = RunWait($cmd & $7z & ' e -ir!ffmpeg.exe -y -o"' & $sOSArchDir & '" "' & $return & '"', @TempDir)
 	FileDelete(@TempDir & $return)
-	If $ret <> 0 Then Exit MsgBox(48 + 1, $sUpdaterTitle, "Failed to extract update package " & $return & "." & @CRLF & @CRLF & "Make sure Universal Extractor is up to date and try again, or unpack the file manually to " & $sOSArchDir)
-	FileMove($cmdline[1] & "\*.txt", $sDocsDir, 8+1)
+	If $ret <> 0 Then Exit MsgBox(48, $sUpdaterTitle, "Failed to extract update package " & $return & "." & @CRLF & @CRLF & "Make sure Universal Extractor is up to date and try again, or unpack the file manually to " & $sOSArchDir)
 
 	; Download license information
-	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then _Download("https://ffmpeg.org/legal.html", $sDocsDir, False)
+	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then _Download("", $sDocsDir, False)
 
 	; License files
 	If $cmdline[2] <> 0 Then FileMove($cmdline[2], @ScriptDir & "\docs\FFmpeg\FFmpeg_license.html", 8 + 1)

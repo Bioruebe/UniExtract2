@@ -3,7 +3,7 @@
 #AutoIt3Wrapper_Outfile=.\UniExtract.exe
 #AutoIt3Wrapper_Res_Comment=Compiled with AutoIt http://www.autoitscript.com/
 #AutoIt3Wrapper_Res_Description=Universal Extractor
-#AutoIt3Wrapper_Res_Fileversion=2.0.0.0
+#AutoIt3Wrapper_Res_Fileversion=2.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=GNU General Public License v2
 #AutoIt3Wrapper_Res_Field=Author|Jared Breland <jbreland@legroom.net>
 #AutoIt3Wrapper_Res_Field=Homepage|http://www.legroom.net/software
@@ -66,7 +66,8 @@ Const $websiteGithub = "https://github.com/Bioruebe/UniExtract2"
 Const $sUpdateURL = "https://update.bioruebe.com/uniextract/data/"
 Const $sLegacyUpdateURL = "https://update.bioruebe.com/uniextract/update2.php"
 Const $sGetLinkURL = "https://update.bioruebe.com/uniextract/geturl.php?q="
-Const $supportURL = "https://support.bioruebe.com/uniextract/upload.php"
+Const $sSupportURL = "https://support.bioruebe.com/uniextract/upload.php"
+Const $sStatsURL = "https://stat.bioruebe.com/uniextract/stats.php?a="
 Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
@@ -117,6 +118,7 @@ Global $FB_ask = 0
 Global $Opt_ConsoleOutput = 0
 Global $Log = 0
 Global $CheckGame = 1
+Global $bSendStats = 1
 Global $iCleanup = $OPTION_MOVE
 Global $KeepOutdir = 0
 Global $KeepOpen = 0
@@ -642,6 +644,7 @@ Func ReadPrefs()
 	LoadPref("feedbackprompt", $FB_ask)
 	LoadPref("log", $Log)
 	LoadPref("checkgame", $CheckGame)
+	LoadPref("sendstats", $bSendStats)
 	LoadPref("extract", $extract)
 	LoadPref("unicodecheck", $checkUnicode)
 	LoadPref("extractvideotrack", $bExtractVideo)
@@ -695,12 +698,13 @@ Func WritePrefs()
 	SavePref('consoleoutput', $Opt_ConsoleOutput)
 	SavePref('log', $Log)
 	SavePref('checkgame', $CheckGame)
+	SavePref('sendstats', $bSendStats)
 	SavePref("extractvideotrack", $bExtractVideo)
 	SavePref('storeguiposition', $StoreGUIPosition)
 	SavePref('timeout', $Timeout / 1000)
 	SavePref('updateinterval', $updateinterval)
 	SavePref("topmost", Number($iTopmost > 0))
-EndFunc   ;==>WritePrefs
+EndFunc
 
 ; Save single preference
 Func SavePref($name, $value)
@@ -3477,8 +3481,8 @@ Func _FileRead($f, $delete = False, $iFlag = 0)
 EndFunc
 
 ; Handle program termination with appropriate error message
-Func terminate($status, $fname = '', $ID = '')
-	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = $STATUS_SUCCESS)? $ID: $status
+Func terminate($status, $fname = '', $sFileType = '')
+	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = $STATUS_SUCCESS)? $sFileType: $status
 
 	; Rename unicode file
 	If $iUnicodeMode Then
@@ -3507,7 +3511,7 @@ Func terminate($status, $fname = '', $ID = '')
 
 	; Save statistics
 	IniWrite($prefs, "Statistics", $status, Number(IniRead($prefs, "Statistics", $status, 0)) + 1)
-	If $status = $STATUS_SUCCESS Then IniWrite($prefs, "Statistics", $ID, Number(IniRead($prefs, "Statistics", $ID, 0)) + 1)
+	If $status = $STATUS_SUCCESS Then IniWrite($prefs, "Statistics", $sFileType, Number(IniRead($prefs, "Statistics", $sFileType, 0)) + 1)
 
 	; Remove singleton
 	If $hMutex <> 0 Then DllCall("kernel32.dll", "bool", "CloseHandle", "handle", $hMutex)
@@ -3533,7 +3537,7 @@ Func terminate($status, $fname = '', $ID = '')
 			$syntax &= t('HELP_EXAMPLE1')
 			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
 			$syntax &= t('HELP_NOARGS')
-			MsgBox($iTopmost + 32, $title, $syntax, $ID? 15: 0)
+			MsgBox($iTopmost + 32, $title, $syntax, $sFileType? 15: 0)
 
 		; Display file type information and exit
 		Case $STATUS_FILEINFO
@@ -3569,7 +3573,7 @@ Func terminate($status, $fname = '', $ID = '')
 			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, $filetype), 0)
 			$exitcode = 7
 		Case $STATUS_MISSINGEXE
-			Prompt(48, 'MISSING_EXE', CreateArray($file, $ID))
+			Prompt(48, 'MISSING_EXE', CreateArray($file, $sFileType))
 			$exitcode = 8
 		Case $STATUS_TIMEOUT
 			Prompt(48, 'EXTRACT_TIMEOUT', $file)
@@ -3586,7 +3590,7 @@ Func terminate($status, $fname = '', $ID = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $ID), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $sFileType), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
 			$exitcode = 1
 
 			; Exit successfully
@@ -3602,7 +3606,7 @@ Func terminate($status, $fname = '', $ID = '')
 	; Write error log if in batchmode
 	If $exitcode <> 0 And $silentmode And $extract Then
 		$handle = FileOpen($logdir & "errorlog.txt", 8 + 1)
-		FileWrite($handle, ($filename = ""? $fname: $filenamefull) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
+		FileWrite($handle, ($filename = ""? $fname: $filenamefull) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $sFileType & @CRLF)
 		FileClose($handle)
 	EndIf
 
@@ -3629,7 +3633,10 @@ Func terminate($status, $fname = '', $ID = '')
 	EndIf
 
 	; Check for updates
-	If Not $silentmode And $status <> $STATUS_SILENT Then CheckUpdate(True, True)
+	If $status <> $STATUS_SILENT Then
+		If Not $silentmode Then CheckUpdate(True, True)
+		SendStats($status, $sFileType)
+	EndIf
 
 	Exit $exitcode
 EndFunc
@@ -4442,6 +4449,14 @@ Func OpenURL($sURL, $hParent = 0)
 	If @error Then InputBox($title, t('OPEN_URL_FAILED'), $sURL, "", -1, -1, Default, Default, 0, $hParent)
 EndFunc
 
+; Send usage statistics if enabled in options
+Func SendStats($a, $sResult = 1)
+	If Not $bSendStats Then Return
+
+	Cout($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID)
+	InetRead($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID, 1)
+EndFunc
+
 ; Check for new version
 ; $silent is used for automatic update check, supressing any error and 'no update found' messages
 Func CheckUpdate($silent = False, $bCheckInterval = False, $iMode = $UPDATE_ALL)
@@ -4581,8 +4596,7 @@ Func _UpdateFFmpeg()
 	; Download new
 	If $return > $version[0] Then
 		Cout("Found an update for FFmpeg")
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $version[0], $return, ""), 0) Then GetFFmpeg()
-		Return True
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $version[0], $return, ""), 0) Then Return GetFFmpeg()
 	EndIf
 
 	Return False
@@ -5043,7 +5057,7 @@ Func GUI_Prefs()
 	Global $OpenOutDirOpt = GUICtrlCreateCheckbox(t('PREFS_OPEN_FOLDER_LABEL'), 10, 265, -1, 20)
 	Global $FeedbackPromptOpt = GUICtrlCreateCheckbox(t('PREFS_FEEDBACK_PROMPT_LABEL'), 10, 285, -1, 20)
 	Global $StoreGUIPositionOpt = GUICtrlCreateCheckbox(t('PREFS_WINDOW_POSITION_LABEL'), 10, 305, -1, 20)
-	Global $CheckGameOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_GAME_LABEL'), 10, 325, -1, 20)
+	Global $UsageStatsOpt = GUICtrlCreateCheckbox(t('PREFS_SEND_STATS_LABEL'), 10, 325, -1, 20)
 	Global $LogOpt = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), 10, 345, -1, 20)
 	Global $VideoTrackOpt = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), 10, 365, -1, 20)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -5066,7 +5080,7 @@ Func GUI_Prefs()
 	GUICtrlSetTip($appendextopt, t('PREFS_APPEND_EXT_TOOLTIP'))
 	GUICtrlSetTip($GameModeOpt, t('PREFS_HIDE_STATUS_FULLSCREEN_TOOLTIP'))
 	GUICtrlSetTip($FeedbackPromptOpt, t('PREFS_FEEDBACK_PROMPT_TOOLTIP'))
-	GUICtrlSetTip($CheckGameOpt, t('PREFS_CHECK_GAME_TOOLTIP'))
+	GUICtrlSetTip($UsageStatsOpt, t('PREFS_SEND_STATS_TOOLTIP'))
 	GUICtrlSetTip($VideoTrackOpt, t('PREFS_VIDEOTRACK_TOOLTIP'))
 	GUICtrlSetTip($DeleteOrigFileOpt[$OPTION_ASK], t('PREFS_SOURCE_FILES_OPT_KEEP_TOOLTIP'))
 
@@ -5082,7 +5096,7 @@ Func GUI_Prefs()
 	If $OpenOutDir Then GUICtrlSetState($OpenOutDirOpt, $GUI_CHECKED)
 	If $FB_ask Then GUICtrlSetState($FeedbackPromptOpt, $GUI_CHECKED)
 	If $StoreGUIPosition Then GUICtrlSetState($StoreGUIPositionOpt, $GUI_CHECKED)
-	If $CheckGame Then GUICtrlSetState($CheckGameOpt, $GUI_CHECKED)
+	If $bSendStats Then GUICtrlSetState($UsageStatsOpt, $GUI_CHECKED)
 	If $Log Then GUICtrlSetState($LogOpt, $GUI_CHECKED)
 	If $bExtractVideo Then GUICtrlSetState($VideoTrackOpt, $GUI_CHECKED)
 	GUICtrlSetState($DeleteOrigFileOpt[$iDeleteOrigFile], $GUI_CHECKED)
@@ -5106,7 +5120,7 @@ EndFunc   ;==>GUI_Prefs_Exit
 
 ; Exit preferences GUI if OK clicked
 Func GUI_Prefs_OK()
-	; universal preferences
+	; Universal preferences
 	$redrawgui = False
 
 	If GUICtrlRead($historyopt) == $GUI_CHECKED Then
@@ -5130,7 +5144,7 @@ Func GUI_Prefs_OK()
 
 	If $updateinterval <> GUICtrlRead($IntervalCont) Then $updateinterval = GUICtrlRead($IntervalCont)
 
-	; format-specific preferences
+	; Format-specific preferences
 	If GUICtrlRead($NoBoxOpt) == $GUI_CHECKED Then
 		$NoBox = 1
 		TrayItemSetState($Tray_Statusbox, $TRAY_CHECKED)
@@ -5149,7 +5163,7 @@ Func GUI_Prefs_OK()
 	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
 	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
 	$StoreGUIPosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
-	$CheckGame = Number(GUICtrlRead($CheckGameOpt) == $GUI_CHECKED)
+	$bSendStats = Number(GUICtrlRead($UsageStatsOpt) == $GUI_CHECKED)
 
 	For $i = 0 To 2
 		If GUICtrlRead($DeleteOrigFileOpt[$i]) == $GUI_CHECKED Then $iDeleteOrigFile = $i
@@ -5458,7 +5472,7 @@ Func GUI_Feedback_Send($FB_Type, $FB_Sys, $FB_File, $FB_Output, $FB_Message, $FB
 	Const $boundary = "--UniExtractLog"
 
 	$http = ObjCreate("winhttp.winhttprequest.5.1")
-	$http.Open("POST", $supportURL, False)
+	$http.Open("POST", $sSupportURL, False)
 	$http.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" & StringTrimLeft($boundary, 2))
 
 	Local $Data = $boundary & @CRLF & 'Content-Disposition: form-data; name="file"; filename="UE_Feedback"' & @CRLF & 'Content-Type: text/plain' & @CRLF & @CRLF & $FB_Text & @CRLF & $boundary & @CRLF & 'Content-Disposition: form-data; name="id"' & @CRLF & @CRLF & $ID & @CRLF & $boundary & '--'
@@ -6015,7 +6029,7 @@ Func GUI_Plugins()
 				; Determine filetype
 				$ret = StringRight($return, 3)
 				If $ret = ".7z" Or $ret = "rar" Or $ret = "zip" Then ; Unpack archive
-					Local $command = $cmd & $7z & ' x' & ($aPluginInfo[$current][7] == 0? '': ' -p"' & $aPluginInfo[$current][7] & '"')
+					Local $command = $cmd & $7z & ($aPluginInfo[$current][5] == ''? ' x': ' e') & ($aPluginInfo[$current][7] == 0? '': ' -p"' & $aPluginInfo[$current][7] & '"')
 					If $aPluginInfo[$current][5] <> "" Then ; Build include command for each file needed
 						$aReturn = StringSplit($aPluginInfo[$current][5], "|", 2)
 						For $sFile In $aReturn

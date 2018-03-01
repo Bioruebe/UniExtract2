@@ -35,6 +35,7 @@ RC 1:
   Fixed certain files being ignored by cleanup function
   Fixed crash when trying to open preferences GUI if /lang directory does not exist
   Fixed log files size display in file menu, if log directory is set to a location, which does not exist
+  Fixed DGCA plugin installation
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
@@ -47,6 +48,7 @@ RC 1:
 						   UniExtract does not have to be updated to fix the link
   Replaced Unreal Engine package extractor with Umodel
   Removed redundant 64-bit MediaInfo dll
+  Removed option to toggle support for game packages from settings GUI
   Updated EnigmaVB unpacker to 0.44, changed logic to use new command line parameter
   Updated Exeinfo PE to 0.0.4.8
   Updated unrar to 5.50
