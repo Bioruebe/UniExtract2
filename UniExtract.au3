@@ -1,10 +1,9 @@
 ﻿#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=.\Support\Icons\uniextract_exe.ico
 #AutoIt3Wrapper_Outfile=.\UniExtract.exe
-#AutoIt3Wrapper_Outfile_x64=.\UniExtract64.exe
 #AutoIt3Wrapper_Res_Comment=Compiled with AutoIt http://www.autoitscript.com/
 #AutoIt3Wrapper_Res_Description=Universal Extractor
-#AutoIt3Wrapper_Res_Fileversion=2.0.0.0
+#AutoIt3Wrapper_Res_Fileversion=2.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=GNU General Public License v2
 #AutoIt3Wrapper_Res_Field=Author|Jared Breland <jbreland@legroom.net>
 #AutoIt3Wrapper_Res_Field=Homepage|http://www.legroom.net/software
@@ -58,19 +57,23 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $version = "2.0.0 Beta RC 1"
+Const $version = "2.0.0 RC 1"
 Const $codename = '"Back from the grave"'
-Const $title = $name & " v" & $version
-Const $website = "http://www.legroom.net/software/uniextract"
-Const $website2 = "http://bioruebe.com/uniextract"
+Const $title = $name & " " & $version
+Const $website = "https://www.legroom.net/software/uniextract"
+Const $website2 = "https://bioruebe.com/uniextract"
 Const $websiteGithub = "https://github.com/Bioruebe/UniExtract2"
-Const $forum = "http://www.msfn.org/board/forum/159-universal-extractor/"
-Const $updateURL = "http://update.bioruebe.com/uniextract/update2.php"
-Const $supportURL = "http://support.bioruebe.com/uniextract/upload.php"
+Const $sUpdateURL = "https://update.bioruebe.com/uniextract/data/"
+Const $sLegacyUpdateURL = "https://update.bioruebe.com/uniextract/update2.php"
+Const $sGetLinkURL = "https://update.bioruebe.com/uniextract/geturl.php?q="
+Const $sSupportURL = "https://support.bioruebe.com/uniextract/upload.php"
+Const $sStatsURL = "https://stat.bioruebe.com/uniextract/stats.php?a="
 Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
-Const $updater = @ScriptDir & '\UniExtractUpdater.exe'
+Const $sUpdater = @ScriptDir & '\UniExtractUpdater.exe'
+Const $sUpdaterNoAdmin = @ScriptDir & '\UniExtractUpdater_NoAdmin.exe'
+Const $sEnglishLangFile = @ScriptDir & '\English.ini'
 Const $notAsciiPattern = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k '
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
@@ -79,6 +82,7 @@ Const $HISTORY_FILE = "File History", $HISTORY_DIR = "Directory History"
 Const $PACKER_UPX = "UPX", $PACKER_ASPACK = "Aspack"
 Const $RESULT_UNKNOWN = 0, $RESULT_SUCCESS = 1, $RESULT_FAILED = 2, $RESULT_CANCELED = 3
 Const $UNICODE_NONE = 0, $UNICODE_MOVE = 1, $UNICODE_COPY = 2
+Const $UPDATE_ALL = 0, $UPDATE_HELPER = 1, $UPDATE_MAIN = 2
 Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNEXE = "unknownexe", $STATUS_UNKNOWNEXT = "unknownext", _
 	  $STATUS_INVALIDFILE = "invalidfile", $STATUS_INVALIDDIR = "invaliddir", $STATUS_NOTPACKED = "notpacked", $STATUS_BATCH = "batch", _
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
@@ -114,6 +118,7 @@ Global $FB_ask = 0
 Global $Opt_ConsoleOutput = 0
 Global $Log = 0
 Global $CheckGame = 1
+Global $bSendStats = 1
 Global $iCleanup = $OPTION_MOVE
 Global $KeepOutdir = 0
 Global $KeepOpen = 0
@@ -280,6 +285,12 @@ TraySetClick(8)
 
 ; If no file passed, display GUI to select file and set options
 If $prompt Then
+	; Make sure a language file exists
+	If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
+		If MsgBox(48+4, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") Then _
+			CheckUpdate(True, False, $UPDATE_HELPER)
+	EndIf
+
 	; Check if Universal Extractor is started the first time
 	If $ID = "" Or StringIsSpace($ID) Then
 		$ID = StringRight(String(_Crypt_EncryptData(Random(10000, 1000000), @ComputerName & Random(10000, 1000000), $CALG_AES_256)), 25)
@@ -476,12 +487,10 @@ EndFunc   ;==>EnvParse
 
 ; Translate text
 Func t($t, $aVars = 0, $lang = $language)
-	Local $ldir = @ScriptDir
-	If $lang <> 'English' Then $ldir &= '\lang'
-	$return = IniRead($ldir & '\' & $lang & '.ini', 'UniExtract', $t, '')
+	$return = IniRead($lang = 'English'? $sEnglishLangFile: $langdir & '\' & $lang & '.ini', 'UniExtract', $t, '')
 	If $return == '' Then
 		Cout("Translation not found for term " & $t)
-		$return = IniRead(@ScriptDir & '\English.ini', 'UniExtract', $t, '')
+		$return = IniRead($sEnglishLangFile, 'UniExtract', $t, '')
 		If $return = '' Then
 			Cout("Warning: term " & $t & " is not defined")
 			Return $t
@@ -515,6 +524,8 @@ Func ParseCommandLine()
 
 	Cout("Command line parameters: " & _ArrayToString($cmdline, " ", 1))
 
+	If _ArraySearch($cmdline, "/silent") > -1 Then $silentmode = True
+
 	If $cmdline[1] = "/prefs" Then
 		GUI_Prefs()
 		While $guiprefs
@@ -527,11 +538,17 @@ Func ParseCommandLine()
 
 	ElseIf $cmdline[1] = "/afterupdate" Then
 		_AfterUpdate()
+
+	ElseIf $cmdline[1] = "/changelog" Then
+		_ShowChangelog()
 		$prompt = 1
 
 	ElseIf $cmdline[1] = "/update" Then
 		CheckUpdate()
 		terminate($STATUS_SILENT)
+
+	ElseIf $cmdline[1] = "/updatehelper" Then
+		CheckUpdate(False, False, $UPDATE_HELPER)
 
 	ElseIf $cmdline[1] = "/plugins" Then
 		$prompt = 1
@@ -549,27 +566,18 @@ Func ParseCommandLine()
 		terminate($STATUS_SILENT)
 
 	Else
-		If FileExists($cmdline[1]) Then
-			$file = $cmdline[1]
-		Else
-			If _ArraySearch($cmdline, "/silent") > -1 Then $silentmode = True
-			terminate($STATUS_INVALIDFILE, $cmdline[1], "")
-		EndIf
+		If Not FileExists($cmdline[1]) Then	terminate($STATUS_INVALIDFILE, $cmdline[1], "")
+
+		$file = $cmdline[1]
 		If $cmdline[0] > 1 Then
-			; Silent mode
-			If $cmdline[2] = "/silent" Then
-				$silentmode = 1
-			Else
-				; Scan only
-				If $cmdline[2] = "/scan" Then
-					$extract = False
-					$Log = False
-				Else ; Outdir specified
-					$outdir = $cmdline[2]
-					; When executed from context menu, opening the outdir is not wanted
-					$OpenOutDir = 0
-				EndIf
-				If $cmdline[0] > 2 And $cmdline[3] = "/silent" Then $silentmode = 1
+			; Scan only
+			If $cmdline[2] = "/scan" Then
+				$extract = False
+				$Log = False
+			Else ; Outdir specified
+				$outdir = $cmdline[2]
+				; When executed from context menu, opening the outdir is not wanted
+				$OpenOutDir = 0
 			EndIf
 		Else
 			$prompt = 1
@@ -636,6 +644,7 @@ Func ReadPrefs()
 	LoadPref("feedbackprompt", $FB_ask)
 	LoadPref("log", $Log)
 	LoadPref("checkgame", $CheckGame)
+	LoadPref("sendstats", $bSendStats)
 	LoadPref("extract", $extract)
 	LoadPref("unicodecheck", $checkUnicode)
 	LoadPref("extractvideotrack", $bExtractVideo)
@@ -689,12 +698,13 @@ Func WritePrefs()
 	SavePref('consoleoutput', $Opt_ConsoleOutput)
 	SavePref('log', $Log)
 	SavePref('checkgame', $CheckGame)
+	SavePref('sendstats', $bSendStats)
 	SavePref("extractvideotrack", $bExtractVideo)
 	SavePref('storeguiposition', $StoreGUIPosition)
 	SavePref('timeout', $Timeout / 1000)
 	SavePref('updateinterval', $updateinterval)
 	SavePref("topmost", Number($iTopmost > 0))
-EndFunc   ;==>WritePrefs
+EndFunc
 
 ; Save single preference
 Func SavePref($name, $value)
@@ -1756,7 +1766,6 @@ Func CheckGame($bUseGaup = True)
 	_SQLite_GetTable(-1, "SELECT n.Name FROM Names n, Scripts s, Extensions e WHERE s.SID = e.EID AND s.SID = n.NID AND e.Extension= '" _
 			 & StringLower($fileext) & "' ORDER BY n.Name", $gameformat, $iRows, $iColumns)
  	_ArrayDelete($gameformat, 1)
-;~ 	_ArrayDisplay($gameformat)
 
 	If $gameformat[0] > 1 Then
 		_ArrayDelete($gameformat, 0)
@@ -1788,7 +1797,7 @@ Func CheckGame($bUseGaup = True)
 
 	_DeleteTrayMessageBox()
 	Return False
-EndFunc   ;==>CheckGame
+EndFunc
 
 ; Determine if InstallExplorer can extract the file
 Func checkIE()
@@ -3304,12 +3313,14 @@ EndFunc
 ; Check write permissions for specified file or folder
 Func CanAccess($sPath)
 	Local $bIsTemp = False
-	If Not FileExists($sPath) Then Return SetError(1, 0, False)
 
 	Cout("Checking permissions for path " & $sPath)
-	If StringInStr(FileGetAttrib($sPath), "D") Then
+	$bExists = FileExists($sPath)
+	If StringInStr(FileGetAttrib($sPath), "D") Or ($bExists = False And StringRight($sPath, 1)) Then
 		$bIsTemp = True
 		$sPath = _TempFile($sPath)
+	Else
+		If Not $bExists Then Return SetError(1, 0, False)
 	EndIf
 
 	$handle = FileOpen($sPath, 1)
@@ -3369,7 +3380,7 @@ EndFunc
 ; Search for FFMPEG and prompt to download it if not found
 Func HasFFMPEG()
 	If HasPlugin($ffmpeg, True) Then Return
-	Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "http://ffmpeg.org/legal.html"), 1)
+	Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "https://ffmpeg.org/legal.html"), 1)
 	GetFFmpeg()
 	If @error Then terminate($STATUS_SILENT, "", "")
 EndFunc
@@ -3470,8 +3481,8 @@ Func _FileRead($f, $delete = False, $iFlag = 0)
 EndFunc
 
 ; Handle program termination with appropriate error message
-Func terminate($status, $fname = '', $ID = '')
-	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = $STATUS_SUCCESS)? $ID: $status
+Func terminate($status, $fname = '', $sFileType = '')
+	Local $LogFile = 0, $exitcode = 0, $shortStatus = ($status = $STATUS_SUCCESS)? $sFileType: $status
 
 	; Rename unicode file
 	If $iUnicodeMode Then
@@ -3500,7 +3511,7 @@ Func terminate($status, $fname = '', $ID = '')
 
 	; Save statistics
 	IniWrite($prefs, "Statistics", $status, Number(IniRead($prefs, "Statistics", $status, 0)) + 1)
-	If $status = $STATUS_SUCCESS Then IniWrite($prefs, "Statistics", $ID, Number(IniRead($prefs, "Statistics", $ID, 0)) + 1)
+	If $status = $STATUS_SUCCESS Then IniWrite($prefs, "Statistics", $sFileType, Number(IniRead($prefs, "Statistics", $sFileType, 0)) + 1)
 
 	; Remove singleton
 	If $hMutex <> 0 Then DllCall("kernel32.dll", "bool", "CloseHandle", "handle", $hMutex)
@@ -3526,7 +3537,7 @@ Func terminate($status, $fname = '', $ID = '')
 			$syntax &= t('HELP_EXAMPLE1')
 			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
 			$syntax &= t('HELP_NOARGS')
-			MsgBox($iTopmost + 32, $title, $syntax, $ID? 15: 0)
+			MsgBox($iTopmost + 32, $title, $syntax, $sFileType? 15: 0)
 
 		; Display file type information and exit
 		Case $STATUS_FILEINFO
@@ -3562,7 +3573,7 @@ Func terminate($status, $fname = '', $ID = '')
 			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, $filetype), 0)
 			$exitcode = 7
 		Case $STATUS_MISSINGEXE
-			Prompt(48, 'MISSING_EXE', CreateArray($file, $ID))
+			Prompt(48, 'MISSING_EXE', CreateArray($file, $sFileType))
 			$exitcode = 8
 		Case $STATUS_TIMEOUT
 			Prompt(48, 'EXTRACT_TIMEOUT', $file)
@@ -3579,7 +3590,7 @@ Func terminate($status, $fname = '', $ID = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $ID), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $sFileType), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
 			$exitcode = 1
 
 			; Exit successfully
@@ -3595,7 +3606,7 @@ Func terminate($status, $fname = '', $ID = '')
 	; Write error log if in batchmode
 	If $exitcode <> 0 And $silentmode And $extract Then
 		$handle = FileOpen($logdir & "errorlog.txt", 8 + 1)
-		FileWrite($handle, ($filename = ""? $fname: $filenamefull) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $ID & @CRLF)
+		FileWrite($handle, ($filename = ""? $fname: $filenamefull) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $sFileType & @CRLF)
 		FileClose($handle)
 	EndIf
 
@@ -3622,7 +3633,10 @@ Func terminate($status, $fname = '', $ID = '')
 	EndIf
 
 	; Check for updates
-	If Not $silentmode And $status <> $STATUS_SILENT Then CheckUpdate(True, True)
+	If $status <> $STATUS_SILENT Then
+		If Not $silentmode Then CheckUpdate(True, True)
+		SendStats($status, $sFileType)
+	EndIf
 
 	Exit $exitcode
 EndFunc
@@ -4415,6 +4429,12 @@ Func KillHelper()
 	If ProcessExists($run) Then ProcessClose($run)
 EndFunc
 
+; Restart Universal Extractor without elevated privileges
+Func RestartWithoutAdminRights($sParameters = "")
+	Run($cmd & 'runas /trustlevel:0x20000 "' & @ScriptFullPath & $sParameters & '"')
+	terminate("silent")
+EndFunc
+
 ; Write data to stdout stream if enabled in options
 Func Cout($Data)
 	Local $Output = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC & ":" & @MSEC & @TAB & $Data & @CRLF; & @CRLF
@@ -4424,14 +4444,26 @@ Func Cout($Data)
 EndFunc
 
 ; Open URL and evaluate success
-Func OpenURL($sURL, $handle = 0)
+Func OpenURL($sURL, $hParent = 0)
 	ShellExecute($sURL)
-	If @error Then InputBox($title, t('OPEN_URL_FAILED'), $sURL, "", -1, -1, Default, Default, 0, $handle)
+	If @error Then InputBox($title, t('OPEN_URL_FAILED'), $sURL, "", -1, -1, Default, Default, 0, $hParent)
+EndFunc
+
+; Send usage statistics if enabled in options
+Func SendStats($a, $sResult = 1)
+	If Not $bSendStats Then Return
+
+	Cout($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID)
+	InetRead($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID, 1)
 EndFunc
 
 ; Check for new version
-Func CheckUpdate($silent = False, $bCheckInterval = False)
+; $silent is used for automatic update check, supressing any error and 'no update found' messages
+Func CheckUpdate($silent = False, $bCheckInterval = False, $iMode = $UPDATE_ALL)
 	If @NumParams > 1 And $bCheckInterval And _DateDiff("D", $lastupdate, _NowCalc()) < $updateinterval Then Return
+	If @NumParams < 3 Then $iMode = $UPDATE_ALL
+	$ret2 = $silentmode
+	If $silent Then $silentmode = 1
 
 	Local $return = 0, $found = False
 	Cout("Checking for update")
@@ -4440,55 +4472,197 @@ Func CheckUpdate($silent = False, $bCheckInterval = False)
 	$lastupdate = @YEAR & "/" & @MON & "/" & @MDAY
 	SavePref('lastupdate', $lastupdate)
 
-	; Universal Extractor
-	$return = _INetGetSource($updateURL & "?get=uniextract&version=" & $version & "&id=" & $ID)
-	If @error Then Return $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
+	; Get index
+	$aReturn = _UpdateGetIndex()
+	If Not IsArray($aReturn) Then Return Cout("Failed to get update file listing")
 
-	$aReturn = StringSplit($return, @CRLF)
-	If @error Then Return $silent? 0: MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
-
-	$return = $aReturn[1]
-
-	Cout("Local: " & $version)
-	Cout("Server: " & $return)
-
-	If StringLen($return) > 0 And $return > $version Then
-		Cout("Update available")
-		$found = True
-		; $Because FFMPEG uses the same update message, we cannot use the %name constant here
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
-			$return = Download($aReturn[$aReturn[0]])
-			If $return == 0 Then Return
-			ShellExecute($updater, Quote($return))
-			Exit
+	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
+	If $iMode <> $UPDATE_HELPER Then
+		If ($aReturn[0])[1] <> FileGetSize(@ScriptFullPath) Then
+			Cout("Update available")
+			$found = True
+			; $Because FFMPEG uses the same update message, we cannot use the %name constant here
+			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
+				If ShellExecute(CanAccess(@ScriptDir)? $sUpdaterNoAdmin: $sUpdaterNoAdmin, "/main") Then Exit
+			EndIf
 		EndIf
 	EndIf
 
-	; If ffmpeg.exe exists check for new ffmpeg version
-	If HasPlugin($ffmpeg, True) Then
-		; Determine FFmpeg version
-		$return = FetchStdout($ffmpeg, @ScriptDir, @SW_HIDE)
-		$ffmpegvers = _StringBetween($return, "ffmpeg version ", " Copyright")
-		$return = _INetGetSource($updateURL & "?get=ffversion" & _IsWinXP("&xp"))
-		; Download new
-		If IsArray($ffmpegvers) And $return > $ffmpegvers[0] Then
-			$found = True
-			Cout("Found update for FFmpeg")
-			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $ffmpegvers[0], $return, ""), 0) Then GetFFmpeg()
-		EndIf
+	; Other files - we can overwrite the files without a seperate updater
+	If $iMode <> $UPDATE_MAIN Then
+		Local $sPath, $ret, $size
+		For $i = 1 To UBound($aReturn) - 1
+			$ret = $aReturn[$i]
+			If $ret[0] = "def/" Then ContinueLoop ; User might have own defs, which means different size - we don't want to always display update message
+			$sPath = @ScriptDir & "\" & $ret[0]
+			$size = _UpdateGetSize($sPath)
+
+			If $size <> $ret[1] Then
+				If Not Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then ExitLoop
+				If Not CanAccess($bindir) Then Exit ShellExecute($sUpdater, "/helper")
+				$found = True
+				If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+				ExitLoop
+			EndIf
+		Next
+		If _UpdateFFmpeg() Then $found = True
 	EndIf
 
 	If $found = False And $silent = False Then MsgBox($iTopmost + 64, $name, t('UPDATE_CURRENT'))
 	Cout("Check for updates finished")
+
+	If $silent Then $silentmode = $ret2
+EndFunc
+
+; Download updated program files and display status
+Func _UpdateHelpers($aFiles)
+	Local $success = True
+	Local $sText = t('TERM_DOWNLOADING') & "... "
+
+	Local $hGUI = GUICreate($title, 434, 130, -1, -1, $WS_POPUPWINDOW, -1, $guimain)
+	Local $idLabel = GUICtrlCreateLabel($sText, 16, 16, 408, 17)
+	GUICtrlCreateLabel(t('TERM_OVERALL_PROGRESS') & ":", 16, 72, 80, 17)
+	Local $idProgressCurrent = GUICtrlCreateProgress(16, 32, 408, 25)
+	Local $idProgressTotal = GUICtrlCreateProgress(16, 88, 406, 25)
+	_GuiSetColor()
+	GUISetState(@SW_SHOW)
+
+	Local $i = 0, $iSize = UBound($aFiles), $iProgress = 0, $sURL, $iBytesReceived, $iBytesTotal
+
+	While $i < $iSize
+		; Update progress
+		$ret = (($i + 1) / $iSize) * 100
+		$iProgress = $ret > $iProgress? $ret: $iProgress + 0.2
+		GUICtrlSetData($idProgressTotal, $iProgress)
+
+		$a = $aFiles[$i]
+		$i += 1
+		$sPath = @ScriptDir & "\" & $a[0]
+		If $sPath == @ScriptFullPath Then ContinueLoop
+
+;~ 		Cout($sPath)
+		$size = _UpdateGetSize($sPath)
+		If $size == $a[1] Then ContinueLoop
+		Cout($a[0] & ": " & $size & " - " & $a[1])
+
+		GUICtrlSetData($idProgressCurrent, 0)
+		If StringRight($a[0], 1) = "/" Then ; Directory
+			If Not FileExists($sPath) Then DirCreate($sPath)
+			GUICtrlSetData($idLabel, t('UPDATE_STATUS_SEARCHING'))
+			$aReturn = _UpdateGetIndex($a[0])
+			If Not IsArray($aReturn) Then
+				$success = False
+				ContinueLoop
+			EndIf
+			_ArrayAdd($aFiles, $aReturn)
+			$iSize = UBound($aFiles)
+		Else
+			GUICtrlSetData($idLabel, $sText & $a[0] & " (" & $a[1] & " bytes" & ")")
+
+			$iBytesReceived = 0
+			Local $hDownload = InetGet($sUpdateURL & $a[0], @ScriptDir & "\" & $a[0], 1, 1)
+
+			; Update progress bar
+			While Not InetGetInfo($hDownload, 2)
+				Sleep(50)
+				If InetGetInfo($hDownload, 4) <> 0 Then
+					Cout("Download failed")
+					$success = False
+					ContinueLoop 2
+				EndIf
+				$iBytesReceived = InetGetInfo($hDownload, 0)
+				GUICtrlSetData($idProgressCurrent, Int($iBytesReceived / $a[1] * 100))
+			WEnd
+			GUICtrlSetData($idProgressCurrent, 100)
+		EndIf
+	WEnd
+
+	GUIDelete($hGUI)
+	Return $success
+EndFunc
+
+; Search for FFmpeg updates
+Func _UpdateFFmpeg()
+	If Not HasPlugin($ffmpeg, True) Then Return False
+
+	; Determine FFmpeg version
+	Local $return = FetchStdout($ffmpeg, @ScriptDir, @SW_HIDE, 0, False)
+	Local $version = _StringBetween($return, "ffmpeg version ", " Copyright")
+	If @error Then Return False
+
+	$return = _INetGetSource(_IsWinXP()? $sLegacyUpdateURL & "?get=ffversion&xp": $sUpdateURL & "ffmpeg")
+	Cout("FFmpeg: " & $version[0] & " <--> " & $return)
+
+	; Download new
+	If $return > $version[0] Then
+		Cout("Found an update for FFmpeg")
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $version[0], $return, ""), 0) Then Return GetFFmpeg()
+	EndIf
+
+	Return False
+EndFunc
+
+; Helper function for updater, downloads index file for subdirectories
+Func _UpdateGetIndex($sURL = "")
+	$sURL = $sUpdateURL & $sURL & "index"
+;~ 	Cout("Sending request: " & $sURL)
+
+	$return = _INetGetSource($sURL)
+	If @error Then Return _UpdateCheckFailed(True)
+
+	$aReturn = StringSplit($return, @LF, 2)
+;~ 	_ArrayDisplay($aReturn)
+
+	For $i = 0 To UBound($aReturn) - 1
+		$aReturn[$i] = StringSplit($aReturn[$i], ",", 2)
+		If @error Then Return _UpdateCheckFailed(True)
+	Next
+
+	Return $aReturn
+EndFunc
+
+; Return size of a file or directory, ignoring plugins, which are not on the server
+Func _UpdateGetSize($sPath)
+	If Not StringInStr(FileGetAttrib($sPath), "D") Then Return FileGetSize($sPath)
+	$sPath = StringReplace($sPath, "/", "\")
+;~ 	Cout("GetSize: " & $sPath)
+	Local $iSize = DirGetSize($sPath)
+
+	; Don't include plugins in calculations
+	If $sPath = @ScriptDir & "\docs\" Then
+		$iSize -= DirGetSize($sPath & "FFmpeg") ; FFmpeg does not exist on server
+	ElseIf $sPath = $bindir & "x86\" Or $sPath = $bindir & "x64\" Then
+		$iSize -= FileGetSize($sPath & "ffmpeg.exe")
+	ElseIf $sPath = $bindir Then
+		$ret = DirGetSize($bindir & "crass-0.4.14.0")
+		If $ret > 0 Then $iSize -= $ret
+
+		Local $aReturn[] = ["x86\ffmpeg.exe", "x64\ffmpeg.exe", "arc_conv.exe", "Extractor.exe", "iscab.exe", "ISTools.dll", "RPGDecrypter.exe", _
+							"umodel.exe", "SDL2.dll", "dcp_unpacker.exe", "mpq.wcx", "mpq.wcx64", "ci-extractor.exe", "gea.dll", "gentee.dll", _
+							"dgcac.exe", "bootimg.exe", "I5comp.exe", "ZD50149.DLL", "ZD51145.DLL", "sim_unpacker.exe"]
+
+		For $i In $aReturn
+			$iSize -= FileGetSize($bindir & $i)
+		Next
+	EndIf
+	Return $iSize
+EndFunc
+
+; Display update failed message
+Func _UpdateCheckFailed()
+	If Not $silentmode Then MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
+	Return False
+EndFunc
+
+; Display most recent changelog
+Func _ShowChangelog()
+	$1 = FileGetTime("changelog_minor.txt", 0, 1)
+	$2 = FileGetTime("changelog.txt", 0, 1)
+	ShellExecute(@ScriptDir & "\" & ($1 > $2? "changelog_minor.txt": "changelog.txt"))
 EndFunc
 
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
-	; Open most recent changelog
-	$1 = FileGetTime("changelog_minor.txt", 0, 1)
-	$2 = FileGetTime("changelog.txt", 0, 1)
-	ShellExecute(@ScriptDir & "\" & ($1 > $2? "changelog_minor.txt": "changelog.txt"))
-
 	; Remove unused files
 	FileDelete($bindir & "languages\ChineseBig5_v0038.lng")
 	FileDelete($bindir & "languages\exeinfope_Neutral_v0038.lng")
@@ -4502,94 +4676,30 @@ Func _AfterUpdate()
 	FileDelete($bindir & "MediaInfo64.dll")
 	FileDelete($bindir & "extract.exe")
 	DirRemove($bindir & "unrpa", 1)
+	DirRemove($bindir ^ "file\contrib\file\5.03\file-5.03"
 
 	; Move files
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
 	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
-	FileMove($bindir & "x86\7z.dll.new", $bindir & "x86\7z.dll", 1)
-	FileMove($bindir & "x86\7z.exe.new", $bindir & "x86\7z.exe", 1)
-	FileMove($bindir & "x64\7z.dll.new", $bindir & "x64\7z.dll", 1)
-	FileMove($bindir & "x64\7z.exe.new", $bindir & "x64\7z.exe", 1)
+
+	; Update helpers
+	CheckUpdate(True, False, $UPDATE_HELPER)
+
+	RestartWithoutAdminRights(" /changelog")
 EndFunc
 
-; Download FFmpeg and move needed files to Universal Extractor directory
+; Start updater to download FFmpeg
 Func GetFFmpeg()
-	$FFmpegURL = _INetGetSource($updateURL & "?get=ffmpeg&OSarch=" & @OSArch & "&id=" & $ID & _IsWinXP("&xp"))
-	$return = Download($FFmpegURL)
-	If @error Then Return SetError(1, 0, 0)
+	; As FFmpeg can be downloaded from the first start assistant, we use the updater to handle elevation and download.
+	; Otherwise, it would be neccessary to exit the assistant and restart UniExtract with higher permissions, which would just look bad and scare the user :(
+	$ret = ShellExecuteWait(CanAccess($bindir)? $sUpdaterNoAdmin: $sUpdater, "/ffmpeg")
+	If @error Or Not HasPlugin($ffmpeg, True) Then Return SetError(1, 0, 0)
 
-	; Extract files, move them to scriptdir and delete files from tempdir
-	Cout("Extracting FFmpeg")
-	Local $outdir = StringTrimRight(_TempFile(@TempDir, 'FFMPEG_', ""), 1)
-	Local $ret = RunWait($cmd & $7z & ' e -ir!ffmpeg.exe -ir!licenses -y -o"' & $outdir & '" "' & $return & '"', @TempDir)
-	FileDelete(@TempDir & $return)
-	If $ret <> 0 Then
-		MsgBox($iTopmost + 48 + 1, $title, t('EXTRACT_FAILED', CreateArray($return, "7Zip")))
-		Return SetError(1, 0, 0)
-	EndIf
-
-	; Download license information
-	Local $ret2 = 0
-	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then $ret2 = Download("http://ffmpeg.org/legal.html")
-
-	Cout("Moving FFmpeg files")
-	ShellExecuteWait($updater, Quote($outdir & '" "' & $ret2))
-
-	If HasPlugin($ffmpeg, True) Then Cout("FFmpeg succesfully loaded")
+	Cout("FFmpeg successfully downloaded")
 	If $FS_GUI Then GUI_FirstStart_Next()
 	Return 1
 EndFunc
 
-; Download a file
-Func Download($f)
-	Cout("Downloading: " & $f)
-
-	; Create GUI with progressbar
-	Local $DownloadGUI = GUICreate(t('TERM_DOWNLOADING'), 466, 109, -1, -1, $WS_POPUPWINDOW, -1, $FS_GUI? $FS_GUI: $guimain)
-	_GuiSetColor()
-	GUICtrlCreateLabel($f, 8, 16, 446, 17, $SS_CENTER)
-	Local $DownloadProgress = GUICtrlCreateProgress(8, 46, 446, 25)
-	GUISetState(@SW_SHOW)
-
-	; Get file size
-	Local $BytesReceived = 0
-	Local $BytesNeeded = InetGetSize($f)
-	Local $DownloadSizeLabel = GUICtrlCreateLabel($BytesReceived & "/" & $BytesNeeded & " kb", 8, 76, 446, 17, $SS_CENTER)
-
-	; Download File
-	Local $DownloadedFile = @TempDir & "\" & StringTrimLeft($f, StringInStr($f, "/", 0, -1))
-
-	If FileExists($DownloadedFile) Then
-		GUIDelete($DownloadGUI)
-		Cout("The file to download already exists")
-		Return $DownloadedFile
-	EndIf
-
-	Local $Download = InetGet($f, $DownloadedFile, 1, 1)
-
-	; Update progress bar
-	While Not InetGetInfo($Download, 2)
-		Sleep(50)
-		If InetGetInfo($Download, 4) <> 0 Then
-			Cout("Download failed")
-			Prompt(48, 'DOWNLOAD_FAILED', $f, 0)
-			GUIDelete($DownloadGUI)
-			Return SetError(1, 0, 0)
-		EndIf
-		$BytesReceived = InetGetInfo($Download, 0)
-		GUICtrlSetData($DownloadProgress, Int($BytesReceived / $BytesNeeded * 100))
-		GUICtrlSetData($DownloadSizeLabel, $BytesReceived & "/" & $BytesNeeded & " kb")
-	WEnd
-
-	; Close GUI
-	GUIDelete($DownloadGUI)
-	Cout("Download finished")
-	If Not FileExists($DownloadedFile) Then
-		Cout("Downloaded file does not exist")
-		Return SetError(1, 0, 0)
-	EndIf
-	Return $DownloadedFile
-EndFunc
 
 ; ------------------------ Begin GUI Control Functions ------------------------
 
@@ -4640,10 +4750,10 @@ Func CreateGUI()
 	Local $webitem = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', $name), $helpmenu)
 	Local $web2item = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', $name & " 2"), $helpmenu)
 	Local $gititem = GUICtrlCreateMenuItem(t('MENU_HELP_GITHUB_LABEL'), $helpmenu)
-	Local $forumitem = GUICtrlCreateMenuItem(t('MENU_HELP_FORUM_LABEL'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $statsitem = GUICtrlCreateMenuItem(t('MENU_HELP_STATS_LABEL'), $helpmenu)
 	Local $programdiritem = GUICtrlCreateMenuItem(t('MENU_HELP_PROGDIR_LABEL'), $helpmenu)
+	Local $configfileitem = GUICtrlCreateMenuItem(t('MENU_HELP_CONFIGFILE_LABEL'), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $aboutitem = GUICtrlCreateMenuItem(t('MENU_HELP_ABOUT_LABEL'), $helpmenu)
 	GUI_UpdateLogItem()
@@ -4727,9 +4837,9 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($webitem, "GUI_Website")
 	GUICtrlSetOnEvent($web2item, "GUI_Website2")
 	GUICtrlSetOnEvent($gititem, "GUI_Website_Github")
-	GUICtrlSetOnEvent($forumitem, "GUI_Forum")
 	GUICtrlSetOnEvent($statsitem, "GUI_Stats")
 	GUICtrlSetOnEvent($programdiritem, "GUI_ProgDir")
+	GUICtrlSetOnEvent($configfileitem, "GUI_ConfigFile")
 	GUICtrlSetOnEvent($aboutitem, "GUI_About")
 	GUICtrlSetOnEvent($ok, "GUI_Ok")
 	GUICtrlSetOnEvent($cancel, "GUI_Exit")
@@ -4903,9 +5013,12 @@ Func GUI_Prefs()
 	Cout("Creating preferences GUI")
 
 	; Load language list
-	Local $aReturn = _FileListToArray($langdir, '*.ini', 1), $langlist = ""
+	Local $aReturn = _FileListToArray($langdir, '*.ini', 1)
+	If @error Then Local $aReturn[1]
 	$aReturn[0] = 'English.ini'
 	_ArraySort($aReturn)
+
+	Local $langlist = ""
 	For $i = 0 To UBound($aReturn) - 1
 		$langlist &= StringTrimRight($aReturn[$i], 4) & '|'
 	Next
@@ -4944,7 +5057,7 @@ Func GUI_Prefs()
 	Global $OpenOutDirOpt = GUICtrlCreateCheckbox(t('PREFS_OPEN_FOLDER_LABEL'), 10, 265, -1, 20)
 	Global $FeedbackPromptOpt = GUICtrlCreateCheckbox(t('PREFS_FEEDBACK_PROMPT_LABEL'), 10, 285, -1, 20)
 	Global $StoreGUIPositionOpt = GUICtrlCreateCheckbox(t('PREFS_WINDOW_POSITION_LABEL'), 10, 305, -1, 20)
-	Global $CheckGameOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_GAME_LABEL'), 10, 325, -1, 20)
+	Global $UsageStatsOpt = GUICtrlCreateCheckbox(t('PREFS_SEND_STATS_LABEL'), 10, 325, -1, 20)
 	Global $LogOpt = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), 10, 345, -1, 20)
 	Global $VideoTrackOpt = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), 10, 365, -1, 20)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -4967,7 +5080,7 @@ Func GUI_Prefs()
 	GUICtrlSetTip($appendextopt, t('PREFS_APPEND_EXT_TOOLTIP'))
 	GUICtrlSetTip($GameModeOpt, t('PREFS_HIDE_STATUS_FULLSCREEN_TOOLTIP'))
 	GUICtrlSetTip($FeedbackPromptOpt, t('PREFS_FEEDBACK_PROMPT_TOOLTIP'))
-	GUICtrlSetTip($CheckGameOpt, t('PREFS_CHECK_GAME_TOOLTIP'))
+	GUICtrlSetTip($UsageStatsOpt, t('PREFS_SEND_STATS_TOOLTIP'))
 	GUICtrlSetTip($VideoTrackOpt, t('PREFS_VIDEOTRACK_TOOLTIP'))
 	GUICtrlSetTip($DeleteOrigFileOpt[$OPTION_ASK], t('PREFS_SOURCE_FILES_OPT_KEEP_TOOLTIP'))
 
@@ -4983,7 +5096,7 @@ Func GUI_Prefs()
 	If $OpenOutDir Then GUICtrlSetState($OpenOutDirOpt, $GUI_CHECKED)
 	If $FB_ask Then GUICtrlSetState($FeedbackPromptOpt, $GUI_CHECKED)
 	If $StoreGUIPosition Then GUICtrlSetState($StoreGUIPositionOpt, $GUI_CHECKED)
-	If $CheckGame Then GUICtrlSetState($CheckGameOpt, $GUI_CHECKED)
+	If $bSendStats Then GUICtrlSetState($UsageStatsOpt, $GUI_CHECKED)
 	If $Log Then GUICtrlSetState($LogOpt, $GUI_CHECKED)
 	If $bExtractVideo Then GUICtrlSetState($VideoTrackOpt, $GUI_CHECKED)
 	GUICtrlSetState($DeleteOrigFileOpt[$iDeleteOrigFile], $GUI_CHECKED)
@@ -5007,7 +5120,7 @@ EndFunc   ;==>GUI_Prefs_Exit
 
 ; Exit preferences GUI if OK clicked
 Func GUI_Prefs_OK()
-	; universal preferences
+	; Universal preferences
 	$redrawgui = False
 
 	If GUICtrlRead($historyopt) == $GUI_CHECKED Then
@@ -5031,7 +5144,7 @@ Func GUI_Prefs_OK()
 
 	If $updateinterval <> GUICtrlRead($IntervalCont) Then $updateinterval = GUICtrlRead($IntervalCont)
 
-	; format-specific preferences
+	; Format-specific preferences
 	If GUICtrlRead($NoBoxOpt) == $GUI_CHECKED Then
 		$NoBox = 1
 		TrayItemSetState($Tray_Statusbox, $TRAY_CHECKED)
@@ -5050,7 +5163,7 @@ Func GUI_Prefs_OK()
 	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
 	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
 	$StoreGUIPosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
-	$CheckGame = Number(GUICtrlRead($CheckGameOpt) == $GUI_CHECKED)
+	$bSendStats = Number(GUICtrlRead($UsageStatsOpt) == $GUI_CHECKED)
 
 	For $i = 0 To 2
 		If GUICtrlRead($DeleteOrigFileOpt[$i]) == $GUI_CHECKED Then $iDeleteOrigFile = $i
@@ -5359,7 +5472,7 @@ Func GUI_Feedback_Send($FB_Type, $FB_Sys, $FB_File, $FB_Output, $FB_Message, $FB
 	Const $boundary = "--UniExtractLog"
 
 	$http = ObjCreate("winhttp.winhttprequest.5.1")
-	$http.Open("POST", $supportURL, False)
+	$http.Open("POST", $sSupportURL, False)
 	$http.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" & StringTrimLeft($boundary, 2))
 
 	Local $Data = $boundary & @CRLF & 'Content-Disposition: form-data; name="file"; filename="UE_Feedback"' & @CRLF & 'Content-Type: text/plain' & @CRLF & @CRLF & $FB_Text & @CRLF & $boundary & @CRLF & 'Content-Disposition: form-data; name="id"' & @CRLF & @CRLF & $ID & @CRLF & $boundary & '--'
@@ -5836,21 +5949,22 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[13][9] = [ _
-		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'http://honyaku-subs.ru/forums/viewtopic.php?f=17&t=470', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
-		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'http://hashem20.persiangig.com/crack%20tools/Extractor.rar', 'Extractor.rar', '', '', 'h4sh3m'], _
-		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', False, 'iscab.exe;ISTools.dll', '', '', 0], _
-		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'https://yadi.sk/d/1BUu6hQmepSWX', 'RPGDecrypter.rar', '', '', 0], _
-		[$unreal, 'Unreal Engine Resource Viewer', t('PLUGIN_UNREAL'), 'pak, u, uax, upk', 'http://www.gildor.org/down/41/umodel/umodel_win32.zip', 'umodel_win32.zip', 'umodel.exe|SDL2.dll', '', 0], _
-		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', 'http://forum.xentax.com/viewtopic.php?f=32&t=9625', $dcp, '', '', 0], _
-		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'http://tlwiki.org/images/8/8a/Crass-0.4.14.0.bin.7z', 'Crass*.7z', '', '', 0], _
-		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'http://www.zezula.net/download/wcx_mpq.zip', 'wcx_mpq.zip', 'mpq.wcx|mpq.wcx64', '', 0], _
-		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'http://www.createinstall.com/download-free-trial.html', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', 0], _
-		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'http://www.emit.jp/dgca/dgca_v110.zip', 'dgca_v*.zip', 'dgcac.exe', '', 0], _
-		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'http://forum.xda-developers.com/redmi-1s/general/guide-unpack-repack-kernel-t2908458', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
-		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'ftp://ftp.elf.stuba.sk/pub/pc/pack/i5comp21.rar', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
-		[$sim, 'Smart Install Maker unpacker', t('PLUGIN_SIM'), 'exe (Smart Install Maker)', 'http://www.nullsecurity.org/download/ca5e3aeb12615212258cabeeb17ef0d8', 'sim_unpacker.7z', $sim, '', 0] _
+	Local $aPluginInfo[13][8] = [ _
+		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
+		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
+		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
+		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'RPGDecrypter.rar', '', '', 0], _
+		[$unreal, 'Unreal Engine Resource Viewer', t('PLUGIN_UNREAL'), 'pak, u, uax, upk', 'umodel_win32.zip', 'umodel.exe|SDL2.dll', '', 0], _
+		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', $dcp, '', '', 0], _
+		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'Crass*.7z', '', '', 0], _
+		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'wcx_mpq.zip', 'mpq.wcx|mpq.wcx64', '', 0], _
+		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', 0], _
+		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'dgca_v*.zip', 'dgcac.exe', '', 0], _
+		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
+		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
+		[$sim, 'Smart Install Maker unpacker', t('PLUGIN_SIM'), 'exe (Smart Install Maker)', 'sim_unpacker.7z', $sim, '', 0] _
 	]
+
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1, $sWorkingdir = @WorkingDir, $aReturn[0]
 	FileChangeDir(@UserProfileDir)
@@ -5891,48 +6005,48 @@ Func GUI_Plugins()
 					Else ; Not installed
 						GUICtrlSetData($GUI_Plugins_Download, t('TERM_DOWNLOAD'))
 						GUICtrlSetData($GUI_Plugins_SelectClose, t('SELECT_FILE'))
-						If $aPluginInfo[$current][4] Then GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
+						If $aPluginInfo[$current][1] <> 'iscab' Then GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
 					EndIf
 				EndIf
 			Case $GUI_Plugins_SelectClose
 				If $current = -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ExitLoop
 
 				Cout("Adding plugin " & $aPluginInfo[$current][1])
-				$return = FileOpenDialog(t('OPEN_FILE'), @WorkingDir, $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][5] & ")", 4+1, "", $GUI_Plugins)
+				$return = FileOpenDialog(t('OPEN_FILE'), @WorkingDir, $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][4] & ")", 4+1, "", $GUI_Plugins)
 				If @error Then ContinueLoop
 				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_DISABLE)
 				Cout("Plugin file selected: " & $return)
-				If $aPluginInfo[$current][7] = "" Then $aPluginInfo[$current][7] = $bindir
+				If $aPluginInfo[$current][6] = "" Then $aPluginInfo[$current][6] = $bindir
 
 				; Check permissions
-				If Not CanAccess($aPluginInfo[$current][7]) Then
+				If Not CanAccess($aPluginInfo[$current][6]) Then
 					If IsAdmin() Then MsgBox($iTopmost + 64, $title, t('ACCESS_DENIED'))
 					MsgBox($iTopmost + 64, $title, t('ELEVATION_REQUIRED'))
-					ShellExecute($updater, "/pluginst")
+					ShellExecute($sUpdater, "/pluginst")
 					terminate($STATUS_SILENT, '', '')
 				EndIf
 
 				; Determine filetype
 				$ret = StringRight($return, 3)
 				If $ret = ".7z" Or $ret = "rar" Or $ret = "zip" Then ; Unpack archive
-					Local $command = $cmd & $7z & ' x' & ($aPluginInfo[$current][8] == 0? '': ' -p"' & $aPluginInfo[$current][8] & '"')
-					If $aPluginInfo[$current][6] <> "" Then ; Build include command for each file needed
-						$aReturn = StringSplit($aPluginInfo[$current][6], "|", 2)
+					Local $command = $cmd & $7z & ($aPluginInfo[$current][5] == ''? ' x': ' e') & ($aPluginInfo[$current][7] == 0? '': ' -p"' & $aPluginInfo[$current][7] & '"')
+					If $aPluginInfo[$current][5] <> "" Then ; Build include command for each file needed
+						$aReturn = StringSplit($aPluginInfo[$current][5], "|", 2)
 						For $sFile In $aReturn
 							$command &= " -ir!" & $sFile
 						Next
 					EndIf
-					$command &= ' -o"' & $aPluginInfo[$current][7] & '" "' & $return & '"'
+					$command &= ' -o"' & $aPluginInfo[$current][6] & '" "' & $return & '"'
 					Cout("Plugin extraction command: " & $command)
-					_Run($command, $aPluginInfo[$current][7], @SW_MINIMIZE)
+					_Run($command, $aPluginInfo[$current][6], @SW_MINIMIZE)
 				Else ; Copy files
-					Local $aVars = StringSplit($aPluginInfo[$current][5], ";", 2), $success = True
+					Local $aVars = StringSplit($aPluginInfo[$current][4], ";", 2), $success = True
 					$aReturn = StringSplit($return, "|", 2)
 
 					; Check if all files have been selected
 					For $sFile In $aVars
 						If _ArraySearch($aReturn, $sFile, 0, 0, 0, 1) < 0 Then
-							MsgBox($iTopmost + 16, $title, t('PLUGIN_IMPORT_MISSINGFILES', CreateArray($aPluginInfo[$current][1], StringReplace($aPluginInfo[$current][5], ";", @CRLF))))
+							MsgBox($iTopmost + 16, $title, t('PLUGIN_IMPORT_MISSINGFILES', CreateArray($aPluginInfo[$current][1], StringReplace($aPluginInfo[$current][4], ";", @CRLF))))
 							$success = False
 							ExitLoop
 						EndIf
@@ -5942,13 +6056,13 @@ Func GUI_Plugins()
 					If $success Then
 						Local $size = UBound($aReturn)
 						If $size = 1 Then ; Move single file directly
-							Cout("Copying plugin file " & $aReturn[0] & " to " & $aPluginInfo[$current][7])
-							FileCopy($aReturn[0], $aPluginInfo[$current][7], 1)
+							Cout("Copying plugin file " & $aReturn[0] & " to " & $aPluginInfo[$current][6])
+							FileCopy($aReturn[0], $aPluginInfo[$current][6], 1)
 						Else ; Multiple files are returned as path|file1|filen
 							For $i = 1 To $size - 1
 								$aReturn[$i] = $aReturn[0] & "\" & $aReturn[$i]
-								Cout("Copying plugin file " & $aReturn[$i] & " to " & $aPluginInfo[$current][7])
-								FileCopy($aReturn[$i], $aPluginInfo[$current][7], 1)
+								Cout("Copying plugin file " & $aReturn[$i] & " to " & $aPluginInfo[$current][6])
+								FileCopy($aReturn[$i], $aPluginInfo[$current][6], 1)
 							Next
 						EndIf
 					EndIf
@@ -5965,7 +6079,7 @@ Func GUI_Plugins()
 				If $current = -1 Then ContinueLoop
 				GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
 				Cout("Download clicked for plugin " & $aPluginInfo[$current][1])
-				OpenURL($aPluginInfo[$current][4])
+				OpenURL($sGetLinkURL & $aPluginInfo[$current][1])
 				GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
 		EndSwitch
 	WEnd
@@ -6003,6 +6117,7 @@ EndFunc
 
 ; Update log directory size in menu entry after deleting log files
 Func GUI_UpdateLogItem()
+	If Not FileExists($logdir) Then DirCreate($logdir)
 	Local $size = Round(DirGetSize($logdir) / 1024 / 1024, 2) & " MB"
 	GUICtrlSetData($logitem, t('MENU_FILE_LOG_LABEL', $size))
 EndFunc
@@ -6100,6 +6215,11 @@ Func GUI_ProgDir()
 	ShellExecute(@ScriptDir)
 EndFunc
 
+; Open configuration file
+Func GUI_ConfigFile()
+	ShellExecute($prefs)
+EndFunc
+
 ; Create about GUI
 Func GUI_About()
 	Local Const $width = 437, $height = 285
@@ -6141,12 +6261,6 @@ EndFunc
 Func GUI_Website_Github()
 	Cout("Opening Github website")
 	OpenURL($websiteGithub)
-EndFunc
-
-; Launch developer forum website if help menu item selected
-Func GUI_Forum()
-	Cout("Opening forum")
-	OpenURL($forum)
 EndFunc
 
 ; Exit if Cancel clicked or window closed

@@ -12,8 +12,10 @@ RC 1:
   Added support for NScripter version 2 archives using ns2dec
   Added support for Smile Game Builder archives
   Added 'Open Log Directory' menu item
+  Added 'Open Configuration File' menu item
   Added support for UNC paths
   Added detection support for encrypted fsb files
+  Added check on start to make sure a language file exists
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
@@ -31,14 +33,22 @@ RC 1:
   Fixed FFMPEG download/installation problems
   Fixed progress display performance in status box and pattern detection
   Fixed certain files being ignored by cleanup function
-  Fixed updater reporting old version as update if local version is more current than the server's
+  Fixed crash when trying to open preferences GUI if /lang directory does not exist
+  Fixed log files size display in file menu, if log directory is set to a location, which does not exist
+  Fixed DGCA plugin installation
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
   Changed .hlp extraction: improved logging, localized file name
   Changed extraction to subdirectory: "."-character is now replaced to prevent collisions with existing files
+  Changed updater: each file is now updated on its own instead of using update packages, this way extractors can be 
+				   updated much easier and faster; administrator rights are now only necessary if the program directory
+				   cannot be written to
+  Changed plugin download: URLs are no longer hardcoded; instead they are requested from the server, so when something goes offline
+						   UniExtract does not have to be updated to fix the link
   Replaced Unreal Engine package extractor with Umodel
   Removed redundant 64-bit MediaInfo dll
+  Removed option to toggle support for game packages from settings GUI
   Updated EnigmaVB unpacker to 0.44, changed logic to use new command line parameter
   Updated Exeinfo PE to 0.0.4.8
   Updated unrar to 5.50
