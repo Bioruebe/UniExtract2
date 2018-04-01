@@ -4712,6 +4712,8 @@ Func CreateGUI()
 	Switch $language
 		Case "Arabic", "Farsi", "Hebrew"
 			$exStyle = $WS_EX_LAYOUTRTL
+		Case Else
+			$exStyle = -1
 	EndSwitch
 		
 
