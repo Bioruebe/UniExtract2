@@ -136,7 +136,7 @@ Dim $file, $filename, $filenamefull, $filedir, $fileext, $initoutdir, $outdir, $
 Dim $prompt, $return, $Output, $hMutex
 Dim $gaDropFiles[1], $queueArray[1]
 Dim $About, $Type, $win7, $silent, $iUnicodeMode = False, $reg64 = ""
-Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0
+Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $exStyle = -1
 Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed, $exefailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
@@ -4708,12 +4708,20 @@ Func CreateGUI()
 	Cout("Creating main GUI")
 	GUIRegisterMsg($WM_DROPFILES, "WM_DROPFILES_UNICODE_FUNC")
 	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Main")
+		
+	Switch $language
+		Case "Arabic", "Farsi", "Hebrew"
+			$exStyle = BitOR($WS_EX_ACCEPTFILES, $iTopmost, $WS_EX_LAYOUTRTL)
+		Case Else
+			$exStyle = BitOR($WS_EX_ACCEPTFILES, $iTopmost)
+	EndSwitch
+		
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost))
+		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), $exStyle)
 	Else
-		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost))
+		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), $exStyle)
 	EndIf
 
 	_GuiSetColor()
@@ -5024,7 +5032,7 @@ Func GUI_Prefs()
 	Next
 
 	; Create GUI
-	Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 470, -1, -1, -1, -1, $guimain)
+	Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 250, 470, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 5, 5, 240, 122)
 
@@ -5550,7 +5558,7 @@ Func GUI_ContextMenu()
 	Local $iSize = UBound($CM_Shells) - 1
 	Global $CM_Checkbox[$iSize + 1], $CM_Picture = False
 
-	Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, -1, $guimain)
+	Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
 	GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 8, 4, 434, 495)
@@ -6224,7 +6232,7 @@ EndFunc
 Func GUI_About()
 	Local Const $width = 437, $height = 285
 	Cout("Creating about GUI")
-	$About = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, -1, $guimain)
+	$About = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, "Arial")
