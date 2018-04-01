@@ -4711,17 +4711,15 @@ Func CreateGUI()
 		
 	Switch $language
 		Case "Arabic", "Farsi", "Hebrew"
-			$exStyle = BitOR($WS_EX_ACCEPTFILES, $iTopmost, $WS_EX_LAYOUTRTL)
-		Case Else
-			$exStyle = BitOR($WS_EX_ACCEPTFILES, $iTopmost)
+			$exStyle = $WS_EX_LAYOUTRTL
 	EndSwitch
 		
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), $exStyle)
+		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle))
 	Else
-		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), $exStyle)
+		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle))
 	EndIf
 
 	_GuiSetColor()
