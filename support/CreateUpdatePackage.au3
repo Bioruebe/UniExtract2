@@ -82,7 +82,7 @@ FileWrite($hFile, _ArrayToString($aSnapshot, "|"))
 FileClose($hFile)
 FileCopy($sSnapshotFile, $aVersion[0] & ".csv", $FC_OVERWRITE)
 
-; Write data to stdout stream if enabled in options
+; Write data to stdout stream
 Func Cout($Data)
 	Local $Output = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC & ":" & @MSEC & @TAB & $Data & @CRLF; & @CRLF
 	ConsoleWrite($Output)

@@ -83,6 +83,7 @@ Const $PACKER_UPX = "UPX", $PACKER_ASPACK = "Aspack"
 Const $RESULT_UNKNOWN = 0, $RESULT_SUCCESS = 1, $RESULT_FAILED = 2, $RESULT_CANCELED = 3
 Const $UNICODE_NONE = 0, $UNICODE_MOVE = 1, $UNICODE_COPY = 2
 Const $UPDATE_ALL = 0, $UPDATE_HELPER = 1, $UPDATE_MAIN = 2
+Const $UPDATEMSG_PROMPT = 0, $UPDATEMSG_SILENT = 1, $UPDATEMSG_FOUND_ONLY = 2
 Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNEXE = "unknownexe", $STATUS_UNKNOWNEXT = "unknownext", _
 	  $STATUS_INVALIDFILE = "invalidfile", $STATUS_INVALIDDIR = "invaliddir", $STATUS_NOTPACKED = "notpacked", $STATUS_BATCH = "batch", _
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
@@ -134,15 +135,14 @@ Global $trayX = -1, $trayY = -1
 ; Global variables
 Dim $file, $filename, $filenamefull, $filedir, $fileext, $initoutdir, $outdir, $filetype = "", $initdirsize
 Dim $prompt, $return, $Output, $hMutex
-Dim $gaDropFiles[1], $queueArray[1]
 Dim $About, $Type, $win7, $silent, $iUnicodeMode = False, $reg64 = ""
-Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0
+Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $sArcTypeOverride = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed, $exefailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Dim $FS_GUI = False, $idTrayStatusExt, $BatchBut
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
-Dim $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
+Dim $gaDropFiles[1], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
 
 ; Check if OS is 64 bit version
 If @OSArch == "X64" Or @OSArch == "IA64" Then
@@ -380,6 +380,9 @@ Func StartExtraction()
 	$testie = False
 	$filetype = ""
 
+	; If an extractor is specified via command line parameter, we simply use that without scanning
+	If $sArcTypeOverride Then Return extract($sArcTypeOverride, $sArcTypeOverride & " " & t('TERM_FILE'))
+
 	; Extract contents from known file types
 
 	; UniExtract uses four methods of detection (in order):
@@ -539,16 +542,13 @@ Func ParseCommandLine()
 	ElseIf $cmdline[1] = "/afterupdate" Then
 		_AfterUpdate()
 
-	ElseIf $cmdline[1] = "/changelog" Then
-		_ShowChangelog()
-		$prompt = 1
-
 	ElseIf $cmdline[1] = "/update" Then
 		CheckUpdate()
 		terminate($STATUS_SILENT)
 
 	ElseIf $cmdline[1] = "/updatehelper" Then
-		CheckUpdate(False, False, $UPDATE_HELPER)
+		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
+		$prompt = 1
 
 	ElseIf $cmdline[1] = "/plugins" Then
 		$prompt = 1
@@ -578,6 +578,13 @@ Func ParseCommandLine()
 				$outdir = $cmdline[2]
 				; When executed from context menu, opening the outdir is not wanted
 				$OpenOutDir = 0
+			EndIf
+
+			If $cmdline[0] > 2 And StringLeft($cmdline[3], 6) = "/type=" Then
+				$sArcTypeOverride = StringTrimLeft($cmdline[3], 6)
+				If StringLen($sArcTypeOverride) < 1 Then
+					; TODO: Display type select GUI
+				EndIf
 			EndIf
 		Else
 			$prompt = 1
@@ -3365,9 +3372,10 @@ Func HasFreeSpace($sPath = $outdir, $fModifier = 1)
 	If $freeSpace < $fileSize Then
 		Local $diff = Round(Abs($freeSpace - $fileSize), 2)
 		Cout("Not enough free space available: " & $freeSpace & " MB, needed: " & $fileSize & " MB, difference: " & $diff & " MB.")
-		If $silentmode Then terminate($STATUS_FAILED, '', "Not enough free space available: " & $freeSpace & " MB, needed: " & $fileSize & " MB, difference: " & $diff & " MB.")
+		Local $Msg = t('NO_FREE_SPACE', CreateArray(StringLeft($sPath, 1), $freeSpace, $fileSize, $diff))
+		If $silentmode Then terminate($STATUS_FAILED, '', $Msg)
 
-		$return = MsgBox($iTopmost + 48 + 2, $name, t('NO_FREE_SPACE', CreateArray($freeSpace, $fileSize, $diff)))
+		$return = MsgBox($iTopmost + 48 + 2, $name, $Msg)
 		If $return = 4 Then ; Retry
 			Return HasFreeSpace($sPath)
 		ElseIf $return = 3 Then ; Cancel
@@ -3634,7 +3642,7 @@ Func terminate($status, $fname = '', $sFileType = '')
 
 	; Check for updates
 	If $status <> $STATUS_SILENT Then
-		If Not $silentmode Then CheckUpdate(True, True)
+		If Not $silentmode Then CheckUpdate($UPDATEMSG_FOUND_ONLY, True)
 		SendStats($status, $sFileType)
 	EndIf
 
@@ -4459,11 +4467,14 @@ EndFunc
 
 ; Check for new version
 ; $silent is used for automatic update check, supressing any error and 'no update found' messages
-Func CheckUpdate($silent = False, $bCheckInterval = False, $iMode = $UPDATE_ALL)
+Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = $UPDATE_ALL)
 	If @NumParams > 1 And $bCheckInterval And _DateDiff("D", $lastupdate, _NowCalc()) < $updateinterval Then Return
-	If @NumParams < 3 Then $iMode = $UPDATE_ALL
+	If @NumParams < 1 Then
+		$silent = $UPDATEMSG_PROMPT
+		$iMode = $UPDATE_ALL
+	EndIf
 	$ret2 = $silentmode
-	If $silent Then $silentmode = 1
+	If $silent == $UPDATEMSG_SILENT Then $silentmode = 1
 
 	Local $return = 0, $found = False
 	Cout("Checking for update")
@@ -4478,45 +4489,73 @@ Func CheckUpdate($silent = False, $bCheckInterval = False, $iMode = $UPDATE_ALL)
 
 	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
 	If $iMode <> $UPDATE_HELPER Then
-		If ($aReturn[0])[1] <> FileGetSize(@ScriptFullPath) Then
+		If ($aReturn[0])[1] <> FileGetSize(@Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, "au3", "exe")) Then
 			Cout("Update available")
 			$found = True
 			; $Because FFMPEG uses the same update message, we cannot use the %name constant here
 			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $version, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
-				If ShellExecute(CanAccess(@ScriptDir)? $sUpdaterNoAdmin: $sUpdaterNoAdmin, "/main") Then Exit
+				If Not ShellExecute(CanAccess(@ScriptDir)? $sUpdaterNoAdmin: $sUpdaterNoAdmin, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+				Exit
+			Else
+				; If the user does not want to install the main update, let's not bother him with more 'update found' messages
+;~ 				$iMode = $UPDATE_MAIN
 			EndIf
 		EndIf
 	EndIf
 
 	; Other files - we can overwrite the files without a seperate updater
 	If $iMode <> $UPDATE_MAIN Then
-		Local $sPath, $ret, $size
-		For $i = 1 To UBound($aReturn) - 1
-			$ret = $aReturn[$i]
-			If $ret[0] = "def/" Then ContinueLoop ; User might have own defs, which means different size - we don't want to always display update message
-			$sPath = @ScriptDir & "\" & $ret[0]
-			$size = _UpdateGetSize($sPath)
-
-			If $size <> $ret[1] Then
-				If Not Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then ExitLoop
-				If Not CanAccess($bindir) Then Exit ShellExecute($sUpdater, "/helper")
-				$found = True
-				If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
-				ExitLoop
-			EndIf
-		Next
+		If CheckUpdateHelpers($aReturn) And Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
+			If Not CanAccess($bindir) Then Exit ShellExecute($sUpdater, "/helper")
+			$found = True
+			If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+		EndIf
 		If _UpdateFFmpeg() Then $found = True
 	EndIf
 
-	If $found = False And $silent = False Then MsgBox($iTopmost + 64, $name, t('UPDATE_CURRENT'))
+	If $found = False Then
+		SendStats("CheckUpdate", 0)
+		If $silent == $UPDATEMSG_PROMPT Then MsgBox($iTopmost + 64, $name, t('UPDATE_CURRENT'))
+	EndIf
 	Cout("Check for updates finished")
 
-	If $silent Then $silentmode = $ret2
+	If $silent == $UPDATEMSG_SILENT Then $silentmode = $ret2
+	If IsAdmin() Then RestartWithoutAdminRights()
+EndFunc
+
+; Compare program files with server index to find if any file has an updated version available
+Func CheckUpdateHelpers($aFiles)
+	Local $i = 1, $iSize = UBound($aFiles)
+
+	While $i < $iSize
+		$a = $aFiles[$i]
+		$i += 1
+		$sPath = @ScriptDir & "\" & $a[0]
+		If $sPath == @ScriptFullPath Then ContinueLoop
+
+;~ 		Cout($sPath)
+		$size = _UpdateGetSize($sPath)
+		If $size == $a[1] Then ContinueLoop
+		Cout($a[0] & ": " & $size & " - " & $a[1])
+
+		; If it's a file and the size differs, update necessary
+		If StringRight($a[0], 1) <> "/" Then Return True
+
+		; Directory
+		If Not FileExists($sPath) Then Return True
+
+		$aReturn = _UpdateGetIndex($a[0])
+		If Not IsArray($aReturn) Then ContinueLoop
+
+		_ArrayAdd($aFiles, $aReturn)
+		$iSize = UBound($aFiles)
+	WEnd
+
+	Return False
 EndFunc
 
 ; Download updated program files and display status
 Func _UpdateHelpers($aFiles)
-	Local $success = True
 	Local $sText = t('TERM_DOWNLOADING') & "... "
 
 	Local $hGUI = GUICreate($title, 434, 130, -1, -1, $WS_POPUPWINDOW, -1, $guimain)
@@ -4527,7 +4566,7 @@ Func _UpdateHelpers($aFiles)
 	_GuiSetColor()
 	GUISetState(@SW_SHOW)
 
-	Local $i = 0, $iSize = UBound($aFiles), $iProgress = 0, $sURL, $iBytesReceived, $iBytesTotal
+	Local $i = 0, $iSize = UBound($aFiles), $iProgress = 0, $success = True, $iBytesReceived
 
 	While $i < $iSize
 		; Update progress
@@ -4577,6 +4616,7 @@ Func _UpdateHelpers($aFiles)
 		EndIf
 	WEnd
 
+	SendStats("UpdateHelpers", 1)
 	GUIDelete($hGUI)
 	Return $success
 EndFunc
@@ -4654,13 +4694,6 @@ Func _UpdateCheckFailed()
 	Return False
 EndFunc
 
-; Display most recent changelog
-Func _ShowChangelog()
-	$1 = FileGetTime("changelog_minor.txt", 0, 1)
-	$2 = FileGetTime("changelog.txt", 0, 1)
-	ShellExecute(@ScriptDir & "\" & ($1 > $2? "changelog_minor.txt": "changelog.txt"))
-EndFunc
-
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
 	; Remove unused files
@@ -4675,17 +4708,21 @@ Func _AfterUpdate()
 	FileDelete($langdir & "Chinese.ini")
 	FileDelete($bindir & "MediaInfo64.dll")
 	FileDelete($bindir & "extract.exe")
+	FileDelete($bindir & "dmgextractor.jar")
 	DirRemove($bindir & "unrpa", 1)
-	DirRemove($bindir ^ "file\contrib\file\5.03\file-5.03"
+	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
 
 	; Move files
+	FileMove(@ScriptDir & "\UniExtractUpdater.exe.new", @ScriptDir & "\UniExtractUpdater.exe", 1)
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
 	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
+
+	SendStats("UpdateMain", 1)
 
 	; Update helpers
 	CheckUpdate(True, False, $UPDATE_HELPER)
 
-	RestartWithoutAdminRights(" /changelog")
+	RestartWithoutAdminRights()
 EndFunc
 
 ; Start updater to download FFmpeg
@@ -5189,7 +5226,7 @@ Func GUI_OK()
 EndFunc   ;==>GUI_OK
 
 ; Set file to extract and target directory
-Func GUI_OK_Set($Msg = False)
+Func GUI_OK_Set($bMsg = False)
 	$file = EnvParse(GUICtrlRead($filecont))
 	If FileExists($file) Then
 		If EnvParse(GUICtrlRead($dircont)) == "" Then
@@ -5198,7 +5235,7 @@ Func GUI_OK_Set($Msg = False)
 			$outdir = EnvParse(GUICtrlRead($dircont))
 		EndIf
 		Return 1
-	ElseIf $Msg Then
+	ElseIf $bMsg Then
 		If $file <> '' Then $file &= ' ' & t('DOES_NOT_EXIST')
 		MsgBox($iTopmost + 48, $title, t('INVALID_FILE_SELECTED', $file))
 	EndIf

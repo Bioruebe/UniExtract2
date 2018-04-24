@@ -1,7 +1,6 @@
 //If this file is not displayed correctly, open it with notepad++
 
 // Language:
-update language files
 check control size for other languages
 
 // Unpacker changes:
@@ -16,13 +15,9 @@ lz
 http://tlwiki.org/index.php?title=Tools
 
 
-// New formats
-
-
 // Extraction logic updates
 Add cleanup function call if necessary
 Disable _Run function's pattern search for extractors that do not provide percentage indicators
-Use definition files instead of hardcoded mapping if possible
 Additional file types for arc_conv, ffmpeg
 
 
