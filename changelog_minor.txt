@@ -11,9 +11,9 @@ RC 1:
   Added support for Mole Box executables
   Added support for NScripter version 2 archives using ns2dec
   Added support for Smile Game Builder archives
+  Added support for UNC paths
   Added 'Open Log Directory' menu item
   Added 'Open Configuration File' menu item
-  Added support for UNC paths
   Added detection support for encrypted fsb files
   Added check on start to make sure a language file exists
   Fixed MS SFX hotfix extraction
@@ -49,6 +49,7 @@ RC 1:
   Replaced Unreal Engine package extractor with Umodel
   Removed redundant 64-bit MediaInfo dll
   Removed option to toggle support for game packages from settings GUI
+  Updated 7zip to 18.01
   Updated EnigmaVB unpacker to 0.44, changed logic to use new command line parameter
   Updated Exeinfo PE to 0.0.4.8
   Updated unrar to 5.50
@@ -98,8 +99,8 @@ Beta 4:
   Fixed .sit extraction
   Fixed crash when trying to extract wise installers
   Fixed swf extraction ignoring some images and sounds
-  Updated language files for Portuguese, Russian, Swedish, Italian
   Removed DMGExtractor and replaced it with 7z
+  Updated language files for Portuguese, Russian, Swedish, Italian
   Updated 7zip to 16.04
   Updated ExeInfoPE to 0.0.4.3
   Updated fsbext to 0.3.5
