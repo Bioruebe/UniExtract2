@@ -4745,20 +4745,17 @@ Func CreateGUI()
 	Cout("Creating main GUI")
 	GUIRegisterMsg($WM_DROPFILES, "WM_DROPFILES_UNICODE_FUNC")
 	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Main")
-		
+
 	Switch $language
 		Case "Arabic", "Farsi", "Hebrew"
 			$exStyle = $WS_EX_LAYOUTRTL
-		Case Else
-			$exStyle = -1
 	EndSwitch
-		
 
 	; Create GUI
 	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle))
+		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 	Else
-		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle))
+		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 	EndIf
 
 	_GuiSetColor()
@@ -5078,13 +5075,13 @@ Func GUI_Prefs()
 
 	; Language controls
 	Local $langlabel = GUICtrlCreateLabel(t('PREFS_LANG_LABEL'), 10, 45, -1, 15)
-	Local $langselectpos = GetPos($guiprefs, $langlabel, -8)
-	Global $langselect = GUICtrlCreateCombo("", $langselectpos, 42, 245 - $langselectpos - 8, -1, $CBS_DROPDOWNLIST)
+	Local $pos = GetPos($guiprefs, $langlabel, -8)
+	Global $langselect = GUICtrlCreateCombo("", $pos, 42, 245 - $pos - 8, -1, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
 
 	; Timeout and update interval controls
 	Local $TimeoutLabel = GUICtrlCreateLabel(t('PREFS_TIMEOUT_LABEL'), 10, 72, -1, 15)
 	Local $UpdateIntervalLabel = GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 10, 102, -1, 15)
-	Local $pos = _Max(GetPos($guiprefs, $TimeoutLabel, 5), GetPos($guiprefs, $UpdateIntervalLabel, 5))
+	$pos = _Max(GetPos($guiprefs, $TimeoutLabel, 5), GetPos($guiprefs, $UpdateIntervalLabel, 5))
 	Global $TimeoutCont = GUICtrlCreateInput($Timeout / 1000, $pos, 70, 35, 20, $ES_NUMBER)
 	Global $IntervalCont = GUICtrlCreateInput($updateinterval, $pos, 100, 35, 20, $ES_NUMBER)
 	GUICtrlCreateLabel(t('PREFS_SECONDS_LABEL'), GetPos($guiprefs, $TimeoutCont, 5), 72, -1, 15)

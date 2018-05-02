@@ -16,6 +16,7 @@ RC 1:
   Added 'Open Configuration File' menu item
   Added detection support for encrypted fsb files
   Added check on start to make sure a language file exists
+  Added Right to left UI mirroring for Arabic, Farsi and Hebrew; thanks to peterooch
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
@@ -36,6 +37,7 @@ RC 1:
   Fixed crash when trying to open preferences GUI if /lang directory does not exist
   Fixed log files size display in file menu, if log directory is set to a location, which does not exist
   Fixed DGCA plugin installation
+  Fixed language selection list not being scrollable
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj
