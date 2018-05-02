@@ -38,6 +38,7 @@ RC 1:
   Fixed log files size display in file menu, if log directory is set to a location, which does not exist
   Fixed DGCA plugin installation
   Fixed language selection list not being scrollable
+  Fixed some context menu GUI items not being translated after language change
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
   Changed .arj extraction to use 7z instead of arj

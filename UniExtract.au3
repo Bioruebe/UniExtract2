@@ -251,19 +251,18 @@ Global Const $regcurrent = "HKCU" & $reg64 & "\Software\Classes\*\shell\"
 Global Const $regall = "HKCR" & $reg64 & "\*\shell\"
 Global $reguser = $regcurrent
 
-ReadPrefs()
-
 ; Define context menu commands
 ; On top to make remove via command line parameter possible
-; After ReadPrefs!
 ; shell	| commandline parameter | translation
 Global $CM_Shells[5][3] = [ _
-	['uniextract_files', '', t('EXTRACT_FILES')], _
-	['uniextract_here', ' .', t('EXTRACT_HERE')], _
-	['uniextract_sub', ' /sub', t('EXTRACT_SUB')], _
-	['uniextract_last', ' /last', t('EXTRACT_LAST')], _
-	['uniextract_scan', ' /scan', t('SCAN_FILE')] _
+	['uniextract_files', '', 'EXTRACT_FILES'], _
+	['uniextract_here', ' .', 'EXTRACT_HERE'], _
+	['uniextract_sub', ' /sub', 'EXTRACT_SUB'], _
+	['uniextract_last', ' /last', 'EXTRACT_LAST'], _
+	['uniextract_scan', ' /scan', 'SCAN_FILE'] _
 ]
+
+ReadPrefs()
 
 Cout("Starting " & $name & " " & $version)
 
@@ -4749,6 +4748,8 @@ Func CreateGUI()
 	Switch $language
 		Case "Arabic", "Farsi", "Hebrew"
 			$exStyle = $WS_EX_LAYOUTRTL
+		Case Else
+			$exStyle = -1
 	EndSwitch
 
 	; Create GUI
@@ -4801,7 +4802,7 @@ Func CreateGUI()
 	GUI_UpdateLogItem()
 
 	; File controls
-	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), 5, 4, -1, 15)
+	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), 5, 4, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
 	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 5), 3, Default, 15)
 	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), 3, 100, 15)
 	GUICtrlSetState($extract? $GUI_Main_Extract: $GUI_Main_Scan, $GUI_CHECKED)
@@ -4810,7 +4811,7 @@ Func CreateGUI()
 	Local $filebut = GUICtrlCreateButton("...", 270, 20, 25, 20)
 
 	; Directory controls
-	Local $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, -1, 15)
+	Local $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
 	Global $dircont = $history? GUICtrlCreateCombo("", 5, 60, 260, 20): GUICtrlCreateInput("", 5, 60, 260, 20)
 	Local $dirbut = GUICtrlCreateButton("...", 270, 60, 25, 20)
 	Global $GUI_Main_Lock = GUICtrlCreateCheckbox(t('MAIN_DIRECTORY_LOCK'), GetPos($guimain, $GUI_Main_Destination_Label, 5), 44, Default, 15)
@@ -4893,13 +4894,19 @@ Func CreateGUI()
 
 	; Display GUI and wait for action
 	GUISetState(@SW_SHOW)
-EndFunc   ;==>CreateGUI
+EndFunc
 
 ; Return control width (for dynamic positioning)
 Func GetPos($hGUI, $hControl, $iOffset = 0, $bX = True)
 	$aReturn = ControlGetPos($hGUI, '', $hControl)
 	If @error Then Return SetError(1, '', $iOffset)
-	Return ($bX? $aReturn[0] + $aReturn[2]: $aReturn[1] + $aReturn[3]) + $iOffset
+
+	If $bX Then
+		If $exStyle == $WS_EX_LAYOUTRTL Then $iOffset *= 0.4
+		Return $aReturn[0] + $aReturn[2] + $iOffset
+	EndIf
+
+	Return $aReturn[1] + $aReturn[3] + $iOffset
 EndFunc
 
 ; Return number of times a character appears in a string
@@ -5079,8 +5086,8 @@ Func GUI_Prefs()
 	Global $langselect = GUICtrlCreateCombo("", $pos, 42, 245 - $pos - 8, -1, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
 
 	; Timeout and update interval controls
-	Local $TimeoutLabel = GUICtrlCreateLabel(t('PREFS_TIMEOUT_LABEL'), 10, 72, -1, 15)
-	Local $UpdateIntervalLabel = GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 10, 102, -1, 15)
+	Local $TimeoutLabel = GUICtrlCreateLabel(t('PREFS_TIMEOUT_LABEL'), 10, 72, $exStyle == $WS_EX_LAYOUTRTL? 40: -1, 15)
+	Local $UpdateIntervalLabel = GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 10, 102, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
 	$pos = _Max(GetPos($guiprefs, $TimeoutLabel, 5), GetPos($guiprefs, $UpdateIntervalLabel, 5))
 	Global $TimeoutCont = GUICtrlCreateInput($Timeout / 1000, $pos, 70, 35, 20, $ES_NUMBER)
 	Global $IntervalCont = GUICtrlCreateInput($updateinterval, $pos, 100, 35, 20, $ES_NUMBER)
@@ -5604,10 +5611,10 @@ Func GUI_ContextMenu()
 
 	Local $pos = 0, $iY = 428
 	For $i = 0 To $iSize Step 2
-		$CM_Checkbox[$i] = GUICtrlCreateCheckbox($CM_Shells[$i][2], 25, $iY)
+		$CM_Checkbox[$i] = GUICtrlCreateCheckbox(t($CM_Shells[$i][2]), 25, $iY)
 		If $pos == 0 Then $pos = GetPos($CM_GUI, $CM_Checkbox[0], 125)
 		If $i == $iSize Then ExitLoop
-		$CM_Checkbox[$i+1] = GUICtrlCreateCheckbox($CM_Shells[$i+1][2], $pos, $iY)
+		$CM_Checkbox[$i+1] = GUICtrlCreateCheckbox(t($CM_Shells[$i+1][2]), $pos, $iY)
 		$iY += 20
 	Next
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
@@ -5722,7 +5729,7 @@ Func GUI_ContextMenu_OK()
 			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
 				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
-					RegWrite($reguser & $CM_Shells[$i][0], "", "REG_SZ", $CM_Shells[$i][2])
+					RegWrite($reguser & $CM_Shells[$i][0], "", "REG_SZ", t($CM_Shells[$i][2]))
 					RegWrite($reguser & $CM_Shells[$i][0] & "\command", "", "REG_SZ", $command)
 					; Add icon to context menu, seems to work only on win 7
 					If $win7 Then RegWrite($reguser & $CM_Shells[$i][0], "Icon", "REG_SZ", @ScriptFullPath & ",0")
@@ -5738,7 +5745,7 @@ Func GUI_ContextMenu_OK()
 			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
 				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
-					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0], "", "REG_SZ", $CM_Shells[$i][2])
+					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0], "", "REG_SZ", t($CM_Shells[$i][2]))
 					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0] & "\command", "", "REG_SZ", $command)
 
 					; Icon
