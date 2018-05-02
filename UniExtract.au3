@@ -4504,10 +4504,12 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 
 	; Other files - we can overwrite the files without a seperate updater
 	If $iMode <> $UPDATE_MAIN Then
-		If CheckUpdateHelpers($aReturn) And Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
-			If Not CanAccess($bindir) Then Exit ShellExecute($sUpdater, "/helper")
+		If CheckUpdateHelpers($aReturn) Then
 			$found = True
-			If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
+				If Not CanAccess($bindir) Then Exit ShellExecute($sUpdater, "/helper")
+				If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+			EndIf
 		EndIf
 		If _UpdateFFmpeg() Then $found = True
 	EndIf
