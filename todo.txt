@@ -11,7 +11,6 @@ dll for ace extraction?
 // New unpackers
 sqx
 paq
-lz
 http://tlwiki.org/index.php?title=Tools
 
 
@@ -32,7 +31,7 @@ is6cab extractor might crash ('... is not working anymore'), resulting in batch 
 
 
 // Other:
-Logging: quickbms, Crage
+Logging: quickbms (+ 'you must choose a new filename' user input needed detection), Crage
 'Extract as' command line parameter (call extract directly with $arctype as param) + GUI if nothing passed
 
 

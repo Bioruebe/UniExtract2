@@ -56,6 +56,7 @@ IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN					
 jsMSIx										jsMSIx.exe					1.11.0704				Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
 KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								
 lessmsi										\lessmsi directory			1.4 mod		-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
+lzip										lzip.exe					1.20		-	x	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
 lzop										lzop.exe					1.03					GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
 MediaInfo 									MediaInfo.dll				0.7.72		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 											MediaInfo64.dll				---------	---------	---------				---------							---------

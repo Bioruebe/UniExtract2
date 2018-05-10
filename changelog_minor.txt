@@ -12,6 +12,7 @@ RC 1:
   Added support for NScripter version 2 archives using ns2dec
   Added support for Smile Game Builder archives
   Added support for UNC paths
+  Added support for Lzip archives
   Added 'Open Log Directory' menu item
   Added 'Open Configuration File' menu item
   Added detection support for encrypted fsb files
@@ -64,6 +65,7 @@ RC 1:
   Updated Chinese (Traditional) translation, thanks to jfcherng
   Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Greek translation, thanks to gvp9000
+  Updated Russian translation, thanks to @wvxwxvw
 
 Beta 4b:
   Beta 4b is a bugfix update adressing failing msi extractions

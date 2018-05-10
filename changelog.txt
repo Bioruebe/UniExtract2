@@ -56,6 +56,7 @@
   Added support for Livemaker games via crass/crage (plugin)
   Added support for .mpq archives using MPQ Plugin for Total Commander (plugin)
   Added support for FreeArc compressed archives (.arc) using FreeArc
+  Added support for Lzip archives using Lzip
   Added support for bcm compressed files using bcm
   Added support for zpaq archives using zpaq
   Added support for .alz files using unalz
