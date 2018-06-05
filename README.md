@@ -19,6 +19,9 @@ Universal Extractor 2 or Universal Extractor (Bioruebe version) as it is also ca
 
 See the changelog for a complete log of all improvements.
 
+## Download
+Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases)
+
 
 ## Portable version
 Universal Extractor itself is completely portable, with some exceptions:
@@ -32,6 +35,14 @@ See issue #20 for more information.
 Any contribution in form of ideas, bug reports, code commits, documentation improvements, etc. is welcome. Help is currently needed in updating the translations for many languages. If you are able to translate into another language, take a look at the corresponding issue (#2) or open the language file in the `/lang` subdirectory and check for empty strings. English and German language are always up-to-date and can be used as a reference.
 
 Feel free to submit bug reports or feature requests using the issues tab or the built-in feedback window in Universal Extractor, accessible via the 'Help' menu. See todo.txt for a list of notes on possible future changes.
+
+
+## Building from Source
+1. Download and install [AutoIt](https://www.autoitscript.com/site/autoit/downloads/)
+2. Download and install [SciTE](https://www.autoitscript.com/site/autoit-script-editor/downloads/) (Optional)
+3. Clone this repository **or** download a snapshot and unpack into a folder of your likings
+4. ~Download the latest release version and unpack into the same directory to install additional program files not included in the source distribution. Do not overwrite files.~ Beginning with RC 1, this has been simplified: just run the updater after building. All neccessary files are downloaded automatically.
+5. Open UniExtract.au3 in SciTE and hit `F5` to run in debug mode; `F7` to build an executable file **or** run UniExtract.au3 through Aut2Exe
 
 
 ## License
