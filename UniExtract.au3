@@ -61,13 +61,14 @@ Const $version = "2.0.0 RC 1"
 Const $codename = '"Back from the grave"'
 Const $title = $name & " " & $version
 Const $website = "https://www.legroom.net/software/uniextract"
-Const $website2 = "https://bioruebe.com/uniextract"
+Const $website2 = "https://bioruebe.com/dev/uniextract"
 Const $websiteGithub = "https://github.com/Bioruebe/UniExtract2"
 Const $sUpdateURL = "https://update.bioruebe.com/uniextract/data/"
 Const $sLegacyUpdateURL = "https://update.bioruebe.com/uniextract/update2.php"
 Const $sGetLinkURL = "https://update.bioruebe.com/uniextract/geturl.php?q="
 Const $sSupportURL = "https://support.bioruebe.com/uniextract/upload.php"
 Const $sStatsURL = "https://stat.bioruebe.com/uniextract/stats.php?a="
+Const $sPrivacyPolicyURL = "https://bioruebe.com/dev/uniextract/privacypolicy"
 Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
@@ -4572,14 +4573,14 @@ Func _UpdateGetIndex($sURL = "")
 ;~ 	Cout("Sending request: " & $sURL)
 
 	$return = _INetGetSource($sURL)
-	If @error Then Return _UpdateCheckFailed(True)
+	If @error Then Return _UpdateCheckFailed()
 
 	$aReturn = StringSplit($return, @LF, 2)
 ;~ 	_ArrayDisplay($aReturn)
 
 	For $i = 0 To UBound($aReturn) - 1
 		$aReturn[$i] = StringSplit($aReturn[$i], ",", 2)
-		If @error Then Return _UpdateCheckFailed(True)
+		If @error Then Return _UpdateCheckFailed()
 	Next
 
 	Return $aReturn
@@ -5361,37 +5362,32 @@ EndFunc   ;==>WM_DROPFILES_UNICODE_FUNC
 Func GUI_Feedback($Type = "", $file = "")
 	Cout("Creating feedback GUI")
 	Opt("GUIOnEventMode", 0)
-	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 251, 370, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
+
+	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 402, 528, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FEEDBACK_TYPE_LABEL'), 8, 8, -1, 15)
-	If $Type == "" Then
-		$FB_TypeCont = GUICtrlCreateCombo(t('FEEDBACK_TYPE_STANDARD'), 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-	Else
-		$FB_TypeCont = GUICtrlCreateCombo($Type, 8, 24, 105, 25, BitOR($CBS_DROPDOWN, $CBS_AUTOHSCROLL))
-		GUICtrlSetData(-1, t('FEEDBACK_TYPE_STANDARD'))
-	EndIf
-	GUICtrlSetData(-1, t('FEEDBACK_TYPE_OPTIONS'))
-	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 120, 8, -1, 15)
-	$FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 120, 24, 121, 21)
-	GUICtrlCreateLabel(t('FEEDBACK_FILE_LABEL'), 8, 56, -1, 15)
-	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
-	$FB_FileCont = GUICtrlCreateInput($file, 8, 72, 233, 21)
-	GUICtrlSetTip(-1, t('FEEDBACK_FILE_TOOLTIP'), "", 0, 1)
-	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 104, -1, 15)
+
+	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 8, 8, 384, 17)
+	$FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 8, 24, 385, 21)
+
+	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 56, 384, 17)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
-	$FB_OutputCont = GUICtrlCreateEdit("", 8, 120, 233, 49, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
+	$FB_OutputCont = GUICtrlCreateEdit("", 8, 72, 385, 161, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetData(-1, $debug)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
-	GUICtrlCreateLabel(t('FEEDBACK_MESSAGE_LABEL'), 8, 176, -1, 15)
+
+	GUICtrlCreateLabel(t('FEEDBACK_MESSAGE_LABEL'), 8, 248, 384, 17)
 	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
-	$FB_MessageCont = GUICtrlCreateEdit("", 8, 192, 233, 73, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
+	$FB_MessageCont = GUICtrlCreateEdit("", 8, 264, 385, 169, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
-	GUICtrlCreateLabel(t('FEEDBACK_EMAIL_LABEL'), 8, 272, -1, 15)
-	GUICtrlSetTip(-1, t('FEEDBACK_EMAIL_TOOLTIP'), "", 0, 1)
-	$FB_MailCont = GUICtrlCreateInput("", 8, 288, 233, 21)
-	GUICtrlSetTip(-1, t('FEEDBACK_EMAIL_TOOLTIP'), "", 0, 1)
-	$FB_Send = GUICtrlCreateButton(t('SEND_BUT'), 55, 318, 60, 20)
-	$FB_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 135, 318, 60, 20)
+
+	$FB_PrivacyPolicyCheckbox = GUICtrlCreateCheckbox(t('FEEDBACK_PRIVACY_ACCEPT_LABEL'), 8, 442, 217, 17)
+	$FB_PrivacyPolicyOpen = GUICtrlCreateLabel(t('FEEDBACK_PRIVACY_VIEW_LABEL'), 246, 444, 147, 17, $SS_RIGHT)
+	GUICtrlSetFont(-1, 8, 800, 4, "MS Sans Serif")
+	GUICtrlSetColor(-1, 0x000080)
+	GUICtrlSetCursor(-1, 0)
+
+	$FB_Send = GUICtrlCreateButton(t('SEND_BUT'), 111, 470, 75, 25)
+	$FB_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 215, 470, 75, 25)
 	$hSelectAll = GUICtrlCreateDummy()
 
 	Local $accelKeys[1][2] = [["^a", $hSelectAll]]
@@ -5406,10 +5402,16 @@ Func GUI_Feedback($Type = "", $file = "")
 		$nMsg = GUIGetMsg()
 		Switch $nMsg
 			Case $FB_Send
-				GUI_Feedback_Send(_GUICtrlComboBox_GetCurSel($FB_TypeCont), GUICtrlRead($FB_SysCont), GUICtrlRead($FB_FileCont), GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont), GUICtrlRead($FB_MailCont))
-				ExitLoop
+				If GUICtrlRead($FB_PrivacyPolicyCheckbox) = $GUI_CHECKED Then
+					GUI_Feedback_Send(GUICtrlRead($FB_SysCont), $file, GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont))
+					ExitLoop
+				Else
+					MsgBox($iTopmost + 48, $name, t('FEEDBACK_PRIVACY_NOT_ACCETPED'))
+				EndIf
 			Case $GUI_EVENT_CLOSE, $FB_Cancel
 				ExitLoop
+			Case $FB_PrivacyPolicyOpen
+				ShellExecute($sPrivacyPolicyURL)
 			Case $hSelectAll
 				GUI_Edit_SelectAll()
 		EndSwitch
@@ -5420,28 +5422,19 @@ Func GUI_Feedback($Type = "", $file = "")
 EndFunc
 
 ; Exit feedback GUI if OK clicked
-Func GUI_Feedback_Send($FB_Type, $FB_Sys, $FB_File, $FB_Output, $FB_Message, $FB_Mail)
+Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	If $FB_File = "" And $FB_Output = "" And $FB_Message = "" Then Return MsgBox($iTopmost + 16, $name, t('FEEDBACK_EMPTY'))
-
-	; Opt-in privacy agreement
-	If Not Prompt(64+4, 'FEEDBACK_PRIVACY', 0, 0) Then Return
 
 	GUIDelete($FB_GUI)
 	If $guimain Then GUISetState(@SW_HIDE, $guimain)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
 
-	Local $FB_Types = StringSplit(t('FEEDBACK_TYPE_OPTIONS', '', 'english'), "|", $STR_NOCOUNT)
-	_ArrayInsert($FB_Types, 0, t('FEEDBACK_TYPE_STANDARD', '', 'english'))
-	$FB_Type = $FB_Types[$FB_Type]
-
-	$FB_Text = $name & " Feedback: " & $FB_Type & @CRLF & _
+	$FB_Text = $name & " Feedback" & @CRLF & _
 			"------------------------------------------------------------------------------------------------" _
 			 & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample File: " & $FB_File & @CRLF _
 			 & "Type: " & StringReplace($filetype, @CRLF, "|") & @CRLF & @CRLF & " Output:" & @CRLF & $FB_Output & @CRLF & @CRLF & _
 			"------------------------------------------------------------------------------------------------" _
 			 & @CRLF & $FB_Message & @CRLF & @CRLF & "Sent by: " & @CRLF & $ID
-
-	If StringInStr($FB_Mail, "@") Then $FB_Text &= @CRLF & $FB_Mail
 
 	Const $boundary = "--UniExtractLog"
 
@@ -5496,10 +5489,8 @@ EndFunc
 ; Set minimal size of feedback GUI
 Func GUI_WM_GETMINMAXINFO_Feedback($hWnd, $Msg, $wParam, $lParam)
 	$tagMaxinfo = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
-	DllStructSetData($tagMaxinfo, 7, 270) ; min width
-	DllStructSetData($tagMaxinfo, 8, 380) ; min height
-	;DllStructSetData($tagMaxinfo,  9, ) ; max width
-	;DllStructSetData($tagMaxinfo, 10, )  ; max height
+	DllStructSetData($tagMaxinfo, 7, 400) ; min width
+	DllStructSetData($tagMaxinfo, 8, 500) ; min height
 EndFunc
 
 ; Tooltip does not work for disabled controls, so here's a workaround

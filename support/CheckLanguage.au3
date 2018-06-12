@@ -4,7 +4,9 @@
  Author:         Bioruebe
 
  Script Function:
-	Checks language file terms and returns terms which are not used in source code
+	Checks language file terms and returns terms which are not used in source code.
+	Some terms are not used in the main script, but in the definition files, the installer or the updater!
+	Don't delete them even if reported by this script!
 
 #ce ----------------------------------------------------------------------------
 
