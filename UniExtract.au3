@@ -1260,7 +1260,7 @@ Func exescan($f, $scantype, $analyze = 1)
 	Local $filetype_curr = "", $bHasRegKey = True
 	Local Const $key = "HKCU\Software\PEiD"
 
-	Cout("Start filescan using PEiD")
+	Cout("Start filescan using PEiD (" & $scantype & ")")
 	_CreateTrayMessageBox(t('SCANNING_EXE', "PEiD (" & $scantype & ")"))
 
 	; Backup existing PEiD options
@@ -1326,7 +1326,7 @@ Func exescan($f, $scantype, $analyze = 1)
 			extract("ie", 'Installer VISE ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($filetype_curr, "InstallShield", 0)
-			If Not $isfailed Then extract($TYPE_ISEXE, 'InstallShield ' & t('TERM_INSTALLER'))
+			checkInstallShield()
 
 		Case StringInStr($filetype_curr, "KGB SFX", 0)
 			extract($TYPE_KGB, t('TERM_SFX') & ' KGB ' & t('TERM_PACKAGE'))
@@ -1856,6 +1856,8 @@ EndFunc
 
 ; Determine if file is really an InstallShield installer (not false positive)
 Func checkInstallShield()
+	If $isfailed Then Return False
+
 	; InstallShield testing handled by extract function
 	Cout("Testing InstallShield")
 	extract($TYPE_ISEXE, 'InstallShield ' & t('TERM_INSTALLER'))
@@ -2446,7 +2448,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						EndIf
 
 					; Not InstallShield
-					Case 4
+					Case 3
 						$isfailed = True
 						Return False
 				EndSwitch
@@ -3544,7 +3546,7 @@ Func terminate($status, $fname = '', $sFileType = '')
 	; Delete empty output directory if failed
 	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
-	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 12 Then
+	If $exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 12 & $fileext <> "dll" Then
 		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file, 0) Then
 			; Attach input file's first bytes for debug purpose
 			Cout("--------------------------------------------------File dump--------------------------------------------------" & _
