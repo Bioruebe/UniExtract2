@@ -75,7 +75,7 @@ Func _GetFFMPEG()
 	If $ret <> 0 Then Exit MsgBox(48, $sUpdaterTitle, "Failed to extract update package " & $return & "." & @CRLF & @CRLF & "Make sure Universal Extractor is up to date and try again, or unpack the file manually to " & $sOSArchDir)
 
 	; Download license information
-	If Not FileExists($sDocsDir & "FFmpeg_license.html") Then _Download("", $sDocsDir, False)
+	If Not FileExists($sDocsDir & "FFmpeg_license.html") Then _Download("https://ffmpeg.org/legal.html", $sDocsDir, False)
 
 	Run($sUniExtract)
 EndFunc
@@ -106,7 +106,7 @@ Func _Download($sURL, $sDir = @ScriptDir, $bCreateBackup = True)
 		If InetGetInfo($hDownload, 4) <> 0 Then
 			GUIDelete($hGUI)
 			If $bCreateBackup Then FileMove($sBackupFile, $sFile, 1)
-			MsgBox(48, $sUpdaterTitle, 'The file ' & $sURL & ' could not be downloaded. Please ensure that you are connected to the internet and try again.')
+			_DownloadError($sURL)
 			Return SetError(1, 0, 0)
 		EndIf
 		$iBytesReceived = InetGetInfo($hDownload, 0)
@@ -118,10 +118,14 @@ Func _Download($sURL, $sDir = @ScriptDir, $bCreateBackup = True)
 	GUIDelete($hGUI)
 	If Not FileExists($sFile) Then
 		If $bCreateBackup Then FileMove($sBackupFile, $sFile, 1)
-		MsgBox(48, $sUpdaterTitle, 'The file ' & $sURL & ' could not be downloaded. Please ensure that you are connected to the internet and try again.')
+		_DownloadError($sURL)
 		Return SetError(1, 0, 0)
 	EndIf
 
 	If $bCreateBackup Then FileDelete($sBackupFile)
 	Return $sFile
+EndFunc
+
+Func _DownloadError($sURL)
+	MsgBox(48, $sUpdaterTitle, 'The file ' & $sURL & ' could not be downloaded. Please ensure that you are connected to the internet and try again.')
 EndFunc
