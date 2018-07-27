@@ -3,6 +3,8 @@
 #AutoIt3Wrapper_Outfile=UniExtractUpdater_NoAdmin.exe
 #AutoIt3Wrapper_Res_Description=Update utility for Universal Extractor
 #AutoIt3Wrapper_Res_Fileversion=2.0.0.0
+#AutoIt3Wrapper_Run_Au3Stripper=y
+#Au3Stripper_Parameters=/mo
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
 #cs ----------------------------------------------------------------------------
@@ -73,10 +75,8 @@ Func _GetFFMPEG()
 	If $ret <> 0 Then Exit MsgBox(48, $sUpdaterTitle, "Failed to extract update package " & $return & "." & @CRLF & @CRLF & "Make sure Universal Extractor is up to date and try again, or unpack the file manually to " & $sOSArchDir)
 
 	; Download license information
-	If Not FileExists(@ScriptDir & "\docs\FFmpeg\FFmpeg_license.html") Then _Download("", $sDocsDir, False)
+	If Not FileExists($sDocsDir & "FFmpeg_license.html") Then _Download("", $sDocsDir, False)
 
-	; License files
-	If $cmdline[2] <> 0 Then FileMove($cmdline[2], @ScriptDir & "\docs\FFmpeg\FFmpeg_license.html", 8 + 1)
 	Run($sUniExtract)
 EndFunc
 
