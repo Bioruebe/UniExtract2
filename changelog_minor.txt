@@ -13,11 +13,13 @@ RC 1:
   Added support for Smile Game Builder archives
   Added support for UNC paths
   Added support for Lzip archives
+  Added support for Visionaire game archives
   Added 'Open Log Directory' menu item
   Added 'Open Configuration File' menu item
   Added detection support for encrypted fsb files
   Added check on start to make sure a language file exists
   Added Right to left UI mirroring for Arabic, Farsi and Hebrew; thanks to peterooch
+  Added new error messages: not enough free disk space, missing part for multipart archives
   Fixed MS SFX hotfix extraction
   Fixed 'Open folder after extraction' being always disabled when UniExtract is opened with command line parameters
   Fixed cleanup for .chm and EnigmaVB files
@@ -41,6 +43,9 @@ RC 1:
   Fixed language selection list not being scrollable
   Fixed some context menu GUI items not being translated after language change
   Fixed 'Not an InstallShield installer' option in MethodSelector not starting additional scans
+  Fixed output directory not being deleted after failed extraction (unicode mode only)
+  Fixed video extraction failing for files starting with -
+  Fixed error message when starting batch mode
   Changed feedback GUI design, removed unneeded input fields
   Changed feedback GUI to always pre-fill output field
   Changed .nrg extraction method to use 7zip for improved unicode support
@@ -62,6 +67,7 @@ RC 1:
   Updated unrpa to 1.5.2
   Updated TrID to 2.24
   Updated unshield to 1.4
+  Updated FFMPEG to 4.0
   Updated Bulgarian translation, thanks to Jekov J.K.
   Updated French translation, thanks to zorbao
   Updated Chinese (Traditional) translation, thanks to jfcherng

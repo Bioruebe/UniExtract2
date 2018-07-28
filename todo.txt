@@ -13,6 +13,8 @@ sqx
 paq
 http://tlwiki.org/index.php?title=Tools
 
+// Detection
+Generic OLE2 / Multistream Compound File   -->   Start msi extraction? Add CheckMSI function?
 
 // Extraction logic updates
 Add cleanup function call if necessary
@@ -22,6 +24,7 @@ Additional file types for arc_conv, ffmpeg
 
 // Usability:
 arj percentage indicator //tee problem
+Folder passed as file -> add to batch?
 
 
 // Bugs

@@ -97,7 +97,7 @@ Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					htt
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
 UnRAR										UnRAR.exe					5.50		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										unrpa.exe					1.4.2		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
-Unshield									unshield.exe				1.4						Freeware				David Eriksson						http://github.com/twogood/unshield/					
+Unshield									unshield.exe				1.4			-	-	-	Freeware				David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
 											UHARC04.EXE					0.4			?	x	?	-------					-------								http://www.klaimsoft.com/forum/index.php?showtopic=25			
 											UNUHARC06.EXE				0.6b		x	x	x	-------					-------								-------
@@ -109,6 +109,8 @@ UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w		-	-	?	modified GNU
 utagedec									utagedec.exe				1.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/utagedec
 											neko runtime files			-------		---------	-------					-------								-------
 UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
+VISExt										VIS3Ext						2.2.6581.0	-	-	-	BSD 3-clause			Deniz Özmen							https://oezmen.eu/gameresources/
+											vis.key						-------		---------	-------					-------								-------
 Windows Installer XML Toolset Decompiler	/dark directory				3.10.3.3007	-	x	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			

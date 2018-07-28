@@ -80,7 +80,8 @@
   Added support for Advanced Installer executables
   Added support for Excelsior Installer executables
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker
-  Added support for Mole Box executables
+  Added support for Mole Box executables using demoleition
+  Added support for Visionaire game archives using VISExt
   Added support for Ghost Installer Studio installers
   Added support for Smart Install Maker installers (plugin)
   Added support for wix installers
