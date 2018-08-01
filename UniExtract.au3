@@ -58,7 +58,7 @@
 
 Const $name = "Universal Extractor"
 Const $sVersion = "2.0.0 RC 1"
-Const $codename = '"Back from the grave"'
+Const $codename = '"Still Alive"'
 Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
 Const $website2 = "https://bioruebe.com/dev/uniextract"
@@ -298,8 +298,9 @@ TraySetClick(8)
 If $prompt Then
 	; Make sure a language file exists
 	If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
-		If MsgBox(48+4, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") Then _
+		If MsgBox(48+4, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") == 6 Then _
 			CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
+		terminate($STATUS_SILENT)
 	EndIf
 
 	; Check if Universal Extractor is started the first time
@@ -1568,7 +1569,8 @@ Func advexescan()
 		Case (StringInStr($filetype_curr, "Not packed") And Not StringInStr($filetype_curr, "Microsoft Visual C++")) Or _
 			  StringInStr($filetype_curr, "ELF executable") Or StringInStr($filetype_curr, "Microsoft Visual C# / Basic.NET") Or _
 			  StringInStr($filetype_curr, "Autoit") Or StringInStr($filetype_curr, "LE <- Linear Executable") Or _
-			  StringInStr($filetype_curr, "NOT EXE - Empty file") Or StringInStr($filetype_curr, "Native - System driver")
+			  StringInStr($filetype_curr, "NOT EXE - Empty file") Or StringInStr($filetype_curr, "Native - System driver") Or _
+			  StringInStr($filetype_curr, "Denuvo protector")
 			terminate($STATUS_NOTPACKED, $file, "")
 
 		; Needs to be at the end, otherwise files might not be recognized
@@ -4526,12 +4528,13 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 
 	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
 	If $iMode <> $UPDATE_HELPER Then
-		If ($aReturn[0])[1] <> FileGetSize(@Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, "au3", "exe")) Then
+		$sUniExtract = @Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, "au3", "exe")
+		If ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2] Then
 			Cout("Update available")
 			$found = True
 			; $Because FFMPEG uses the same update message, we cannot use the %name constant here
 			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $sVersion, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
-				If Not ShellExecute(CanAccess(@ScriptDir)? $sUpdaterNoAdmin: $sUpdaterNoAdmin, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+				If Not ShellExecute(CanAccess(@ScriptDir)? $sUpdaterNoAdmin: $sUpdater, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
 				Exit
 			Else
 				; If the user does not want to install the main update, let's not bother him with more 'update found' messages
@@ -4751,11 +4754,6 @@ EndFunc
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
 	; Remove unused files
-	FileDelete($bindir & "languages\ChineseBig5_v0038.lng")
-	FileDelete($bindir & "languages\exeinfope_Neutral_v0038.lng")
-	FileDelete($bindir & "languages\exeinfope_Neutral_v0041.lng")
-	FileDelete($bindir & "languages\exeinfope_turkish.lng")
-	FileDelete($bindir & "languages\exeinfopeCHS.lng")
 	FileDelete($bindir & "faad.exe")
 	FileDelete($bindir & "x86\flac.exe")
 	FileDelete($bindir & "x64\flac.exe")
@@ -4763,7 +4761,12 @@ Func _AfterUpdate()
 	FileDelete($bindir & "MediaInfo64.dll")
 	FileDelete($bindir & "extract.exe")
 	FileDelete($bindir & "dmgextractor.jar")
+	FileDelete($bindir & "x86\7z.dll.new")
+	FileDelete($bindir & "x86\7z.exe.new")
+	FileDelete($bindir & "x64\7z.dll.new")
+	FileDelete($bindir & "x64\7z.exe.new")
 	DirRemove($bindir & "unrpa", 1)
+	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
 
 	; Move files
@@ -4774,9 +4777,10 @@ Func _AfterUpdate()
 	SendStats("UpdateMain", 1)
 
 	; Update helpers
-	CheckUpdate(True, False, $UPDATE_HELPER)
+	CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
 
-	RestartWithoutAdminRights()
+	If IsAdmin() Then RestartWithoutAdminRights()
+	Restart()
 EndFunc
 
 ; Start updater to download FFmpeg

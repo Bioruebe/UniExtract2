@@ -30,7 +30,7 @@ disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https:
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.44		x	-	-	Freeware				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.4.8		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.0		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											exeinfopeRUN.cfg			-------		---------	-------					-------								-------															
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 											\plugins directory			-------		---------	-------					-------								-------															
@@ -51,7 +51,7 @@ GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http:
 HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					http://www.geocities.com/mwinterhoff/helpdeco.htm				
 											---------					-------		---------	-------					-------								http://www.helpmaster.info/hlp-developmentaids-helpdeco.htm		
 i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
-innounp, the Inno Setup Unpacker			innounp.exe					0.46				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
+innounp, the Inno Setup Unpacker			innounp.exe					0.47				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
 IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
 jsMSIx										jsMSIx.exe					1.11.0704				Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
 KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								

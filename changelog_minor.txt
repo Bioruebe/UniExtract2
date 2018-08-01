@@ -62,12 +62,13 @@ RC 1:
   Removed option to toggle support for game packages from settings GUI
   Updated 7zip to 18.01
   Updated EnigmaVB unpacker to 0.44, changed logic to use new command line parameter
-  Updated Exeinfo PE to 0.0.4.8
+  Updated Exeinfo PE to 0.0.5.0
   Updated unrar to 5.50
   Updated unrpa to 1.5.2
   Updated TrID to 2.24
   Updated unshield to 1.4
-  Updated FFMPEG to 4.0
+  Updated FFMPEG to 4.0.2
+  Updated innounp to 0.47
   Updated Bulgarian translation, thanks to Jekov J.K.
   Updated French translation, thanks to zorbao
   Updated Chinese (Traditional) translation, thanks to jfcherng
