@@ -4534,7 +4534,11 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 			$found = True
 			; $Because FFMPEG uses the same update message, we cannot use the %name constant here
 			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $sVersion, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
-				If Not ShellExecute(CanAccess(@ScriptDir)? $sUpdaterNoAdmin: $sUpdater, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+				If CanAccess(@ScriptDir) Then
+					If Not ShellExecute($sUpdaterNoAdmin, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+				Else
+					If Not ShellExecute($sUpdater, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
+				EndIf
 				Exit
 			Else
 				; If the user does not want to install the main update, let's not bother him with more 'update found' messages
@@ -4548,7 +4552,10 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 		If CheckUpdateHelpers($aReturn) Then
 			$found = True
 			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
-				If Not CanAccess($bindir) Then Exit ShellExecute($sUpdater, "/helper")
+				If Not CanAccess($bindir) Then
+					If Not ShellExecute($sUpdater, "/helper") Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
+					Exit
+				EndIf
 				If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
 			EndIf
 		EndIf
@@ -4726,6 +4733,7 @@ Func _UpdateGetSize($sPath)
 	Return $iSize
 EndFunc
 
+; Compare file size and hash with the server value
 Func _UpdateFileCompare($sPath, $a)
 	Local $iSize = _UpdateGetSize($sPath)
 
