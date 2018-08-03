@@ -41,8 +41,8 @@ Feel free to submit bug reports or feature requests using the issues tab or the 
 1. Download and install [AutoIt](https://www.autoitscript.com/site/autoit/downloads/)
 2. Download and install [SciTE](https://www.autoitscript.com/site/autoit-script-editor/downloads/) (Optional)
 3. Clone this repository **or** download a snapshot and unpack into a folder of your likings
-4. ~Download the latest release version and unpack into the same directory to install additional program files not included in the source distribution. Do not overwrite files.~ Beginning with RC 1, this has been simplified: just run the updater after building. All neccessary files are downloaded automatically.
-5. Open UniExtract.au3 in SciTE and hit `F5` to run in debug mode; `F7` to build an executable file **or** run UniExtract.au3 through Aut2Exe
+4. Open UniExtract.au3 in SciTE and hit `F5` to run in debug mode; `F7` to build an executable file **or** run UniExtract.au3 through Aut2Exe (look [here](https://github.com/Bioruebe/UniExtract2/issues/72#issuecomment-313288728) for more information about Aut2Exe)
+5. ~Download the latest release version and unpack into the same directory to install additional program files not included in the source distribution. Do not overwrite files.~ Beginning with RC 1, this has been simplified: just run the updater after building. All neccessary files are downloaded automatically. Make sure to not overwrite UniExtract.exe: if the update message says an update for Universal Extractor is available select no, then answer with yes when being notified about 'Universal Extractor program files'.
 
 
 ## License
