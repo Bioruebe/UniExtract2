@@ -62,7 +62,7 @@ Func _GetFFMPEG()
 	Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
 	Const $sOSArchDir = @ScriptDir & "\bin\" & (@OSArch = 'X64'? 'x64\': 'x86\')
 	Const $sOSArch = @OSArch = 'X64'? '64': '32'
-	Const $sDocsDir = @ScriptDir & "\docs\FFmpeg\"
+	Const $sLicenseFile = @ScriptDir & "\docs\FFmpeg_license.html"
 	Const $7z = '""' & $sOSArchDir & '7z.exe"'
 
 	$FFmpegURL = _INetGetSource($sGetLinkURL & "ffmpeg" & (StringInStr(@OSVersion, "WIN_XP")? "xp": "") & $sOSArch & "&r=0")
@@ -75,12 +75,12 @@ Func _GetFFMPEG()
 	If $ret <> 0 Then Exit MsgBox(48, $sUpdaterTitle, "Failed to extract update package " & $return & "." & @CRLF & @CRLF & "Make sure Universal Extractor is up to date and try again, or unpack the file manually to " & $sOSArchDir)
 
 	; Download license information
-	If Not FileExists($sDocsDir & "FFmpeg_license.html") Then _Download("https://ffmpeg.org/legal.html", $sDocsDir, False)
+	If Not FileExists($sLicenseFile) Then _Download("https://ffmpeg.org/legal.html", $sLicenseFile, False, True)
 
 	Run($sUniExtract)
 EndFunc
 
-Func _Download($sURL, $sDir = @ScriptDir, $bCreateBackup = True)
+Func _Download($sURL, $sDir = @ScriptDir, $bCreateBackup = True, $bIsFilePath = False)
 	; Create GUI with progressbar
 	Local $hGUI = GUICreate("Downloading", 466, 109, -1, -1, $WS_POPUPWINDOW, -1)
 	GUICtrlCreateLabel($sURL, 8, 16, 446, 17, $SS_CENTER)
@@ -93,7 +93,7 @@ Func _Download($sURL, $sDir = @ScriptDir, $bCreateBackup = True)
 	Local $idSize = GUICtrlCreateLabel($iBytesReceived & "/" & $iBytesTotal & " kb", 8, 76, 446, 17, $SS_CENTER)
 
 	; Download File
-	Local $sFile = $sDir & "\" & StringTrimLeft($sURL, StringInStr($sURL, "/", 0, -1))
+	Local $sFile = $bIsFilePath? $sDir: $sDir & "\" & StringTrimLeft($sURL, StringInStr($sURL, "/", 0, -1))
 	Local $sBackupFile = $sFile & ".bak"
 
 	If $bCreateBackup And FileExists($sFile) Then FileMove($sFile, $sBackupFile)
