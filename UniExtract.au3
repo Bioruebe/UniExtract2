@@ -7,6 +7,7 @@
 #AutoIt3Wrapper_Res_LegalCopyright=GNU General Public License v2
 #AutoIt3Wrapper_Res_Field=Author|Jared Breland <jbreland@legroom.net>
 #AutoIt3Wrapper_Res_Field=Homepage|http://www.legroom.net/software
+#AutoIt3Wrapper_Res_Field = Timestamp|%date%
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
 #AutoIt3Wrapper_Run_Au3Stripper=y
@@ -75,6 +76,7 @@ Const $defdir = @ScriptDir & "\def\"
 Const $sUpdater = @ScriptDir & '\UniExtractUpdater.exe'
 Const $sUpdaterNoAdmin = @ScriptDir & '\UniExtractUpdater_NoAdmin.exe'
 Const $sEnglishLangFile = @ScriptDir & '\English.ini'
+Const $sUniExtract = @Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, "au3", "exe")
 Const $sRegExAscii = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k ' ; Keep command prompt open for debugging
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
@@ -97,7 +99,7 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_IS3ARC = "is3arc", $TYPE_ISCAB = "iscab", _
 	  $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", _
 	  $TYPE_MOLE = "mole", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", _
-	  $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS3 = "rgss3", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
+	  $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
 	  $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIT = "sit", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
 	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
 	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
@@ -154,7 +156,7 @@ Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isof
 Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed, $exefailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
-Dim $FS_GUI = False, $idTrayStatusExt, $BatchBut
+Dim $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $gaDropFiles[1], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
 
@@ -204,6 +206,7 @@ Const $peid = Quote($bindir & "peid.exe")											;0.95   2012/04/24
 Const $quickbms = Quote($bindir & "quickbms.exe", True)								;0.6.4
 Const $rai = "RAIU.EXE" 															;0.1a
 Const $rar = "unrar.exe" 															;5.50
+Const $rgss = "RgssDecrypter.exe"													;1.0.0.1
 Const $rpa = "unrpa.exe"															;1.5.2
 Const $sfark = "sfarkxtc.exe"														;3.0
 Const $sit = Quote($bindir & "Expander.exe")										;6.0
@@ -255,7 +258,6 @@ Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)	;x64
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
 Const $mpq = "mpq.wcx" & $reg64
-Const $rgss3 = Quote($bindir & "RPGDecrypter.exe")
 Const $sim = "sim_unpacker.exe"
 Const $thinstall = Quote($bindir & "Extractor.exe", True)
 Const $unreal = "umodel.exe"
@@ -1106,14 +1108,11 @@ Func tridcompare($filetype_curr)
 		Case StringInStr($filetype_curr, "RAR Archive")
 			extract($TYPE_RAR, 'RAR ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($filetype_curr, "RPG Maker VX Ace")
-			extract($TYPE_RGSS3, "RPG Maker VX Ace " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+		Case StringInStr($filetype_curr, "RPG Maker") And Not StringInStr($filetype_curr, "MV encrypted")
+			extract($TYPE_RGSS, "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "NScripter archive, version 1")
 			extract($TYPE_ARC_CONV, "NScripter " & t('TERM_ARCHIVE'))
-
-		Case StringInStr($filetype_curr, "RPG Maker")
-			extract($TYPE_ARC_CONV, "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($filetype_curr, "Smile Game Builder")
 			extract($TYPE_SGB, "Smile Game Builder " & t('TERM_GAME') & t('TERM_ARCHIVE'))
@@ -2647,20 +2646,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If @error = 3 Then terminate($STATUS_MISSINGPART)
 			If @extended Then terminate($STATUS_PASSWORD, $file, $arcdisp)
 
-		Case $TYPE_RGSS3
-			HasPlugin($rgss3)
-			Run($rgss3, $outdir, @SW_HIDE)
-			Local $handle = WinWait("RPGMaker Decrypter", "", $Timeout)
-			If $handle = 0 Then terminate($STATUS_TIMEOUT, $file, $arcdisp)
-			ControlSetText($handle, "", "Edit1", $file)
-			ControlSetText($handle, "", "Edit2", $outdir)
-			ControlClick($handle, "", "Button4")
-			Local $handle2 = WinWait("[CLASS:#32770]", "Extraction completed")
-			WinClose($handle2)
-			WinClose($handle)
-			Local $return = _FileRead($outdir & "\extract.log", True)
-			If @error Then terminate($STATUS_FAILED, $file, $arcdisp)
-			$success = $RESULT_SUCCESS
+		Case $TYPE_RGSS
+			HasNetFramework(2)
+			_Run($rgss & ' -p -o="' & $outdir & '" "' & $file & '"', $outdir, @SW_HIDE)
 
 		Case $TYPE_ROBO
 			RunWait(Warn_Execute($file & ' /unpack="' & $outdir & '"'), $filedir)
@@ -4528,7 +4516,6 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 
 	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
 	If $iMode <> $UPDATE_HELPER Then
-		$sUniExtract = @Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, "au3", "exe")
 		If ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2] Then
 			Cout("Update available")
 			$found = True
@@ -4550,6 +4537,9 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 	; Other files - we can overwrite the files without a seperate updater
 	If $iMode <> $UPDATE_MAIN Then
 		If CheckUpdateHelpers($aReturn) Then
+			_ProgressSet(100)
+			Sleep(200)
+			_ProgressOff()
 			$found = True
 			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
 				If Not CanAccess($bindir) Then
@@ -4574,11 +4564,13 @@ EndFunc
 
 ; Compare program files with server index to find if any file has an updated version available
 Func CheckUpdateHelpers($aFiles)
+	_ProgressOn(t('UPDATE_STATUS_SEARCHING'), $guimain)
 	Local $i = 1, $iSize = UBound($aFiles)
 
 	While $i < $iSize
 		$a = $aFiles[$i]
 		$i += 1
+		_ProgressSet(($i / _Max($iSize, 200)) * 100)
 		$sPath = @ScriptDir & "\" & $a[0]
 		If $sPath == @ScriptFullPath Then ContinueLoop
 
@@ -4598,6 +4590,7 @@ Func CheckUpdateHelpers($aFiles)
 		$iSize = UBound($aFiles)
 	WEnd
 
+	_ProgressOff()
 	Return False
 EndFunc
 
@@ -4759,6 +4752,25 @@ Func _UpdateCheckFailed()
 	Return False
 EndFunc
 
+; Custom styled ProgressOn replacement
+Func _ProgressOn($sText, $hParent)
+	$hProgress = GUICreate($title, 270, 54, -1, -1, $WS_POPUPWINDOW, -1, $hParent)
+	$idProgress = GUICtrlCreateProgress(4, 6, 259, 25)
+	GUICtrlCreateLabel($sText, 6, 36, 261, 17, $SS_CENTER)
+	_GuiSetColor()
+	GUISetState(@SW_SHOW)
+EndFunc
+
+; ProgressSet replacement
+Func _ProgressSet($iPercent)
+	GUICtrlSetData($idProgress, $iPercent)
+EndFunc
+
+; ProgressOff replacement
+Func _ProgressOff()
+	GUIDelete($hProgress)
+EndFunc
+
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
 	; Remove unused files
@@ -4773,6 +4785,7 @@ Func _AfterUpdate()
 	FileDelete($bindir & "x86\7z.exe.new")
 	FileDelete($bindir & "x64\7z.dll.new")
 	FileDelete($bindir & "x64\7z.exe.new")
+	FileDelete($bindir & "RPGDecrypter.exe")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
@@ -5969,7 +5982,7 @@ Func GUI_FirstStart()
 	GUICtrlSetFont(-1, 14, 800, 0, "MS Sans Serif")
 	Global $FS_Section = GUICtrlCreateLabel("", 16, 85, 382, 28)
 	GUICtrlSetFont(-1, 14, 800, 4, "MS Sans Serif")
-	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 125)
+	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 170)
 	Global $FS_Next = GUICtrlCreateButton(t('NEXT_BUT'), 296, 344, 89, 25)
 	Local $FS_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 400, 344, 89, 25)
 	Global $FS_Prev = GUICtrlCreateButton(t('PREV_BUT'), 192, 344, 89, 25)
@@ -5992,8 +6005,7 @@ Func GUI_FirstStart()
 		EndIf
 		Exit 0
 	EndIf
-	Global $FS_Texts[UBound($FS_Sections)] = ["", t('FIRSTSTART_PAGE1'), t('FIRSTSTART_PAGE2'), _
-		t('FIRSTSTART_PAGE3'), t('FIRSTSTART_PAGE4'), t('FIRSTSTART_PAGE5', $bindir), t('FIRSTSTART_PAGE6')]
+	Global $FS_Texts[UBound($FS_Sections)] = ["", t('FIRSTSTART_PAGE1'), t('FIRSTSTART_PAGE2'), t('FIRSTSTART_PAGE3'), t('FIRSTSTART_PAGE4')]
 
 	GUISetState(@SW_SHOW)
 	GUI_FirstStart_ShowPage()
@@ -6032,6 +6044,7 @@ Func GUI_FirstStart_ShowPage()
 	Cout("First start assistant - step " & $page)
 	Switch $page
 		Case 2
+			GUICtrlSetPos($FS_Text, 16, 120, 468, 125)
 			GUICtrlSetState($FS_Button, $GUI_SHOW)
 			GUICtrlSetData($FS_Button, t('PREFS_TITLE_LABEL'))
 			GUICtrlSetOnEvent($FS_Button, "GUI_Prefs")
@@ -6048,9 +6061,6 @@ Func GUI_FirstStart_ShowPage()
 				GUICtrlSetData($FS_Button, t('TERM_DOWNLOAD'))
 				GUICtrlSetOnEvent($FS_Button, "GetFFmpeg")
 			EndIf
-		Case 6
-			GUICtrlSetState($FS_Button, $GUI_HIDE)
-			GUICtrlSetPos($FS_Text, 16, 120, 468, 170)
 		Case Else
 			GUICtrlSetState($FS_Button, $GUI_HIDE)
 	EndSwitch
@@ -6068,11 +6078,10 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[13][8] = [ _
-		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, rgss2a, rgssad, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
+	Local $aPluginInfo[12][8] = [ _
+		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
-		[$rgss3, 'RPGMaker Decrypter', t('PLUGIN_RPGMAKER'), 'rgss3a', 'RPGDecrypter.rar', '', '', 0], _
 		[$unreal, 'Unreal Engine Resource Viewer', t('PLUGIN_UNREAL'), 'pak, u, uax, upk', 'umodel_win32.zip', 'umodel.exe|SDL2.dll', '', 0], _
 		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', $dcp, '', '', 0], _
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'Crass*.7z', '', '', 0], _
@@ -6347,7 +6356,7 @@ Func GUI_About()
 	_GuiSetColor()
 	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, "Arial")
-	GUICtrlCreateLabel(t('ABOUT_VERSION', $sVersion), 16, 72, $width - 32, 17, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $width - 32, 17, $SS_CENTER)
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")

@@ -1,3 +1,9 @@
+RC 2:
+  Added progress bar while search for update is in progress as the new updater might need more time than the old one on some systems
+  Added build date to 'About' window
+  Changed first start assistant: removed 2 pages and changed some wording
+  Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
+
 RC 1:
   Added support for wix installers
   Added support for Spoon installers
