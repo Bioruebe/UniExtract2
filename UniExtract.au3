@@ -238,6 +238,7 @@ Const $ie = "InstExpl.wcx"
 Const $iso = "Iso.wcx"
 Const $mht_plug = "MhtUnPack.wcx"
 Const $msi_plug = "msi.wcx"
+Const $observer = "TotalObserver.wcx"
 Const $sis = "PDunSIS.wcx"
 
 ; Other
@@ -257,7 +258,6 @@ Const $dgca = "dgcac.exe"
 Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)	;x64
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
-Const $mpq = "mpq.wcx" & $reg64
 Const $sim = "sim_unpacker.exe"
 Const $thinstall = Quote($bindir & "Extractor.exe", True)
 Const $unreal = "umodel.exe"
@@ -927,8 +927,7 @@ Func filecompare($filetype_curr)
 		Case StringInStr($filetype_curr, "MS Windows HtmlHelp Data")
 			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
 		Case StringInStr($filetype_curr, "MoPaQ", 0)
-			HasPlugin($mpq)
-			extract($TYPE_QBMS, 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
+			extract($TYPE_QBMS, 'MPQ ' & t('TERM_ARCHIVE'), $observer)
 		Case (StringInStr($filetype_curr, "RIFF", 0) And Not StringInStr($filetype_curr, "WAVE audio", 0)) Or _
 			 StringInStr($filetype_curr, "MPEG v", 0) Or StringInStr($filetype_curr, "MPEG sequence") Or _
 			 StringInStr($filetype_curr, "Microsoft ASF") Or StringInStr($filetype_curr, "GIF image") Or _
@@ -1093,8 +1092,7 @@ Func tridcompare($filetype_curr)
 			extract($TYPE_MSP, 'Windows Installer (MSP) ' & t('TERM_PATCH'))
 
 		Case StringInStr($filetype_curr, "MPQ Archive - Blizzard game data")
-			HasPlugin($mpq)
-			extract($TYPE_QBMS, 'MPQ ' & t('TERM_ARCHIVE'), $mpq)
+			extract($TYPE_QBMS, 'MPQ ' & t('TERM_ARCHIVE'), $observer)
 
 		Case StringInStr($filetype_curr, "HTC NBH ROM Image")
 			extract($TYPE_NBH, 'NBH ' & t('TERM_IMAGE'))
@@ -2397,13 +2395,17 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				; Extract 3.x SFX installer using stix
 				_Run($stix & ' ' & FileGetShortName($file) & ' ' & FileGetShortName($outdir), $filedir)
 			Else
-				Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
+				Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'TotalObserver'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
 				$choice = MethodSelect($aReturn, $arcdisp)
 
 				; User-specified false positive; return for additional analysis
 				Switch $choice
-					; Extract using isxunpack
+					; Extract using TotalObserver plugin
 					Case 1
+						extract($TYPE_QBMS, $arcdisp, $observer)
+
+					; Extract using isxunpack
+					Case 2
 						FileMove($file, $outdir)
 						Run(_MakeCommand($isxunp & ' "' & $outdir & '\' & $filename & '.' & $fileext & '"', True), $outdir)
 						WinWait(@ComSpec)
@@ -2413,7 +2415,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						FileMove($outdir & '\' & $filename & '.' & $fileext, $filedir)
 
 					; Try to extract MSI using cache switch
-					Case 2
+					Case 3
 						; Run installer and wait for temp files to be copied
 						_CreateTrayMessageBox(t('INIT_WAIT'))
 						DirCreate($tempoutdir)
@@ -2467,7 +2469,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						EndIf
 
 					; Not InstallShield
-					Case 3
+					Case 4
 						$isfailed = True
 						Return False
 				EndSwitch
@@ -4715,8 +4717,8 @@ Func _UpdateGetSize($sPath)
 		$ret = DirGetSize($bindir & "crass-0.4.14.0")
 		If $ret > 0 Then $iSize -= $ret
 
-		Local $aReturn[] = ["x86\ffmpeg.exe", "x64\ffmpeg.exe", "arc_conv.exe", "Extractor.exe", "iscab.exe", "ISTools.dll", "RPGDecrypter.exe", _
-							"umodel.exe", "SDL2.dll", "dcp_unpacker.exe", "mpq.wcx", "mpq.wcx64", "ci-extractor.exe", "gea.dll", "gentee.dll", _
+		Local $aReturn[] = ["x86\ffmpeg.exe", "x64\ffmpeg.exe", "arc_conv.exe", "Extractor.exe", "iscab.exe", "ISTools.dll", _
+							"umodel.exe", "SDL2.dll", "dcp_unpacker.exe", "ci-extractor.exe", "gea.dll", "gentee.dll", _
 							"dgcac.exe", "bootimg.exe", "I5comp.exe", "ZD50149.DLL", "ZD51145.DLL", "sim_unpacker.exe"]
 
 		For $i In $aReturn
@@ -4786,6 +4788,8 @@ Func _AfterUpdate()
 	FileDelete($bindir & "x64\7z.dll.new")
 	FileDelete($bindir & "x64\7z.exe.new")
 	FileDelete($bindir & "RPGDecrypter.exe")
+	FileDelete($bindir & "mpq.wcx")
+	FileDelete($bindir & "mpq.wcx64")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
@@ -6078,14 +6082,13 @@ EndFunc   ;==>GUI_FirstStart_Exit
 Func GUI_Plugins()
 	; Define plugins
 	; executable|name|description|filetypes|url|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[12][8] = [ _
+	Local $aPluginInfo[11][8] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
 		[$unreal, 'Unreal Engine Resource Viewer', t('PLUGIN_UNREAL'), 'pak, u, uax, upk', 'umodel_win32.zip', 'umodel.exe|SDL2.dll', '', 0], _
 		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', $dcp, '', '', 0], _
 		[$crage, 'Crass/Crage', t('PLUGIN_CRAGE'), 'exe (Livemaker)', 'Crass*.7z', '', '', 0], _
-		[$mpq, 'MPQ Plugin', t('PLUGIN_MPQ'), 'mpq', 'wcx_mpq.zip', 'mpq.wcx|mpq.wcx64', '', 0], _
 		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', 0], _
 		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'dgca_v*.zip', 'dgcac.exe', '', 0], _
 		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _

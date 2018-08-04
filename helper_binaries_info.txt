@@ -128,11 +128,13 @@ Total Commander plugins:
    InstallExplorer plugin					InstExpl.wcx				0.9.2					Freeware				Domo								http://www.totalcmd.net/plugring/InstallExplorer.html			
 											InstExpl.dll				-------		---------	-------					-------								-------															
 											\Unp directory				-------		---------	-------					-------								-------															
-   Iso plugin								iso_x86.wcx					1.7.7					Open Source				Domo								http://www.totalcmd.net/plugring/iso64.html						
-											iso_x64.wcx					-------		---------	-------					-------								-------															
+   Iso plugin								iso.wcx						1.7.7					Freeware				Domo								http://www.totalcmd.net/plugring/iso64.html						
    MhtUnPack plugin							MhtUnPack.wcx				1.1.1			-		Freeware				Alexander Afonin					http://www.totalcmd.net/plugring/MhtUnPack.html					
    MSI plugin								msi.wcx						1.2						Freeware				Alex Gretha							http://www.totalcmd.net/plugring/msi.html						
    PDunSIS plugin							PDunSIS.wcx					1.0						Freeware				Patrik Daranský						http://ghisler.fileburst.com/plugins/pdunsis.zip				
+   TotalObserver							TotalObserver.wcx			1.2.0 mod	-	-	-	Freeware				Egor Vlaznev						http://totalcmd.net/plugring/totalobserver.html
+											observer.ini				-------		---------	-------					-------								-------
+											\modules directory			-------		---------	-------					-------								-------
 
 Notes
 ----------------------------

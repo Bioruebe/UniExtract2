@@ -1,8 +1,10 @@
 RC 2:
+  Added TotalObserver as additional extractor choice for InstallShield
   Added progress bar while search for update is in progress as the new updater might need more time than the old one on some systems
   Added build date to 'About' window
   Changed first start assistant: removed 2 pages and changed some wording
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
+  Removed mpq plugin, replaced with built-in TotalObserver
 
 RC 1:
   Added support for wix installers
@@ -39,7 +41,7 @@ RC 1:
   Fixed endless detection loop occuring for some .exe files
   Fixed missing minimize controls
   Fixed status box for .swf extraction
-  Fixed extraction being detected as failed if the putput directory is a drive, not a folder
+  Fixed extraction being detected as failed if the output directory is a drive, not a folder
   Fixed FFMPEG download/installation problems
   Fixed progress display performance in status box and pattern detection
   Fixed certain files being ignored by cleanup function
@@ -81,6 +83,8 @@ RC 1:
   Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Greek translation, thanks to gvp9000
   Updated Russian translation, thanks to @wvxwxvw
+  Updated Ukrainian translation, thanks to @YuriPet
+  Updated Finnish translation, thanks to @jyrkive
 
 Beta 4b:
   Beta 4b is a bugfix update adressing failing msi extractions
