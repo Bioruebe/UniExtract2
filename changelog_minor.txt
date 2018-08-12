@@ -1,7 +1,8 @@
 RC 2:
   Added TotalObserver as additional extractor choice for InstallShield
   Added progress bar while search for update is in progress as the new updater might need more time than the old one on some systems
-  Added build date to 'About' window
+  Added build date to 'About' window and feedback data
+  Added nightly update channel
   Changed first start assistant: removed 2 pages and changed some wording
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
   Removed mpq plugin, replaced with built-in TotalObserver

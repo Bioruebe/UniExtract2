@@ -64,7 +64,8 @@ Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
 Const $website2 = "https://bioruebe.com/dev/uniextract"
 Const $websiteGithub = "https://github.com/Bioruebe/UniExtract2"
-Const $sUpdateURL = "https://update.bioruebe.com/uniextract/data/"
+Const $sDefaultUpdateURL = "https://update.bioruebe.com/uniextract/data/"
+Const $sNightlyUpdateURL = "https://update.bioruebe.com/uniextract/nightly/"
 Const $sLegacyUpdateURL = "https://update.bioruebe.com/uniextract/update2.php"
 Const $sGetLinkURL = "https://update.bioruebe.com/uniextract/geturl.php?q="
 Const $sSupportURL = "https://support.bioruebe.com/uniextract/upload.php"
@@ -150,7 +151,7 @@ Global $trayX = -1, $trayY = -1
 
 ; Global variables
 Dim $file, $filename, $filenamefull, $filedir, $fileext, $initoutdir, $outdir, $filetype = "", $initdirsize
-Dim $prompt, $return, $Output, $hMutex
+Dim $prompt, $return, $Output, $hMutex, $sUpdateURL = $sDefaultUpdateURL
 Dim $About, $Type, $win7, $silent, $iUnicodeMode = False, $reg64 = ""
 Dim $debug = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $exStyle = -1, $sArcTypeOverride = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
@@ -689,6 +690,9 @@ Func ReadPrefs()
 	If $updateinterval < 1 Then $updateinterval = 1
 	LoadPref("lastupdate", $lastupdate, False)
 	LoadPref("ID", $ID, False)
+	Local $bNightlyUpdates = 0
+	LoadPref("nightlyupdates", $bNightlyUpdates)
+	If $bNightlyUpdates == 1 Then $sUpdateURL = $sNightlyUpdateURL
 
 	If Not HasTranslation($language) Then
 		$language = _WinAPI_GetLocaleInfo(_WinAPI_GetSystemDefaultUILanguage(), $LOCALE_SENGLANGUAGE)
@@ -5585,7 +5589,7 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	If $guimain Then GUISetState(@SW_HIDE, $guimain)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
 
-	$FB_Text = $name & " Feedback v" & $sVersion & @CRLF & _
+	$FB_Text = $name & " Feedback v" & $sVersion & "(" & FileGetVersion($sUniExtract, "Timestamp") & ")" & @CRLF & _
 			"----------------------------------------------------------------------------------------------------" _
 			 & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample File: " & $FB_File _
 			 & @CRLF & "Type: " & $filetype & @CRLF & @CRLF & "Message: " & $FB_Message & @CRLF & @CRLF & "Output:" _
