@@ -15,8 +15,8 @@ Name										Files						Version		Features	License					Author								Website
 ARC - Archive utility						arc.exe						5.21i		-	x	-	GNU GPL v2				Howard Chu							http://gnuwin32.sourceforge.net/packages/arc.htm				
 Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Roper						https://github.com/minirop/arc-reader/downloads
 											libpng12.dll				-------		---------	-------					-------								-------
-											zlib1.dll					-------		---------	-------					-------								-------
-ARJ32										arj.exe						3.10		!	x	!	GNU GPL v2				Andrew Belov							http://arj.sourceforge.net/										
+											zlib1.dll					1.2.8		---------	zlib license			Jean-loup Gailly, Mark Adler		http://zlib.net/
+ARJ32										arj.exe						3.10		!	x	!	GNU GPL v2				Andrew Belov						http://arj.sourceforge.net/										
 AspackDie									AspackDie.exe				1.41					Open Source				yoda								http://scifi.pages.at/yoda9k/									
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
 BCM											x86\bcm.exe					1.00		-	-	-	Public Domain			Ilya Muravyov						http://sourceforge.net/projects/bcm/
