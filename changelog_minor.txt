@@ -3,9 +3,22 @@ RC 2:
   Added progress bar while search for update is in progress as the new updater might need more time than the old one on some systems
   Added build date to 'About' window and feedback data
   Added nightly update channel
+  Added support for InstallScript installers
+  Fixed first-start assistant not being displayed when running from command line
+  Fixed language setting being reset if language file does not exist
   Changed first start assistant: removed 2 pages and changed some wording
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
   Removed mpq plugin, replaced with built-in TotalObserver
+  Updated EnigmaVB unpacker to 0.51
+  Updated demoleition to 0.60
+  Updated Chinese (Simplified) translation, thanks to deluxghost
+  Updated Chinese (Traditional) translation, thanks to jfcherng
+  Updated Croatian translaton, thanks to Alen Bajo
+  Updated Finnish translation, thanks to jyrkive
+  Updated Korean translation, thanks to 까꿍
+  Updated Polish translaton, thanks to Barnaba and dmocha
+  Updated Russian translation, thanks to wvxwxvw
+  Updated Ukrainian translation, thanks to YuriPet
 
 RC 1:
   Added support for wix installers

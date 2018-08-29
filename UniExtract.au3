@@ -98,14 +98,14 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ETHORNELL = "ethornell", _
 	  $TYPE_ENIGMA = "enigma", $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GCF = "gcf", $TYPE_GHOST = "ghost", _
 	  $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_IS3ARC = "is3arc", $TYPE_ISCAB = "iscab", _
-	  $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", _
-	  $TYPE_MOLE = "mole", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", _
-	  $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
-	  $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIT = "sit", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
-	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
-	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
-	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
-	  $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
+	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", _
+	  $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", _
+	  $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIT = "sit", $TYPE_SQLITE = "sqlite", _
+	  $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", _
+	  $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", _
+	  $TYPE_VIDEO_CONVERT = "video_convert", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", _
+	  $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 
 
 Opt("GUIOnEventMode", 1)
@@ -280,6 +280,13 @@ Global $CM_Shells[5][3] = [ _
 	['uniextract_scan', ' /scan', 'SCAN_FILE'] _
 ]
 
+; Make sure a language file exists
+If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
+	If MsgBox(48+4, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") == 6 Then _
+		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
+	terminate($STATUS_SILENT)
+EndIf
+
 ReadPrefs()
 
 Cout("Starting " & $name & " " & $sVersion)
@@ -297,28 +304,21 @@ TrayItemSetOnEvent($Tray_Exit, "Tray_Exit")
 TraySetToolTip($name)
 TraySetClick(8)
 
+; Check if Universal Extractor is started the first time
+If $ID = "" Or StringIsSpace($ID) Then
+	$ID = StringRight(String(_Crypt_EncryptData(Random(10000, 1000000), @ComputerName & Random(10000, 1000000), $CALG_AES_256)), 25)
+	Cout("Created User ID: " & $ID)
+	SavePref("ID", $ID)
+	GUI_FirstStart()
+	While $FS_GUI
+		Sleep(250)
+	WEnd
+EndIf
+
 ; If no file passed, display GUI to select file and set options
 If $prompt Then
-	; Make sure a language file exists
-	If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
-		If MsgBox(48+4, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") == 6 Then _
-			CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
-		terminate($STATUS_SILENT)
-	EndIf
-
-	; Check if Universal Extractor is started the first time
-	If $ID = "" Or StringIsSpace($ID) Then
-		$ID = StringRight(String(_Crypt_EncryptData(Random(10000, 1000000), @ComputerName & Random(10000, 1000000), $CALG_AES_256)), 25)
-		Cout("Created User ID: " & $ID)
-		SavePref("ID", $ID)
-		GUI_FirstStart()
-		While $FS_GUI
-			Sleep(250)
-		WEnd
-	EndIf
-
-	CheckUpdate(True, True)
 	CreateGUI()
+	CheckUpdate($UPDATEMSG_FOUND_ONLY, True, $UPDATE_ALL, False)
 
 	While 1
 		If Not $guimain Then ExitLoop
@@ -1483,6 +1483,9 @@ Func advexescan()
 		Case StringInStr($filetype_curr, "InstallAware")
 			extract($TYPE_7Z, 'InstallAware ' & t('TERM_INSTALLER') & ' ' & t('TERM_PACKAGE'))
 
+		Case StringInStr($filetype_curr, "InstallScript Setup Launcher")
+			extract($TYPE_ISCRIPT, 'InstallScript ' & t('TERM_INSTALLER'))
+
 		Case StringInStr($filetype_curr, "InstallShield")
 			If Not $isfailed Then extract($TYPE_ISEXE, 'InstallShield ' & t('TERM_INSTALLER'))
 
@@ -1571,7 +1574,7 @@ Func advexescan()
 			  StringInStr($filetype_curr, "ELF executable") Or StringInStr($filetype_curr, "Microsoft Visual C# / Basic.NET") Or _
 			  StringInStr($filetype_curr, "Autoit") Or StringInStr($filetype_curr, "LE <- Linear Executable") Or _
 			  StringInStr($filetype_curr, "NOT EXE - Empty file") Or StringInStr($filetype_curr, "Native - System driver") Or _
-			  StringInStr($filetype_curr, "Denuvo protector")
+			  StringInStr($filetype_curr, "Denuvo protector") Or StringInStr($filetype_curr, "Kaspersky AV Pack")
 			terminate($STATUS_NOTPACKED, $file, "")
 
 		; Needs to be at the end, otherwise files might not be recognized
@@ -2393,6 +2396,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					FileDelete($outdir & "\files.ini")
 			EndSwitch
 
+		Case $TYPE_ISCRIPT
+			If Not extract($TYPE_QBMS, $arcdisp, $observer, False, True) Then
+				Warn_Execute($file & ' /extract_all:"' & $outdir & '"')
+				ShellExecuteWait($file, ' /extract_all:"' & $outdir & '"', $outdir, "open", @SW_MINIMIZE)
+			EndIf
+
 		Case $TYPE_ISEXE
 			exescan($file, 'ext', 0)
 			If StringInStr($filetype, "3.x", 0) Then
@@ -3053,7 +3062,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($wix & ' -x "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False)
 
 		Case $TYPE_ZIP
-			If Not extract($TYPE_7Z, -1, $additionalParameters, True, True) Then _Run($zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, True, False)
+			If Not extract($TYPE_7Z, -1, $additionalParameters, True, True) Then
+				If $arcdisp > -1 Then _CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
+				_Run($zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, True, False)
+			EndIf
 
 		Case $TYPE_ZOO
 			FileMove($file, $tempoutdir, 8)
@@ -4500,11 +4512,12 @@ EndFunc
 
 ; Check for new version
 ; $silent is used for automatic update check, supressing any error and 'no update found' messages
-Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = $UPDATE_ALL)
+Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = $UPDATE_ALL, $bShowProgress = True)
 	If @NumParams > 1 And $bCheckInterval And _DateDiff("D", $lastupdate, _NowCalc()) < $updateinterval Then Return
 	If @NumParams < 1 Then
 		$silent = $UPDATEMSG_PROMPT
 		$iMode = $UPDATE_ALL
+		$bShowProgress = True
 	EndIf
 	$ret2 = $silentmode
 	If $silent == $UPDATEMSG_SILENT Then $silentmode = 1
@@ -4542,10 +4555,12 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 
 	; Other files - we can overwrite the files without a seperate updater
 	If $iMode <> $UPDATE_MAIN Then
-		If CheckUpdateHelpers($aReturn) Then
-			_ProgressSet(100)
-			Sleep(200)
-			_ProgressOff()
+		If CheckUpdateHelpers($aReturn, $bShowProgress) Then
+			If $bShowProgress Then
+				_ProgressSet(100)
+				Sleep(200)
+				_ProgressOff()
+			EndIf
 			$found = True
 			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
 				If Not CanAccess($bindir) Then
@@ -4569,14 +4584,14 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 EndFunc
 
 ; Compare program files with server index to find if any file has an updated version available
-Func CheckUpdateHelpers($aFiles)
-	_ProgressOn(t('UPDATE_STATUS_SEARCHING'), $guimain)
+Func CheckUpdateHelpers($aFiles, $bShowProgress = True)
+	If $bShowProgress Then _ProgressOn(t('UPDATE_STATUS_SEARCHING'), $guimain)
 	Local $i = 1, $iSize = UBound($aFiles)
 
 	While $i < $iSize
 		$a = $aFiles[$i]
 		$i += 1
-		_ProgressSet(($i / _Max($iSize, 200)) * 100)
+		If $bShowProgress Then _ProgressSet(($i / _Max($iSize, 200)) * 100)
 		$sPath = @ScriptDir & "\" & $a[0]
 		If $sPath == @ScriptFullPath Then ContinueLoop
 
@@ -4596,7 +4611,7 @@ Func CheckUpdateHelpers($aFiles)
 		$iSize = UBound($aFiles)
 	WEnd
 
-	_ProgressOff()
+	If $bShowProgress Then _ProgressOff()
 	Return False
 EndFunc
 
@@ -4794,6 +4809,7 @@ Func _AfterUpdate()
 	FileDelete($bindir & "RPGDecrypter.exe")
 	FileDelete($bindir & "mpq.wcx")
 	FileDelete($bindir & "mpq.wcx64")
+	FileDelete(@ScriptDir & "\todo.txt")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)

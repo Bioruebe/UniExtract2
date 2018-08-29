@@ -23,11 +23,11 @@ BCM											x86\bcm.exe					1.00		-	-	-	Public Domain			Ilya Muravyov						htt
 											x64\bcm.exe					-------		---------	-------					-------								-------
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
-demoleition									demoleition.exe				0.55		x	-	-	Freeware				kao									https://lifeinhex.com/category/tools/
+demoleition									demoleition.exe				0.60		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
 											disunity.bat				-------		---------	-------					-------								-------
 											\lib directory				-------		---------	-------					-------								-------
-Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.44		x	-	-	Freeware				kao									https://lifeinhex.com/category/tools/
+Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.51		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
 Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.0		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
@@ -158,5 +158,6 @@ x						means yes, without exeptions
 o						means partly
 -						means no
 !						means planned in future releases
+*						means used with permission
 
 Thanks to all developers for their great tools!

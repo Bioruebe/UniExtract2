@@ -87,6 +87,7 @@
   Added support for wix installers
   Added support for Spoon installers
   Added support for InstallAware installers
+  Added support for InstallScript installers
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for audio decompression to wav using FFmpeg
@@ -94,8 +95,8 @@
 		--> binaries have to be downloaded on first use due to the license and to keep the filesize of Universal Extractor small
   Added support for InstallShield archives using iscab (plugin)
 		--> files not included as it is commercial software			
-  Added jsMSI Unpacker for better .msi extraction (former unsupported files)
-  Added unshield as an alternative extraction method for InstallShield archives (also creates log of registry changes during installation as .txt file)
+  Added jsMSI Unpacker and lessmsi for better .msi extraction (former unsupported files)
+  Added unshield and TotalObserver as alternative extraction methods for InstallShield archives (also creates log of registry changes during installation as .txt file)
   Added 7z sfx script extraction using 7ZSplit
   Added support for password list for .rar, .zip and .7z archives
   Added new command line parameters (/help for complete list)
@@ -166,14 +167,14 @@
   Replaced booz with unzoo (adds support for 64 bit systems, longer filenames, logging)
   Replaced cmdTotal with QuickBMS
   Replaced tee with mtee/wintee (adds support for unicode and longer filenames, smaller)
-  Updated translations for English, German, French, Finnish, Portuguese (Portugal), Portuguese (Brazilian), Russian, Japanese (partly), Chinese (Simplified), Swedish, Bulgarian, Ukrainian, Chinese (Traditional), Greek
+  Updated translations: Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, English, Finnish, French, German, Greek, Japanese, Korean, Polish, Portuguese (Brazilian), Portuguese (Portugal), Russian, Swedish, Ukrainian 
   Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
   Updated 7zip to 18.01
   Updated innounp to 0.45
   Updated KGB archiver to 2 beta 2
   Updated lzop to 1.03
-  Updated PEiD to 0.95; Database files to 2012/04/24
-  Updated TrID to 2.10; Definitions to 2018
+  Updated PEiD to 0.95, database files to 2012/04/24
+  Updated TrID to 2.10, definitions to 2018
   Updated unrar to 5.31 Beta 1
   Updated upx to 3.91
   Updated many other extractors to the newest version

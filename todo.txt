@@ -39,7 +39,6 @@ Logging: quickbms (+ 'you must choose a new filename' user input needed detectio
 
 
 // Short term
-Test normal Run function for paths with spaces
 Change timeout var to seconds for WinWait
 
 
