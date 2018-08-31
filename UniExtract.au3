@@ -4532,21 +4532,20 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 	Local $return = 0, $found = False
 	Cout("Checking for update")
 
-	; Save date of last check for update
-	$lastupdate = @YEAR & "/" & @MON & "/" & @MDAY
-	SavePref('lastupdate', $lastupdate)
-
 	; Get index
 	$aReturn = _UpdateGetIndex()
 	If Not IsArray($aReturn) Then Return Cout("Failed to get update file listing")
+
+	; Save date of last check for update
+	$lastupdate = @YEAR & "/" & @MON & "/" & @MDAY
+	SavePref('lastupdate', $lastupdate)
 
 	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
 	If $iMode <> $UPDATE_HELPER Then
 		If ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2] Then
 			Cout("Update available")
 			$found = True
-			; $Because FFMPEG uses the same update message, we cannot use the %name constant here
-			If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray($name, $sVersion, $return, $aReturn[0] > 2? $aReturn[2]: ""), 0) Then
+			If GUI_UpdatePrompt() Then
 				If CanAccess(@ScriptDir) Then
 					If Not ShellExecute($sUpdaterNoAdmin, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
 				Else
@@ -4690,19 +4689,24 @@ EndFunc
 ; Search for FFmpeg updates
 Func _UpdateFFmpeg()
 	If Not HasPlugin($ffmpeg, True) Then Return False
+	_ProgressOn(t('UPDATE_STATUS_SEARCHING'), $guimain)
 
 	; Determine FFmpeg version
 	Local $return = FetchStdout($ffmpeg, @ScriptDir, @SW_HIDE, 0, False)
+	_ProgressSet(50)
 	Local $aReturn = _StringBetween($return, "ffmpeg version ", " Copyright")
 	Local $sVersion = @error? 0: $aReturn[0] ; In case ffmpeg exists but crashes, redownload it
 
 	$return = _INetGetSource(_IsWinXP()? $sLegacyUpdateURL & "?get=ffversion&xp": $sUpdateURL & "ffmpeg")
 	Cout("FFmpeg: " & $sVersion & " <--> " & $return)
+	_ProgressSet(100)
+	Sleep(300)
+	_ProgressOff()
 
 	; Download new
 	If $return > $sVersion Then
 		Cout("Found an update for FFmpeg")
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $sVersion, $return, ""), 0) Then Return GetFFmpeg()
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $sVersion, $return), 0) Then Return GetFFmpeg()
 	EndIf
 
 	Return False
@@ -5063,11 +5067,25 @@ Func _GuiRoundCorners($h_win, $i_x1, $i_y1, $i_x3, $i_y3)
 	EndIf
 EndFunc   ;==>_GuiRoundCorners
 
+; Load an image into a picture GUI control, used for PNG support
+Func _GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
+	If Not _GDIPlus_Startup() Then Return
+	$hImage = _GDIPlus_ImageLoadFromFile($sPath)
+	$hResized = _GDIPlus_ImageResize($hImage, $iWidth, $iHeight)
+	$hBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hResized)
+
+	If Not @error Then GUICtrlSendMsg($idImage, $STM_SETIMAGE, 0, $hBitmap)
+
+	_GDIPlus_BitmapDispose($hResized)
+	_GDIPlus_ImageDispose($hImage)
+	_GDIPlus_Shutdown()
+EndFunc
+
 ; Set GUI color to white when using Windows 10
 Func _GuiSetColor()
 	If @OSVersion <> "WIN_10" Then Return
-	GUISetBkColor(0xFFFFFF)
-	GUICtrlSetDefBkColor(0xFFFFFF)
+	GUISetBkColor($COLOR_WHITE)
+	GUICtrlSetDefBkColor($COLOR_WHITE)
 EndFunc
 
 ; Prompt user for file
@@ -6009,7 +6027,7 @@ Func GUI_FirstStart()
 	; Create GUI
 	Global $FS_GUI = GUICreate($title, 504, 387)
 	_GuiSetColor()
-	GUICtrlCreatePic(".\support\Icons\uniextract_inno.bmp", 8, 312, 65, 65)
+	Local $idImage = GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract_inno.bmp", 8, 312, 65, 65)
 	GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 24, 800, 0, "MS Sans Serif")
 	GUICtrlCreateLabel(t('FIRSTSTART_TITLE'), 8, 50, 488, 60, $SS_CENTER)
@@ -6023,6 +6041,8 @@ Func GUI_FirstStart()
 	GUICtrlSetState(-1, $GUI_HIDE)
 	Global $FS_Button = GUICtrlCreateButton("", 187, 260, 129, 41)
 	Global $FS_Progress = GUICtrlCreateLabel("", 80, 350, 21, 17)
+
+	_GDIPlus_LoadImage(@ScriptDir & "\support\Icons\uniextract.png", $idImage, 65, 65)
 
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_FirstStart_Exit")
 	GUICtrlSetOnEvent($FS_Cancel, "GUI_FirstStart_Exit")
@@ -6107,6 +6127,42 @@ Func GUI_FirstStart_Exit()
 	GUISetState(@SW_SHOW, $guimain)
 	Cout("First start configuration finished")
 EndFunc   ;==>GUI_FirstStart_Exit
+
+; Custom update found message with changelog display
+Func GUI_UpdatePrompt()
+	Local $bChoice = False
+	Opt("GUIOnEventMode", 0)
+
+	Local $hGUI = GUICreate($name, 454, 314, -1, -1, -1, -1, $guimain)
+	_GuiSetColor()
+	GUICtrlCreateLabel(t('UPDATE_PROMPT', $name), 72, 12, 372, 40)
+	GUICtrlCreateLabel(t('UPDATE_WHATS_NEW'), 8, 64, 372, 17)
+	Local $idEdit = GUICtrlCreateEdit(t('TERM_LOADING'), 8, 80, 440, 193, BitOR($ES_READONLY, $WS_VSCROLL), $WS_EX_STATICEDGE)
+	Local $idYes = GUICtrlCreateButton(t('YES_BUT'), 272, 280, 75, 25)
+	Local $idNo = GUICtrlCreateButton(t('NO_BUT'), 368, 280, 75, 25)
+	Local $idImage = GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract_inno.bmp", 8, 8, 48, 48)
+	_GDIPlus_LoadImage(@ScriptDir & "\support\Icons\uniextract.png", $idImage, 48, 48)
+	GUISetState(@SW_SHOW)
+
+	Local $return = _INetGetSource($sUpdateURL & "news")
+	If @error Then $return = t('DOWNLOAD_FAILED', "'" & t('UPDATE_WHATS_NEW') & "'")
+	GUICtrlSetData($idEdit, $return)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idNo
+				ExitLoop
+			Case $idYes
+				$bChoice = True
+				ExitLoop
+		EndSwitch
+	WEnd
+
+	GUIDelete($hGUI)
+	Opt("GUIOnEventMode", 1)
+	Return $bChoice
+EndFunc
 
 ; CreatePlugin GUI
 Func GUI_Plugins()
