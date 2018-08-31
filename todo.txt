@@ -11,7 +11,6 @@ dll for ace extraction?
 // New unpackers
 sqx
 paq
-http://tlwiki.org/index.php?title=Tools
 
 // Detection
 Generic OLE2 / Multistream Compound File   -->   Start msi extraction? Add CheckMSI function?

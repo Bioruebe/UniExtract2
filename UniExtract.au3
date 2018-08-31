@@ -1864,14 +1864,14 @@ Func checkInno()
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' Inno Setup ' & t('TERM_INSTALLER'))
 
 	$return = FetchStdout($inno & ' "' & $file & '"', $filedir, @SW_HIDE)
-	If (StringInStr($return, "Version detected:", 0) And Not (StringInStr($return, "error", 0))) _
-			Or (StringInStr($return, "Signature detected:", 0) _
-			And Not StringInStr($return, "not a supported version", 0)) Then
-		_DeleteTrayMessageBox()
-		extract($TYPE_INNO, 'Inno Setup ' & t('TERM_INSTALLER'))
-	EndIf
 
 	_DeleteTrayMessageBox()
+
+	If (StringInStr($return, "Version detected:", 0) And Not (StringInStr($return, "error", 0))) _
+			Or (StringInStr($return, "Signature detected:", 0) _
+			And Not StringInStr($return, "not a supported version", 0)) Then _
+		extract($TYPE_INNO, 'Inno Setup ' & t('TERM_INSTALLER'))
+
 	$innofailed = True
 	checkIE()
 	Return False
@@ -1903,6 +1903,16 @@ Func CheckIso()
 	Else
 		Return extract($TYPE_QBMS, t('TERM_IMAGE') & " " & t('TERM_FILE'), $iso, $isofile, $isofile)
 	EndIf
+EndFunc
+
+; Try listing msi contents with lessmsi
+Func CheckLessmsi()
+	If Not HasNetFramework(4) Then Return False
+
+	Cout("Testing lessmsi")
+	$return = FetchStdout($msi_lessmsi & ' l "' & $file & '"', $outdir)
+
+	Return StringInStr($return, "Listing msi file") And Not StringInStr($return, "Error: ")
 EndFunc
 
 ; Determine if file is NSIS installer
@@ -2547,8 +2557,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_MSI
-			If HasNetFramework(4) Then
-				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_SHOW, True, True, True)
+			If CheckLessmsi() Then
+				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_HIDE, True, True, True)
 				MoveFiles($outdir & "\SourceDir", $outdir, False, '', True)
 			Else
 				Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
@@ -2556,7 +2566,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 				Switch $choice
 					Case 1 ; jsMSI Unpacker
-						_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_SHOW, False, False)
+						_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_HIDE, False, False)
 						_FileRead($outdir & "\MSI Unpack.log", True)
 
 					Case 2 ; MsiX
@@ -3006,15 +3016,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				; Extract with WUN
 				Case 2
 					RunWait(_MakeCommand($wise_wun, True) & ' "' & $filename & '" "' & $tempoutdir & '"', $filedir)
-					Local $removetemp = 1
-					LoadPref("removetemp", $removetemp)
-					If $removetemp Then
-						FileDelete($tempoutdir & "INST0*")
-						FileDelete($tempoutdir & "WISE0*")
-					Else
-						FileMove($tempoutdir & "INST0*", $outdir)
-						FileMove($tempoutdir & "WISE0*", $outdir)
-					EndIf
+
+					Local $aReturn[2] = [$tempoutdir & "INST0*", $tempoutdir & "WISE0*"]
+					Cleanup($aReturn)
 					MoveFiles($tempoutdir, $outdir, False, "", True)
 
 				; Extract using the /x switch
@@ -3263,7 +3267,10 @@ EndFunc
 Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 	If Not $iMode Then Return
 	If Not IsArray($aFiles) Then
-		If Not FileExists($aFiles) And Not FileExists($outdir & "\" & $aFiles) Then Return SetError(1, 0, 0)
+		If Not FileExists($aFiles) And Not FileExists($outdir & "\" & $aFiles) Then
+			Cout("Cleanup: Invalid path " & $aFiles)
+			Return SetError(1, 0, 0)
+		EndIf
 		$return = $aFiles
 		Dim $aFiles = [$return]
 	EndIf
@@ -4150,14 +4157,14 @@ EndFunc
 
 ; Dump complete debug content to log file
 Func CreateLog($status)
-	Local $name = $logdir & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
-	If $status <> $STATUS_SUCCESS Then $name &= StringUpper($status)
-	If $file <> "" Then $name &= "_" & ($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext
-	$name &= ".log"
-	$handle = FileOpen($name, 32 + 8 + 2)
-	FileWrite($handle, $debug)
-	FileClose($handle)
-	Return $name
+	Local $sName = $logdir & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
+	If $status <> $STATUS_SUCCESS Then $sName &= StringUpper($status)
+	If $file <> "" Then $sName &= "_" & ($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext
+	$sName &= ".log"
+	$hFile = FileOpen($sName, 32 + 8 + 2)
+	FileWrite($hFile, $debug)
+	FileClose($hFile)
+	Return $sName
 EndFunc
 
 ; Determine whether the archive is password protected or not and try passwords from list if necessary
@@ -4398,7 +4405,7 @@ Func _PatternSearch($sString)
 EndFunc
 
 ; Run a program and return stdout/stderr stream
-Func FetchStdout($f, $sWorkingdir, $show_flag, $iLine = 0, $bOutput = True, $useCmd = True)
+Func FetchStdout($f, $sWorkingdir, $show_flag = @SW_HIDE, $iLine = 0, $bOutput = True, $useCmd = True)
 	Global $run = 0, $return = ""
 
 	$f = _MakeCommand($f, $useCmd)
@@ -4818,6 +4825,9 @@ Func _AfterUpdate()
 	FileMove(@ScriptDir & "\UniExtractUpdater.exe.new", @ScriptDir & "\UniExtractUpdater.exe", 1)
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
 	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
+
+	; Ini changes
+	IniDelete($prefs, "UniExtract Preferences", "removetemp")
 
 	SendStats("UpdateMain", 1)
 
