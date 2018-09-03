@@ -1,5 +1,7 @@
 RC 2:
   Added support for InstallScript installers
+  Added support for .bsa, .ba2 archives using BSA Browser
+  Added support for .pex scripts using Champollion
   Added TotalObserver as additional extractor choice for InstallShield
   Added nightly update channel
   Added changelog to update found prompt

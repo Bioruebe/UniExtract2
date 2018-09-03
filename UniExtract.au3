@@ -1907,7 +1907,7 @@ EndFunc
 
 ; Try listing msi contents with lessmsi
 Func CheckLessmsi()
-	If Not HasNetFramework(4) Then Return False
+	If Not HasNetFramework(4, False) Then Return False
 
 	Cout("Testing lessmsi")
 	$return = FetchStdout($msi_lessmsi & ' l "' & $file & '"', $outdir)
@@ -2160,8 +2160,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_CHM
 			_Run($7z & ' x "' & $file & '"', $outdir)
-			Local $aReturn[2] = ['#*', '$*']
-			Cleanup($aReturn)
+			Local $aCleanup[] = ['#*', '$*']
+			Cleanup($aCleanup)
 			$handle = FileFindFirstFile($outdir & '\*')
 			If $handle <> -1 Then
 				$dir = FileFindNextFile($handle)
@@ -2355,18 +2355,18 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 			; (Re)move ',2' files and install_script.iss
-			$aReturn = _FileListToArrayRec($return, "*,2.*", 1, 1, 0, 2)
-			_ArrayDelete($aReturn, 0)
-			Cleanup($aReturn)
+			Local $aCleanup = _FileListToArrayRec($return, "*,2.*", 1, 1, 0, 2)
+			_ArrayDelete($aCleanup, 0)
+			Cleanup($aCleanup)
 
 			; Change output directory structure
-			Local $aReturn = ["embedded", "{tmp}", "{commonappdata}", "{cf}", "{cf32}", "{{userappdata}}", "{{userdocs}}"]
-			Cleanup($aReturn)
+			Local $aCleanup[] = ["embedded", "{tmp}", "{commonappdata}", "{cf}", "{cf32}", "{{userappdata}}", "{{userdocs}}"]
+			Cleanup($aCleanup)
 			MoveFiles($outdir & "\{app}", $outdir, True, '', True)
 			; TODO: {syswow64}, {sys} - move files to outdir as dlls might be needed by the program?
 
-			Cleanup("install_script.iss")
-			Cleanup("setup.iss")
+			Local $aCleanup[] = ["install_script.iss", "setup.iss"]
+			Cleanup($aCleanup)
 
 		Case $TYPE_IS3ARC ; Test
 			$aReturn = ['InstallShield 3.x ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', 'STIX'), t('METHOD_EXTRACTION_RADIO', 'unshield')]
@@ -2640,8 +2640,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 			If $success == $RESULT_FAILED Then checkIE()
 
-			Local $aReturn[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
-			Cleanup($aReturn)
+			Local $aCleanup[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
+			Cleanup($aCleanup)
 
 			; Determine if there are .bin files in filedir
 			checkBin()
@@ -2661,8 +2661,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If FileExists($bindir & $bms) Then FileDelete($bindir & $bms)
 
 			If $additionalParameters == $ie Then
-				Local $aReturn[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
-				Cleanup($aReturn)
+				Local $aCleanup[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
+				Cleanup($aCleanup)
 			EndIf
 
 		Case $TYPE_RAR
@@ -2728,8 +2728,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Next
 			EndIf
 
-			Local $aReturn = ["runtime.cab", "installer.config"]
-			Cleanup($aReturn)
+			Local $aCleanup[] = ["runtime.cab", "installer.config"]
+			Cleanup($aCleanup)
 
 		Case $TYPE_SIT
 			FileMove($file, $tempoutdir, 8)
@@ -3017,8 +3017,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Case 2
 					RunWait(_MakeCommand($wise_wun, True) & ' "' & $filename & '" "' & $tempoutdir & '"', $filedir)
 
-					Local $aReturn[2] = [$tempoutdir & "INST0*", $tempoutdir & "WISE0*"]
-					Cleanup($aReturn)
+					Local $aCleanup[] = [$tempoutdir & "INST0*", $tempoutdir & "WISE0*"]
+					Cleanup($aCleanup)
 					MoveFiles($tempoutdir, $outdir, False, "", True)
 
 				; Extract using the /x switch
@@ -3062,7 +3062,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If $appendext Then AppendExtensions($outdir)
 
 		Case $TYPE_WIX
-			If Not HasNetFramework(4) Then terminate($STATUS_MISSINGEXE, $file, ".Net Framework 4")
+			HasNetFramework(4)
 			_Run($wix & ' -x "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False)
 
 		Case $TYPE_ZIP
@@ -3177,47 +3177,71 @@ EndFunc
 Func pluginExtract($sPlugin)
 	Cout("Starting custom " & $sPlugin & " extraction")
 
-	Local $ret = $userDefDir & $sPlugin & ".ini"
-	If Not FileExists($ret) Then
-		$ret = $defdir & $sPlugin & ".ini"
-		If Not FileExists($ret) Then terminate($STATUS_MISSINGDEF, $ret, '')
+	Local $sPluginFile = $userDefDir & $sPlugin & ".ini"
+	If Not FileExists($sPluginFile) Then
+		$sPluginFile = $defdir & $sPlugin & ".ini"
+		If Not FileExists($sPluginFile) Then terminate($STATUS_MISSINGDEF, $sPluginFile, '')
 	EndIf
 
-	Local Const $ret2 = "Extract"
-	Local $sBinary = IniRead($ret, $ret2, "executable", $sPlugin)
+	Local Const $sSection = "Plugin"
+	Local $aReturn = IniReadSection($sPluginFile, "Plugin")
+
+	Local $sBinary = _ArrayGet($aReturn, "executable", $sPlugin)
 	HasPlugin($sBinary)
+
+	Local $ret = _ArrayGet($aReturn, "requireNetFramework", 0)
+	If $ret > 0 Then HasNetFramework($ret)
 
 	; Set status box
 	If Not $NoBox Then
-		Local $aReturn = StringSplit(IniRead($ret, "Display", "displayTypeTranslation", ""), ",")
-		Local $arcdisp = t('EXTRACTING') & @CRLF & IniRead($ret, "Display", "display", $sPlugin)
-		If StringLen($aReturn[1]) > 0 And Not StringIsSpace($aReturn[1]) Then
-			For $i = 1 To $aReturn[0]
-				$arcdisp &= " " & t(StringStripWS($aReturn[$i], 8))
-			Next
-		EndIf
+		Local $arcdisp = t('EXTRACTING') & @CRLF & _ArrayGet($aReturn, "display", $sPlugin)
+		$arcdisp = ReplacePlaceholders($arcdisp)
 		_CreateTrayMessageBox($arcdisp)
 	EndIf
 
-	Local $sParameters = " " & IniRead($ret, $ret2, "parameters", "")
-	Local $sWorkingdir = IniRead($ret, $ret2, "workingdir", "")
-	If $sWorkingdir = "" Then $sWorkingdir = $outdir
+	Local $sParameters = " " & _ArrayGet($aReturn, "parameters", "")
+	Local $sWorkingDir = _ArrayGet($aReturn, "workingdir", "")
+	If Not $sWorkingDir Or $sWorkingDir = "" Then $sWorkingDir = $outdir
 
 	$sParameters = ReplacePlaceholders($sParameters)
-	$sWorkingdir = ReplacePlaceholders($sWorkingdir)
+	$sWorkingDir = ReplacePlaceholders($sWorkingDir)
 
-	_Run($sBinary & $sParameters, $sWorkingdir, Number(IniRead($ret, $ret2, "hide", 0)) == 1? @SW_HIDE: @SW_MINIMIZE, Number(IniRead($ret, $ret2, "useCmd", 1)) == 1, Number(IniRead($ret, $ret2, "log", 1)) == 1, Number(IniRead($ret, $ret2, "patternSearch", 0)) == 1, Number(IniRead($ret, $ret2, "initialShow", 1)) == 1)
+	_Run($sBinary & $sParameters, $sWorkingDir, _ArrayGet($aReturn, "hide", 0, True) == 1? @SW_HIDE: @SW_MINIMIZE, _ArrayGet($aReturn, "useCmd", 1, True) == 1, _ArrayGet($aReturn, "log", 1, True) == 1, _ArrayGet($aReturn, "patternSearch", 0, True) == 1, _ArrayGet($aReturn, "initialShow", 1, True) == 1)
+
+	Local $sCleanup = IniRead($sPluginFile, $sSection, "cleanup", 0)
+	If Not $sCleanup Or StringLen($sCleanup) < 1 Then Return
+
+	$aCleanup = StringSplit($sCleanup, "|", 2)
+	Cleanup($aCleanup)
 EndFunc
 
 ; Replace % placeholders with variable contents
 Func ReplacePlaceholders($sString, $bQuote = True)
 	If Not StringInStr($sString, "%") Then Return $sString
-	$sString = StringReplace($sString, "%filename", $filename)
-	$sString = StringReplace($sString, "%fileext", $fileext)
-	$sString = StringReplace($sString, "%filedir", $filedir)
-	$sString = StringReplace($sString, "%file", $bQuote? Quote($file): $file)
-	$sString = StringReplace($sString, "%outdir", $bQuote? Quote($outdir): $outdir)
+
+	$sString = StringReplace($sString, "%filename%", $filename)
+	$sString = StringReplace($sString, "%fileext%", $fileext)
+	$sString = StringReplace($sString, "%filedir%", $filedir)
+	$sString = StringReplace($sString, "%file%", $bQuote? Quote($file): $file)
+	$sString = StringReplace($sString, "%outdir%", $bQuote? Quote($outdir): $outdir)
+
+	$aReturn = _StringBetween($sString, "%", "%")
+	If @error Then Return $sString
+
+	For $sPlaceholder In $aReturn
+		$sString = StringReplace($sString, "%" & $sPlaceholder & "%", t($sPlaceholder))
+	Next
+
 	Return $sString
+EndFunc
+
+; Retrieve array value be key
+Func _ArrayGet(ByRef $aData, $sKey, $sDefault, $bNumber = False, $iKeyIndex = 0, $iValueIndex = 1)
+	Local $ret = _ArraySearch($aData, $sKey, 0, 0, 0, 0, 1, $iKeyIndex)
+	If $ret < 0 Then Return $sDefault
+
+	Local $return = $aData[$ret][$iValueIndex]
+	Return $bNumber? Number($return): $return
 EndFunc
 
 ; Encapsulate a string with "
@@ -3996,7 +4020,8 @@ EndFunc
 
 ; Determine versions of installed .NET frameworks
 ; Modified version of (https://www.autoitscript.com/forum/topic/164455-check-net-framework-4-or-45-is-installed/#comment-1199620)
-Func HasNetFramework($iVersion)
+Func HasNetFramework($iVersion, $bTerminate = True)
+	Cout("Searching for .NET Framework " & $iVersion)
 	Local $sKey, $sBaseKeyName, $sBVersion, $sBBVersion, $z = 0, $i = 0
     $sKey = "HKLM" & $reg64 & "\SOFTWARE\Microsoft\NET Framework Setup\NDP"
 
@@ -4022,6 +4047,7 @@ Func HasNetFramework($iVersion)
 		EndIf
     Until $sBaseKeyName = ''
 
+	If $bTerminate Then terminate($STATUS_MISSINGEXE, $file, ".Net Framework " & $iVersion)
     Return False
 EndFunc
 
@@ -4199,21 +4225,21 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 EndFunc
 
 ; Executes a program and log output using tee
-Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True, $useTee = True, $patternSearch = True, $initialShow = True)
+Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True, $useTee = True, $patternSearch = True, $initialShow = True)
 	Global $run = 0, $runtitle = 0
 	Local $return = "", $pos = 0, $size = 1, $lastSize = 0
 	Local Const $LogFile = $logdir & "teelog.txt"
 
 	$f = _MakeCommand($f, $useCmd) & ($useTee? ' 2>&1 | ' & $tee & ' "' & $LogFile & '"': "")
 
-	Cout("Executing: " & $f & " with options: patternSearch = " & $patternSearch & ", workingdir = " & $sWorkingdir)
+	Cout("Executing: " & $f & " with options: patternSearch = " & $patternSearch & ", workingdir = " & $sWorkingDir)
 
 	; Create log
 	If $useTee Then
 		HasPlugin($tee)
 		If Not FileExists($logdir) Then DirCreate($logdir)
 
-		$run = Run($f, $sWorkingdir, $initialShow? @SW_MINIMIZE: $show_flag)
+		$run = Run($f, $sWorkingDir, $initialShow? @SW_MINIMIZE: $show_flag)
 		If @error Then
 			$success = $RESULT_FAILED
 			Return SetError(1)
@@ -4321,7 +4347,7 @@ Func _Run($f, $sWorkingdir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 	; Do not create log
 	Else
 		Cout("Runtime logging disabled")
-		$run = Run($f, $sWorkingdir, $show_flag)
+		$run = Run($f, $sWorkingDir, $show_flag)
 		If @error Then
 			$success = $RESULT_FAILED
 			Return SetError(1)
@@ -4405,12 +4431,12 @@ Func _PatternSearch($sString)
 EndFunc
 
 ; Run a program and return stdout/stderr stream
-Func FetchStdout($f, $sWorkingdir, $show_flag = @SW_HIDE, $iLine = 0, $bOutput = True, $useCmd = True)
+Func FetchStdout($f, $sWorkingDir, $show_flag = @SW_HIDE, $iLine = 0, $bOutput = True, $useCmd = True)
 	Global $run = 0, $return = ""
 
 	$f = _MakeCommand($f, $useCmd)
 	If $bOutput Then Cout("Executing: " & $f)
-	$run = Run($f, $sWorkingdir, $show_flag, $STDERR_MERGED)
+	$run = Run($f, $sWorkingDir, $show_flag, $STDERR_MERGED)
 	If @error Then Return SetError(1, 0, -1)
 
 	$runtitle = _WinGetByPID($run)
@@ -4824,6 +4850,7 @@ Func _AfterUpdate()
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
+	DirRemove($bindir & "file\contrib\file\5.03\file-5.03-src", 1)
 
 	; Move files
 	FileMove(@ScriptDir & "\UniExtractUpdater.exe.new", @ScriptDir & "\UniExtractUpdater.exe", 1)
@@ -6183,7 +6210,7 @@ Func GUI_Plugins()
 	]
 
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
-	Local $current = -1, $sWorkingdir = @WorkingDir, $aReturn[0]
+	Local $current = -1, $sWorkingDir = @WorkingDir, $aReturn[0]
 	FileChangeDir(@UserProfileDir)
 
 	$GUI_Plugins = GUICreate($name, 410, 167, -1, -1, -1, -1, $guimain)
@@ -6301,7 +6328,7 @@ Func GUI_Plugins()
 		EndSwitch
 	WEnd
 
-	FileChangeDir($sWorkingdir)	; Reset working dir in case it was changed by FileOpenDialog
+	FileChangeDir($sWorkingDir)	; Reset working dir in case it was changed by FileOpenDialog
 	GUIDelete($GUI_Plugins)
 	Opt("GUIOnEventMode", 1)
 EndFunc

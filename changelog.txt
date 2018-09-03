@@ -52,8 +52,9 @@
   Added support for Ethornell Engine's .arc files using Arc-reader
   Added support for several game archives using QuickBMS and Game Archive UnPacker PRO plugin (optional)
   Added support for several game archives using arc_conv (older RPG Maker, Wolf RPG Editor, NScripter, YU-RIS Script Engine archives; plugin)
-  Added support for RPG Maker VX Ace archives using RPGMaker Decrypter (plugin)
+  Added support for RPG Maker VX Ace archives using RGSS Decryptor CLI
   Added support for Livemaker games via crass/crage (plugin)
+  Added support for .bsa, .ba2 archives using BSA Browser
   Added support for .mpq archives using MPQ Plugin for Total Commander (plugin)
   Added support for FreeArc compressed archives (.arc) using FreeArc
   Added support for Lzip archives using Lzip
@@ -68,6 +69,7 @@
   Added support for .swf files using swfextract (slow)
   Added support for .uif image files using uif2iso
   Added support for .daa, .gbi image files using daa2iso
+  Added support for .pex scripts using Champollion
   Added support for .rpgmvp files
   Added support for .sgbpack files
   Added support for .utage files
