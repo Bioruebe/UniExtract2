@@ -2,6 +2,9 @@ RC 2:
   Added support for InstallScript installers
   Added support for .bsa, .ba2 archives using BSA Browser
   Added support for .pex scripts using Champollion
+  Added support for Bruns Engine encrypted files
+  Added support for .mo translation files using GNU gettext
+  Added support for .qm translation files using Qt Linguist
   Added TotalObserver as additional extractor choice for InstallShield
   Added nightly update channel
   Added changelog to update found prompt
@@ -9,6 +12,7 @@ RC 2:
   Added build date to 'About' window and feedback data
   Fixed first-start assistant not being displayed when running from command line
   Fixed language setting being reset if language file does not exist
+  Fixed UI images not being loaded if starting UniExtract from context menu
   Changed first start assistant: removed 2 pages and changed some wording
   Changed msi extraction: added method selector prompt if the default extractor fails
   Improved UniExtract logo quality

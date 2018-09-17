@@ -5759,7 +5759,7 @@ EndFunc   ;==>GUI_Create_Tooltip
 Func GUI_ContextMenu()
 	Cout("Creating context menu GUI")
 	Local $iSize = UBound($CM_Shells) - 1
-	Global $CM_Checkbox[$iSize + 1], $CM_Picture = False
+	Global $CM_Checkbox[$iSize + 1]
 
 	Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
@@ -5862,12 +5862,9 @@ EndFunc   ;==>GUI_ContextMenu
 
 ; Change picture according to selected context menu type
 Func GUI_ContextMenu_ChangePic()
-	If GUICtrlRead($CM_Cascading_Radio) = $GUI_CHECKED Then
-		GUICtrlSetImage($CM_Picture, ".\support\Icons\cascading.jpg")
-	Else
-		GUICtrlSetImage($CM_Picture, ".\support\Icons\simple.jpg")
-	EndIf
-EndFunc   ;==>GUI_ContextMenu_ChangePic
+	Local $sPath = @ScriptDir & "\support\Icons\" & (GUICtrlRead($CM_Cascading_Radio) = $GUI_CHECKED? "cascading.jpg": "simple.jpg")
+	GUICtrlSetImage($CM_Picture, $sPath)
+EndFunc
 
 ; Close GUI and create context menu entries
 Func GUI_ContextMenu_OK()
@@ -6476,7 +6473,7 @@ Func GUI_About()
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, "Arial")
-	GUICtrlCreatePic(".\support\Icons\Bioruebe.jpg", $width - 89 - 10, $height - 55, 89, 50)
+	GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.jpg", $width - 89 - 10, $height - 55, 89, 50)
 	$About_OK = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
 	GUISetState(@SW_SHOW)
 

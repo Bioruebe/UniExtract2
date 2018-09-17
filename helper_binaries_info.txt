@@ -21,6 +21,8 @@ AspackDie									AspackDie.exe				1.41					Open Source				yoda								http://sc
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
 BCM											x86\bcm.exe					1.00		-	-	-	Public Domain			Ilya Muravyov						http://sourceforge.net/projects/bcm/
 											x64\bcm.exe					-------		---------	-------					-------								-------
+brunsdec									brunsdec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/brunsdec
+											neko runtime files			-------		---------	-------					-------								-------
 BSA Browser									bsab.exe					1.6.5 mod	-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
@@ -37,8 +39,6 @@ Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.0		---------	Freeware		
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 											\plugins directory			-------		---------	-------					-------								-------															
 											\languages directory		-------		---------	-------					-------								-------
-Stuffit Expander							Expander.exe				6.0						Freeware				Aladdin Systems						ftp://ftp.elf.stuba.sk/pub/pc/pack/
-											stuffit5.engine-5.1.dll		-------		---------	-------					-------								-------															
 Extract NT									EXTRNT.EXE					2.10					Freeware				Gilles Vollant						http://www.winimage.com/extract.htm								
 extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland						http://legroom.net/software/extractmht							
 FFmpeg										x86\ffmpeg.exe				newest		-		-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
@@ -50,6 +50,7 @@ GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http:
 											x64\GCFScape.exe			-------		---------	-------					-------								-------															
 											x86\hllib.dll				2.4.0		---------	GNU LGPL				-------								http://nemesis.thewavelength.net/index.php?p=35					
 											x64\hllib.dll				-------		---------	-------					-------								-------															
+GNU gettext									msgunfmt.exe				0.19.8.1	-	x	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
 HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					http://www.geocities.com/mwinterhoff/helpdeco.htm				
 											---------					-------		---------	-------					-------								http://www.helpmaster.info/hlp-developmentaids-helpdeco.htm		
 i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
@@ -72,6 +73,7 @@ ns2dec (ONScripter Tools)					ns2dec						2010-09-15	-	-	x	GNU GPL v2				"Uncle"
 PeaZip										pea.exe						0.53/1.0				GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
+Qt Linguist									lconvert.exe				5.11.1		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
 QuickBMS									quickbms.exe				0.7.5		!	o	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
@@ -88,7 +90,9 @@ spoondec									spoondec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							http
 											lime.ndll					-------		---------	-------					-------								-------
 STIX										STIX_D.exe					2001/06/13				Freeware				Veit Kannegieser					http://kannegieser.net/veit/programm/index_e.htm				
 											WDOSXLE.exe					-------		---------	-------					-------								-------															
-swfextract	(part of swftools)				swfextract.exe				0.9.2					GNU GPL v3				Ricardo Pedroso?					http://www.swftools.org/										
+Stuffit Expander							Expander.exe				6.0						Freeware				Aladdin Systems						ftp://ftp.elf.stuba.sk/pub/pc/pack/
+											stuffit5.engine-5.1.dll		-------		---------	-------					-------								-------															
+swfextract (part of swftools)				swfextract.exe				0.9.2					GNU GPL v3				Ricardo Pedroso?					http://www.swftools.org/										
 											---------					-------		---------	-------					-------								http://unxutils.sourceforge.net/								
 TrID										trid.exe					2.24		---------	Freeware				Marco Pontello						http://mark0.net/soft-trid-e.html								
 TrIDLib - Free version						TrIDLib.dll					1.02		---------	TrIDLib license			Marco Pontello						http://mark0.net/soft-trid-e.html
