@@ -35,6 +35,7 @@ is6cab extractor might crash ('... is not working anymore'), resulting in batch 
 // Other:
 Logging: quickbms (+ 'you must choose a new filename' user input needed detection), Crage
 'Extract as' command line parameter (call extract directly with $arctype as param) + GUI if nothing passed
+Expose _RunInTempOutdir (for use in plugin definitions)
 
 
 // Short term

@@ -5,22 +5,35 @@ RC 2:
   Added support for Bruns Engine encrypted files
   Added support for .mo translation files using GNU gettext
   Added support for .qm translation files using Qt Linguist
+  Added support for encrypted .wolf archives using WolfDec (plugin)
   Added TotalObserver as additional extractor choice for InstallShield
   Added nightly update channel
-  Added changelog to update found prompt
+  Added changelog to update found message box
   Added progress bar while search for update is in progress as the new updater might need more time than the old one on some systems
   Added build date to 'About' window and feedback data
+  Added beta update channel
   Fixed first-start assistant not being displayed when running from command line
   Fixed language setting being reset if language file does not exist
   Fixed UI images not being loaded if starting UniExtract from context menu
+  Fixed extraction from context menu if UniExtract is in scan mode
+  Fixed some files being misdetected as disk images
+  Fixed status box not being updated for some file types
+  Changed preferences dialog: redesigned GUI, added option to remove additional files, replaced numeral update interval 
+							  with daily, weekly, etc. presets, removed timeout setting, added beta update setting
+  Changed file scan results message box: the name of the detector is now shown along with its result, output can now be
+										 selected and copied easily
   Changed first start assistant: removed 2 pages and changed some wording
   Changed msi extraction: added method selector prompt if the default extractor fails
+  Changed plugin file selector to use 'Downloads' folder as default
   Improved UniExtract logo quality
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
   Removed mpq plugin, replaced with built-in TotalObserver
   Updated EnigmaVB unpacker to 0.51
   Updated demoleition to 0.60
   Updated lessmsi to 1.6.1 mod
+  Updated QuickBMS to 0.9.0
+  Updated SQLite to 3.25.1
+  Updated Czech translation, thanks to DžejPý
   Updated Chinese (Simplified) translation, thanks to deluxghost
   Updated Chinese (Traditional) translation, thanks to jfcherng
   Updated Croatian translaton, thanks to Alen Bajo
