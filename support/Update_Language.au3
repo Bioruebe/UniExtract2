@@ -44,9 +44,9 @@ For $i=1 To $ini_old[0]
 	ConsoleWrite(" (" & $i & "/" & $ini_old[0]+1 & ")" & @CRLF)
 Next
 
-ConsoleWrite("Creating changes.txt")
-GetChanges()
-ConsoleWrite(" (" & $i & "/" & $ini_old[0]+1 & ")" & @CRLF)
+;~ ConsoleWrite("Creating changes.txt")
+;~ GetChanges()
+;~ ConsoleWrite(" (" & $i & "/" & $ini_old[0]+1 & ")" & @CRLF)
 
 Func GetChanges()
 	_FileReadToArray($changes_ini, $changes_old_arr)
