@@ -60,6 +60,7 @@
   Added support for Lzip archives using Lzip
   Added support for bcm compressed files using bcm
   Added support for zpaq archives using zpaq
+  Added support for StuffIt X archives
   Added support for .alz files using unalz
   Added support for .fsb files using FSB files extractor
   Added support for newer .kgb files using version 2 of KGB archiver

@@ -103,11 +103,11 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
 	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", _
 	  $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", _
-	  $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIT = "sit", $TYPE_SQLITE = "sqlite", _
-	  $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", _
-	  $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", _
-	  $TYPE_VIDEO_CONVERT = "video_convert", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", _
-	  $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
+	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
+	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
+	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
+	  $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 
 
 Opt("GUIOnEventMode", 1)
@@ -214,7 +214,6 @@ Const $rar = "unrar.exe" 															;5.50
 Const $rgss = "RgssDecrypter.exe"													;1.0.0.1
 Const $rpa = "unrpa.exe"															;1.5.2
 Const $sfark = "sfarkxtc.exe"														;3.0
-Const $sit = Quote($bindir & "Expander.exe")										;6.0
 Const $sqlite = "sqlite3.exe"														;3.10.2
 Const $stix = "stix_d.exe" 															;2001/06/13
 Const $swf = "swfextract.exe" 														;0.9.1
@@ -916,8 +915,6 @@ Func filecompare($sFileType)
 			extract($TYPE_LZ, "LZIP " & t('TERM_COMPRESSED') & " " & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "Zip archive data") And Not StringInStr($sFileType, "7")
 			extract($TYPE_ZIP, 'ZIP ' & t('TERM_ARCHIVE'))
-		Case StringInStr($sFileType, "StuffIt Archive")
-			extract($TYPE_SIT, 'StuffIt ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "UHarc archive data", 0)
 			extract($TYPE_UHA, 'UHARC ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "Symbian installation file", 0)
@@ -1176,9 +1173,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "sfArk compressed SoundFont")
 			extract($TYPE_SFARK, 'sfArk ' & t('TERM_COMPRESSED'))
-
-		Case StringInStr($sFileType, "StuffIT SIT compressed archive")
-			extract($TYPE_SIT, 'StuffIt ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "SymbianOS Installer")
 			extract($TYPE_QBMS, 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
@@ -2747,9 +2741,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $aCleanup[] = ["runtime.cab", "installer.config"]
 			Cleanup($aCleanup)
 
-		Case $TYPE_SIT
-			_RunInTempOutdir($tempoutdir, $sit & ' "' & $file & '"', $tempoutdir, @SW_SHOW, False, False, False)
-
 		Case $TYPE_SQLITE
 			$return = FetchStdout($sqlite & ' "' & $file & '" .dump ', $filedir, @SW_HIDE, 0, False)
 			$handle = FileOpen($outdir & '\' & $filename & '.sql', 8+2)
@@ -3508,6 +3499,7 @@ EndFunc
 
 ; Open file and return contents
 Func _FileRead($f, $delete = False, $iFlag = 0)
+	Cout("Reading file " & $f)
 	$handle = FileOpen($f, $iFlag)
 	If $handle = -1 Then Return SetError(1, 0, "")
 
@@ -4351,7 +4343,8 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 			   StringInStr($return, "All OK") Or StringInStr($return, "done.") Or _
 			   StringInStr($return, "Done ...") Or StringInStr($return, ": done") Or _
 			   StringInStr($return, "Result:	Successful, errorcode 0") Or StringInStr($return, "... Successful") Or _
-			   StringInStr($return, "Extract files [ ") Or StringInStr($return, "Done; file is OK") Then
+			   StringInStr($return, "Extract files [ ") Or StringInStr($return, "Done; file is OK") OR_
+			   StringInStr($return, "Successfully extracted to") Then
 			Cout("Success evaluation passed")
 			$success = $RESULT_SUCCESS
 		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
@@ -4918,6 +4911,8 @@ Func _AfterUpdate()
 	FileDelete($bindir & "RPGDecrypter.exe")
 	FileDelete($bindir & "mpq.wcx")
 	FileDelete($bindir & "mpq.wcx64")
+	FileDelete($bindir & "Expander.exe")
+	FileDelete($bindir & "stuffit5.engine-5.1.dll")
 	FileDelete(@ScriptDir & "\todo.txt")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)

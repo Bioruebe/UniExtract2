@@ -6,6 +6,7 @@ RC 2:
   Added support for .mo translation files using GNU gettext
   Added support for .qm translation files using Qt Linguist
   Added support for encrypted .wolf archives using WolfDec (plugin)
+  Added support for StuffIt X archives
   Added TotalObserver as additional extractor choice for InstallShield
   Added nightly update channel
   Added changelog to update found message box
@@ -28,11 +29,13 @@ RC 2:
   Improved UniExtract logo quality
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
   Removed mpq plugin, replaced with built-in TotalObserver
+  Removed StuffIt Expander, replaced with unar
   Updated EnigmaVB unpacker to 0.51
   Updated demoleition to 0.60
   Updated lessmsi to 1.6.1 mod
   Updated QuickBMS to 0.9.0
   Updated SQLite to 3.25.1
+  Updated ttarchext to 0.3.1a
   Updated Czech translation, thanks to DžejPý
   Updated Chinese (Simplified) translation, thanks to deluxghost
   Updated Chinese (Traditional) translation, thanks to jfcherng
