@@ -5,6 +5,8 @@
 
  Script Function:
 	Update Universal Extractor's language files (add new & delete old terms)
+	Requires _GetIntersection UDF by Bugfix, available at
+	https://www.autoitscript.com/forum/topic/82466-compare-arrays-strings-_getintersection/
 
 #ce ----------------------------------------------------------------------------
 

@@ -5,6 +5,7 @@
 
  Script Function:
 	Update language files, replace %s with %name
+	Used to convert legacy language files to new UniExtract 2 format
 
 #ce ----------------------------------------------------------------------------
 

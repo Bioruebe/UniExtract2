@@ -15,6 +15,7 @@
 #include <File.au3>
 #include <String.au3>
 
+; Settings - Default values work if this script is run from the \support subdirectory
 $sDir = "..\"
 $sSnapshotFile = "Snapshot.csv" ; path, hash
 $sMainFile = "..\UniExtract.au3"

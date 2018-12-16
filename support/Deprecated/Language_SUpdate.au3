@@ -5,6 +5,7 @@
 
  Script Function:
 	Update language files, replace %s with %1, %2, ..., %n
+	Used to convert legacy language files to new UniExtract 2 format
 
 #ce ----------------------------------------------------------------------------
 
@@ -13,8 +14,7 @@
 #include <Array.au3>
 #include <String.au3>
 
-;~ $sFile = "..\English.ini"
-
+; Run for each file like this:
 ;~ _SUpdate("..\lang\Chinese (Simplified).ini")
 
 Func _SUpdate($sFile)
