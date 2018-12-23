@@ -4343,7 +4343,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 			   StringInStr($return, "All OK") Or StringInStr($return, "done.") Or _
 			   StringInStr($return, "Done ...") Or StringInStr($return, ": done") Or _
 			   StringInStr($return, "Result:	Successful, errorcode 0") Or StringInStr($return, "... Successful") Or _
-			   StringInStr($return, "Extract files [ ") Or StringInStr($return, "Done; file is OK") OR_
+			   StringInStr($return, "Extract files [ ") Or StringInStr($return, "Done; file is OK") Or _
 			   StringInStr($return, "Successfully extracted to") Then
 			Cout("Success evaluation passed")
 			$success = $RESULT_SUCCESS
@@ -4524,6 +4524,12 @@ EndFunc
 Func _FiletypeAdd($sScanner, $sType)
 	If StringRight($sType, 2) == @CRLF Then $sType = StringTrimRight($sType, 2)
 	If Not $sType Or $sType == "" Then Return
+
+	Local $iPos = _ArraySearch($aFiletype, $sScanner, 0, 0, 0, 0, 1, 0)
+	If $iPos > -1 Then
+		$aFiletype[$iPos][1] &= @CRLF & $sType
+		Return
+	EndIf
 
 	Local $iSize = UBound($aFiletype)
 	ReDim $aFiletype[$iSize + 1][2]

@@ -84,7 +84,7 @@ rmvdec										rmvdec.exe					1.0.0		x	-	x	BSD 3-clause			Bioruebe							https:
 											neko runtime files			-------		---------	-------					-------								-------
 sfarkxtc									sfarkxtc.exe				3.0 mod		x	x	x	GNU GPL v3				Arnout Engelen						https://github.com/raboof/sfarkxtc
 											zlib1.dll					1.2.8		---------	zlib license			Jean-loup Gailly, Mark Adler		http://zlib.net/
-Command Line Shell For SQLite				sqlite3.exe					3.25.1		-	x	-	Public Domain			SQLite developers					http://sqlite.org/
+Command Line Shell For SQLite				sqlite3.exe					3.26.0		-	x	-	Public Domain			SQLite developers					http://sqlite.org/
 spoondec									spoondec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/spoondec
 											neko runtime files			-------		---------	-------					-------								-------
 											lime.ndll					-------		---------	-------					-------								-------
