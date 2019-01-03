@@ -2151,7 +2151,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				EndIf
 			WEnd
 			$run = 0
-			MoveFiles($file & "~", $outdir, True, "", True)
+			MoveFiles($file & "~", $outdir, True, "", True, True)
 
 		Case $TYPE_AUDIO
 			HasFFMPEG()
@@ -3070,7 +3070,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_WOLF
 			extract($TYPE_ARC_CONV, -1, "", False, True)
-			$success = $RESULT_UNKNOWN
 			HasPlugin($wolf)
 			_RunInTempOutdir($tempoutdir, $wolf & ' ' & Quote($file), $outdir, @SW_MINIMIZE, True, True, False)
 			MoveFiles($outdir & "\" & $filename, $outdir, True, '', True, True)
@@ -3180,8 +3179,15 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 	EndSwitch
 
-	If $success = $RESULT_FAILED Then Return $returnFail? 0: terminate($STATUS_FAILED, $file, $arcdisp)
-	Return $returnSuccess? 1: terminate($STATUS_SUCCESS, "", $arctype)
+	If $success = $RESULT_FAILED Then
+		If Not $returnFail Then terminate($STATUS_FAILED, $file, $arcdisp)
+		$success = $RESULT_UNKNOWN
+		Return 0
+	EndIf
+
+	If Not $returnSuccess Then terminate($STATUS_SUCCESS, "", $arctype)
+	$success = $RESULT_UNKNOWN
+	Return 1
 EndFunc
 
 Func pluginExtract($sPlugin)
@@ -4366,6 +4372,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 		Cout("Runtime logging disabled")
 		$run = Run($f, $sWorkingDir, $show_flag)
 		If @error Then
+			Cout("Failed to execute command")
 			$success = $RESULT_FAILED
 			Return SetError(1)
 		EndIf

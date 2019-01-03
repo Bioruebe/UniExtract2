@@ -30,7 +30,7 @@ RC 2:
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
   Removed mpq plugin, replaced with built-in TotalObserver
   Removed StuffIt Expander, replaced with unar
-  Updated EnigmaVB unpacker to 0.51
+  Updated EnigmaVB unpacker to 0.55
   Updated demoleition to 0.60
   Updated lessmsi to 1.6.1 mod
   Updated QuickBMS to 0.9.0
