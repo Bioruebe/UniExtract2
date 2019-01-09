@@ -41,10 +41,11 @@ RC 2:
   Updated Chinese (Traditional) translation, thanks to jfcherng
   Updated Croatian translaton, thanks to Alen Bajo
   Updated Finnish translation, thanks to jyrkive
-  Updated Italian translation, thanks to NAMP
+  Updated Italian translation, thanks to NAMP and tfr
   Updated Korean translation, thanks to 까꿍
   Updated Polish translaton, thanks to Barnaba and dmocha
   Updated Russian translation, thanks to wvxwxvw
+  Updated Spanish translation, thanks to GGobbi
   Updated Ukrainian translation, thanks to YuriPet
 
 RC 1:
