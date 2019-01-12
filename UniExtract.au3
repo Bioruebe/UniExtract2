@@ -83,13 +83,14 @@ Const $sUniExtract = @Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, 
 Const $sRegExAscii = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k ' ; Keep command prompt open for debugging
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
-Const $HISTORY_FILE = "File History", $HISTORY_DIR = "Directory History"
 Enum $OPTION_KEEP, $OPTION_DELETE, $OPTION_ASK, $OPTION_MOVE
 Enum $RESULT_UNKNOWN, $RESULT_SUCCESS, $RESULT_FAILED, $RESULT_CANCELED, $RESULT_NOFREESPACE
 Enum $UNICODE_NONE, $UNICODE_MOVE, $UNICODE_COPY
 Enum $UPDATE_ALL, $UPDATE_HELPER, $UPDATE_MAIN
 Enum $UPDATEMSG_PROMPT, $UPDATEMSG_SILENT, $UPDATEMSG_FOUND_ONLY
+Const $FONT_ARIAL = "Arial"
 Const $PACKER_UPX = "UPX", $PACKER_ASPACK = "Aspack"
+Const $HISTORY_FILE = "File History", $HISTORY_DIR = "Directory History"
 Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNEXE = "unknownexe", $STATUS_UNKNOWNEXT = "unknownext", _
 	  $STATUS_INVALIDFILE = "invalidfile", $STATUS_INVALIDDIR = "invaliddir", $STATUS_NOTPACKED = "notpacked", $STATUS_BATCH = "batch", _
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
@@ -2567,10 +2568,16 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_MSI
-			If CheckLessmsi() Then
+			; Try Lessmsi first
+			$ret = CheckLessmsi()
+			If $ret Then
 				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_HIDE, True, True, True)
 				MoveFiles($outdir & "\SourceDir", $outdir, False, '', True)
-			Else
+			EndIf
+
+			; If lessmsi fails or .NET framework is not available, the user can choose between legacy extractors
+			If Not $ret Or $success == $RESULT_FAILED Then
+				$success = $RESULT_UNKNOWN
 				Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
 				$choice = MethodSelect($aReturn, $arcdisp)
 
@@ -2584,16 +2591,14 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						_Run($msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendargs, $filedir)
 
 					Case 3 ; MSI Total Commander plugin
-						extract($TYPE_QBMS, $arcdisp, $msi_plug, True)
+						DirCreate($tempoutdir)
+						_Run($quickbms & ' "' & $bindir & $msi_plug & '" "' & $file & '" "' & $tempoutdir & '"', $outdir, @SW_MINIMIZE, True, False)
 
 						; Extract files from extracted CABs
-						$cabfiles = FileSearch($tempoutdir)
+						$cabfiles = FileSearch($tempoutdir & "*.cab")
 						For $i = 1 To $cabfiles[0]
-							filescan($cabfiles[$i], 0)
-							If StringInStr($sFileType, "Microsoft Cabinet Archive", 0) Then
-								_Run($cmd & $7z & ' x "' & $cabfiles[$i] & '"', $outdir)
-								FileDelete($cabfiles[$i])
-							EndIf
+							_Run($cmd & $7z & ' x "' & $cabfiles[$i] & '"', $outdir)
+							FileDelete($cabfiles[$i])
 						Next
 
 						; Append missing file extensions
@@ -3499,7 +3504,13 @@ Func FileSearch($s_Mask = '', $i_Recurse = 1)
 	WEnd
 	$s_Buf = StringSplit(StringTrimRight($s_Buf, 2), @CRLF, 1)
 	ProcessClose($i_Pid)
-	If UBound($s_Buf) = 2 And $s_Buf[1] = '' Then SetError(1)
+
+	If UBound($s_Buf) == 2 And $s_Buf[1] = '' Then
+		ReDim $s_Buf[1]
+		$s_Buf[0] = 0
+		SetError(1)
+	EndIf
+
 	Return $s_Buf
 EndFunc
 
@@ -3663,7 +3674,7 @@ Func terminate($status, $fname = '', $arctype = '')
 	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 12) And $fileext <> "dll" Then
 		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file, 0) Then
 			; Attach input file's first bytes for debug purpose
-			If $isexe Then
+			If Not $isexe Then
 				Cout("--------------------------------------------------File dump--------------------------------------------------" & _
 					 @CRLF & _HexDump($file, 1024))
 			EndIf
@@ -3849,9 +3860,9 @@ Func _CreateTrayMessageBox($TBText)
 	Local $idTrayStatus = GUICtrlCreateLabel($TBText, $left, GetPos($TBgui, $idTrayFileName, 6, False), $width, 30)
 	Global $idTrayStatusExt = GUICtrlCreateLabel("", $left, GetPos($TBgui, $idTrayStatus, 8, False), $width, 20, $SS_CENTER)
 
-	GUICtrlSetFont($idTrayFileName, 9, 500, 0, "Arial")
-	GUICtrlSetFont($idTrayStatus, 9, 500, 0, "Arial")
-	GUICtrlSetFont($idTrayStatusExt, 9, 500, 0, "Arial")
+	GUICtrlSetFont($idTrayFileName, 9, 500, 0, $FONT_ARIAL)
+	GUICtrlSetFont($idTrayStatus, 9, 500, 0, $FONT_ARIAL)
+	GUICtrlSetFont($idTrayStatusExt, 9, 500, 0, $FONT_ARIAL)
 
 	If $bDark Then
 		GUICtrlSetColor($idTrayFileName, 0xFFFFFF)
@@ -4252,7 +4263,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 	Local $return = "", $pos = 0, $size = 1, $lastSize = 0
 	Local Const $LogFile = $logdir & "teelog.txt"
 
-	$f = _MakeCommand($f, $useCmd) & ($useTee? ' 2>&1 | ' & $tee & ' "' & $LogFile & '"': "")
+	$f = _MakeCommand($f, $useCmd) & ($useTee? ' 2>&1 | ' & $tee & ' "' & $LogFile & '"': '')
 
 	Cout("Executing: " & $f & " with options: patternSearch = " & $patternSearch & ", workingdir = " & $sWorkingDir)
 
@@ -4263,6 +4274,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 
 		$run = Run($f, $sWorkingDir, $initialShow? @SW_MINIMIZE: $show_flag)
 		If @error Then
+			Cout("Failed to execute command")
 			$success = $RESULT_FAILED
 			Return SetError(1)
 		EndIf
@@ -4357,7 +4369,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $useCmd = True,
 			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
 			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
 			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) _
-			   Or StringInStr($return, "Open ERROR: Can not open the file as") Then
+			   Or StringInStr($return, "Open ERROR: Can not open the file as") Or StringInStr($return, "Error: System.Exception:") Then
 			$success = $RESULT_FAILED
 			SetError(1)
 		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
@@ -5703,7 +5715,7 @@ Func GUI_Feedback($Type = "", $file = "")
 
 	$FB_PrivacyPolicyCheckbox = GUICtrlCreateCheckbox(t('FEEDBACK_PRIVACY_ACCEPT_LABEL'), 8, 442, 217, 17)
 	$FB_PrivacyPolicyOpen = GUICtrlCreateLabel(t('FEEDBACK_PRIVACY_VIEW_LABEL'), 246, 444, 147, 17, $SS_RIGHT)
-	GUICtrlSetFont(-1, 8, 800, 4, "MS Sans Serif")
+	GUICtrlSetFont(-1, 8, 800, 4, $FONT_ARIAL)
 	GUICtrlSetColor(-1, 0x000080)
 	GUICtrlSetCursor(-1, 0)
 
@@ -6143,11 +6155,11 @@ Func GUI_FirstStart()
 	_GuiSetColor()
 	Local $idImage = GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract_inno.bmp", 8, 312, 65, 65)
 	GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
-	GUICtrlSetFont(-1, 24, 800, 0, "MS Sans Serif")
+	GUICtrlSetFont(-1, 24, 800, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('FIRSTSTART_TITLE'), 8, 50, 488, 60, $SS_CENTER)
-	GUICtrlSetFont(-1, 14, 800, 0, "MS Sans Serif")
+	GUICtrlSetFont(-1, 14, 800, 0, $FONT_ARIAL)
 	Global $FS_Section = GUICtrlCreateLabel("", 16, 85, 382, 28)
-	GUICtrlSetFont(-1, 14, 800, 4, "MS Sans Serif")
+	GUICtrlSetFont(-1, 14, 800, 4, $FONT_ARIAL)
 	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 170)
 	Global $FS_Next = GUICtrlCreateButton(t('NEXT_BUT'), 296, 344, 89, 25)
 	Local $FS_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 400, 344, 89, 25)
@@ -6506,11 +6518,11 @@ Func GUI_Stats()
 	$GUI_Stats_Types_Legend = GUICtrlCreatePic("", 8, 312, 337, 113)
 	$GUI_Stats_Status_Legend = GUICtrlCreatePic("", 232, 72, 113, 209)
 	GUICtrlCreateLabel($ret, 8, 8, 715, 33, $SS_CENTER)
-	GUICtrlSetFont(-1, 18, 500, 0, "Arial")
+	GUICtrlSetFont(-1, 18, 500, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 212, 24, $SS_CENTER)
-	GUICtrlSetFont(-1, 12, 300, 0, "Arial")
+	GUICtrlSetFont(-1, 12, 300, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('STATS_HEADER_TYPE'), 368, 48, 354, 24, $SS_CENTER)
-	GUICtrlSetFont(-1, 12, 300, 0, "Arial")
+	GUICtrlSetFont(-1, 12, 300, 0, $FONT_ARIAL)
 	GUISetBkColor(0xFFFFFF)
 	GUICtrlSetDefBkColor(0xFFFFFF)
 	GUISetState(@SW_SHOW)
@@ -6599,11 +6611,11 @@ Func GUI_About()
 	$About = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
-	GUICtrlSetFont(-1, 25, 400, 0, "Arial")
+	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $width - 32, 17, $SS_CENTER)
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
-	GUICtrlSetFont(-1, 8, 800, 0, "Arial")
+	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
 	GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.jpg", $width - 89 - 10, $height - 55, 89, 50)
 	$About_OK = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
 	GUISetState(@SW_SHOW)
