@@ -76,6 +76,7 @@ Const $sPrivacyPolicyURL = "https://bioruebe.com/dev/uniextract/privacypolicy"
 Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
+Const $docsdir = @ScriptDir & "\docs\"
 Const $sUpdater = @ScriptDir & '\UniExtractUpdater.exe'
 Const $sUpdaterNoAdmin = @ScriptDir & '\UniExtractUpdater_NoAdmin.exe'
 Const $sEnglishLangFile = @ScriptDir & '\English.ini'
@@ -154,7 +155,7 @@ Global $posx = -1, $posy = -1
 Global $trayX = -1, $trayY = -1
 
 ; Global variables
-Dim $file, $filename, $filenamefull, $filedir, $fileext, $initoutdir, $outdir, $initdirsize
+Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
 Dim $prompt, $return, $Output, $hMutex, $sUpdateURL = $sDefaultUpdateURL
 Dim $About, $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Dim $sFullLog = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $exStyle = -1, $sArcTypeOverride = 0
@@ -352,9 +353,9 @@ Func StartExtraction()
 	FilenameParse($file)
 
 	; Collect file information, for log/feedback only
-	Local $return = Round(FileGetSize($file) / 1048576, 2)
-	Cout("File size: " & ($return < 1? Round(FileGetSize($file) / 1024, 2) & " KB": $return & " MB"))
-	Cout("Created " & FileGetTime($file, 1, 1) & ", modified " & FileGetTime($file, 0, 1))
+	Local $iSize = Round(FileGetSize($file) / 1048576, 2)
+	Global $sFileSize = $iSize < 1? Round(FileGetSize($file) / 1024, 2) & " KB": $iSize & " MB"
+	Cout("File size: " & $sFileSize)
 
 	; Set full output directory
 	If $outdir = '/sub' Then
@@ -1459,7 +1460,7 @@ Func advexescan()
 
 	_DeleteTrayMessageBox()
 
-	$sFileType = StringReplace($sFileType, $filenamefull & "   - ", "")
+	$sFileType = StringTrimLeft(StringStripWS(StringReplace($sFileType, $filenamefull, ""), 1), 2)
 
 	; Return if not .exe file
 	If StringInStr($sFileType, "NOT EXE") Or StringInStr($sFileType, "File is not Windows PE") Then Return
@@ -1581,9 +1582,6 @@ Func advexescan()
 		Case StringInStr($sFileType, ".dmg  Mac OS")
 			extract($TYPE_7Z, 'DMG ' & t('TERM_IMAGE'))
 
-		Case StringInStr($sFileType, "upx")
-			unpack($PACKER_UPX)
-
 		Case StringInStr($sFileType, "aspack")
 			unpack($PACKER_ASPACK)
 
@@ -1601,6 +1599,9 @@ Func advexescan()
 			terminate($STATUS_NOTPACKED, $file, "")
 
 		; Needs to be at the end, otherwise files might not be recognized
+		Case StringInStr($sFileType, "upx")
+			unpack($PACKER_UPX)
+
 		Case StringInStr($sFileType, "Microsoft Visual C++", 0) And Not StringInStr($sFileType, "SPx Method", 0) And Not StringInStr($sFileType, "Custom", 0) And Not StringInStr($sFileType, "7.0", 0)
 			$test7z = True
 			$testie = True
@@ -2573,6 +2574,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If $ret Then
 				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_HIDE, True, True, True)
 				MoveFiles($outdir & "\SourceDir", $outdir, False, '', True)
+				If $success == $RESULT_UNKNOWN And DirGetSize($outdir) == $initdirsize Then $success = $RESULT_FAILED
 			EndIf
 
 			; If lessmsi fails or .NET framework is not available, the user can choose between legacy extractors
@@ -2948,8 +2950,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 							$aStreamType[2] = "wmv" ;wmv3
 						ElseIf StringInStr($aStreamType[2], "mpeg") Then
 							$aStreamType[2] = "mpeg" ;mpeg1video
-						ElseIf StringInStr($aStreamType[2], "v8") Then
+						ElseIf StringInStr($aStreamType[2], "vp8") Then
 							$aStreamType[2] = "webm"
+						ElseIf StringInStr($aStreamType[2], "flv") Then
+							$aStreamType[2] = "flv" ;flv1
 						EndIf
 						_Run(_MakeFFmpegCommand($command & ' -vcodec copy -an -map ', $aStreamType, t('TERM_VIDEO'), $iVideo), $outdir, @SW_HIDE, True, True, False)
 					EndIf
@@ -3185,7 +3189,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	EndSwitch
 
 	If $success = $RESULT_FAILED Then
-		If Not $returnFail Then terminate($STATUS_FAILED, $file, $arcdisp)
+		If Not $returnFail Then terminate($STATUS_FAILED, $file, $arctype, $arcdisp)
 		$success = $RESULT_UNKNOWN
 		Return 0
 	EndIf
@@ -3226,8 +3230,9 @@ Func pluginExtract($sPlugin)
 
 	$sParameters = ReplacePlaceholders($sParameters)
 	$sWorkingDir = ReplacePlaceholders($sWorkingDir)
+	Local $show_flag = _ArrayGet($aReturn, "hide", 0, True) == 1? @SW_HIDE: @SW_MINIMIZE
 
-	_Run($sBinary & $sParameters, $sWorkingDir, _ArrayGet($aReturn, "hide", 0, True) == 1? @SW_HIDE: @SW_MINIMIZE, _ArrayGet($aReturn, "useCmd", 1, True) == 1, _ArrayGet($aReturn, "log", 1, True) == 1, _ArrayGet($aReturn, "patternSearch", 0, True) == 1, _ArrayGet($aReturn, "initialShow", 1, True) == 1)
+	_Run($sBinary & $sParameters, $sWorkingDir, $showitem, _ArrayGet($aReturn, "useCmd", 1, True) == 1, _ArrayGet($aReturn, "log", 1, True) == 1, _ArrayGet($aReturn, "patternSearch", 0, True) == 1, _ArrayGet($aReturn, "initialShow", 1, True) == 1)
 
 	Local $sCleanup = IniRead($sPluginFile, $sSection, "cleanup", 0)
 	If Not $sCleanup Or StringLen($sCleanup) < 1 Then Return
@@ -3529,7 +3534,7 @@ Func _FileRead($f, $delete = False, $iFlag = 0)
 EndFunc
 
 ; Handle program termination with appropriate error message
-Func terminate($status, $fname = '', $arctype = '')
+Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	Local $LogFile = 0, $exitcode = 0, $sFileType = _FiletypeGet(False), $shortStatus = ($status = $STATUS_SUCCESS)? $arctype: $status
 
 	; Rename unicode file
@@ -3622,7 +3627,7 @@ Func terminate($status, $fname = '', $arctype = '')
 			Prompt(48, 'NOT_PACKED', CreateArray($file, $sFileType), 0)
 			$exitcode = 6
 		Case $STATUS_NOTSUPPORTED
-			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, $sFileType), 0)
+			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, StringReplace(t('MENU_HELP_FEEDBACK_LABEL'), "&", ""), StringReplace(t('MENU_HELP_LABEL'), "&", "")), 0)
 			$exitcode = 7
 		Case $STATUS_MISSINGEXE
 			Prompt(48, 'MISSING_EXE', CreateArray($file, $arctype))
@@ -3648,7 +3653,7 @@ Func terminate($status, $fname = '', $arctype = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $arctype), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $arcdisp), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
 			$exitcode = 1
 
 			; Exit successfully
@@ -3671,7 +3676,7 @@ Func terminate($status, $fname = '', $arctype = '')
 	; Delete empty output directory if failed
 	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
-	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 12) And $fileext <> "dll" Then
+	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Or $exitcode == 12) And $fileext <> "dll" Then
 		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file, 0) Then
 			; Attach input file's first bytes for debug purpose
 			If Not $isexe Then
@@ -4938,9 +4943,17 @@ Func _AfterUpdate()
 	FileDelete($bindir & "mpq.wcx64")
 	FileDelete($bindir & "Expander.exe")
 	FileDelete($bindir & "stuffit5.engine-5.1.dll")
+	FileDelete($bindir & "FLVExtractCL.exe")
+	FileDelete($defdir & "flv.ini")
+	FileDelete($docsdir & "flac_authors.txt")
+	FileDelete($docsdir & "flac_readme.txt")
+	FileDelete($docsdir & "Expander_license.txt")
+	FileDelete($docsdir & "flvextractcl_icons.txt")
+	FileDelete($docsdir & "bcm_readme.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
+	DirRemove($bindir & "plugins", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03-src", 1)
 
@@ -5762,11 +5775,13 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	If $guimain Then GUISetState(@SW_HIDE, $guimain)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
 
-	$FB_Text = $name & " Feedback v" & $sVersion & "(" & FileGetVersion($sUniExtract, "Timestamp") & ")" & @CRLF & _
+	$FB_Text = $name & " Feedback v" & $sVersion & " (" & FileGetVersion($sUniExtract, "Timestamp") & ")" & @CRLF & _
 			"----------------------------------------------------------------------------------------------------" _
-			 & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample File: " & $FB_File _
-			 & @CRLF & "Type: " & $sFileType & @CRLF & @CRLF & "Message: " & $FB_Message & @CRLF & @CRLF & "Output:" _
-			 & @CRLF & $FB_Output & @CRLF & @CRLF & _
+			 & @CRLF & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample file: " & _
+			 $FB_File & @CRLF & "File size: " & $sFileSize & @CRLF & "File type: " & _FiletypeGet(False) & @CRLF _
+			 & @CRLF & "Message: " & $FB_Message & @CRLF & @CRLF & _
+			"----------------------------------------------------------------------------------------------------" _
+			 & @CRLF & @CRLF & "Output:" & @CRLF & $FB_Output & @CRLF & @CRLF & _
 			"----------------------------------------------------------------------------------------------------" _
 			 & @CRLF & "Sent by: " & @CRLF & $ID
 
@@ -5976,8 +5991,6 @@ Func GUI_ContextMenu_OK()
 
 	; Remove old associations
 	GUI_ContextMenu_remove()
-
-	;If NOT RegExists($reguser) Then RegWrite($reguser)
 
 	Cout("Registering context menu entries")
 	If GUICtrlRead($CM_Checkbox_enabled) == $GUI_CHECKED Then
