@@ -338,7 +338,7 @@ EndIf
 $hMutex = _Singleton($name & " " & $sVersion, 1)
 If $hMutex = 0 And $extract Then
 	AddToBatch()
-	terminate($STATUS_SILENT, '', '')
+	terminate($STATUS_SILENT)
 EndIf
 
 StartExtraction()
@@ -426,7 +426,7 @@ Func StartExtraction()
 	; Display file information and terminate if scan only mode
 	If Not $extract Then
 		MediaFileScan($file)
-		terminate($STATUS_FILEINFO, "", "")
+		terminate($STATUS_FILEINFO)
 	EndIf
 
 	; Else perform additional extraction methods
@@ -440,7 +440,7 @@ Func StartExtraction()
 
 	; Cannot determine filetype, all checks failed - abort
 	_DeleteTrayMessageBox()
-	terminate($STATUS_UNKNOWNEXT, $file, "")
+	terminate($STATUS_UNKNOWNEXT, $file)
 EndFunc
 
 ; Extract if exe file detected
@@ -451,7 +451,7 @@ Func IsExe()
 	; Just for fun
 	If $file = @ScriptFullPath Or $file = $sUpdater Or $file = $sUpdaterNoAdmin Then
 		_FiletypeAdd($name, $name)
-		terminate($STATUS_NOTPACKED, $file, "")
+		terminate($STATUS_NOTPACKED, $file, $name, $name)
 	EndIf
 
 	; Check executable using Exeinfo PE
@@ -589,7 +589,7 @@ Func ParseCommandLine()
 		terminate($STATUS_SILENT)
 
 	Else
-		If Not FileExists($cmdline[1]) Then	terminate($STATUS_INVALIDFILE, $cmdline[1], "")
+		If Not FileExists($cmdline[1]) Then	terminate($STATUS_INVALIDFILE, $cmdline[1])
 
 		$file = $cmdline[1]
 		If $cmdline[0] > 1 Then
@@ -615,7 +615,7 @@ Func ParseCommandLine()
 
 		If _ArraySearch($cmdline, "/batch") > -1 Then
 			AddToBatch()
-			terminate($STATUS_SILENT, '', '')
+			terminate($STATUS_SILENT)
 		EndIf
 	EndIf
 EndFunc
@@ -988,9 +988,9 @@ Func filecompare($sFileType)
 	  StringInStr($sFileType, "shortcut") Or StringInStr($sFileType, "empty") Or _
 	  StringInStr($sFileType, "directory") Or StringInStr($sFileType, "BitTorrent file") Or _
 	  StringInStr($sFileType, "Standard MIDI data") Or StringInStr($sFileType, "MSVC program database") Then _
-		terminate($STATUS_NOTPACKED, $file, "")
+		terminate($STATUS_NOTPACKED, $file)
 
-	If StringInStr($sFileType, "MS-DOS executable") Then terminate($STATUS_NOTSUPPORTED, $file, "")
+	If StringInStr($sFileType, "MS-DOS executable") Then terminate($STATUS_NOTSUPPORTED, $file)
 EndFunc
 
 ; Compare TrID's return to supported file types
@@ -1170,7 +1170,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Ren'Py data file")
 			extract($TYPE_RPA, "Ren'Py " & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "RPM Linux Package")
+		Case StringInStr($sFileType, "RPM Package")
 			extract($TYPE_7Z, 'RPM ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "sfArk compressed SoundFont")
@@ -1266,11 +1266,11 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
 			 StringInStr($sFileType, "Microsoft Program DataBase")
-			terminate($STATUS_NOTPACKED, $file, "")
+			terminate($STATUS_NOTPACKED, $file)
 
 		; Not supported filetypes
 		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File")
-			terminate($STATUS_NOTSUPPORTED, $file, "")
+			terminate($STATUS_NOTSUPPORTED, $file)
 
 		; Check for .exe file, only when fileext not .exe
 		Case Not $isexe And (StringInStr($sFileType, 'Executable') Or StringInStr($sFileType, '(.EXE)', 1))
@@ -1460,7 +1460,7 @@ Func advexescan()
 
 	_DeleteTrayMessageBox()
 
-	$sFileType = StringTrimLeft(StringStripWS(StringReplace($sFileType, $filenamefull, ""), 1), 2)
+	If StringInStr($sFileType, $filenamefull) Then $sFileType = StringTrimLeft(StringStripWS(StringReplace($sFileType, $filenamefull, ""), 1), 2)
 
 	; Return if not .exe file
 	If StringInStr($sFileType, "NOT EXE") Or StringInStr($sFileType, "File is not Windows PE") Then Return
@@ -1503,6 +1503,9 @@ Func advexescan()
 			 StringInStr($sFileType, "Setup Factory 6.x")
 			checkIE()
 
+		Case StringInStr($sFileType, "install4j")
+			BmsExtract("install4j")
+
 		; Needs to be before InstallShield
 		Case StringInStr($sFileType, "InstallAware")
 			extract($TYPE_7Z, 'InstallAware ' & t('TERM_INSTALLER') & ' ' & t('TERM_PACKAGE'))
@@ -1544,7 +1547,7 @@ Func advexescan()
 			extract($TYPE_WIX, 'WiX ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "Microsoft SFX CAB") And StringInStr($sFileType, "rename file *.exe as *.cab")
-			Prompt(1, "FILE_COPY", $file, 1)
+			Prompt(1, "FILE_COPY", $file, True)
 			Local $return = _TempFile($filedir, $filename & "_", ".cab")
 			FileCopy($file, $return)
 			$file = $return
@@ -1588,7 +1591,7 @@ Func advexescan()
 		; Not supported
 		Case StringInStr($sFileType, "Astrum InstallWizard") Or StringInStr($sFileType, "clickteam") Or _
 			 StringInStr($sFileType, "BitRock InstallBuilder") Or StringInStr($sFileType, "NE <- Windows 16bit")
-			terminate($STATUS_NOTSUPPORTED, $file, "")
+			terminate($STATUS_NOTSUPPORTED, $file)
 
 		; Terminate if file cannot be unpacked
 		Case (StringInStr($sFileType, "Not packed") And Not StringInStr($sFileType, "Microsoft Visual C++")) Or _
@@ -1596,7 +1599,7 @@ Func advexescan()
 			  StringInStr($sFileType, "Autoit") Or StringInStr($sFileType, "LE <- Linear Executable") Or _
 			  StringInStr($sFileType, "NOT EXE - Empty file") Or StringInStr($sFileType, "Native - System driver") Or _
 			  StringInStr($sFileType, "Denuvo protector") Or StringInStr($sFileType, "Kaspersky AV Pack")
-			terminate($STATUS_NOTPACKED, $file, "")
+			terminate($STATUS_NOTPACKED, $file)
 
 		; Needs to be at the end, otherwise files might not be recognized
 		Case StringInStr($sFileType, "upx")
@@ -1778,7 +1781,7 @@ Func checkBin()
 
 	$NSISbin = FileFindFirstFile($filedir & "\data*.bin")
 	If $NSISbin == -1 Then Return
-	If Prompt(64 + 1, "NSIS_BINFILES", CreateArray($file, $filenamefull), 0) Then
+	If Prompt(64 + 1, "NSIS_BINFILES", CreateArray($file, $filenamefull)) Then
 		While 1
 			$file = $filedir & "\" & FileFindNextFile($NSISbin)
 			If @error Then ExitLoop
@@ -1787,7 +1790,7 @@ Func checkBin()
 		WEnd
 	EndIf
 	FileClose($NSISbin)
-	terminate($STATUS_SUCCESS, "", "NSIS")
+	terminate($STATUS_SUCCESS, $filenamefull, "NSIS", "NSIS")
 EndFunc
 
 ; Determine if file is supported game archive
@@ -1820,41 +1823,18 @@ Func CheckGame($bUseGaup = True)
 	EndIf
 
 	; Check if game specific bms script is available
-	_SQLite_Startup()
-	If @error Then Return Cout("[ERROR] SQLite startup failed with code " & @error)
+	Local $hDB = OpenDB("BMS.db")
+	Local $aReturn[0], $iRows, $iColumns
 
-	_SQLite_Open($bindir & "BMS.db", $SQLITE_OPEN_READONLY)
-	If @error Then Return Cout("[ERROR] Failed to open BMS database")
+	_SQLite_GetTable($hDB, "SELECT n.Name FROM Names n, Scripts s, Extensions e WHERE s.SID = e.EID AND s.SID = n.NID AND e.Extension= '" _
+						  & StringLower($fileext) & "' ORDER BY n.Name", $aReturn, $iRows, $iColumns)
+ 	_ArrayDelete($aReturn, 1)
 
-	Local $gameformat, $iRows, $iColumns, $game
-
-	_SQLite_GetTable(-1, "SELECT n.Name FROM Names n, Scripts s, Extensions e WHERE s.SID = e.EID AND s.SID = n.NID AND e.Extension= '" _
-			 & StringLower($fileext) & "' ORDER BY n.Name", $gameformat, $iRows, $iColumns)
- 	_ArrayDelete($gameformat, 1)
-
-	If $gameformat[0] > 1 Then
-		_ArrayDelete($gameformat, 0)
-		_ArraySort($gameformat)
-		$game = GameSelect(_ArrayToString($gameformat), t('METHOD_GAME_NOGAME'))
-
-		If $game Then
-			Cout("SELECT s.Script FROM Scripts s, Names n WHERE s.SID = n.NID AND Name = '" & $game & "'")
-			_SQLite_GetTable(-1, "SELECT s.Script FROM Scripts s, Names n WHERE s.SID = n.NID AND Name = '" & _
-								 $game & "'", $gameformat, $iRows, $iColumns)
-			;_ArrayDisplay($gameformat)
-			; Write script to file and execute it
-			$bmsScript = FileOpen($bindir & $bms, 2)
-			FileWrite($bmsScript, $gameformat[2])
-			FileClose($bmsScript)
-			$return = FetchStdout($quickbms & ' -l "' & $bindir & $bms & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
-			;_ArrayDisplay($gameformat)
-			If Not StringInStr($return, "0 files found") And Not StringInStr($return, "Error") And Not StringInStr($return, "invalid") _
-			And Not StringInStr($return, "expeceted") And $return <> "" Then
-				_SQLite_Close()
-				_SQLite_Shutdown()
-				extract($TYPE_QBMS, $game & " " & t('TERM_PACKAGE'), $bms)
-			EndIf
-		EndIf
+	If $aReturn[0] > 1 Then
+		_ArrayDelete($aReturn, 0)
+		_ArraySort($aReturn)
+		Local $choice = GUI_GameSelect(_ArrayToString($aReturn), t('METHOD_GAME_NOGAME'))
+		BmsExtract($choice, $hDB)
 	EndIf
 
 	_SQLite_Close()
@@ -2065,9 +2045,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		If Not StringInStr(FileGetAttrib($outdir), "D") Then terminate($STATUS_INVALIDDIR, $outdir, "")
 		$dirmtime = FileGetTime($outdir, 0, 1)
 		If @error Then $dirmtime = -1
-		If Not CanAccess($outdir) Then terminate($STATUS_INVALIDDIR, $outdir, "")
+		If Not CanAccess($outdir) Then terminate($STATUS_INVALIDDIR, $outdir)
 	Else
-		If Not DirCreate($outdir) Then terminate($STATUS_INVALIDDIR, $outdir, "")
+		If Not DirCreate($outdir) Then terminate($STATUS_INVALIDDIR, $outdir)
 		$createdir = True
 	EndIf
 
@@ -2083,7 +2063,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $sPassword = _FindArchivePassword($7z & ' l -p -slt "' & $file & '"', $7z & ' t -p"%PASSWORD%" "' & $file & '"', "Encrypted = +", "Wrong password?", 0, "Everything is Ok")
 			_Run($7z & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_HIDE, True, True, True, True)
 			If @error = 3 Then terminate($STATUS_MISSINGPART)
-			If @extended Then terminate($STATUS_PASSWORD, $file, $arcdisp)
+			If @extended Then terminate($STATUS_PASSWORD, $file, $arctype, $arcdisp)
 
 			If FileExists($outdir & '\.text') Then
 				; Generic .exe extraction should not be considered successful
@@ -2140,7 +2120,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If @error Then Return
 
 			Local $hWnd = WinWait("arc_conv", "", $Timeout)
-			If $hWnd == 0 Then terminate($STATUS_TIMEOUT, $file, $arcdisp)
+			If $hWnd == 0 Then terminate($STATUS_TIMEOUT, $file, $arctype, $arcdisp)
 			Local $current = "", $last = ""
 			; Hide not possible as window text has to be read
 			WinSetState("arc_conv", "", @SW_MINIMIZE)
@@ -2202,7 +2182,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			FileClose($ret)
 			_Run($ci & ' ' & $return, $outdir, @SW_SHOW, False, False, False)
 			FileDelete($return)
-			terminate($STATUS_SILENT, "", "")
+			terminate($STATUS_SILENT)
 
 		Case $TYPE_CRAGE
 			HasPlugin($crage)
@@ -2236,12 +2216,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			HasPlugin($dgca)
 			Local $sPassword = _FindArchivePassword($dgca & ' e "' & $file & '"', $dgca & ' l -p%PASSWORD% "' & $file & '"', "Archive encrypted.", 0, -2, "-------------------------")
 			_Run($dgca & ' e ' & ($sPassword == 0? '"': '-p' & $sPassword & ' "') & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE, True, True, False, False)
-			If @extended Then terminate($STATUS_PASSWORD, $file, $arcdisp)
+			If @extended Then terminate($STATUS_PASSWORD, $file, $arctype, $arcdisp)
 
 		Case $TYPE_DAA
 			; Prompt user to continue
 			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', 'DAA/GBI', 1)
+			Prompt(32 + 4, 'CONVERT_CDROM', 'DAA/GBI', True)
 
 			; Begin conversion to .iso format
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'DAA ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
@@ -2293,9 +2273,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($fsb & ' -d "' & $outdir & '" "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, False)
 
 		Case $TYPE_GCF
-			Prompt(48 + 1, 'PACKAGE_EXPLORER', $file, 1)
+			Prompt(48 + 1, 'PACKAGE_EXPLORER', $file, True)
 			Run($gcf & ' "' & $file & '"')
-			terminate($STATUS_SILENT, "", "")
+			terminate($STATUS_SILENT)
 
 		Case $TYPE_GHOST
 			$ret = $outdir & "\" & $filename & ".exe"
@@ -2494,7 +2474,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 								; Move files to outdir
 								_DeleteTrayMessageBox()
-								Prompt(64, 'INIT_COMPLETE', 0)
+								Prompt(64, 'INIT_COMPLETE')
 								MoveFiles($tempoutdir, $outdir, False, "", True)
 								$success = $RESULT_SUCCESS
 								ExitLoop
@@ -2507,7 +2487,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						; Not a supported installer
 						If $success <> $RESULT_SUCCESS Then
 							_DeleteTrayMessageBox()
-							Prompt(64, 'INIT_COMPLETE', 0)
+							Prompt(64, 'INIT_COMPLETE')
 						EndIf
 
 					; Not InstallShield
@@ -2519,7 +2499,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_ISZ
 			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', 'ISZ', 1)
+			Prompt(32 + 4, 'CONVERT_CDROM', 'ISZ', True)
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'ISZ ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
 
 			_RunInTempOutdir($tempoutdir, $isz & ' "' & $file & '"', $tempoutdir, True, True)
@@ -2686,7 +2666,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $sPassword = _FindArchivePassword($rar & ' lt -p- "' & $file & '"', $rar & ' t -p"%PASSWORD%" "' & $file & '"', "encrypted", 0, 0)
 			_Run($rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
 			If @error = 3 Then terminate($STATUS_MISSINGPART)
-			If @extended Then terminate($STATUS_PASSWORD, $file, $arcdisp)
+			If @extended Then terminate($STATUS_PASSWORD, $file, $arctype, $arcdisp)
 
 		Case $TYPE_RGSS
 			HasNetFramework(2)
@@ -2871,12 +2851,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_TTARCH ; Test
 			; Get all supported games
 			$aReturn = _StringBetween(FetchStdout($ttarch, @ScriptDir, @SW_HIDE), "Games", "Examples")
-			If @error Then terminate($STATUS_FAILED, $file, $arcdisp)
+			If @error Then terminate($STATUS_FAILED, $file, $arctype, $arcdisp)
 			$gameformat = StringRegExp($aReturn[0], "\d+ +(.+)", 3)
 ;~ 			_ArrayDisplay($gameformat)
 
 			; Display game select GUI
-			$game = GameSelect(_ArrayToString($gameformat), t('METHOD_GAME_NOGAME'))
+			$game = GUI_GameSelect(_ArrayToString($gameformat), t('METHOD_GAME_NOGAME'))
 			If $game Then
 				$game = _ArraySearch($gameformat, $game)
 				If $game > -1 Then _Run($ttarch & ' -m ' & $game & ' "' & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE)
@@ -2894,7 +2874,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_UIF
 			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', 'UIF', 1)
+			Prompt(32 + 4, 'CONVERT_CDROM', 'UIF', True)
 
 			; Begin conversion, format selected by uif2iso
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'UIF ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
@@ -2920,7 +2900,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$return = FetchStdout($command, $outdir, @SW_HIDE)
 
 			; Terminate if file could not be read by FFmpeg
-			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") Then terminate($STATUS_FAILED, $file, $arcdisp)
+			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") Then terminate($STATUS_FAILED, $file, $arctype, $arcdisp)
 
 			; Otherwise, extract all tracks
 			$Streams = StringSplit($return, "Stream", 1)
@@ -2973,7 +2953,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Cout("Unknown stream type: " & $aStreamType[1])
 				EndIf
 			Next
-			If $iVideo + $iAudio < 1 Then terminate($STATUS_NOTPACKED, $file, $arcdisp)
+			If $iVideo + $iAudio < 1 Then terminate($STATUS_NOTPACKED, $file, $arctype, $arcdisp)
 
 		Case $TYPE_VIDEO_CONVERT
 			HasFFMPEG()
@@ -3041,7 +3021,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Case 4
 					; Prompt to continue
 					_DeleteTrayMessageBox()
-					Prompt(48 + 4, 'WISE_MSI_PROMPT', 1)
+					Prompt(48 + 4, 'WISE_MSI_PROMPT', True)
 
 					; First, check for any files that are already in extraction dir
 					_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
@@ -3114,12 +3094,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & StringUpper($arctype) & ' ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
 			$file = $isofile
 			If Not CheckIso() Then _Run($7z & ' x "' & $isofile & '"', $outdir)
-			If $success <> $RESULT_FAILED Or Prompt(16 + 4, 'CONVERT_CDROM_STAGE2_FAILED', '', 0) = 0 Then
+			If $success <> $RESULT_FAILED Or Prompt(16 + 4, 'CONVERT_CDROM_STAGE2_FAILED') = 0 Then
 				$initdirsize -= FileGetSize($isofile)
 				FileDelete($isofile)
 			EndIf
 		Else
-			Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED', '', 0)
+			Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED')
 			If FileExists($isofile) Then FileDelete($isofile)
 			check7z()
 			$success = $RESULT_FAILED
@@ -3161,7 +3141,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				; Check generic .exe ressource extraction
 				If FileExists($outdir & "\[0]") Then
 					; Try to extract unpacked file (skip file extension checks)
-					If Prompt(48 + 1, "UNPACK_GENERIC_ZIP", CreateArray($file, "7Zip", $outdir & "\[0]"), 0) Then
+					If Prompt(48 + 1, "UNPACK_GENERIC_ZIP", CreateArray($file, "7Zip", $outdir & "\[0]")) Then
 						Cout("Trying to extract unpacked file [0]")
 						$file = $outdir & "\[0]"
 						$outdir = $file & "\"
@@ -3194,7 +3174,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Return 0
 	EndIf
 
-	If Not $returnSuccess Then terminate($STATUS_SUCCESS, "", $arctype)
+	If Not $returnSuccess Then terminate($STATUS_SUCCESS, $filenamefull, $arctype, $arcdisp)
 	$success = $RESULT_UNKNOWN
 	Return 1
 EndFunc
@@ -3205,7 +3185,7 @@ Func pluginExtract($sPlugin)
 	Local $sPluginFile = $userDefDir & $sPlugin & ".ini"
 	If Not FileExists($sPluginFile) Then
 		$sPluginFile = $defdir & $sPlugin & ".ini"
-		If Not FileExists($sPluginFile) Then terminate($STATUS_MISSINGDEF, $sPluginFile, '')
+		If Not FileExists($sPluginFile) Then terminate($STATUS_MISSINGDEF, $sPluginFile, $sPlugin)
 	EndIf
 
 	Local Const $sSection = "Plugin"
@@ -3261,6 +3241,45 @@ Func ReplacePlaceholders($sString, $bQuote = True)
 	Return $sString
 EndFunc
 
+; Load a BMS script from the database and start extraction
+Func BmsExtract($sName, $hDB = 0)
+	If Not $sName Then Return
+
+	If $hDB == 0 Then $hDB = OpenDB("BMS.db")
+
+	If $hDB Then
+		Local $aReturn[0], $iRows, $iColumns
+		_SQLite_GetTable($hDB, Cout("SELECT s.Script FROM Scripts s, Names n WHERE s.SID = n.NID AND Name = '" & $sName & "'"), $aReturn, $iRows, $iColumns)
+		;_ArrayDisplay($aReturn)
+
+		; Write script to file and execute it
+		$bmsScript = FileOpen($bindir & $bms, 2)
+		FileWrite($bmsScript, $aReturn[2])
+		FileClose($bmsScript)
+		$return = FetchStdout($quickbms & ' -l "' & $bindir & $bms & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
+		;_ArrayDisplay($return)
+		If Not StringInStr($return, "0 files found") And Not StringInStr($return, "Error") And Not StringInStr($return, "invalid") _
+		And Not StringInStr($return, "expected: ") And $return <> "" Then
+			_SQLite_Close($hDB)
+			_SQLite_Shutdown()
+			extract($TYPE_QBMS, $sName & " " & t('TERM_PACKAGE'), $bms)
+		EndIf
+	EndIf
+
+	terminate($STATUS_FAILED, $filenamefull, $sName, $sName)
+EndFunc
+
+; Start SQLite and open a database
+Func OpenDB($sName)
+	_SQLite_Startup()
+	If @error Then Return Cout("[ERROR] SQLite startup failed with code " & @error)
+
+	$hDB = _SQLite_Open($bindir & $sName, $SQLITE_OPEN_READONLY)
+	If @error Then Return Cout("[ERROR] Failed to open database " & $sName)
+
+	Return $hDB
+EndFunc
+
 ; Retrieve array value be key
 Func _ArrayGet(ByRef $aData, $sKey, $sDefault, $bNumber = False, $iKeyIndex = 0, $iValueIndex = 1)
 	Local $ret = _ArraySearch($aData, $sKey, 0, 0, 0, 0, 1, $iKeyIndex)
@@ -3282,7 +3301,7 @@ Func unpack($packer)
 	$ret = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext
 
 	; Prompt to continue
-	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, $ret), 0) Then Return
+	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, $ret)) Then Return
 
 	; Unpack file
 	Switch $packer
@@ -3301,15 +3320,15 @@ Func unpack($packer)
 	; Success evaluation
 	If FileExists($ret) Then
 		; Prompt if unpacked file should be scanned
-		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($file, $filename & '_' & t('TERM_UNPACKED') & "." & $fileext), 0) Then
+		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($file, $filename & '_' & t('TERM_UNPACKED') & "." & $fileext)) Then
 			$file = $ret
 			$outdir = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "\"
 			StartExtraction()
 		Else
-			terminate($STATUS_SUCCESS, "", $packer)
+			terminate($STATUS_SUCCESS, $filenamefull, $packer, $packer)
 		EndIf
 	Else
-		Prompt(16, 'UNPACK_FAILED', $file, 1)
+		Prompt(16, 'UNPACK_FAILED', $file)
 	EndIf
 EndFunc
 
@@ -3381,7 +3400,7 @@ Func HasPlugin($plugin, $returnFail = False)
 	If FileExists($plugin) Or (_WinAPI_PathIsRelative($plugin) And (FileExists(_PathFull($plugin, $bindir)) Or FileExists(_PathFull($plugin, $archdir)))) Then Return True
 	Cout("Plugin not found")
 	If $returnFail Then Return False
-	terminate($STATUS_MISSINGEXE, $file, $plugin)
+	terminate($STATUS_MISSINGEXE, $file, $plugin, $plugin)
 EndFunc
 
 ; Search for translation file for given language and return result
@@ -3407,14 +3426,14 @@ Func HasFreeSpace($sPath = $outdir, $fModifier = 2)
 		Local $diff = Round(Abs($freeSpace - $fileSize), 2)
 		Cout("Not enough free space available: " & $freeSpace & " MB, needed: " & $fileSize & " MB, difference: " & $diff & " MB.")
 		Local $Msg = t('NO_FREE_SPACE', CreateArray(StringLeft($sPath, 1), $freeSpace, $fileSize, $diff))
-		If $silentmode Then terminate($STATUS_FAILED, '', $Msg)
+		If $silentmode Then terminate($STATUS_FAILED, $filenamefull, $STATUS_NOFREESPACE, $Msg)
 
 		$return = MsgBox($iTopmost + 48 + 2, $name, $Msg)
 		If $return = 4 Then ; Retry
 			Return HasFreeSpace($sPath, $fModifier)
 		ElseIf $return = 3 Then ; Cancel
 			If $createdir Then DirRemove($outdir, 0)
-			terminate($STATUS_SILENT, '', '')
+			terminate($STATUS_SILENT)
 		EndIf
 	EndIf
 EndFunc
@@ -3422,9 +3441,9 @@ EndFunc
 ; Search for FFMPEG and prompt to download it if not found
 Func HasFFMPEG()
 	If HasPlugin($ffmpeg, True) Then Return
-	Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "https://ffmpeg.org/legal.html"), 1)
+	Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "https://ffmpeg.org/legal.html"), True)
 	GetFFmpeg()
-	If @error Then terminate($STATUS_SILENT, "", "")
+	If @error Then terminate($STATUS_SILENT)
 EndFunc
 
 ; Create a temporary directory which did not exist before
@@ -3612,22 +3631,22 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 
 		; Display error information and exit
 		Case $STATUS_UNKNOWNEXE
-			If Not $silentmode And Prompt(256 + 16 + 4, 'CANNOT_EXTRACT', CreateArray($file, $sFileType), 0) Then Run($exeinfope & ' "' & $file & '"', $filedir)
+			If Not $silentmode And Prompt(256 + 16 + 4, 'CANNOT_EXTRACT', CreateArray($file, $sFileType)) Then Run($exeinfope & ' "' & $file & '"', $filedir)
 			$exitcode = 3
 		Case $STATUS_UNKNOWNEXT
-			Prompt(16, 'UNKNOWN_EXT', CreateArray($file, $sFileType == ""? "": t('FILESCAN_TITLE') & @CRLF & @CRLF & _FiletypeGet(True, 76)), 0)
+			Prompt(16, 'UNKNOWN_EXT', CreateArray($file, $sFileType == ""? "": t('FILESCAN_TITLE') & @CRLF & @CRLF & _FiletypeGet(True, 76)))
 			$exitcode = 4
 		Case $STATUS_INVALIDFILE
-			Prompt(16, 'INVALID_FILE', $fname, 0)
+			Prompt(16, 'INVALID_FILE', $fname)
 			$exitcode = 5
 		Case $STATUS_INVALIDDIR
-			Prompt(16, 'INVALID_DIR', $fname, 0)
+			Prompt(16, 'INVALID_DIR', $fname)
 			$exitcode = 5
 		Case $STATUS_NOTPACKED
-			Prompt(48, 'NOT_PACKED', CreateArray($file, $sFileType), 0)
+			Prompt(48, 'NOT_PACKED', CreateArray($file, $sFileType))
 			$exitcode = 6
 		Case $STATUS_NOTSUPPORTED
-			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, StringReplace(t('MENU_HELP_FEEDBACK_LABEL'), "&", ""), StringReplace(t('MENU_HELP_LABEL'), "&", "")), 0)
+			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, StringReplace(t('MENU_HELP_FEEDBACK_LABEL'), "&", ""), StringReplace(t('MENU_HELP_LABEL'), "&", "")))
 			$exitcode = 7
 		Case $STATUS_MISSINGEXE
 			Prompt(48, 'MISSING_EXE', CreateArray($file, $arctype))
@@ -3653,15 +3672,14 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $arcdisp), 0) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $arcdisp)) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
 			$exitcode = 1
 
 			; Exit successfully
 		Case $STATUS_SUCCESS
-			If $iDeleteOrigFile = $OPTION_DELETE Then
+			If $iDeleteOrigFile = $OPTION_DELETE Or ($iDeleteOrigFile = $OPTION_ASK And Not $silentmode And Prompt(32 + 4, 'FILE_DELETE', $file)) Then
+				Cout("Deleting source file " & $file)
 				FileDelete($file)
-			ElseIf $iDeleteOrigFile = $OPTION_ASK Then
-				If Not $silentmode And Prompt(32 + 4, 'FILE_DELETE', $file) Then FileDelete($file)
 			EndIf
 			If $OpenOutDir And Not $silentmode Then Run("explorer.exe /e, " & $outdir)
 	EndSwitch
@@ -3677,7 +3695,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
 
 	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Or $exitcode == 12) And $fileext <> "dll" Then
-		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file, 0) Then
+		If $FB_ask And $extract And Not $silentmode And Prompt(32+4, 'FEEDBACK_PROMPT', $file) Then
 			; Attach input file's first bytes for debug purpose
 			If Not $isexe Then
 				Cout("--------------------------------------------------File dump--------------------------------------------------" & _
@@ -3758,40 +3776,9 @@ Func MethodSelect($aData, $arcdisp)
 				; Exit if Cancel clicked or window closed
 			Case $GUI_EVENT_CLOSE, $idCancel
 				If $createdir Then DirRemove($outdir, 0)
-				terminate($STATUS_SILENT, '', '')
+				terminate($STATUS_SILENT)
 		EndSwitch
 	WEnd
-EndFunc
-
-; Create GUI to select game and return selection
-Func GameSelect($sEntries, $sStandard)
-	Local $sSelection = 0
-	$GameSelectGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
-	_GuiSetColor()
-	$GameSelectLabel = GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filenamefull, $sStandard)), 10, 8, 252, 210, $SS_CENTER)
-	$GameSelectList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
-	GUICtrlSetData(-1, $sStandard & '|' & $sEntries)
-	$ok = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)
-	$cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 152, 427, 81, 25)
-	_GUICtrlListBox_UpdateHScroll($GameSelectList)
-	_GUICtrlListBox_SetCurSel($GameSelectList, 0)
-	GUISetState(@SW_SHOW)
-	Opt("GUIOnEventMode", 0)
-
-	While 1
-		$nMsg = GUIGetMsg($GameSelectGUI)
-		Switch $nMsg
-			Case $ok
-				$sSelection = GUICtrlRead($GameSelectList)
-				If $sSelection == $sStandard Then $sSelection = 0
-				ExitLoop
-			Case $GUI_EVENT_CLOSE, $cancel
-				ExitLoop
-		EndSwitch
-	WEnd
-	GUIDelete($GameSelectGUI)
-	Opt("GUIOnEventMode", 1)
-	Return $sSelection
 EndFunc
 
 ; Warn user before executing files for extraction
@@ -3800,7 +3787,7 @@ Func Warn_Execute($command)
 		Cout("Displaying warn_execute message")
 		If MsgBox($iTopmost + 49, $title, t('WARN_EXECUTE', $command)) <> 1 Then
 			If $createdir Then DirRemove($outdir, 0)
-			terminate($STATUS_SILENT, '', '')
+			terminate($STATUS_SILENT)
 		EndIf
 	EndIf
 	Return $command
@@ -3815,7 +3802,7 @@ Func CreateArray($i0, $i1 = 0, $i2 = 0, $i3 = 0, $i4 = 0, $i5 = 0, $i6 = 0, $i7 
 EndFunc
 
 ; Display a custom prompt and return user choice
-Func Prompt($show_flag, $Message, $vars = 0, $terminate = 1)
+Func Prompt($show_flag, $Message, $vars = 0, $terminate = False)
 	If $silentmode Then
 		Cout("Assuming yes to message " & $Message)
 		Return 1
@@ -3826,7 +3813,7 @@ Func Prompt($show_flag, $Message, $vars = 0, $terminate = 1)
 	Else
 		If Not $terminate Then Return 0
 		If $createdir Then DirRemove($outdir, 0)
-		terminate($STATUS_SILENT, '', '')
+		terminate($STATUS_SILENT)
 	EndIf
 EndFunc
 
@@ -3928,7 +3915,7 @@ Func AddToBatch()
 	Local $return = FileRead($handle)
 	Local $ret = StringRegExpReplace($cmdline, '(".*?\.part)(\d+\.rar".*)', "$1", 1)
 	If (@extended > 0 And StringInStr($return, $ret)) Or _ ; Only add one file if multiple part rar
-	   (StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file, 0)) Then
+	   (StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file)) Then
 		Cout("Not adding duplicate file " & $cmdline)
 		FileClose($handle)
 		Return
@@ -4607,13 +4594,13 @@ EndFunc
 ; Restart Universal Extractor
 Func Restart()
 	Run(@ScriptFullPath)
-	terminate("silent")
+	terminate($STATUS_SILENT)
 EndFunc
 
 ; Restart Universal Extractor without elevated privileges
 Func RestartWithoutAdminRights($sParameters = "")
 	Run($cmd & 'runas /trustlevel:0x20000 "' & @ScriptFullPath & $sParameters & '"')
-	terminate("silent")
+	terminate($STATUS_SILENT)
 EndFunc
 
 ; Write data to stdout stream if enabled in options
@@ -4689,7 +4676,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 				_ProgressOff()
 			EndIf
 			$found = True
-			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES'), 0) Then
+			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES')) Then
 				If Not CanAccess($bindir) Then
 					If Not ShellExecute($sUpdater, "/helper") Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
 					Exit
@@ -4827,7 +4814,7 @@ Func _UpdateFFmpeg($bShowProgress = True)
 	; Download new
 	If $return > $sVersion Then
 		Cout("Found an update for FFmpeg")
-		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $sVersion, $return), 0) Then Return GetFFmpeg()
+		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $sVersion, $return)) Then Return GetFFmpeg()
 	EndIf
 
 	Return False
@@ -5547,7 +5534,7 @@ Func GUI_Batch_OK()
 
 	If FileExists($fileScanLogFile) Then FileDelete($fileScanLogFile)
 
-	terminate($STATUS_BATCH, '', '')
+	terminate($STATUS_BATCH)
 EndFunc
 
 ; Display batch queue and allow changes
@@ -6270,6 +6257,37 @@ Func GUI_FirstStart_Exit()
 	Cout("First start configuration finished")
 EndFunc   ;==>GUI_FirstStart_Exit
 
+; Create GUI to select game and return selection
+Func GUI_GameSelect($sEntries, $sStandard)
+	Local $sSelection = 0
+	Local $hGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
+	_GuiSetColor()
+	GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filenamefull, $sStandard)), 10, 8, 252, 210, $SS_CENTER)
+	Local $idList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
+	GUICtrlSetData(-1, $sStandard & '|' & $sEntries)
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 152, 427, 81, 25)
+	_GUICtrlListBox_UpdateHScroll($idList)
+	_GUICtrlListBox_SetCurSel($idList, 0)
+	GUISetState(@SW_SHOW)
+	Opt("GUIOnEventMode", 0)
+
+	While 1
+		$nMsg = GUIGetMsg($hGUI)
+		Switch $nMsg
+			Case $idOk
+				$sSelection = GUICtrlRead($idList)
+				If $sSelection == $sStandard Then $sSelection = 0
+				ExitLoop
+			Case $GUI_EVENT_CLOSE, $idCancel
+				ExitLoop
+		EndSwitch
+	WEnd
+	GUIDelete($hGUI)
+	Opt("GUIOnEventMode", 1)
+	Return $sSelection
+EndFunc
+
 ; Display file scan result
 Func _GUI_FileScan()
 	Local $sFileType = _FiletypeGet(True, 48)
@@ -6420,7 +6438,7 @@ Func GUI_Plugins()
 					If IsAdmin() Then MsgBox($iTopmost + 64, $title, t('ACCESS_DENIED'))
 					MsgBox($iTopmost + 64, $title, t('ELEVATION_REQUIRED'))
 					ShellExecute($sUpdater, "/pluginst")
-					terminate($STATUS_SILENT, '', '')
+					terminate($STATUS_SILENT)
 				EndIf
 
 				; Determine filetype
@@ -6663,7 +6681,7 @@ EndFunc
 ; Exit if Cancel clicked or window closed
 Func GUI_Exit()
 	GUIGetPosition()
-	terminate($STATUS_SILENT, '', '')
+	terminate($STATUS_SILENT)
 EndFunc
 
 ; Shows/hides cmd window when clicked on tray icon
@@ -6704,5 +6722,5 @@ Func Tray_Exit()
 		CreateLog("trayexit")
 	EndIf
 
-	terminate($STATUS_SILENT, '', '')
+	terminate($STATUS_SILENT)
 EndFunc

@@ -7,6 +7,7 @@ RC 2:
   Added support for .qm translation files using Qt Linguist
   Added support for encrypted .wolf archives using WolfDec (plugin)
   Added support for StuffIt X archives
+  Added support for install4j installers
   Added TotalObserver as additional extractor choice for InstallShield
   Added nightly update channel
   Added changelog to update found message box
@@ -20,6 +21,8 @@ RC 2:
   Fixed some files being misdetected as disk images
   Fixed status box not being updated for some file types
   Fixed MSI extraction failing for some files, which were supported in previous versions of Universal Extractor, thanks to mzso
+  Fixed some options ('Open folder after extraction', 'Keep Open') being ignored and UniExtract not exiting as intended 
+	   (setting exit code, delete empty output directory) after certain message boxes, thanks to davidhbrown
   Changed preferences dialog: redesigned GUI, added option to remove additional files, replaced numeral update interval 
 							  with daily, weekly, etc. presets, removed timeout setting, added beta update setting
   Changed file scan results message box: the name of the detector is now shown along with its result, output can now be
@@ -37,6 +40,7 @@ RC 2:
   Updated demoleition to 0.60
   Updated lessmsi to 1.6.1 mod
   Updated QuickBMS to 0.9.0
+  Updated rmvdec to 1.1.0
   Updated SQLite to 3.25.1
   Updated ttarchext to 0.3.1a
   Updated Czech translation, thanks to DžejPý
