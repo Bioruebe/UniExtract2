@@ -423,6 +423,9 @@ Func StartExtraction()
 	; Scan file with TrID, if file is not an .exe
 	filescan($file, $extract)
 
+	; ExeInfo PE supports non-executables as well
+	If Not $exefailed Then advexescan()
+
 	; Display file information and terminate if scan only mode
 	If Not $extract Then
 		MediaFileScan($file)
@@ -461,6 +464,9 @@ Func IsExe()
 	exescan($file, 'ext', $extract) ; Userdb is much faster, so do that first
 	exescan($file, 'hard', $extract)
 
+	; Make sure TrID doesn't call IsExe again
+	$exefailed = True
+
 	If Not $extract Then Return
 
 	; Perform additional tests if necessary
@@ -472,9 +478,6 @@ Func IsExe()
 	If Not $iefailed Then checkIE()
 
 	CheckGame()
-
-	; Make sure TrID doesn't call IsExe again
-	$exefailed = True
 
 	; Scan using TrID
 	filescan($file)
@@ -818,6 +821,11 @@ Func GetLanguageList()
 	Return $return
 EndFunc
 
+; Return original file name, used to rename unicode files correctly
+Func GetFileName()
+	Return $iUnicodeMode? $sUnicodeName: $filename
+EndFunc
+
 ; Scan file using TrID
 Func filescan($f, $analyze = 1)
 	If $tridfailed Then Return
@@ -898,7 +906,7 @@ Func advfilescan($f)
 	_DeleteTrayMessageBox()
 
 	If Not $extract Then
-		; Text files often lead to wrong detection, so renaming them is not a good idea
+		; Text files are often misdetected, renaming them is not a good idea
 		If $appendext And (StringInStr($sFileType, "text", 0) Or StringInStr($sFileType, "ASCII", 0)) Then $appendext = False
 		Return
 	EndIf
@@ -1463,7 +1471,7 @@ Func advexescan()
 	If StringInStr($sFileType, $filenamefull) Then $sFileType = StringTrimLeft(StringStripWS(StringReplace($sFileType, $filenamefull, ""), 1), 2)
 
 	; Return if not .exe file
-	If StringInStr($sFileType, "NOT EXE") Or StringInStr($sFileType, "File is not Windows PE") Then Return
+;~ 	If StringInStr($sFileType, "NOT EXE") Or StringInStr($sFileType, "File is not Windows PE") Then Return
 
 	; Return if file is too big
 	If StringInStr($sFileType, "Skipped") Then Return
@@ -2027,7 +2035,11 @@ Func MoveInputFileIfNecessary()
 	$sUnicodeName = $filename
 	$oldoutdir = $outdir
 	FilenameParse($new)
-	$outdir = $initoutdir
+
+	If Not StringRegExp($outdir, $sRegExAscii, 0) Then
+		Cout("Output directory seems to be unicode")
+		$outdir = $initoutdir
+	EndIf
 EndFunc
 
 ; Extract from known archive format
@@ -2137,10 +2149,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_AUDIO
 			HasFFMPEG()
-			_Run($cmd & $ffmpeg & ' -i "' & $file & '" "' & ($iUnicodeMode? $sUnicodeName: $filename) & '.wav"', $outdir, @SW_HIDE)
+			_Run($cmd & $ffmpeg & ' -i "' & $file & '" "' & GetFileName() & '.wav"', $outdir, @SW_HIDE)
 
 		Case $TYPE_BCM
-			_Run($bcm & ' -d "' & $file & '" "' & $outdir & '\' & ($iUnicodeMode? $sUnicodeName: $filename) & '"', $filedir, @SW_HIDE, True, True, False)
+			_Run($bcm & ' -d "' & $file & '" "' & $outdir & '\' & GetFileName() & '"', $filedir, @SW_HIDE, True, True, False)
 
 		Case $TYPE_BOOTIMG ;Test
 			HasPlugin($bootimg)
@@ -2237,18 +2249,16 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			ShellExecuteWait($file, '/batch /no-reg /no-postinstall /dest "' & $outdir & '"', $outdir)
 
 		Case $TYPE_ENIGMA
-			_Run($enigma & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
+			_RunInTempOutdir($tempoutdir, $enigma & ' /nogui "' & $file & '"', $tempoutdir, @SW_HIDE, True, False, False)
 
 			; Move files
-			FileMove($filedir & "\" & $filename & "_unpacked.exe", $outdir & "\" & $filename & "_unpacked.exe")
-			DirMove($filedir & "\%DEFAULT FOLDER%", $outdir & "\%DEFAULT FOLDER%")
+			FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
 			; TODO: move other folders
 
 			; Read log file
-			FileDelete($outdir & "\!unpacker.log")
-			$ret = $filedir & "\!unpacker.log"
-			$return = Cout(FileRead($ret))
-			FileDelete($ret)
+			Local $sPath = $outdir & "\!unpacker.log"
+			$return = Cout(FileRead($sPath))
+			FileDelete($sPath)
 
 			; Success evaluation
 			If StringInStr($return, 'Expected section name ".enigma2"') Then
@@ -2529,17 +2539,15 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_MOLE
-			_Run($mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
+			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 
 			; Move files
-			FileMove($filedir & "\" & $filename & "_unpacked.exe", $outdir & "\" & $filename & "_unpacked.exe")
-			MoveFiles($filedir & "\_extracted", $outdir, False, '', True)
+			FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
 
 			; Read log file
-			FileDelete($outdir & "\!unpacker.log")
-			$ret = $filedir & "\!unpacker.log"
-			$return = Cout(FileRead($ret))
-			FileDelete($ret)
+			Local $sPath = $outdir & "\!unpacker.log"
+			$return = Cout(FileRead($sPath))
+			FileDelete($sPath)
 
 			; Success evaluation
 			If StringInStr($return, '[x] Not a Molebox or unknown version') Then
@@ -2915,7 +2923,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				If $aStreamType[1] == "Video" Then
 					; Split gif files into single images
 					If $aStreamType[2] == "gif" Or $aStreamType[2] == "apng" Or $aStreamType[2] == "webp" Then
-						_Run($command & ' "' & ($iUnicodeMode? $sUnicodeName: $filename) & '%05d.png"', $outdir, @SW_HIDE, True, False)
+						_Run($command & ' "' & GetFileName() & '%05d.png"', $outdir, @SW_HIDE, True, False)
 						$iVideo += 1
 						ContinueLoop
 					EndIf
@@ -2958,7 +2966,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_VIDEO_CONVERT
 			HasFFMPEG()
 
-			_Run($ffmpeg & ' -i "' & $file & '" "' & ($iUnicodeMode? $sUnicodeName: $filename) & '.mp4"', $outdir, @SW_HIDE, True, True, False)
+			_Run($ffmpeg & ' -i "' & $file & '" "' & GetFileName() & '.mp4"', $outdir, @SW_HIDE, True, True, False)
 
 		Case $TYPE_VISIONAIRE3
 			Local $ret = $outdir & '\names.txt"'
@@ -3563,7 +3571,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 		If $iUnicodeMode = $UNICODE_MOVE Then
 			FileMove($file, $oldpath, 1)
 		Else
-			FileRecycle($file)
+			If Not FileRecycle($file) Then Cout("Failed to recycle file")
 		EndIf
 		Cout("Moving extracted files: " & DirMove($outdir, $oldoutdir))
 		$fname = $sUnicodeName
@@ -3846,7 +3854,7 @@ Func _CreateTrayMessageBox($TBText)
 	_GuiRoundCorners($TBgui, 0, 0, 5, 5)
 
 	; Labels
-	Local $fname = $filename == ""? "": ($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext
+	Local $fname = $filename == ""? "": GetFileName() & "." & $fileext
 	If StringLen($fname) > $iMaxCharCount Then $fname = StringLeft($fname, $iMaxCharCount) & " [...]"
 	Local $idTrayFileName = GUICtrlCreateLabel($fname, $left, $top, $width, 16)
 	Local $idTrayStatus = GUICtrlCreateLabel($TBText, $left, GetPos($TBgui, $idTrayFileName, 6, False), $width, 30)
@@ -4210,7 +4218,7 @@ EndFunc
 Func CreateLog($status)
 	Local $sName = $logdir & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
 	If $status <> $STATUS_SUCCESS Then $sName &= StringUpper($status)
-	If $file <> "" Then $sName &= "_" & ($iUnicodeMode? $sUnicodeName: $filename) & "." & $fileext
+	If $file <> "" Then $sName &= "_" & GetFileName() & "." & $fileext
 	$sName &= ".log"
 	$hFile = FileOpen($sName, 32 + 8 + 2)
 	FileWrite($hFile, $sFullLog)
@@ -4514,7 +4522,7 @@ EndFunc
 
 ; Build command line for FFMPEG extractions
 Func _MakeFFmpegCommand($sPrefix, $aStreamType, $sType, $iIndex)
-	Local $sName = ($iUnicodeMode? $sUnicodeName: $filename)
+	Local $sName = GetFileName()
 
 	While StringLeft($sName, 1) == "-"
 		$sName = StringTrimLeft($sName, 1)
@@ -4990,11 +4998,7 @@ Func CreateGUI()
 	EndSwitch
 
 	; Create GUI
-	If $StoreGUIPosition Then
-		Global $guimain = GUICreate($title, 310, 160, $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
-	Else
-		Global $guimain = GUICreate($title, 310, 160, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
-	EndIf
+	Global $guimain = GUICreate($title, 310, 160 + GUI_GetFontScalingModifier(True), $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 
 	_GuiSetColor()
 	Local $dropzone = GUICtrlCreateLabel("", 0, 0, 300, 135)
@@ -5205,6 +5209,17 @@ Func _GuiSetColor()
 	If @OSVersion <> "WIN_10" Then Return
 	GUISetBkColor($COLOR_WHITE)
 	GUICtrlSetDefBkColor($COLOR_WHITE)
+EndFunc
+
+; Return the amount of pixels to increase GUI heigth if Windows font scaling is enabled
+Func GUI_GetFontScalingModifier($bOutput = False)
+	; Get the size of the title bar and calculate difference to the default value
+	Local $ret = _WinAPI_GetSystemMetrics($SM_CYCAPTION)
+	Local $iModifier = _Max(0, $ret - 23) * 2.5
+
+	If $bOutput Then Cout("Font scaling: height = " & $ret & ", modifier = " & $iModifier)
+
+	Return $iModifier
 EndFunc
 
 ; Prompt user for file
@@ -5493,7 +5508,7 @@ EndFunc
 ; Handle click on OK
 Func GUI_OK()
 	If Not GUI_OK_Set(True) Then Return
-	GUIGetPosition()
+	GUI_SavePosition()
 	GUIDelete($guimain)
 	$guimain = False
 EndFunc
@@ -5529,7 +5544,7 @@ Func GUI_Batch_OK()
 	Cout("Closing main GUI - batch mode")
 	Local $file = GUICtrlRead($filecont)
 	If $file <> "" And Not StringIsSpace($file) Then GUI_Batch()
-	GUIGetPosition()
+	GUI_SavePosition()
 	GUIDelete($guimain)
 
 	If FileExists($fileScanLogFile) Then FileDelete($fileScanLogFile)
@@ -5696,7 +5711,7 @@ EndFunc   ;==>WM_DROPFILES_UNICODE_FUNC
 Func GUI_Feedback($Type = "", $file = "")
 	Opt("GUIOnEventMode", 0)
 
-	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 402, 528, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
+	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 402, 528 + GUI_GetFontScalingModifier(), -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
 	_GuiSetColor()
 
 	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 8, 8, 384, 17)
@@ -5820,12 +5835,12 @@ Func GUI_Edit_SelectAll()
 EndFunc
 
 ; Saves current position of main GUI
-Func GUIGetPosition()
-	If Not $StoreGUIPosition Then Return
+Func GUI_SavePosition()
+	If Not $StoreGUIPosition Or Not $guimain Then Return
 	$pos = WinGetPos($guimain)
 	SavePref('posx', $pos[0])
 	SavePref('posy', $pos[1])
-EndFunc   ;==>GUIGetPosition
+EndFunc
 
 ; Set minimal size of main GUI
 Func GUI_WM_GETMINMAXINFO_Main($hwnd, $Msg, $wParam, $lParam)
@@ -6680,7 +6695,7 @@ EndFunc
 
 ; Exit if Cancel clicked or window closed
 Func GUI_Exit()
-	GUIGetPosition()
+	GUI_SavePosition()
 	terminate($STATUS_SILENT)
 EndFunc
 
@@ -6715,12 +6730,9 @@ EndFunc   ;==>Tray_Statusbox
 Func Tray_Exit()
 	Cout("Tray exit, helper PID: " & $run)
 	KillHelper()
+	GUI_SavePosition()
 
-	If $guimain Then
-		GUIGetPosition()
-	Else
-		CreateLog("trayexit")
-	EndIf
+	If Not $guimain Then CreateLog("trayexit")
 
 	terminate($STATUS_SILENT)
 EndFunc

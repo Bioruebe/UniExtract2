@@ -23,6 +23,8 @@ RC 2:
   Fixed MSI extraction failing for some files, which were supported in previous versions of Universal Extractor, thanks to mzso
   Fixed some options ('Open folder after extraction', 'Keep Open') being ignored and UniExtract not exiting as intended 
 	   (setting exit code, delete empty output directory) after certain message boxes, thanks to davidhbrown
+  Fixed some problems with file names containing non-ASCII characters
+  Fixed GUI being cut off if Windows font scaling is enabled
   Changed preferences dialog: redesigned GUI, added option to remove additional files, replaced numeral update interval 
 							  with daily, weekly, etc. presets, removed timeout setting, added beta update setting
   Changed file scan results message box: the name of the detector is now shown along with its result, output can now be
@@ -30,6 +32,7 @@ RC 2:
   Changed first start assistant: removed 2 pages and changed some wording
   Changed msi extraction: added method selector prompt if the default extractor fails
   Changed plugin file selector to use 'Downloads' folder as default
+  Improved file scan results for non-executable files
   Improved UniExtract logo quality
   Improved text quality for several dialogs
   Removed RPGMaker Decrypter plugin, replaced with RGSS Decryptor CLI
@@ -38,6 +41,7 @@ RC 2:
   Removed FLV Extract CL, decompression is done with FFMPEG instead
   Updated EnigmaVB unpacker to 0.55
   Updated demoleition to 0.60
+  Updated innounp to 0.48
   Updated lessmsi to 1.6.1 mod
   Updated QuickBMS to 0.9.0
   Updated rmvdec to 1.1.0

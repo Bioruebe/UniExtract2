@@ -24,6 +24,7 @@ Additional file types for arc_conv, ffmpeg
 // Usability:
 arj percentage indicator //tee problem
 Folder passed as file -> add to batch?
+Exeinfo message box if procmon open
 
 
 // Bugs
