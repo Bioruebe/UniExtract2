@@ -7,7 +7,7 @@ Binaries:
 															(Success Evaluation|Fast Detection|Percentage Indicator)
 Name										Files						Version		Features	License					Author								Website
 															
-7Zip										x86\7z.exe					18.01		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
+7Zip										x86\7z.exe					19.00		o	o	-	GNU LGPL 				Igor Pavlov							http://www.7-zip.org/
 											x64\7z.exe					-------		---------	(+ unRAR restriction)	-------								-------															
 											x86\7z.dll					-------		---------	-------					-------								-------															
 											x64\7z.dll					-------		---------	-------					-------								-------															
@@ -41,7 +41,7 @@ extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland			
 FFmpeg										x86\ffmpeg.exe				newest		-		-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
-FSB files extractor							fsbext.exe					0.3.5					GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
+FSB files extractor							fsbext.exe					0.3.8		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
 GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http://nemesis.thewavelength.net/index.php?p=25					
 											x64\GCFScape.exe			-------		---------	-------					-------								-------															
 											x86\hllib.dll				2.4.0		---------	GNU LGPL				-------								http://nemesis.thewavelength.net/index.php?p=35					
@@ -114,14 +114,14 @@ UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w		-	-	?	modified GNU
 utagedec									utagedec.exe				1.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/utagedec
 											neko runtime files			-------		---------	-------					-------								-------
 UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
-VISExt										VIS3Ext						2.2.6581.0	-	-	-	BSD 3-clause			Deniz Özmen							https://oezmen.eu/gameresources/
+VISExt										VIS3Ext						2.2.6777.0	-	-	-	BSD 3-clause			Deniz Özmen							https://oezmen.eu/gameresources/
 											vis.key						-------		---------	-------					-------								-------
 Windows Installer XML Toolset Decompiler	/dark directory				3.10.3.3007	-	x	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
-XAce Plus									xace.exe					2.6						Freeware				Marcel Lemke						http://www.winace.com/											
+XAce Plus									xace.exe					2.6			x		-	Freeware				Marcel Lemke						http://www.winace.com/											
 Xor											xor.exe						0.2			-	-	-	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm
-ZPAQ										x86\zpaq.exe				7.70		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html
+ZPAQ										x86\zpaq.exe				7.15		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html
 											x64\zpaq.exe				-------		---------	-------					-------								-------
 											zpaqxp.exe					-------		---------	-------					-------								-------
 

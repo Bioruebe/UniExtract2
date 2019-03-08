@@ -31,6 +31,7 @@ Exeinfo message box if procmon open
 Extracting to C:/ creates file in @ScriptDir
 Unicode files are not moved to outdir if using unpack() function
 is6cab extractor might crash ('... is not working anymore'), resulting in batch processing stop
+TrID detection fails if UniExtract is run from an UNC path
 
 
 // Other:

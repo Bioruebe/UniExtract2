@@ -1,6 +1,6 @@
 //If this file is not displayed correctly, open it with notepad++
 
-2.0.0 (2018):
+2.0.0 (2019):
   Added filter for specific files to file selection dialog (GUI only)
   Added option not to display extraction status box
   Added option to open destination folder after extraction
@@ -171,16 +171,9 @@
   Replaced cmdTotal with QuickBMS
   Replaced tee with mtee/wintee (adds support for unicode and longer filenames, smaller)
   Updated translations: Bulgarian, Chinese (Simplified), Chinese (Traditional), Croatian, English, Finnish, French, German, Greek, Japanese, Korean, Polish, Portuguese (Brazilian), Portuguese (Portugal), Russian, Swedish, Ukrainian 
-  Updated AutoIt to 3.3.14.1 and source code to fit new AutoIt version
-  Updated 7zip to 18.01
-  Updated innounp to 0.45
-  Updated KGB archiver to 2 beta 2
-  Updated lzop to 1.03
   Updated PEiD to 0.95, database files to 2012/04/24
   Updated TrID to 2.10, definitions to 2018
-  Updated unrar to 5.31 Beta 1
-  Updated upx to 3.91
-  Updated many other extractors to the newest version
+  Updated most extractors to the newest version
 
 
 1.6.1 (05/12/2010):

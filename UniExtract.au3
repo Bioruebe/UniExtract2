@@ -233,7 +233,7 @@ Const $wise_ewise = "e_wise_w.exe" 													;2002/07/01
 Const $wise_wun = "wun.exe" 														;0.90A
 Const $wix = Quote($bindir & "dark\dark.exe", True)									;3.10.3.3007
 Const $zip = "unzip.exe" 															;6.00
-Const $zpaq = _IsWinXP("zpaqxp.exe", Quote($archdir & "zpaq.exe", True)) ;x64		;7.07
+Const $zpaq = Quote($archdir & "zpaq.exe", True) ;x64								;7.07
 Const $zoo = "unzoo.exe" 															;4.5
 
 ; Plugins
@@ -839,11 +839,12 @@ Func filescan($f, $analyze = 1)
 	If $extract Then
 		Local $return = ""
 		$hDll = DllOpen($bindir & "TrIDLib.dll")
-		DllCall($hDll, "int", "TrID_LoadDefsPack", "str", $bindir)
+		Local $aReturn = DllCall($hDll, "int", "TrID_LoadDefsPack", "str", $bindir)
+		If Not @error Then Cout($aReturn[0] & " definitions loaded")
 		DllCall($hDll, "int", "TrID_SubmitFileA", "str", $f)
 		DllCall($hDll, "int", "TrID_Analyze")
 
-		Local $aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 1, "int", 0, "str", $return)
+		$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 1, "int", 0, "str", $return)
 		If $aReturn[0] = 0 Then
 			Cout("Unknown filetype!")
 			Return _DeleteTrayMessageBox()
@@ -1268,7 +1269,8 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Video") Or StringInStr($sFileType, "QuickTime Movie") Or _
 			 StringInStr($sFileType, "Matroska") Or StringInStr($sFileType, "Material Exchange Format") Or _
-			 StringInStr($sFileType, "Windows Media (generic)") Or StringInStr($sFileType, "GIF animated")
+			 StringInStr($sFileType, "Windows Media (generic)") Or StringInStr($sFileType, "GIF animated") Or _
+			 StringInStr($sFileType, "MPEG-2 Transport Stream")
 			extract($TYPE_VIDEO, t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
@@ -1784,20 +1786,23 @@ Func checkArj()
 EndFunc
 
 ; Determine if folder contains .bin files
-Func checkBin()
+Func CheckBin()
 	Cout("Searching additional .bin files to be extracted")
 
-	$NSISbin = FileFindFirstFile($filedir & "\data*.bin")
-	If $NSISbin == -1 Then Return
+	Local $hSearch = FileFindFirstFile($filedir & "\data*.bin")
+	If $hSearch == -1 Then Return
+
+	Local $tmp = $file
 	If Prompt(64 + 1, "NSIS_BINFILES", CreateArray($file, $filenamefull)) Then
 		While 1
-			$file = $filedir & "\" & FileFindNextFile($NSISbin)
+			$file = $filedir & "\" & FileFindNextFile($hSearch)
 			If @error Then ExitLoop
-			;FilenameParse($file)
+			FilenameParse($file)
 			extract($TYPE_7Z, ".bin " & t('TERM_ARCHIVE'), "", True, True)
 		WEnd
 	EndIf
-	FileClose($NSISbin)
+	FileClose($hSearch)
+	FilenameParse($tmp) ; Make sure the log/stats are correct
 	terminate($STATUS_SUCCESS, $filenamefull, "NSIS", "NSIS")
 EndFunc
 
@@ -2175,16 +2180,16 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($7z & ' x "' & $file & '"', $outdir)
 			Local $aCleanup[] = ['#*', '$*']
 			Cleanup($aCleanup)
-			$handle = FileFindFirstFile($outdir & '\*')
-			If $handle <> -1 Then
-				$dir = FileFindNextFile($handle)
+			$hSearch = FileFindFirstFile($outdir & '\*')
+			If $hSearch <> -1 Then
+				$dir = FileFindNextFile($hSearch)
 				Do
 					$char = StringLeft($dir, 1)
 					If $char = '#' Or $char = '$' Then Cleanup($outdir & "\" & $dir)
-					$dir = FileFindNextFile($handle)
+					$dir = FileFindNextFile($hSearch)
 				Until @error
 			EndIf
-			FileClose($handle)
+			FileClose($hSearch)
 
 		Case $TYPE_CI
 			HasPlugin($ci)
@@ -2207,10 +2212,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($7z & ' x "' & $file & '"', $outdir)
 
 			; Check for new files
-			$handle = FileFindFirstFile($outdir & "\*")
+			$hSearch = FileFindFirstFile($outdir & "\*")
 			If Not @error Then
 				While 1
-					$fname = FileFindNextFile($handle)
+					$fname = FileFindNextFile($hSearch)
 					If @error Then ExitLoop
 					If Not StringInStr($oldfiles, $fname) Then
 						; Check for supported archive format
@@ -2222,7 +2227,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					EndIf
 				WEnd
 			EndIf
-			FileClose($handle)
+			FileClose($hSearch)
 
 		Case $TYPE_DGCA
 			HasPlugin($dgca)
@@ -2649,7 +2654,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Cleanup($aCleanup)
 
 			; Determine if there are .bin files in filedir
-			checkBin()
+			CheckBin()
 
 		Case $TYPE_PEA
 			DirCreate($tempoutdir)
@@ -2887,9 +2892,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Begin conversion, format selected by uif2iso
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'UIF ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
 			_Run($uif & ' "' & $file & '" "' & $outdir & "\" & $filename & '"', $filedir, True, True, True)
-			$handle = FileFindFirstFile($outdir & "\" & $filename & ".*")
-			$isofile = $outdir & "\" & FileFindNextFile($handle)
-			FileClose($handle)
+			$hSearch = FileFindFirstFile($outdir & "\" & $filename & ".*")
+			$isofile = $outdir & "\" & FileFindNextFile($hSearch)
+			FileClose($hSearch)
 
 		Case $TYPE_UNITY ; Test
 			IsJavaInstalled()
@@ -2974,10 +2979,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 			If $fileext <> "vis" Then
 				Local $sPath = _PathFull($filedir & "\..\")
-				$handle = FileFindFirstFile($sPath & "*.vis")
-				If $handle <> -1 Then
-					Local $ret2 = FileFindNextFile($handle)
+				$hSearch = FileFindFirstFile($sPath & "*.vis")
+				If $hSearch <> -1 Then
+					Local $ret2 = FileFindNextFile($hSearch)
 					If Not @error Then $f = $sPath & $ret2
+					FileClose($hSearch)
 				EndIf
 			EndIf
 
@@ -3068,6 +3074,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_WOLF
 			extract($TYPE_ARC_CONV, -1, "", False, True)
 			HasPlugin($wolf)
+			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 			_RunInTempOutdir($tempoutdir, $wolf & ' ' & Quote($file), $outdir, @SW_MINIMIZE, True, True, False)
 			MoveFiles($outdir & "\" & $filename, $outdir, True, '', True, True)
 
@@ -3136,6 +3143,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$TimerStart = TimerInit()
 				Do
 					Sleep(100)
+					If WinExists("7z SFX Archives splitter warning") Then WinClose("7z SFX Archives splitter warning")
 					$TimerDiff = TimerDiff($TimerStart)
 					If $TimerDiff > $Timeout Then ExitLoop
 				Until FileExists($filedir & "\" & $filename & ".txt") Or WinExists("7z SFX Archives splitter error")
@@ -3468,36 +3476,34 @@ EndFunc
 
 ; Return list of files and directories in directory as a pipe-delimited string
 Func ReturnFiles($dir)
-	Local $handle, $files, $fname
-	$handle = FileFindFirstFile($dir & "\*")
-	If Not @error Then
-		While 1
-			$fname = FileFindNextFile($handle)
-			If @error Then ExitLoop
-			$files &= $fname & '|'
-		WEnd
-		$files = StringTrimRight($files, 1)
-		FileClose($handle)
-	Else
-		SetError(1)
-		Return
-	EndIf
+	Local $hSearch, $files, $fname
+	$hSearch = FileFindFirstFile($dir & "\*")
+	If @error Then Return SetError(1)
+
+	While 1
+		$fname = FileFindNextFile($hSearch)
+		If @error Then ExitLoop
+		$files &= $fname & '|'
+	WEnd
+
+	$files = StringTrimRight($files, 1)
+	FileClose($hSearch)
 	Return $files
-EndFunc   ;==>ReturnFiles
+EndFunc
 
 ; Move all files and subdirectories from one directory to another
 ; $force is an integer that specifies whether or not to replace existing files
 ; $omit is a string that includes files to be excluded from move
 Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = False, $bShowStatus = False)
-	Local $handle, $fname
+	Local $hSearch, $fname
 	Cout("Moving files from " & $source & " to " & $dest)
 	If $bShowStatus Then _CreateTrayMessageBox(t('MOVING_FILE') & @CRLF & $dest)
 	DirCreate($dest)
 
-	$handle = FileFindFirstFile($source & "\*")
+	$hSearch = FileFindFirstFile($source & "\*")
 	If @error Then Return SetError(1)
 	While 1
-		$fname = FileFindNextFile($handle)
+		$fname = FileFindNextFile($hSearch)
 		If @error Then ExitLoop
 		If StringInStr($omit, $fname) Then ContinueLoop
 
@@ -3507,7 +3513,7 @@ Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = Fa
 			FileMove($source & '\' & $fname, $dest, $force)
 		EndIf
 	WEnd
-	FileClose($handle)
+	FileClose($hSearch)
 
 	If $bShowStatus Then _DeleteTrayMessageBox()
 	If $removeSourceDir Then Return DirRemove($source, ($omit = ""? 1: 0))
@@ -4101,7 +4107,7 @@ EndFunc
 Func RegExists($sKeyName, $sValueName)
 	RegRead($sKeyName, $sValueName)
 	Return Number(@error = 0)
-EndFunc   ;==>RegExists
+EndFunc
 
 ; Return a specific line of a multi line string
 ; http://www.autoitscript.com/forum/topic/103821-how-to-read-specific-line-from-a-string/page__view__findpost__p__735189
@@ -4111,7 +4117,7 @@ Func _StringGetLine($sString, $iLine, $bCountBlank = False)
 	If Not IsInt($iLine) Then Return SetError(1, 0, "")
 	If $iLine < 0 Then Return StringTrimLeft($sString, StringInStr($sString, @CRLF, 0, -2 + $iLine))
 	Return StringRegExpReplace($sString, "((." & $sChar & "\n){" & $iLine - 1 & "})(." & $sChar & "\n)((." & $sChar & "\n?)+)", "\2")
-EndFunc   ;==>_StringGetLine
+EndFunc
 
 ; Return file metadata
 ; (Source: http://www.autoitscript.com/forum/topic/40684-querying-a-files-metadata/)
@@ -4642,14 +4648,14 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 		$iMode = $UPDATE_ALL
 		$bShowProgress = True
 	EndIf
-	$ret2 = $silentmode
-	If $silent == $UPDATEMSG_SILENT Then $silentmode = 1
 
-	Local $return = 0, $found = False
 	Cout("Checking for update")
+	Local $ret2 = $silentmode, $return = 0, $found = False
+	If $silent == $UPDATEMSG_SILENT Or $silent == $UPDATEMSG_FOUND_ONLY Then $silentmode = 1
 
 	; Get index
 	$aReturn = _UpdateGetIndex()
+	If $silent <> $UPDATEMSG_SILENT Then $silentmode = $ret2
 	If Not IsArray($aReturn) Then Return Cout("Failed to get update file listing")
 
 	; Save date of last check for update
@@ -4939,6 +4945,7 @@ Func _AfterUpdate()
 	FileDelete($bindir & "Expander.exe")
 	FileDelete($bindir & "stuffit5.engine-5.1.dll")
 	FileDelete($bindir & "FLVExtractCL.exe")
+	FileDelete($bindir & "zpaqxp.exe")
 	FileDelete($defdir & "flv.ini")
 	FileDelete($docsdir & "flac_authors.txt")
 	FileDelete($docsdir & "flac_readme.txt")
@@ -5014,6 +5021,7 @@ Func CreateGUI()
 	Global $clearitem = GUICtrlCreateMenuItem(t('MENU_FILE_CLEAR_LABEL'), $filemenu)
 	GUICtrlCreateMenuItem("", $filemenu)
 	Local $logopenitem = GUICtrlCreateMenuItem(t('MENU_FILE_LOG_OPEN_LABEL'), $filemenu)
+	Local $logdiropenitem = GUICtrlCreateMenuItem(t('MENU_FILE_LOG_FOLDER_OPEN_LABEL'), $filemenu)
 	Global $logitem = GUICtrlCreateMenuItem("DUMMY", $filemenu)
 	GUICtrlCreateMenuItem("", $filemenu)
 	Local $quititem = GUICtrlCreateMenuItem(t('MENU_FILE_QUIT_LABEL'), $filemenu)
@@ -5105,7 +5113,8 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($topmostitem, "GUI_Topmost")
 	GUICtrlSetOnEvent($showitem, "GUI_Batch_Show")
 	GUICtrlSetOnEvent($clearitem, "GUI_Batch_Clear")
-	GUICtrlSetOnEvent($logopenitem, "GUI_OpenLogDir")
+	GUICtrlSetOnEvent($logopenitem, "GUI_OpenLastLog")
+	GUICtrlSetOnEvent($logdiropenitem, "GUI_OpenLogDir")
 	GUICtrlSetOnEvent($logitem, "GUI_DeleteLogs")
 	GUICtrlSetOnEvent($GUI_Main_Lock, "GUI_KeepOutdir")
 	GUICtrlSetOnEvent($GUI_Main_Extract, "GUI_ScanOnly")
@@ -6519,6 +6528,15 @@ Func GUI_Plugins()
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
+; Open most recent log file
+Func GUI_OpenLastLog()
+	Local $aFiles = _FileListToArray($logdir, "*.log", $FLTA_FILES, True)
+	If @error Or $aFiles[0] < 1 Then Return
+
+	Local $iIndex = UBound($aFiles) - 1
+	ShellExecute($aFiles[$iIndex])
+EndFunc
+
 ; Open log directory
 Func GUI_OpenLogDir()
 	ShellExecute($logdir)
@@ -6527,19 +6545,19 @@ EndFunc
 ; Option to delete all log files
 Func GUI_DeleteLogs()
 	Cout("Deleting log files")
-	Local $handle, $return, $i
+	Local $hSearch, $return, $i = 0
 
-	$handle = FileFindFirstFile($logdir & "*.log")
-	If $handle == -1 Then Return
+	$hSearch = FileFindFirstFile($logdir & "*.log")
+	If $hSearch == -1 Then Return
 
 	While 1
-		$return = FileFindNextFile($handle)
+		$return = FileFindNextFile($hSearch)
 		If @error Then ExitLoop
 		FileDelete($logdir & $return)
 		$i += 1
 	WEnd
 
-	FileClose($handle)
+	FileClose($hSearch)
 	GUI_UpdateLogItem()
 
 	Cout("Deleted a total of " & $i & " files")
