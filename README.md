@@ -4,16 +4,17 @@ Universal Extractor 2 or Universal Extractor (Bioruebe version) as it is also ca
 ## New features
 
 - Batch mode
-- Silent mode, not showing any prompts
 - Scan only mode to determine file types without extracting
-- Integrated updater
+- Built-in updater
 - 100+ new supported file types
 - Audio and video extraction for multimedia files
 - Cascading context menu
 - Support for password list for common archives
 - Improved optional status box with progress indicator
-- New detection methods + more detailed output and error messages
+- Better and faster file analysis
 - Support for some extractors not shipping with UniExtract as plugins
+- Silent mode, not showing any prompts
+- Many interface improvements and redesigned dialogs
 - Resource usage/speed improvements, lots of fixes
 - Auto-using 64 bit versions of extractors if supported by OS
 
@@ -21,6 +22,10 @@ See the changelog for a complete log of all improvements.
 
 ## Download
 Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases)
+
+Virus alert? - Universal Extractor does not contain any malware. Some anti-virus software occasionally misdetects files inside UniExtract's program directory. (You know, better warn too much than let any malware slip through.) But you can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
+
+'Windows protected your PC'? - Modern versions of Windows have a feature called SmartScreen, which warns about unknown files. This means software without a big company behind it and/or a huge userbase produces a warning. Don't panic! Mostly this happens after a new version of UniExtract has been released. After enough users updated their installation, the warning might vanish, because it now has reputation. If you see a SmartScreen warning, you can safely click 'More info', then 'Run anyway'.
 
 ## FAQ
 
@@ -30,11 +35,11 @@ Universal Extractor itself is completely portable, with some exceptions:
 - Enabling context menu entries will create registry entries
 - To extract a wide variety of file types more than 50 different extractors are used. Some of them might leave traces on the system. For the most common archives and installers extraction can be considered portable, for others probably not.
 - Storing Universal Extractor in a directory without write access (e.g. C:\Program Files) enables multi-user mode. This results in configuration files being stored in the %APPDATA% directory (C:\Users\YourUsername\AppData\Roaming\Bioruebe\UniExtract).
-  See issue #20 for more information.
+  See issue [#20](https://github.com/Bioruebe/UniExtract2/issues/20) for more information.
 
 #### Why are there many different versions/modifications/repacks of Universal Extractor?
 
-When the original developer of UniExtract stopped working on it, many people from around the world continued to update and improve the program. Some  'only' updated the tools Universal Extractor uses, others added great features. As a result all versions differ in terms of supported archives and features added.
+When the original developer of UniExtract stopped working on it, many people from around the world continued to update and improve the program. Some 'only' updated the tools Universal Extractor uses, others added great features. As a result all versions differ in terms of supported archives and features added.
 
 This version is the only 'real' open-source one, with a central repository on Github everyone can contribute to. Over the years I fulfilled many user requests, added support for files the community wanted to decompress and implemented a lot of convenience functions. Many volunteers help translating UniExtract, finding bugs, discussing improvements and respond to other user's questions.
 
@@ -46,7 +51,13 @@ No. This tool was designed as an extraction utility. A counterpart (*"UniArchive
 
 ## Nightly Builds
 
-Beginning with RC 2 you can opt-in to receive the most current development build of Universal Extractor 2. Simply open the preferences dialog (Edit menu) and check `Install beta updates`. The next time you search for updates, you will receive the development build instead of the release version.
+You can opt-in to receive the most current development build of Universal Extractor 2. Simply open the preferences dialog (from 'Edit' menu) and check `Install beta updates`. The next time you search for updates, you will receive the development build instead of the release version. After disabling the option again you can go back to the latest stable version by simply updating.
+
+## Reporting bugs
+Did you encounter a problem with UniExtract? Please report what went wrong to us. There are differnet ways to do so:
+- If you have a Github account, you can **[open an issue](https://github.com/Bioruebe/UniExtract2/issues)**. This is the prefered way for **feature requests**, **suggestions** and **general technical problems**.
+- From within Universal Extractor: select **'Give feedback'** from the **'Help' menu**. This is the prefered way to submit **failed extractons**. If UniExtract was not successful, it will automatically ask you to send feedback (can be disabled from the options). This type of feedback includes a log with several debug information, which could help fixing the problem.
+- Direct contact via **[email](https://bioruebe.com/blog/contact/)**. This can be used if you do not have an account at Github. Many users, who created translations for UniExtract, like to send updated files per email. (Others open [pull requests](https://github.com/Bioruebe/UniExtract2/pulls) instead.)
 
 ## Building from Source
 
