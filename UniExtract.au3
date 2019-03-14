@@ -60,7 +60,7 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $sVersion = "2.0.0 RC 1"
+Const $sVersion = "2.0.0 RC 2"
 Const $codename = '"Still Alive"'
 Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
@@ -156,7 +156,7 @@ Global $trayX = -1, $trayY = -1
 
 ; Global variables
 Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
-Dim $prompt, $return, $Output, $hMutex, $sUpdateURL = $sDefaultUpdateURL
+Dim $prompt, $return, $Output, $hMutex, $prefs = 0, $sUpdateURL = $sDefaultUpdateURL
 Dim $About, $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Dim $sFullLog = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $exStyle = -1, $sArcTypeOverride = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
@@ -288,9 +288,11 @@ Global $CM_Shells[5][3] = [ _
 
 ; Make sure a language file exists
 If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
-	If MsgBox(48+4, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") == 6 Then _
+	If MsgBox(48+1, $title, "No language file found." & @CRLF & @CRLF & "Click OK to download all missing files or Cancel to exit") == 1 Then
 		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
-	terminate($STATUS_SILENT)
+		Run($sUniExtract, @ScriptDir)
+	EndIf
+	Exit 99
 EndIf
 
 ReadPrefs()
@@ -4660,7 +4662,8 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 
 	; Save date of last check for update
 	$lastupdate = @YEAR & "/" & @MON & "/" & @MDAY
-	SavePref('lastupdate', $lastupdate)
+	; In case of missing files, CheckUpdate can be run without any preferences being loaded
+	If $prefs <> 0 Then SavePref('lastupdate', $lastupdate)
 
 	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
 	If $iMode <> $UPDATE_HELPER Then
