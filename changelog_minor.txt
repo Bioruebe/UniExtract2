@@ -1,3 +1,11 @@
+RC 3:
+  Added support for MSCF installers
+  Improved speed of file type detection
+  Fixed some installers being misdetected as InstallShield
+  Fixed swf exe extraction not terminating correctly
+  Updated UnRAR to 5.70; added x64 version
+  Updated unrpa to 1.6
+
 RC 2:
   Added support for InstallScript installers
   Added support for .bsa, .ba2 archives using BSA Browser
@@ -63,6 +71,7 @@ RC 2:
   Updated Italian translation, thanks to NAMP and tfr
   Updated Korean translation, thanks to 까꿍
   Updated Polish translaton, thanks to Barnaba and dmocha
+  Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Russian translation, thanks to wvxwxvw
   Updated Spanish translation, thanks to GGobbi
   Updated Ukrainian translation, thanks to YuriPet

@@ -60,7 +60,7 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $sVersion = "2.0.0 RC 2"
+Const $sVersion = "2.0.0 RC 3"
 Const $codename = '"Still Alive"'
 Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
@@ -103,8 +103,8 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_ENIGMA = "enigma", $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GCF = "gcf", $TYPE_GHOST = "ghost", _
 	  $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_IS3ARC = "is3arc", $TYPE_ISCAB = "iscab", _
 	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
-	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", _
-	  $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", _
+	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
+	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", _
 	  $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
 	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
 	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
@@ -212,9 +212,9 @@ Const $pea = Quote($bindir & "pea.exe") 											;0.53/1.0
 Const $peid = Quote($bindir & "peid.exe")											;0.95   2012/04/24
 Const $quickbms = Quote($bindir & "quickbms.exe", True)								;0.6.4
 Const $rai = "RAIU.EXE" 															;0.1a
-Const $rar = "unrar.exe" 															;5.50
+Const $rar = Quote($archdir & "UnRAR.exe", True) ;x64								;5.70
 Const $rgss = "RgssDecrypter.exe"													;1.0.0.1
-Const $rpa = "unrpa.exe"															;1.5.2
+Const $rpa = "unrpa.exe"															;1.6
 Const $sfark = "sfarkxtc.exe"														;3.0
 Const $sqlite = "sqlite3.exe"														;3.10.2
 Const $stix = "stix_d.exe" 															;2001/06/13
@@ -832,9 +832,6 @@ EndFunc
 Func filescan($f, $analyze = 1)
 	If $tridfailed Then Return
 
-	; Scan file using unix file tool
-	advfilescan($f)
-
 	_CreateTrayMessageBox(t('SCANNING_FILE', "TrID"))
 	Cout("Starting filescan using TrID")
 
@@ -849,13 +846,14 @@ Func filescan($f, $analyze = 1)
 		$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 1, "int", 0, "str", $return)
 		If $aReturn[0] = 0 Then
 			Cout("Unknown filetype!")
-			Return _DeleteTrayMessageBox()
+			_DeleteTrayMessageBox()
+			Return advfilescan($f)
 		EndIf
 
 		For $i = 1 To $aReturn[0]
 			$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 2, "int", $i, "str", $return)
 			_FiletypeAdd("TrID", $aReturn[3])
-			If $analyze Then tridcompare($aReturn[3])
+			If $analyze And $i < 4 Then tridcompare($aReturn[3])
 		Next
 
 		RenameWithTridExtension($hDll)
@@ -873,6 +871,9 @@ Func filescan($f, $analyze = 1)
 			If $analyze Then tridcompare($sFileType)
 		EndIf
 	EndIf
+
+	; Scan file using unix file tool
+	advfilescan($f)
 
 	$tridfailed = True
 EndFunc
@@ -1127,7 +1128,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Microsoft Windows Installer merge module")
 			extract($TYPE_MSM, 'Windows Installer (MSM) ' & t('TERM_MERGE_MODULE'))
 
-		Case StringInStr($sFileType, "Microsoft Windows Installer")
+		Case StringInStr($sFileType, "Microsoft Windows Installer") Or StringInStr($sFileType, "Generic OLE2 / Multistream Compound File")
 			extract($TYPE_MSI, 'Windows Installer (MSI) ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Microsoft Windows Installer patch")
@@ -1145,7 +1146,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "PEA compressed archive")
 			extract($TYPE_PEA, 'Pea ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "RAR Archive")
+		Case StringInStr($sFileType, "RAR compressed archive")
 			extract($TYPE_RAR, 'RAR ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "RPG Maker") And Not StringInStr($sFileType, "MV encrypted")
@@ -1252,7 +1253,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_ENIGMA, 'Enigma Virtual Box ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "InstallShield setup")
-			checkInstallShield()
+			CheckInstallShield()
 
 		Case  StringInStr($sFileType, "MP3 audio")
 			extract($TYPE_AUDIO, 'MP3 ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
@@ -1277,11 +1278,12 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
-			 StringInStr($sFileType, "Microsoft Program DataBase")
+			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump")
 			terminate($STATUS_NOTPACKED, $file)
 
 		; Not supported filetypes
-		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File")
+		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File") Or _
+			 StringInStr($sFileType, "DOS Executable")
 			terminate($STATUS_NOTSUPPORTED, $file)
 
 		; Check for .exe file, only when fileext not .exe
@@ -1382,7 +1384,7 @@ Func exescan($f, $scantype, $analyze = 1)
 			extract("ie", 'Installer VISE ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "InstallShield", 0)
-			checkInstallShield()
+			CheckInstallShield()
 
 		Case StringInStr($sFileType, "KGB SFX", 0)
 			extract($TYPE_KGB, t('TERM_SFX') & ' KGB ' & t('TERM_PACKAGE'))
@@ -1454,7 +1456,7 @@ Func advexescan()
 		Local Const $LogFile = $logdir & "exeinfo.log"
 		RunWait($exeinfope & ' "' & $file & '*" /sx /log:"' & $LogFile & '"', $bindir, @SW_HIDE)
 		$sFileType = _FileRead($LogFile, True)
-	Else ; Run and read GUI fields to get additional information on how to extract for scan only mode
+	Else ; In scan only mode run and read GUI fields to get additional information on how to extract
 		$aReturn = OpenExeInfo()
 		$TimerStart = TimerInit()
 
@@ -1597,6 +1599,9 @@ Func advexescan()
 		Case StringInStr($sFileType, ".dmg  Mac OS")
 			extract($TYPE_7Z, 'DMG ' & t('TERM_IMAGE'))
 
+		Case StringInStr($sFileType, "MSCF Cab file detected")
+			extract($TYPE_MSCF, "MSCF " & t('TERM_INSTALLER'))
+
 		Case StringInStr($sFileType, "aspack")
 			unpack($PACKER_ASPACK)
 
@@ -1610,7 +1615,8 @@ Func advexescan()
 			  StringInStr($sFileType, "ELF executable") Or StringInStr($sFileType, "Microsoft Visual C# / Basic.NET") Or _
 			  StringInStr($sFileType, "Autoit") Or StringInStr($sFileType, "LE <- Linear Executable") Or _
 			  StringInStr($sFileType, "NOT EXE - Empty file") Or StringInStr($sFileType, "Native - System driver") Or _
-			  StringInStr($sFileType, "Denuvo protector") Or StringInStr($sFileType, "Kaspersky AV Pack")
+			  StringInStr($sFileType, "Denuvo protector") Or StringInStr($sFileType, "Kaspersky AV Pack") Or _
+			  StringInStr($sFileType, "TASM / MASM / FASM - assembler")
 			terminate($STATUS_NOTPACKED, $file)
 
 		; Needs to be at the end, otherwise files might not be recognized
@@ -1658,10 +1664,46 @@ Func OpenExeInfo($f = $file)
 
 	; Execute and hide
 	Run($exeinfope & ' "' & $f & '"', $bindir, @SW_MINIMIZE)
-	WinWait($aReturn[0])
+	WinWait($aReturn[0], "", $Timeout)
 	WinSetState($aReturn[0], "", @SW_HIDE)
 
 	Return $aReturn
+EndFunc
+
+; Use ExeInfo PE's rip feature
+Func RipExeInfo($f, $tempoutdir, $command)
+	DirCreate($tempoutdir)
+	$tmp = $tempoutdir & "\" & $filenamefull
+	Cout("Moving file to " & $tmp)
+	FileMove($file, $tmp)
+
+	$aReturn = OpenExeInfo($tmp)
+
+	WinWait($aReturn[0], "", $Timeout)
+	MouseMove(0, 0, 0)
+	ControlClick($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]")
+	ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]", $command)
+
+	Local $handle = WinWait("[CLASS:TSViewer]", "", $Timeout)
+	Local $hControl = ControlGetHandle($handle, "", "TListBox1")
+
+	$TimerStart = TimerInit()
+	$return = -1
+
+	While $return < 0
+		Sleep(200)
+		$return = _GUICtrlListBox_FindString($hControl, "--- End of file ---", True)
+		If TimerDiff($TimerStart) > $Timeout Then ExitLoop
+	WEnd
+
+	Local $success = _GUICtrlListBox_FindString($hControl, "--- Not found , sorry ---", True) == -1
+
+	CloseExeInfo($aReturn)
+
+	Cout("Moving file back")
+	FileMove($tmp, $filedir & "\")
+
+	Return $success
 EndFunc
 
 ; Close ExeInfo PE and restore registry settings
@@ -1896,13 +1938,19 @@ Func checkInno()
 EndFunc
 
 ; Determine if file is really an InstallShield installer (not false positive)
-Func checkInstallShield()
+Func CheckInstallShield()
 	If $isfailed Then Return False
 
-	; InstallShield testing handled by extract function
 	Cout("Testing InstallShield")
-	extract($TYPE_ISEXE, 'InstallShield ' & t('TERM_INSTALLER'))
-	Return False
+
+	Local $return = FetchStdout($quickbms & ' -l "' & $bindir & $observer & '" "' & $file & '"', $filedir, @SW_HIDE)
+	If StringInStr($return, "not supported by this WCX plugin") Or StringInStr($return, "0 files found") Or _
+	   StringInStr($return, "exception occured") Then
+		$isfailed = True
+		Return False
+	EndIf
+
+	Return extract($TYPE_ISEXE, 'InstallShield ' & t('TERM_INSTALLER'))
 EndFunc
 
 ; Determine if file is CD/DVD image
@@ -2301,6 +2349,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 			$aReturn = OpenExeInfo($ret)
 
+			WinWait($aReturn[0], "", $Timeout)
 			MouseMove(0, 0, 0)
 			ControlClick($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:15]")
 			ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:15]", "{DOWN}{DOWN}{RIGHT}{ENTER}")
@@ -2563,6 +2612,23 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$success = $RESULT_SUCCESS
 			EndIf
 
+		Case $TYPE_MSCF
+			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}{DOWN}{DOWN}{DOWN}{ENTER}") Then
+				$cabfiles = FileSearch($tempoutdir & "\*.cab")
+				For $i = 1 To $cabfiles[0]
+					Cout("Extracting cab file " & $cabfiles[$i])
+					_Run($7z & ' x "' & $cabfiles[$i] & '"', $tempoutdir, @SW_HIDE, True, True, True, False)
+					If $success == $RESULT_SUCCESS Then FileRecycle($cabfiles[$i])
+				Next
+
+				MoveFiles($tempoutdir, $outdir, False, '', True, True)
+				Local $aCleanup[] = ["resource.dat", "cp*.bin", "*.cab"]
+				Cleanup($aCleanup)
+				$success = $RESULT_UNKNOWN
+			Else
+				$success = $RESULT_FAILED
+			EndIf
+
 		Case $TYPE_MSI
 			; Try Lessmsi first
 			$ret = CheckLessmsi()
@@ -2805,32 +2871,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Next
 
 		Case $TYPE_SWFEXE
-			$ret = $outdir & "\" & $filenamefull
-			Cout("Moving file to " & $ret)
-			FileMove($file, $ret)
-
-			$aReturn = OpenExeInfo($ret)
-
-			MouseMove(0, 0, 0)
-			ControlClick($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]")
-			ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]", "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{ENTER}")
-
-			Local $handle = WinWait("[TITLE:s; CLASS:TSViewer]", "", $Timeout)
-			Local $hControl = ControlGetHandle($handle, "", "TListBox1")
-
-			$TimerStart = TimerInit()
-			$return = -1
-
-			While $return < 0
-				Sleep(200)
-				$return = _GUICtrlListBox_FindString($hControl, "--- End of file ---")
-				If TimerDiff($TimerStart) > $Timeout Then ExitLoop
-			WEnd
-
-			CloseExeInfo($aReturn)
-
-			Cout("Moving file back")
-			FileMove($ret, $filedir & "\")
+			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{ENTER}") Then
+				MoveFiles($tempoutdir, $outdir, False, '', True, True)
+			Else
+				$success = $RESULT_FAILED
+			EndIf
 
 		Case $TYPE_TAR
 			_Run($7z & ' x "' & $file & '"', $outdir)
@@ -4934,7 +4979,6 @@ Func _AfterUpdate()
 	FileDelete($bindir & "faad.exe")
 	FileDelete($bindir & "x86\flac.exe")
 	FileDelete($bindir & "x64\flac.exe")
-	FileDelete($langdir & "Chinese.ini")
 	FileDelete($bindir & "MediaInfo64.dll")
 	FileDelete($bindir & "extract.exe")
 	FileDelete($bindir & "dmgextractor.jar")
@@ -4949,13 +4993,17 @@ Func _AfterUpdate()
 	FileDelete($bindir & "stuffit5.engine-5.1.dll")
 	FileDelete($bindir & "FLVExtractCL.exe")
 	FileDelete($bindir & "zpaqxp.exe")
+	FileDelete($bindir & "unrar.exe")
 	FileDelete($defdir & "flv.ini")
 	FileDelete($docsdir & "flac_authors.txt")
 	FileDelete($docsdir & "flac_readme.txt")
 	FileDelete($docsdir & "Expander_license.txt")
 	FileDelete($docsdir & "flvextractcl_icons.txt")
 	FileDelete($docsdir & "bcm_readme.txt")
+	FileDelete($langdir & "Chinese.ini")
+	FileDelete($langdir & "changes.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
+	FileDelete(@ScriptDir & "\useful_software.txt")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "plugins", 1)

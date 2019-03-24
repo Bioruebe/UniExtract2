@@ -101,7 +101,7 @@ unecm										unecm.exe					1.0			x	-	x	GNU GPL v2				Neill Corlett						http:/
 Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
 UnRAR										UnRAR.exe					5.50		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
-unrpa										unrpa.exe					1.4.2		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
+unrpa										unrpa.exe					1.6	mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				1.4			-	-	-	Freeware				David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
 											UHARC04.EXE					0.4			?	x	?	-------					-------								http://www.klaimsoft.com/forum/index.php?showtopic=25			
