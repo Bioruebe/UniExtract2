@@ -23,7 +23,7 @@ BCM											x86\bcm.exe					1.30		-	-	-	MIT						Ilya Muravyov						https://gi
 											x64\bcm.exe					-------		---------	-------					-------								-------
 brunsdec									brunsdec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/brunsdec
 											neko runtime files			-------		---------	-------					-------								-------
-BSA Browser									bsab.exe					1.6.5 mod	-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
+BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
 ConvertLIT									clit.exe					1.8			-	x	-	Open Source				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	o	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
@@ -66,11 +66,11 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
 ns2dec (ONScripter Tools)					ns2dec						2010-09-15	-	-	x	GNU GPL v2				"Uncle" Mion Sonozaki				http://unclemion.com/onscripter/releases/
-PeaZip										pea.exe						0.53/1.0				GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
+PeaZip										pea.exe						0.61/1.1	-	-	-	GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
 Qt Linguist									lconvert.exe				5.11.1		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
-QuickBMS									quickbms.exe				0.9.0		!	o	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
+QuickBMS									quickbms.exe				0.9.2		!	o	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
 RA Installer Unwrapper						RAIU.exe					0.1a		-	-	-	Open Source				Icebird								http://legroom.net/node/539										
@@ -93,6 +93,7 @@ TrID										trid.exe					2.24		---------	Freeware				Marco Pontello						http:
 TrIDLib - Free version						TrIDLib.dll					1.02		---------	TrIDLib license			Marco Pontello						http://mark0.net/soft-trid-e.html
 TrID definations							TrIDDefs.TRD				2018/06/29	---------	-------					-------								-------															
 Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.3.1a		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
+unADF										unadf.exe					1.0			-	-	-	GNU GPL v3				Laurent Clevy						http://lclevy.free.fr/adflib/unadf.html
 unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com					http://www.kippler.com/win/unalz/
 unar										unar.exe					1.8.1		x	x	-	GNU LGPL v2				Dag Ågren							https://theunarchiver.com/command-line
 											Foundation.1.0.dll			-------		---------	-------					-------								-------
@@ -100,7 +101,7 @@ FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin	
 unecm										unecm.exe					1.0			x	-	x	GNU GPL v2				Neill Corlett						http://www.neillcorlett.com/ecm
 Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					5.50		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
+UnRAR										UnRAR.exe					5.70		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										unrpa.exe					1.6	mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				1.4			-	-	-	Freeware				David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
@@ -109,16 +110,16 @@ UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http:
 unzoo										unzoo.exe					4.5			-	x	-	Public Domain			Martin Schoenert					http://archives.math.utk.edu/software/multi-platform/gap/util/
 Info-ZIPs UnZip								unzip.exe					6.00		-	x	-	Open Source				Info-ZIP							http://www.info-zip.org/pub/infozip/							
 uif2iso										uif2iso.exe					0.1.7c		-	-	x	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#uif2iso				
-UPX - The Ultimate Packer for eXecutables	upx.exe						3.08w		-	-	?	modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		http://upx.sourceforge.net/										
+UPX - The Ultimate Packer for eXecutables	upx.exe						3.95w		-	-	?	modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		https://github.com/upx/upx									
 											---------					-------		---------	(UPX License)			Markus Oberhumer					-------															
 utagedec									utagedec.exe				1.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/utagedec
 											neko runtime files			-------		---------	-------					-------								-------
 UUDeview									uudeview.exe				0.5pl20					GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
 VISExt										VIS3Ext						2.2.6777.0	-	-	-	BSD 3-clause			Deniz Özmen							https://oezmen.eu/gameresources/
 											vis.key						-------		---------	-------					-------								-------
-Windows Installer XML Toolset Decompiler	/dark directory				3.10.3.3007	-	x	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
+Windows Installer XML Toolset Decompiler	/dark directory				3.11.1		-	x	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
-Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906			
+Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906	[Offline]
 XAce Plus									xace.exe					2.6			x		-	Freeware				Marcel Lemke						http://www.winace.com/											
 Xor											xor.exe						0.2			-	-	-	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm
 ZPAQ										x86\zpaq.exe				7.15		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html

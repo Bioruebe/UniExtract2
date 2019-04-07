@@ -1,10 +1,20 @@
 RC 3:
   Added support for MSCF installers
+  Added support for Amiga Disk Files
   Improved speed of file type detection
   Fixed some installers being misdetected as InstallShield
   Fixed swf exe extraction not terminating correctly
+  Fixed console window always being visible for extractions using definition files
+  Fixed file identification not working correctly for a few big executables
+  Fixed Wise extraction methods 3 and 4 always failing
+  Fixed some executables not being tested with 7zip
+  Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
+  Updated PeaZip to 0.61/1.1
+  Updated QuickBMS to 1.9.2
   Updated UnRAR to 5.70; added x64 version
   Updated unrpa to 1.6
+  Updated upx to 3.95w
+  Updated WiX to 3.11.1
 
 RC 2:
   Added support for InstallScript installers
