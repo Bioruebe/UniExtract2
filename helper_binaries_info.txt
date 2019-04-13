@@ -52,7 +52,7 @@ HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					htt
 i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
 innounp, the Inno Setup Unpacker			innounp.exe					0.48				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
 IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
-jsMSIx										jsMSIx.exe					1.11.0704				Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
+jsMSIx										jsMSIx.exe					1.19.0.1				Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
 KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								
 lessmsi										\lessmsi directory			1.6.1 mod	-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
 lzip										lzip.exe					1.20		-	x	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
@@ -121,6 +121,10 @@ Windows Installer XML Toolset Decompiler	/dark directory				3.11.1		-	x	-	MS-RL	
 wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a					Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906	[Offline]
 XAce Plus									xace.exe					2.6			x		-	Freeware				Marcel Lemke						http://www.winace.com/											
+Xpdf command line tools						pdfdetach.exe				4.01.01		-	-	-	GNU GPL v2/v3			Glyph & Cog, LLC					http://www.xpdfreader.com/index.html
+											pdftohtml.exe				-------		---------	-------					-------								-------
+											pdftopng.exe				-------		---------	-------					-------								-------
+											pdftotext.exe				-------		---------	-------					-------								-------
 Xor											xor.exe						0.2			-	-	-	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm
 ZPAQ										x86\zpaq.exe				7.15		x	-	-	Public Domain			Matt Mahoney						http://mattmahoney.net/dc/zpaq.html
 											x64\zpaq.exe				-------		---------	-------					-------								-------

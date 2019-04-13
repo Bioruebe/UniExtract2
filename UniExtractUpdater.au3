@@ -19,11 +19,13 @@
 
 ; Script Start - Add your code below here
 
+#include <Array.au3>
 #include <GUIConstants.au3>
 #include <Inet.au3>
 
 Const $sUpdaterTitle = "Universal Extractor Updater"
-Const $sUpdateURL = "https://update.bioruebe.com/uniextract/data/UniExtract.exe"
+Const $sMainUpdateURL = "https://update.bioruebe.com/uniextract/data/UniExtract.exe"
+Const $sMainNighlyUpdateURL = "https://update.bioruebe.com/uniextract/nightly/UniExtract.exe"
 Const $sGetLinkURL = "https://update.bioruebe.com/uniextract/geturl.php?q="
 Const $sUniExtract = @ScriptDir & "\UniExtract.exe"
 
@@ -41,17 +43,17 @@ If $cmdline[1] == "/pluginst" Then
 	; To install plugins we just start UniExtract elevated
 	Exit ShellExecute($sUniExtract, "/plugins")
 ElseIf $cmdline[1] == "/main" Then
-	_UpdateUniExtract()
+	_UpdateUniExtract(_ArraySearch($cmdline, "/nightly") > -1)
 ElseIf $cmdline[1] == "/helper" Then
 	Exit ShellExecute($sUniExtract, "/updatehelper")
 ElseIf $cmdline[1] == "/ffmpeg" Then
 	_GetFFMPEG()
 EndIf
 
-Func _UpdateUniExtract()
+Func _UpdateUniExtract($bNightly = False)
 	If Not ProcessWaitClose($sUniExtract, 10) Then Exit MsgBox(16, $sUpdaterTitle, "Failed to close Universal Extractor. Please terminate the process manually and try again.")
 
-	_Download($sUpdateURL)
+	_Download($bNightly? $sMainNighlyUpdateURL: $sMainUpdateURL)
 	$error = @error
 
 	Sleep(100)

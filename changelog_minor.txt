@@ -1,6 +1,7 @@
 RC 3:
   Added support for MSCF installers
-  Added support for Amiga Disk Files
+  Added support for Amiga Disk Files using unADF
+  Added support for PDF files using Xpdf command line tools
   Improved speed of file type detection
   Fixed some installers being misdetected as InstallShield
   Fixed swf exe extraction not terminating correctly
@@ -8,13 +9,22 @@ RC 3:
   Fixed file identification not working correctly for a few big executables
   Fixed Wise extraction methods 3 and 4 always failing
   Fixed some executables not being tested with 7zip
+  Fixed some FMOD sound banks not being fully extracted, thanks to Sakkade
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
+  Changed output directory input field to autofill after typing an input file path
+  Updated jsMSIx to 1.19.0.1
   Updated PeaZip to 0.61/1.1
   Updated QuickBMS to 1.9.2
   Updated UnRAR to 5.70; added x64 version
   Updated unrpa to 1.6
   Updated upx to 3.95w
   Updated WiX to 3.11.1
+
+RC 2b:
+  RC 2b is a bugfix update adressing problems with the beta update channel
+  
+  Fixed updater not downloading the correct version of UniExtract if 'Install beta updates' option is enabled
+  Changed preferences dialog: after changing 'Install beta updates' UniExtract now automatically searches for updates
 
 RC 2:
   Added support for InstallScript installers

@@ -104,12 +104,12 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_IS3ARC = "is3arc", $TYPE_ISCAB = "iscab", _
 	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
 	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
-	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", _
-	  $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
-	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
-	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
-	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
-	  $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", _
+	  $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", _
+	  $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", _
+	  $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", _
+	  $TYPE_VIDEO_CONVERT = "video_convert", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", _
+	  $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 
 
 Opt("GUIOnEventMode", 1)
@@ -157,7 +157,7 @@ Global $trayX = -1, $trayY = -1
 ; Global variables
 Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
 Dim $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL
-Dim $About, $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
+Dim $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Dim $sFullLog = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $exStyle = -1, $sArcTypeOverride = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isfailed, $isofailed, $tridfailed, $gamefailed, $unpackfailed, $exefailed
@@ -176,65 +176,69 @@ Else
 EndIf
 
 ; Extractors
-Const $7z = Quote($archdir & '7z.exe', True) ;x64									;15.05
-Const $7zsplit = "7ZSplit.exe" 														;0.2
-Const $ace = $bindir & "xace.exe" 													;2.6
-Const $alz = "unalz.exe" 															;0.64
-Const $arj = "arj.exe" 																;3.10
-Const $aspack = "AspackDie.exe" 													;1.4.1
-Const $bcm = Quote($archdir & "bcm.exe", True) ;x64									;1.00
-Const $daa = "daa2iso.exe" 															;0.1.7e
-Const $enigma = "EnigmaVBUnpacker.exe"												;0.44
-Const $ethornell = "ethornell.exe" 													;unknown
-Const $exeinfope = Quote($bindir & "exeinfope.exe")									;0.0.3.7
-Const $filetool = Quote($bindir & "file\bin\file.exe", True)						;5.03
-Const $freearc = "unarc.exe"														;0.666
-Const $fsb = "fsbext.exe" 															;0.3.3
-Const $gcf = $archdir & "GCFScape.exe" ;x64											;1.8.2
-Const $hlp = "helpdeco.exe" 														;2.1
-Const $img = "EXTRNT.EXE" 															;2.10
-Const $inno = "innounp.exe" 														;0.45
-Const $is6cab = "i6comp.exe" 														;0.2
-Const $isxunp = "IsXunpack.exe" 													;0.99
-Const $isz = "unisz.exe"															;?
-Const $kgb = 'kgb\kgb2_console.exe'													;1.2.1.24
-Const $lit = "clit.exe" 															;1.8
-Const $lz = "lzip.exe"																;1.20
-Const $lzo = "lzop.exe" 															;1.03
-Const $lzx = "unlzx.exe" 															;1.21
-Const $mht = "extractMHT.exe" 														;1.0
-Const $mole = "demoleition.exe"														;0.5
-Const $msi_msix = "MsiX.exe" 														;1.0
-Const $msi_jsmsix = "jsMSIx.exe" 													;1.11.0704
-Const $msi_lessmsi = Quote($bindir & 'lessmsi\lessmsi.exe', True)					;1.4
-Const $nbh = "NBHextract.exe" 														;1.0
-Const $pea = Quote($bindir & "pea.exe") 											;0.53/1.0
-Const $peid = Quote($bindir & "peid.exe")											;0.95   2012/04/24
-Const $quickbms = Quote($bindir & "quickbms.exe", True)								;0.6.4
-Const $rai = "RAIU.EXE" 															;0.1a
-Const $rar = Quote($archdir & "UnRAR.exe", True) ;x64								;5.70
-Const $rgss = "RgssDecrypter.exe"													;1.0.0.1
-Const $rpa = "unrpa.exe"															;1.6
-Const $sfark = "sfarkxtc.exe"														;3.0
-Const $sqlite = "sqlite3.exe"														;3.10.2
-Const $stix = "stix_d.exe" 															;2001/06/13
-Const $swf = "swfextract.exe" 														;0.9.1
-Const $trid = "trid.exe" 															;2.24	2012/05/06
-Const $ttarch = "ttarchext.exe"														;0.2.4
-Const $uharc = "UNUHARC06.EXE" 														;0.6b
-Const $uharc04 = "UHARC04.EXE" 														;0.4
-Const $uharc02 = "UHARC02.EXE" 														;0.2
-Const $uif = "uif2iso.exe" 															;0.1.7c
-Const $unity = "disunity.bat" 														;0.3.2
-Const $unshield = "unshield.exe" 													;0.5
-Const $upx = "upx.exe" 																;3.08w
-Const $visionaire3 = "VIS3Ext.exe"													;2.2.6581.0
-Const $wise_ewise = "e_wise_w.exe" 													;2002/07/01
-Const $wise_wun = "wun.exe" 														;0.90A
-Const $wix = Quote($bindir & "dark\dark.exe", True)									;3.10.3.3007
-Const $zip = "unzip.exe" 															;6.00
-Const $zpaq = Quote($archdir & "zpaq.exe", True) ;x64								;7.07
-Const $zoo = "unzoo.exe" 															;4.5
+Const $7z = Quote($archdir & '7z.exe', True)
+Const $7zsplit = "7ZSplit.exe"
+Const $ace = $bindir & "xace.exe"
+Const $alz = "unalz.exe"
+Const $arj = "arj.exe"
+Const $aspack = "AspackDie.exe"
+Const $bcm = Quote($archdir & "bcm.exe", True)
+Const $daa = "daa2iso.exe"
+Const $enigma = "EnigmaVBUnpacker.exe"
+Const $ethornell = "ethornell.exe"
+Const $exeinfope = Quote($bindir & "exeinfope.exe")
+Const $filetool = Quote($bindir & "file\bin\file.exe", True)
+Const $freearc = "unarc.exe"
+Const $fsb = "fsbext.exe"
+Const $gcf = $archdir & "GCFScape.exe"
+Const $hlp = "helpdeco.exe"
+Const $img = "EXTRNT.EXE"
+Const $inno = "innounp.exe"
+Const $is6cab = "i6comp.exe"
+Const $isxunp = "IsXunpack.exe"
+Const $isz = "unisz.exe"
+Const $kgb = "kgb\kgb2_console.exe"
+Const $lit = "clit.exe"
+Const $lz = "lzip.exe"
+Const $lzo = "lzop.exe"
+Const $lzx = "unlzx.exe"
+Const $mht = "extractMHT.exe"
+Const $mole = "demoleition.exe"
+Const $msi_msix = "MsiX.exe"
+Const $msi_jsmsix = "jsMSIx.exe"
+Const $msi_lessmsi = Quote($bindir & 'lessmsi\lessmsi.exe', True)
+Const $nbh = "NBHextract.exe"
+Const $pea = Quote($bindir & "pea.exe")
+Const $pdfdetach = "pdfdetach.exe"
+Const $pdftohtml = "pdftohtml.exe"
+Const $pdftopng = "pdftopng.exe"
+Const $pdftotext = "pdftotext.exe"
+Const $peid = Quote($bindir & "peid.exe")
+Const $quickbms = Quote($bindir & "quickbms.exe", True)
+Const $rai = "RAIU.EXE"
+Const $rar = Quote($archdir & "UnRAR.exe", True)
+Const $rgss = "RgssDecrypter.exe"
+Const $rpa = "unrpa.exe"
+Const $sfark = "sfarkxtc.exe"
+Const $sqlite = "sqlite3.exe"
+Const $stix = "stix_d.exe"
+Const $swf = "swfextract.exe"
+Const $trid = "trid.exe"
+Const $ttarch = "ttarchext.exe"
+Const $uharc = "UNUHARC06.EXE"
+Const $uharc04 = "UHARC04.EXE"
+Const $uharc02 = "UHARC02.EXE"
+Const $uif = "uif2iso.exe"
+Const $unity = "disunity.bat"
+Const $unshield = "unshield.exe"
+Const $upx = "upx.exe"
+Const $visionaire3 = "VIS3Ext.exe"
+Const $wise_ewise = "e_wise_w.exe"
+Const $wise_wun = "wun.exe"
+Const $wix = Quote($bindir & "dark\dark.exe", True)
+Const $zip = "unzip.exe"
+Const $zpaq = Quote($archdir & "zpaq.exe", True)
+Const $zoo = "unzoo.exe"
 
 ; Plugins
 Const $bms = "BMS.bms"
@@ -251,7 +255,7 @@ Const $sis = "PDunSIS.wcx"
 Const $mtee = Quote($bindir & "mtee.exe")
 Const $wtee = Quote($bindir & "wtee.exe")
 Const $tee = @OSVersion = "WIN_10"? $wtee: $mtee
-Const $mediainfo = $bindir & "MediaInfo.dll"										; 0.7.72
+Const $mediainfo = $bindir & "MediaInfo.dll"
 Const $xor = "xor.exe"
 
 ; Not included binaries
@@ -261,7 +265,7 @@ Const $ci = "ci-extractor.exe"
 Const $crage = Quote($bindir & "crass-0.4.14.0\crage.exe", True)
 Const $dcp = "dcp_unpacker.exe"
 Const $dgca = "dgcac.exe"
-Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)	;x64
+Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
 Const $sim = "sim_unpacker.exe"
@@ -1144,6 +1148,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Outlook Express E-mail folder")
 			extract($TYPE_QBMS, 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
 
+		Case StringInStr($sFileType, "Portable Document Format")
+			extract($TYPE_PDF, 'PDF ' & t('TERM_FILE'))
+
 		Case StringInStr($sFileType, "PEA compressed archive")
 			extract($TYPE_PEA, 'Pea ' & t('TERM_ARCHIVE'))
 
@@ -1247,7 +1254,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_ZPAQ, 'ZPAQ ' & t('TERM_ARCHIVE'))
 
 		; Forced to bottom of list due to false positives
-		Case StringInStr($sFileType, "LZMA compressed archive")
+		Case StringInStr($sFileType, "LZMA compressed archive") Or StringInStr($sFileType, "Windows Thumbnail Database")
 			check7z()
 
 		Case StringInStr($sFileType, "Enigma Virtual Box virtualized executable")
@@ -1256,7 +1263,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "InstallShield setup")
 			CheckInstallShield()
 
-		Case  StringInStr($sFileType, "MP3 audio")
+		Case StringInStr($sFileType, "MP3 audio")
 			extract($TYPE_AUDIO, 'MP3 ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($sFileType, "FLAC lossless")
@@ -1279,7 +1286,8 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
-			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump")
+			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump") Or _
+			 StringInStr($sFileType, "Windows Shortcut")
 			terminate($STATUS_NOTPACKED, $file)
 
 		; Not supported filetypes
@@ -2338,7 +2346,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($freearc & ' x -dp"' & $outdir & '" "' & $file & '"', $filedir, @SW_HIDE, True, True, False, False)
 
 		Case $TYPE_FSB
-			_Run($fsb & ' -d "' & $outdir & '" "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, False)
+			_Run($fsb & ' -o -1 -A -d "' & $outdir & '" "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, False)
+
+			; Ogg files are raw dumps and not playable
+			Cleanup("*.ogg")
 
 		Case $TYPE_GCF
 			Prompt(48 + 1, 'PACKAGE_EXPLORER', $file, True)
@@ -2734,6 +2745,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 			; Determine if there are .bin files in filedir
 			CheckBin()
+
+		Case $TYPE_PDF
+			_Run($pdfdetach & ' -saveall "' & $file & '"', $outdir, @SW_HIDE, True, True, False, False)
+			_Run($pdftohtml & ' "' & $file & '" "' & $outdir & '\' & $filename & '-HTML"', $outdir, @SW_HIDE, True, True, False, False)
+			_Run($pdftopng & ' "' & $file & '" "' & $outdir & '\' & $filename & '-' & t('TERM_PAGE') & '"', $outdir, @SW_HIDE, True, True, False, False)
+			_Run($pdftotext & ' "' & $file & '" "' & $outdir & '\' & $filename & '.txt"', $outdir, @SW_HIDE, True, True, False, False)
 
 		Case $TYPE_PEA
 			DirCreate($tempoutdir)
@@ -4049,7 +4066,7 @@ Func EnableBatchMode($enable = True)
 		EndIf
 
 		If $guimain Then
-			GUICtrlSetOnEvent($ok, "GUI_Batch_OK")
+			GUICtrlSetOnEvent($GUI_Main_Ok, "GUI_Batch_OK")
 			GUICtrlSetState($showitem, $GUI_ENABLE)
 			GUICtrlSetState($clearitem, $GUI_ENABLE)
 		EndIf
@@ -4063,7 +4080,7 @@ Func EnableBatchMode($enable = True)
 		EndIf
 
 		If $guimain Then
-			GUICtrlSetOnEvent($ok, "GUI_OK")
+			GUICtrlSetOnEvent($GUI_Main_Ok, "GUI_OK")
 			GUICtrlSetData($BatchBut, t('BATCH_BUT'))
 			GUICtrlSetState($showitem, $GUI_DISABLE)
 			GUICtrlSetState($clearitem, $GUI_DISABLE)
@@ -4723,10 +4740,12 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 			Cout("Update available")
 			$found = True
 			If GUI_UpdatePrompt() Then
+				Local $sParameters = "/main"
+				If $bOptNightlyUpdates == 1 Then $sParameters &= " /nightly"
 				If CanAccess(@ScriptDir) Then
-					If Not ShellExecute($sUpdaterNoAdmin, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+					If Not ShellExecute($sUpdaterNoAdmin, $sParameters) Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
 				Else
-					If Not ShellExecute($sUpdater, "/main") Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
+					If Not ShellExecute($sUpdater, $sParameters) Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
 				EndIf
 				Exit
 			Else
@@ -5011,6 +5030,7 @@ Func _AfterUpdate()
 	FileDelete($langdir & "changes.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
 	FileDelete(@ScriptDir & "\useful_software.txt")
+	FileDelete(@ScriptDir & "\support\Icons\Bioruebe.jpg")
 	DirRemove($bindir & "unrpa", 1)
 	DirRemove($bindir & "languages", 1)
 	DirRemove($bindir & "plugins", 1)
@@ -5125,8 +5145,8 @@ Func CreateGUI()
 	GUICtrlSetTip($GUI_Main_Lock, t('MAIN_DIRECTORY_LOCK_TOOLTIP'))
 
 	; Buttons
-	Global $ok = GUICtrlCreateButton(t('OK_BUT'), 10, 90, 80, 20)
-	Local $cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 110, 90, 80, 20)
+	Global $GUI_Main_Ok = GUICtrlCreateButton(t('OK_BUT'), 10, 90, 80, 20)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 110, 90, 80, 20)
 	Global $BatchBut = GUICtrlCreateButton(t('BATCH_BUT'), 210, 90, 80, 20)
 
 	; Set properties
@@ -5134,7 +5154,7 @@ Func CreateGUI()
 	GUICtrlSetState($dropzone, $GUI_DISABLE)
 	GUICtrlSetState($dropzone, $GUI_DROPACCEPTED)
 	GUICtrlSetState($filecont, $GUI_FOCUS)
-	GUICtrlSetState($ok, $GUI_DEFBUTTON)
+	GUICtrlSetState($GUI_Main_Ok, $GUI_DEFBUTTON)
 	GUICtrlSetState($GUI_Main_Lock, $KeepOutdir? $GUI_CHECKED: $GUI_UNCHECKED)
 	GUICtrlSetState($keepopenitem, $KeepOpen? $GUI_CHECKED: $GUI_UNCHECKED)
 	GUICtrlSetState($topmostitem, $iTopmost? $GUI_CHECKED: $GUI_UNCHECKED)
@@ -5177,6 +5197,7 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($GUI_Main_Lock, "GUI_KeepOutdir")
 	GUICtrlSetOnEvent($GUI_Main_Extract, "GUI_ScanOnly")
 	GUICtrlSetOnEvent($GUI_Main_Scan, "GUI_ScanOnly")
+	GUICtrlSetOnEvent($filecont, "GUI_OnFileInputChanged")
 	GUICtrlSetOnEvent($silentitem, "GUI_Silent")
 	GUICtrlSetOnEvent($passworditem, "GUI_Password")
 	GUICtrlSetOnEvent($contextitem, "GUI_ContextMenu")
@@ -5192,8 +5213,8 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($programdiritem, "GUI_ProgDir")
 	GUICtrlSetOnEvent($configfileitem, "GUI_ConfigFile")
 	GUICtrlSetOnEvent($aboutitem, "GUI_About")
-	GUICtrlSetOnEvent($ok, "GUI_Ok")
-	GUICtrlSetOnEvent($cancel, "GUI_Exit")
+	GUICtrlSetOnEvent($GUI_Main_Ok, "GUI_Ok")
+	GUICtrlSetOnEvent($idCancel, "GUI_Exit")
 	GUICtrlSetOnEvent($BatchBut, "GUI_Batch")
 	GUICtrlSetOnEvent($quititem, "GUI_Exit")
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Exit")
@@ -5257,9 +5278,23 @@ Func _GuiRoundCorners($h_win, $i_x1, $i_y1, $i_x3, $i_y3)
 	EndIf
 EndFunc   ;==>_GuiRoundCorners
 
+; Drop-in replacement for GUICtrlCreatePic with PNG support
+Func _GUICtrlCreatePic($sPath, $left, $top, $iWidth, $iHeight)
+	Local Const $sPlaceholder = @ScriptDir & "\support\Icons\uniextract_inno.bmp"
+
+	$idImage = GUICtrlCreatePic($sPlaceholder, $left, $top, $iWidth, $iHeight)
+	_GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
+
+	Return $idImage
+EndFunc
+
 ; Load an image into a picture GUI control, used for PNG support
 Func _GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
-	If Not _GDIPlus_Startup() Then Return
+	If Not _GDIPlus_Startup() Then
+		Cout("Failed to start GDI+")
+		Return SetError(1)
+	EndIf
+
 	$hImage = _GDIPlus_ImageLoadFromFile($sPath)
 	$hResized = _GDIPlus_ImageResize($hImage, $iWidth, $iHeight)
 	$hBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hResized)
@@ -5306,7 +5341,7 @@ Func GUI_File()
 		;_ArrayDisplay($gaDropFiles)
 		GUI_Drop()
 
-		GUICtrlSetState($ok, $GUI_FOCUS)
+		GUICtrlSetState($GUI_Main_Ok, $GUI_FOCUS)
 	EndIf
 EndFunc
 
@@ -5555,7 +5590,9 @@ Func GUI_Prefs_OK()
 	$StoreGUIPosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
 	$bSendStats = Number(GUICtrlRead($UsageStatsOpt) == $GUI_CHECKED)
 	$iCleanup = GUICtrlRead($idOptDeleteAdditionalFiles) == $GUI_CHECKED? $OPTION_DELETE: $OPTION_MOVE
-	$bOptNightlyUpdates = Number(GUICtrlRead($idOptBetaUpdates) == $GUI_CHECKED)
+	$tmp = Number(GUICtrlRead($idOptBetaUpdates) == $GUI_CHECKED)
+	$bUpdate = Not ($bOptNightlyUpdates == $tmp)
+	$bOptNightlyUpdates = $tmp
 	$sUpdateURL = $bOptNightlyUpdates == 1? $sNightlyUpdateURL: $sDefaultUpdateURL
 
 	For $i = 0 To 2
@@ -5567,9 +5604,19 @@ Func GUI_Prefs_OK()
 	GUIDelete($guiprefs)
 	$guiprefs = False
 
+	If $bUpdate Then CheckUpdate()
+
 	If Not $redrawgui Then Return
 	GUIDelete($guimain)
 	CreateGUI()
+EndFunc
+
+; Handle change event of file input
+Func GUI_OnFileInputChanged()
+	If StringLen(GUICtrlRead($dircont)) > 0 Then Return
+
+	Global $file = GUICtrlRead($filecont)
+	GUI_Drop_Parse()
 EndFunc
 
 ; Handle click on OK
@@ -5739,6 +5786,8 @@ EndFunc
 
 ; Process dropped files
 Func GUI_Drop_Parse()
+	If $file == "" Then Return
+
 	If $history Then
 		$filelist = '|' & $file & '|' & ReadHist($HISTORY_FILE)
 		GUICtrlSetData($filecont, $filelist, $file)
@@ -6235,7 +6284,7 @@ Func GUI_FirstStart()
 	; Create GUI
 	Global $FS_GUI = GUICreate($title, 504, 387)
 	_GuiSetColor()
-	Local $idImage = GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract_inno.bmp", 8, 312, 65, 65)
+	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract.png", 8, 312, 65, 65)
 	GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 24, 800, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('FIRSTSTART_TITLE'), 8, 50, 488, 60, $SS_CENTER)
@@ -6249,8 +6298,6 @@ Func GUI_FirstStart()
 	GUICtrlSetState(-1, $GUI_HIDE)
 	Global $FS_Button = GUICtrlCreateButton("", 187, 260, 129, 41)
 	Global $FS_Progress = GUICtrlCreateLabel("", 80, 350, 21, 17)
-
-	_GDIPlus_LoadImage(@ScriptDir & "\support\Icons\uniextract.png", $idImage, 65, 65)
 
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_FirstStart_Exit")
 	GUICtrlSetOnEvent($FS_Cancel, "GUI_FirstStart_Exit")
@@ -6382,11 +6429,10 @@ Func _GUI_FileScan()
 	Local $idEdit = GUICtrlCreateEdit($sFileType, 81, 26, 367, 181, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 14? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
 	GUICtrlSetFont(-1, 8.5, 0, 0, "Courier New")
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 362, 214, 81, 25)
-	Local $idImage = GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract_inno.bmp", 4, 12, 73, 73)
+	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract.png", 4, 12, 73, 73)
 	Local $idCopy = GUICtrlCreateButton(t('COPY_BUT'), 260, 214, 81, 25)
 
 	GUICtrlSetBkColor($idEdit, $COLOR_WHITE)
-	_GDIPlus_LoadImage(@ScriptDir & "\support\Icons\uniextract.png", $idImage, 73, 68)
 	GUISetState(@SW_SHOWNORMAL)
 
 	While 1
@@ -6417,8 +6463,7 @@ Func GUI_UpdatePrompt()
 	Local $idEdit = GUICtrlCreateEdit(t('TERM_LOADING'), 8, 80, 440, 193, BitOR($ES_READONLY, $WS_VSCROLL), $WS_EX_STATICEDGE)
 	Local $idYes = GUICtrlCreateButton(t('YES_BUT'), 272, 280, 75, 25)
 	Local $idNo = GUICtrlCreateButton(t('NO_BUT'), 368, 280, 75, 25)
-	Local $idImage = GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract_inno.bmp", 8, 8, 48, 48)
-	_GDIPlus_LoadImage(@ScriptDir & "\support\Icons\uniextract.png", $idImage, 48, 48)
+	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\uniextract.png", 8, 8, 48, 48)
 	GUISetState(@SW_SHOW)
 
 	Local $return = _INetGetSource($sUpdateURL & "news")
@@ -6730,7 +6775,7 @@ EndFunc
 Func GUI_About()
 	Local Const $width = 437, $height = 285
 	Cout("Creating about GUI")
-	$About = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, $exStyle, $guimain)
+	Local $hGUI = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
@@ -6738,11 +6783,11 @@ Func GUI_About()
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
-	GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.jpg", $width - 89 - 10, $height - 55, 89, 50)
-	$About_OK = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
+	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.png", $width - 100 - 10, $height - 48 - 10, 100, 48)
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
 	GUISetState(@SW_SHOW)
 
-	GUICtrlSetOnEvent($About_OK, "GUI_Close")
+	GUICtrlSetOnEvent($idOk, "GUI_Close")
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Close")
 EndFunc
 
