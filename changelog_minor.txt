@@ -2,6 +2,7 @@ RC 3:
   Added support for MSCF installers
   Added support for Amiga Disk Files using unADF
   Added support for PDF files using Xpdf command line tools
+  Added support for hundreds of game archives using GARbro
   Improved speed of file type detection
   Fixed some installers being misdetected as InstallShield
   Fixed swf exe extraction not terminating correctly
@@ -10,8 +11,10 @@ RC 3:
   Fixed Wise extraction methods 3 and 4 always failing
   Fixed some executables not being tested with 7zip
   Fixed some FMOD sound banks not being fully extracted, thanks to Sakkade
+  Fixed 'NScripter archive' false positives
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
+  Changed design of 'Unknown file type' error dialog, feedback prompt
   Updated jsMSIx to 1.19.0.1
   Updated PeaZip to 0.61/1.1
   Updated QuickBMS to 1.9.2
@@ -19,6 +22,8 @@ RC 3:
   Updated unrpa to 1.6
   Updated upx to 3.95w
   Updated WiX to 3.11.1
+  Removed Crass/Crage, replaced with GARbro
+  Removed XAce, replaced with acefile
 
 RC 2b:
   RC 2b is a bugfix update adressing problems with the beta update channel
@@ -89,6 +94,7 @@ RC 2:
   Updated Finnish translation, thanks to jyrkive
   Updated Greek translation, thanks to gvp9000
   Updated Italian translation, thanks to NAMP and tfr
+  Updated Japanese translation, thanks to wakaizumo
   Updated Korean translation, thanks to 까꿍
   Updated Polish translaton, thanks to Barnaba and dmocha
   Updated Portuguese (Brazilian) translation, thanks to igorruckert

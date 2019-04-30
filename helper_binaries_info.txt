@@ -12,6 +12,7 @@ Name										Files						Version		Features	License					Author								Website
 											x86\7z.dll					-------		---------	-------					-------								-------															
 											x64\7z.dll					-------		---------	-------					-------								-------															
 7z SFX Archives splitter					7ZSplit.exe					0.2			---------	GNU LGPL v3				Oleg Scherbakov						http://www.7zsfx.info/en/										
+acefile										acefile.exe					0.6.11		-	-	-	modified BSD 2-clause	Daniel Roethlisberger				https://github.com/droe/acefile
 ARC - Archive utility						arc.exe						5.21i		-	x	-	GNU GPL v2				Howard Chu							http://gnuwin32.sourceforge.net/packages/arc.htm				
 Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Roper						https://github.com/minirop/arc-reader/downloads
 											libpng12.dll				-------		---------	-------					-------								-------
@@ -42,6 +43,7 @@ FFmpeg										x86\ffmpeg.exe				newest		-		-	LGPL/GPL v2+			FFmpeg project				
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
 FSB files extractor							fsbext.exe					0.3.8		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
+GARbro										\GARbro directory			1.5.44		x	-	x	MIT						mørkt								https://github.com/morkt/GARbro
 GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http://nemesis.thewavelength.net/index.php?p=25					
 											x64\GCFScape.exe			-------		---------	-------					-------								-------															
 											x86\hllib.dll				2.4.0		---------	GNU LGPL				-------								http://nemesis.thewavelength.net/index.php?p=35					
