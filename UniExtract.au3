@@ -90,7 +90,7 @@ Enum $RESULT_UNKNOWN, $RESULT_SUCCESS, $RESULT_FAILED, $RESULT_CANCELED, $RESULT
 Enum $UNICODE_NONE, $UNICODE_MOVE, $UNICODE_COPY
 Enum $UPDATE_ALL, $UPDATE_HELPER, $UPDATE_MAIN
 Enum $UPDATEMSG_PROMPT, $UPDATEMSG_SILENT, $UPDATEMSG_FOUND_ONLY
-Const $FONT_ARIAL = "Arial"
+Const $FONT_ARIAL = "Arial", $COLOR_LINK = 0x000080
 Const $PACKER_UPX = "UPX", $PACKER_ASPACK = "Aspack"
 Const $HISTORY_FILE = "File History", $HISTORY_DIR = "Directory History"
 Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNEXE = "unknownexe", $STATUS_UNKNOWNEXT = "unknownext", _
@@ -1272,17 +1272,8 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "InstallShield setup")
 			CheckInstallShield()
 
-		Case StringInStr($sFileType, "MP3 audio")
-			extract($TYPE_AUDIO, 'MP3 ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
-
-		Case StringInStr($sFileType, "FLAC lossless")
-			extract($TYPE_AUDIO, 'FLAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
-
-		Case StringInStr($sFileType, "Windows Media (generic)")
-			extract($TYPE_AUDIO, 'Windows Media ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
-
-		Case StringInStr($sFileType, "OGG Vorbis audio")
-			extract($TYPE_AUDIO, 'OGG Vorbis ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+		Case StringInStr($sFileType, "audio") Or StringInStr($sFileType, "FLAC lossless")
+			extract($TYPE_AUDIO, t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($sFileType, "Smacker movie/video")
 			extract($TYPE_VIDEO_CONVERT, t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
@@ -2848,7 +2839,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Cleanup($aCleanup)
 
 		Case $TYPE_SQLITE
-			$return = FetchStdout($sqlite & ' "' & $file & '" .dump ', $filedir, @SW_HIDE, 0, False)
+			$return = FetchStdout($sqlite & ' "' & $file & '" .dump"', $filedir, @SW_HIDE, 0)
 			$handle = FileOpen($outdir & '\' & $filename & '.sql', 8+2)
 			FileWrite($handle, $return)
 			FileClose($handle)
@@ -3533,9 +3524,80 @@ EndFunc
 ; Search for FFMPEG and prompt to download it if not found
 Func HasFFMPEG()
 	If HasPlugin($ffmpeg, True) Then Return
-	Prompt(48 + 4, 'FFMPEG_NEEDED', CreateArray($file, "https://ffmpeg.org/legal.html"), True)
-	GetFFmpeg()
-	If @error Then terminate($STATUS_SILENT)
+
+	Opt("GUIOnEventMode", 0)
+	Local $sTranslation = t('TERM_DOWNLOAD')
+
+	Local $hGUI = GUICreate($name, 416, 201, 438, 245, $GUI_SS_DEFAULT_GUI)
+	_GuiSetColor()
+	GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filename, $sTranslation)), 72, 20, 330, 107)
+	Local $idDownload = GUICtrlCreateButton($sTranslation, 242, 166, 75, 25)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 332, 166, 75, 25)
+	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	Local $idCheckbox = GUICtrlCreateCheckbox(t('FFMPEG_LICENSE_ACCEPT_LABEL'), 10, 138, 259, 17)
+	Local $idViewLicense = GUICtrlCreateLabel(t('FFMPEG_LICENSE_VIEW_LABEL'), 266, 140, 138, 17, $SS_RIGHT)
+	_GuiCtrlLinkFormat()
+	Local $idSelectFile = GUICtrlCreateLabel(t('FFMPEG_SELECT_LABEL'), 10, 172, 133, 17)
+	_GuiCtrlLinkFormat()
+	GUISetState(@SW_SHOW)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idCancel
+				GUIDelete($hGUI)
+				terminate($STATUS_SILENT)
+			Case $idDownload
+				If GUICtrlRead($idCheckbox) = $GUI_CHECKED Then
+					GUIDelete($hGUI)
+					GetFFmpeg()
+					If @error Then terminate($STATUS_SILENT)
+					ExitLoop
+				EndIf
+				MsgBox($iTopmost + 48, $name, t('LICENSE_NOT_ACCEPTED'))
+			Case $idViewLicense
+				ShellExecute("https://ffmpeg.org/legal.html")
+			Case $idSelectFile
+				Local $tmp = @WorkingDir
+				$sPath = FileOpenDialog(t('FFMPEG_SELECT_TITLE'), _GetFileOpenDialogInitDir(), "FFmpeg (ffmpeg.exe)", 1, "", $hGUI)
+				If @error Or Not FileExists($sPath) Then ContinueLoop
+
+				; Make sure the executable is really FFmpeg
+				GUICtrlSetState($idDownload, $GUI_DISABLE)
+				GUICtrlSetState($idSelectFile, $GUI_DISABLE)
+				Local $ret = FetchStdout($sPath, @WorkingDir, @SW_HIDE, 0, True, True, False)
+				FileChangeDir($tmp)
+				GUICtrlSetState($idDownload, $GUI_ENABLE)
+				GUICtrlSetState($idSelectFile, $GUI_ENABLE)
+
+				; Shared version is not supported, because the DLLs cannot be found with a hardlinked executable
+				If FileGetSize($sPath) < 1024 * 1024 Or Not StringInStr($ret, "ffmpeg version") Then
+					MsgBox($iTopmost + 16, $title, t('FFMPEG_INVALID_FILE'))
+					ContinueLoop
+				EndIf
+				GUIDelete($hGUI)
+				Cout("FFmpeg selected: " & $sPath)
+
+				Local $sDestination = StringReplace($ffmpeg, '"', '')
+				; Create a hardlink because:
+				;  -FFmpeg is available even after deleting the linked file
+				;  -Compatibility with Windows XP (symlinks not available on older OS)
+				;  -Yes, using the direct path to FFmpeg would be the cleanest solution, but the whole extraction logic
+				;   is built around having everything in \bin. Saving a few MB is not worth the work necessary to change
+				;   all functions to support extractors outside this directory.
+				If FileCreateNTFSLink($sPath, $sDestination) Then ExitLoop
+
+				; If creating a hardlink fails, simply copy the binary to \bin directory
+				If FileCopy($sPath, $sDestination) Then ExitLoop
+
+				MsgBox($iTopmost + 16, $title, t('FFMPEG_MOVE_FAILED'))
+				terminate($STATUS_SILENT)
+		EndSwitch
+	WEnd
+
+	GUIDelete($hGUI)
+
+	Opt("GUIOnEventMode", 1)
 EndFunc
 
 ; Create a temporary directory which did not exist before
@@ -4553,10 +4615,10 @@ Func _PatternSearch($sString)
 EndFunc
 
 ; Run a program and return stdout/stderr stream
-Func FetchStdout($f, $sWorkingDir, $show_flag = @SW_HIDE, $iLine = 0, $bOutput = True, $bUseCmd = True)
+Func FetchStdout($f, $sWorkingDir, $show_flag = @SW_HIDE, $iLine = 0, $bOutput = True, $bUseCmd = True, $bMakeCommand = True)
 	Global $run = 0, $return = ""
 
-	$f = _MakeCommand($f, $bUseCmd)
+	If $bMakeCommand Then $f = _MakeCommand($f, $bUseCmd)
 	If $bOutput Then Cout("Executing: " & $f)
 	$run = Run($f, $sWorkingDir, $show_flag, $STDERR_MERGED)
 	If @error Then Return SetError(1, 0, -1)
@@ -4610,6 +4672,13 @@ Func _DirGetSize($f, $return = -1)
 	; so let's only calculate size if less than 4 GB space used on drive
 	If (StringLen($f) < 4 And DriveSpaceTotal($f) - DriveSpaceFree($f) > 4000) Then Return $return
 	Return DirGetSize($f)
+EndFunc
+
+; Return the path to the download directory
+Func _GetFileOpenDialogInitDir()
+	Local $sDir = _WinAPI_ShellGetKnownFolderPath($FOLDERID_Downloads)
+	If @error Or $sDir == "" Or Not FileExists($sDir) Then $sDir = @WorkingDir
+	Return $sDir
 EndFunc
 
 ; Add new scan result to filetype array
@@ -5054,13 +5123,11 @@ EndFunc
 
 ; Start updater to download FFmpeg
 Func GetFFmpeg()
-	; As FFmpeg can be downloaded from the first start assistant, we use the updater to handle elevation and download.
-	; Otherwise, it would be neccessary to exit the assistant and restart UniExtract with higher permissions, which would just look bad and scare the user :(
+	; Use the updater to handle elevation and download.
 	$ret = ShellExecuteWait(CanAccess($bindir)? $sUpdaterNoAdmin: $sUpdater, "/ffmpeg")
 	If @error Or Not HasPlugin($ffmpeg, True) Then Return SetError(1, 0, 0)
 
 	Cout("FFmpeg successfully downloaded")
-	If $FS_GUI Then GUI_FirstStart_Next()
 	Return 1
 EndFunc
 
@@ -5313,6 +5380,13 @@ Func _GuiSetColor()
 	If @OSVersion <> "WIN_10" Then Return
 	GUISetBkColor($COLOR_WHITE)
 	GUICtrlSetDefBkColor($COLOR_WHITE)
+EndFunc
+
+; Format a label to look like a link
+Func _GuiCtrlLinkFormat($idControlID = -1)
+	GUICtrlSetFont($idControlID, 8, 800, 4, $FONT_ARIAL)
+	GUICtrlSetColor($idControlID, $COLOR_LINK)
+	GUICtrlSetCursor($idControlID, 0)
 EndFunc
 
 ; Return the amount of pixels to increase GUI heigth if Windows font scaling is enabled
@@ -5862,9 +5936,7 @@ Func GUI_Feedback()
 
 	$FB_PrivacyPolicyCheckbox = GUICtrlCreateCheckbox(t('FEEDBACK_PRIVACY_ACCEPT_LABEL'), 8, 442, 217, 17)
 	$FB_PrivacyPolicyOpen = GUICtrlCreateLabel(t('FEEDBACK_PRIVACY_VIEW_LABEL'), 246, 444, 147, 17, $SS_RIGHT)
-	GUICtrlSetFont(-1, 8, 800, 4, $FONT_ARIAL)
-	GUICtrlSetColor(-1, 0x000080)
-	GUICtrlSetCursor(-1, 0)
+	_GuiCtrlLinkFormat()
 
 	$FB_Send = GUICtrlCreateButton(t('SEND_BUT'), 111, 470, 75, 25)
 	$FB_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 215, 470, 75, 25)
@@ -5958,6 +6030,7 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	GUISetState(@SW_SHOW, $guimain)
 EndFunc
 
+; Ask for feedback
 Func GUI_Feedback_Prompt()
 	If Not ($FB_ask And $extract) Or $silentmode Then Return
 	If $FB_ask == 2 Then Return GUI_Feedback()
@@ -6370,7 +6443,7 @@ Func GUI_FirstStart()
 		EndIf
 		Exit 0
 	EndIf
-	Global $FS_Texts[UBound($FS_Sections)] = ["", t('FIRSTSTART_PAGE1'), t('FIRSTSTART_PAGE2'), t('FIRSTSTART_PAGE3'), t('FIRSTSTART_PAGE4')]
+	Global $FS_Texts[UBound($FS_Sections)] = ["", t('FIRSTSTART_PAGE1'), t('FIRSTSTART_PAGE2'), t('FIRSTSTART_PAGE3')]
 
 	GUISetState(@SW_SHOW)
 	GUI_FirstStart_ShowPage()
@@ -6420,15 +6493,6 @@ Func GUI_FirstStart_ShowPage()
 			;GUICtrlSetState($FS_Button, $GUI_SHOW)
 			GUICtrlSetData($FS_Button, t('CONTEXT_ENTRIES_LABEL'))
 			GUICtrlSetOnEvent($FS_Button, "GUI_ContextMenu")
-		Case 4
-			GUICtrlSetState($FS_Button, $GUI_SHOW)
-			If HasPlugin($ffmpeg, True) Then
-				GUICtrlSetData($FS_Button, t('TERM_INSTALLED'))
-				GUICtrlSetState($FS_Button, $GUI_DISABLE)
-			Else
-				GUICtrlSetData($FS_Button, t('TERM_DOWNLOAD'))
-				GUICtrlSetOnEvent($FS_Button, "GetFFmpeg")
-			EndIf
 		Case Else
 			GUICtrlSetState($FS_Button, $GUI_HIDE)
 	EndSwitch
@@ -6657,9 +6721,7 @@ Func GUI_Plugins()
 				If $current = -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ExitLoop
 
 				Cout("Adding plugin " & $aPluginInfo[$current][1])
-				Local $sDir = _WinAPI_ShellGetKnownFolderPath($FOLDERID_Downloads)
-				If @error Or $sDir == "" Or Not FileExists($sDir) Then $sDir = @WorkingDir
-				$return = FileOpenDialog(t('OPEN_FILE'), $sDir, $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][4] & ")", 4+1, "", $GUI_Plugins)
+				$return = FileOpenDialog(t('OPEN_FILE'), _GetFileOpenDialogInitDir(), $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][4] & ")", 4+1, "", $GUI_Plugins)
 				If @error Then ContinueLoop
 				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_DISABLE)
 				Cout("Plugin file selected: " & $return)

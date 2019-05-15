@@ -32,13 +32,13 @@ demoleition									demoleition.exe				0.60		x	-	-	Freeware*				kao									http
 disunity									disunity.jar				0.3.4		-	-	-	Public Domain			ata4								https://github.com/ata4/disunity
 											disunity.bat				-------		---------	-------					-------								-------
 											\lib directory				-------		---------	-------					-------								-------
-Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.55		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
+Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.56		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01				Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.2		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.4		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 Extract NT									EXTRNT.EXE					2.10					Freeware				Gilles Vollant						http://www.winimage.com/extract.htm								
-extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland						http://legroom.net/software/extractmht							
+extractMHT									extractMHT.exe				1.0			-	-	o	Open Source				Jared Breland						https://github.com/bambucode/extractMHT						
 FFmpeg										x86\ffmpeg.exe				newest		-		-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
@@ -49,8 +49,7 @@ GCFScape									x86\GCFScape.exe			1.8.2					Freeware				Rynn Gregg							http:
 											x86\hllib.dll				2.4.0		---------	GNU LGPL				-------								http://nemesis.thewavelength.net/index.php?p=35					
 											x64\hllib.dll				-------		---------	-------					-------								-------															
 GNU gettext									msgunfmt.exe				0.19.8.1	-	x	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
-HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					http://www.geocities.com/mwinterhoff/helpdeco.htm				
-											---------					-------		---------	-------					-------								http://www.helpmaster.info/hlp-developmentaids-helpdeco.htm		
+HelpDeco									helpdeco.exe				2.1						Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
 i6comp										i6comp.exe					0.2						Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
 innounp, the Inno Setup Unpacker			innounp.exe					0.48				o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
 IsXunpack									IsXunpack.exe				0.99					Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
@@ -59,16 +58,16 @@ KGB Archiver								\kgb directory				2 (beta 2)				GNU GPL v2				Thomasz Pawlak
 lessmsi										\lessmsi directory			1.6.1 mod	-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
 lzip										lzip.exe					1.20		-	x	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
 lzop										lzop.exe					1.03					GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
-MediaInfo 									MediaInfo.dll				18.12		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
+MediaInfo 									MediaInfo.dll				19.04		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0						Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
-mtee										mtee.exe					2.1			---------	MIT						Ritchie Lawrence					http://sourceforge.net/projects/mtee
+mtee										mtee.exe					2.1			---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
 NBHextract									NBHextract.exe				1.0						Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
 Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation						https://github.com/HaxeFoundation/neko
 											gcmt-dll.dll				-------		---------	-------					-------								-------
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
 ns2dec (ONScripter Tools)					ns2dec						2010-09-15	-	-	x	GNU GPL v2				"Uncle" Mion Sonozaki				http://unclemion.com/onscripter/releases/
-PeaZip										pea.exe						0.61/1.1	-	-	-	GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
+PeaZip										pea.exe						0.65		-	-	-	GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
 Qt Linguist									lconvert.exe				5.11.1		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
@@ -82,7 +81,7 @@ rmvdec										rmvdec.exe					1.1.0		x	-	x	BSD 3-clause			Bioruebe							https:
 											neko runtime files			-------		---------	-------					-------								-------
 sfarkxtc									sfarkxtc.exe				3.0 mod		x	x	x	GNU GPL v3				Arnout Engelen						https://github.com/raboof/sfarkxtc
 											zlib1.dll					1.2.8		---------	zlib license			Jean-loup Gailly, Mark Adler		http://zlib.net/
-Command Line Shell For SQLite				sqlite3.exe					3.26.0		-	x	-	Public Domain			SQLite developers					http://sqlite.org/
+Command Line Shell For SQLite				sqlite3.exe					3.28.0		-	x	-	Public Domain			SQLite developers					http://sqlite.org/
 spoondec									spoondec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/spoondec
 											neko runtime files			-------		---------	-------					-------								-------
 											regexp.ndll					-------		---------	-------					-------								-------
@@ -103,7 +102,7 @@ FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin	
 unecm										unecm.exe					1.0			x	-	x	GNU GPL v2				Neill Corlett						http://www.neillcorlett.com/ecm
 Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-		-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					5.70		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
+UnRAR										UnRAR.exe					5.71		x	x	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										unrpa.exe					1.6	mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				1.4			-	-	-	Freeware				David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	x	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								

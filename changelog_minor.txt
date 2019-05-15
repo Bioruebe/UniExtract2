@@ -12,13 +12,18 @@ RC 3:
   Fixed some executables not being tested with 7zip
   Fixed some FMOD sound banks not being fully extracted, thanks to Sakkade
   Fixed 'NScripter archive' false positives
+  Fixed SQLite extraction
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
-  Changed design of 'Unknown file type' error dialog, feedback prompt
+  Changed design of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt
+  Updated EnigmaVB unpacker to 0.56
+  Updated ExeInfo PE to 0.0.5.4
   Updated jsMSIx to 1.19.0.1
-  Updated PeaZip to 0.61/1.1
+  Updated MediaInfo to 19.04
+  Updated PeaZip to 0.65
   Updated QuickBMS to 1.9.2
-  Updated UnRAR to 5.70; added x64 version
+  Updated SQLite to 3.38.0
+  Updated UnRAR to 5.71; added x64 version
   Updated unrpa to 1.6
   Updated upx to 3.95w
   Updated WiX to 3.11.1
