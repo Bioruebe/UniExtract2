@@ -1,13 +1,12 @@
 ﻿#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=.\Support\Icons\uniextract_exe.ico
 #AutoIt3Wrapper_Outfile=.\UniExtract.exe
-#AutoIt3Wrapper_Res_Comment=Compiled with AutoIt http://www.autoitscript.com/
 #AutoIt3Wrapper_Res_Description=Universal Extractor
 #AutoIt3Wrapper_Res_Fileversion=2.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=GNU General Public License v2
-#AutoIt3Wrapper_Res_Field=Author|Jared Breland <jbreland@legroom.net>
-#AutoIt3Wrapper_Res_Field=Homepage|http://www.legroom.net/software
-#AutoIt3Wrapper_Res_Field = Timestamp|%date%
+#AutoIt3Wrapper_Res_Field=Author|Jared Breland, Bioruebe
+#AutoIt3Wrapper_Res_Field=Homepage|https://bioruebe.com/blog/dev/uniextract/
+#AutoIt3Wrapper_Res_Field=Timestamp|%date%
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
 #AutoIt3Wrapper_Run_Au3Stripper=y
@@ -102,15 +101,15 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", $TYPE_CTAR = "ctar", _
 	  $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ETHORNELL = "ethornell", $TYPE_ENIGMA = "enigma", _
 	  $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", _
-	  $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_IS3ARC = "is3arc", $TYPE_ISCAB = "iscab", _
-	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
-	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
-	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", _
-	  $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", _
-	  $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", _
-	  $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", _
-	  $TYPE_VIDEO_CONVERT = "video_convert", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", _
-	  $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", _
+	  $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", _
+	  $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", _
+	  $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
+	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
+	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
+	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
+	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
+	  $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 
 
 Opt("GUIOnEventMode", 1)
@@ -222,7 +221,6 @@ Const $rgss = "RgssDecrypter.exe"
 Const $rpa = "unrpa.exe"
 Const $sfark = "sfarkxtc.exe"
 Const $sqlite = "sqlite3.exe"
-Const $stix = "stix_d.exe"
 Const $swf = "swfextract.exe"
 Const $trid = "trid.exe"
 Const $ttarch = "ttarchext.exe"
@@ -433,7 +431,7 @@ Func StartExtraction()
 	; Display file information and terminate if scan only mode
 	If Not $extract Then
 		MediaFileScan($file)
-		terminate($STATUS_FILEINFO)
+		terminate($STATUS_FILEINFO, $filenamefull, $fileext)
 	EndIf
 
 	; Else perform additional extraction methods
@@ -448,7 +446,7 @@ Func StartExtraction()
 
 	; Cannot determine filetype, all checks failed - abort
 	_DeleteTrayMessageBox()
-	terminate($STATUS_UNKNOWNEXT, $file)
+	terminate($STATUS_UNKNOWNEXT, $file, $fileext & "; " & StringLeft($aFiletype[0][1], 45))
 EndFunc
 
 ; Extract if exe file detected
@@ -490,7 +488,7 @@ Func IsExe()
 	check7z()
 
 	; Exit with unknown file type
-	terminate($STATUS_UNKNOWNEXE, $file)
+	terminate($STATUS_UNKNOWNEXE, $file, StringLeft($aFiletype[0][1], 50))
 EndFunc
 
 ; Parse filename
@@ -562,6 +560,8 @@ Func ParseCommandLine()
 	Cout("Command line parameters: " & _ArrayToString($cmdline, " ", 1))
 
 	If _ArraySearch($cmdline, "/silent") > -1 Then $silentmode = True
+	If _ArraySearch($cmdline, "/nolog") > -1 Then $Log = False
+	If _ArraySearch($cmdline, "/nostats") > -1 Then $bSendStats = False
 
 	If $cmdline[1] = "/prefs" Then
 		GUI_Prefs()
@@ -1008,9 +1008,9 @@ Func filecompare($sFileType)
 	  StringInStr($sFileType, "shortcut") Or StringInStr($sFileType, "empty") Or _
 	  StringInStr($sFileType, "directory") Or StringInStr($sFileType, "BitTorrent file") Or _
 	  StringInStr($sFileType, "Standard MIDI data") Or StringInStr($sFileType, "MSVC program database") Then _
-		terminate($STATUS_NOTPACKED, $file)
+		terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
-	If StringInStr($sFileType, "MS-DOS executable") Then terminate($STATUS_NOTSUPPORTED, $file)
+	If StringInStr($sFileType, "MS-DOS executable") Then terminate($STATUS_NOTSUPPORTED, $file, $sFileType, $sFileType)
 EndFunc
 
 ; Compare TrID's return to supported file types
@@ -1106,8 +1106,8 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Inno Setup installer")
 			checkInno()
 
-		Case StringInStr($sFileType, "InstallShield archive")
-			extract($TYPE_IS3ARC, 'InstallShield 3.x ' & t('TERM_ARCHIVE'))
+		Case StringInStr($sFileType, "InstallShield Z archive")
+			CheckTotalObserver('InstallShield Z ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "InstallShield compressed archive")
 			extract($TYPE_ISCAB, 'InstallShield CAB ' & t('TERM_ARCHIVE'))
@@ -1249,7 +1249,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "UNIX Compressed")
 			extract($TYPE_7Z, 'LZW ' & t('TERM_COMPRESSED'), "Z")
 
-		Case StringInStr($sFileType, "xz container")
+		Case StringInStr($sFileType, "xz compressed container")
 			extract($TYPE_7Z, 'XZ ' & t('TERM_COMPRESSED'), "xz")
 
 		Case StringInStr($sFileType, "ZIP compressed archive") Or StringInStr($sFileType, "Winzip Win32 self-extracting archive")
@@ -1290,11 +1290,11 @@ Func tridcompare($sFileType)
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
 			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump") Or _
 			 StringInStr($sFileType, "Windows Shortcut")
-			terminate($STATUS_NOTPACKED, $file)
+			terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
 		; Not supported filetypes
 		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File")
-			terminate($STATUS_NOTSUPPORTED, $file)
+			terminate($STATUS_NOTSUPPORTED, $file, $fileext, $sFileType)
 
 		; Check for .exe file, only when fileext not .exe
 		Case Not $isexe And (StringInStr($sFileType, 'Executable') Or StringInStr($sFileType, '(.EXE)', 1))
@@ -1611,7 +1611,7 @@ Func advexescan($bUseCmd = $extract)
 		; Not supported
 		Case StringInStr($sFileType, "Astrum InstallWizard") Or StringInStr($sFileType, "clickteam") Or _
 			 StringInStr($sFileType, "BitRock InstallBuilder") Or StringInStr($sFileType, "NE <- Windows 16bit")
-			terminate($STATUS_NOTSUPPORTED, $file)
+			terminate($STATUS_NOTSUPPORTED, $file, $sFileType, $sFileType)
 
 		; Terminate if file cannot be unpacked
 		Case (StringInStr($sFileType, "Not packed") And Not StringInStr($sFileType, "Microsoft Visual C++")) Or _
@@ -1620,7 +1620,7 @@ Func advexescan($bUseCmd = $extract)
 			  StringInStr($sFileType, "NOT EXE - Empty file") Or StringInStr($sFileType, "Native - System driver") Or _
 			  StringInStr($sFileType, "Denuvo protector") Or StringInStr($sFileType, "Kaspersky AV Pack") Or _
 			  StringInStr($sFileType, "TASM / MASM / FASM - assembler")
-			terminate($STATUS_NOTPACKED, $file)
+			terminate($STATUS_NOTPACKED, $file, $sFileType, $sFileType)
 
 		; Needs to be at the end, otherwise files might not be recognized
 		Case StringInStr($sFileType, "upx")
@@ -2445,17 +2445,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $aCleanup[] = ["install_script.iss", "setup.iss"]
 			Cleanup($aCleanup)
 
-		Case $TYPE_IS3ARC ; Test
-			$aReturn = ['InstallShield 3.x ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', 'STIX'), t('METHOD_EXTRACTION_RADIO', 'unshield')]
-			$choice = MethodSelect($aReturn, $arcdisp)
-
-			If $choice == 1 Then ; STIX
-				_Run($stix & ' ' & FileGetShortName($file) & ' ' & FileGetShortName($outdir), $filedir)
-			Else ; Unshield
-				_Run($unshield & ' -d "' & $outdir & '" x "' & $file & '"', $outdir)
-			EndIf
-
 		Case $TYPE_ISCAB ; Test
+;~ 			Local $sReturn = _Run($unshield & ' -D 2 -d "' & $outdir & '" x "' & $file & '"', $outdir)
+;~ 			If StringInStr($sReturn, "Try unshield_file_save_old()") Then $sReturn = _Run($unshield & ' -O -D 2 -d "' & $outdir & '" x "' & $file & '"', $outdir)
+;~ 			If StringInStr($sReturn, "Failed to extract file") Then
+
 			Local $aReturn = ['InstallShield Cabinet ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', 'is6comp'), t('METHOD_EXTRACTION_RADIO', 'is5comp'), t('METHOD_EXTRACTION_RADIO', 'iscab')]
 			$choice = MethodSelect($aReturn, $arcdisp)
 
@@ -2482,6 +2476,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					RunWait($iscab & ' "' & $file & '" -i"files.ini" -x', $outdir, @SW_MINIMIZE)
 					FileDelete($outdir & "\files.ini")
 			EndSwitch
+;~ 			EndIf
 
 		Case $TYPE_ISCRIPT
 			If Not extract($TYPE_QBMS, $arcdisp, $observer, False, True) Then
@@ -2492,83 +2487,76 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_ISEXE
 			CheckTotalObserver($arcdisp)
 
-			exescan($file, 'ext', 0)
-			If StringInStr($sFileType, "3.x", 0) Then
-				; Extract 3.x SFX installer using stix
-				_Run($stix & ' ' & FileGetShortName($file) & ' ' & FileGetShortName($outdir), $filedir)
-			Else
-				Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
-				$choice = MethodSelect($aReturn, $arcdisp)
+			Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
+			$choice = MethodSelect($aReturn, $arcdisp)
 
-				; User-specified false positive; return for additional analysis
-				Switch $choice
-					; Extract using isxunpack
-					Case 1
-						FileMove($file, $outdir)
-						Run(_MakeCommand($isxunp & ' "' & $outdir & '\' & $filename & '.' & $fileext & '"', True), $outdir)
-						WinWait(@ComSpec)
-						WinActivate(@ComSpec)
-						Send("{ENTER}")
-						ProcessWaitClose($isxunp)
-						FileMove($outdir & '\' & $filename & '.' & $fileext, $filedir)
+			Switch $choice
+				; Extract using isxunpack
+				Case 1
+					FileMove($file, $outdir)
+					Run(_MakeCommand($isxunp & ' "' & $outdir & '\' & $filenamefull & '"', True), $outdir)
+					WinWait(@ComSpec)
+					WinActivate(@ComSpec)
+					Send("{ENTER}")
+					ProcessWaitClose($isxunp)
+					FileMove($outdir & '\' & $filenamefull, $filedir)
 
-					; Try to extract MSI using cache switch
-					Case 2
-						; Run installer and wait for temp files to be copied
-						_CreateTrayMessageBox(t('INIT_WAIT'))
-						DirCreate($tempoutdir)
-						ShellExecute($file, '/b"' & $tempoutdir, $filedir)
+				; Try to extract MSI using cache switch
+				Case 2
+					; Run installer and wait for temp files to be copied
+					_CreateTrayMessageBox(t('INIT_WAIT'))
+					DirCreate($tempoutdir)
+					ShellExecute($file, '/b"' & $tempoutdir, $filedir)
 
-						; TODO: Rewrite
-						; Wait for matching windows for up to 30 seconds (60 * .5)
-						Opt("WinTitleMatchMode", 4)
-						Local $success
-						For $i = 1 To $Timeout / 500
-							If WinExists("classname=MsiDialogCloseClass") Then
-								; Search temp directory for MSI support and copy to tempoutdir
-								$msihandle = FileFindFirstFile($tempoutdir & "*.msi")
-								If Not @error Then
-									While 1
-										$msiname = FileFindNextFile($msihandle)
-										If @error Then ExitLoop
-										$tsearch = FileSearch(@TempDir & "\" & $msiname)
-										If @error Then ContinueLoop
+					; TODO: Rewrite
+					; Wait for matching windows for up to 30 seconds (60 * .5)
+					Opt("WinTitleMatchMode", 4)
+					Local $success
+					For $i = 1 To $Timeout / 500
+						If WinExists("classname=MsiDialogCloseClass") Then
+							; Search temp directory for MSI support and copy to tempoutdir
+							$msihandle = FileFindFirstFile($tempoutdir & "*.msi")
+							If Not @error Then
+								While 1
+									$msiname = FileFindNextFile($msihandle)
+									If @error Then ExitLoop
+									$tsearch = FileSearch(@TempDir & "\" & $msiname)
+									If @error Then ContinueLoop
 
-										$isdir = StringLeft($tsearch[1], StringInStr($tsearch[1], '\', 0, -1) - 1)
-										$ishandle = FileFindFirstFile($isdir & "\*")
+									$isdir = StringLeft($tsearch[1], StringInStr($tsearch[1], '\', 0, -1) - 1)
+									$ishandle = FileFindFirstFile($isdir & "\*")
+									$fname = FileFindNextFile($ishandle)
+									Do
+										If $fname <> $msiname Then FileCopy($isdir & "\" & $fname, $tempoutdir)
 										$fname = FileFindNextFile($ishandle)
-										Do
-											If $fname <> $msiname Then FileCopy($isdir & "\" & $fname, $tempoutdir)
-											$fname = FileFindNextFile($ishandle)
-										Until @error
-										FileClose($ishandle)
-									WEnd
-									FileClose($msihandle)
-								EndIf
-
-								; Move files to outdir
-								_DeleteTrayMessageBox()
-								Prompt(64, 'INIT_COMPLETE')
-								MoveFiles($tempoutdir, $outdir, False, "", True)
-								$success = $RESULT_SUCCESS
-								ExitLoop
+									Until @error
+									FileClose($ishandle)
+								WEnd
+								FileClose($msihandle)
 							EndIf
 
-							Sleep(500)
-						Next
-						$run = 0
-
-						; Not a supported installer
-						If $success <> $RESULT_SUCCESS Then
+							; Move files to outdir
 							_DeleteTrayMessageBox()
 							Prompt(64, 'INIT_COMPLETE')
+							MoveFiles($tempoutdir, $outdir, False, "", True)
+							$success = $RESULT_SUCCESS
+							ExitLoop
 						EndIf
 
-					; Not InstallShield
-					Case 3
-						Return False
-				EndSwitch
-			EndIf
+						Sleep(500)
+					Next
+					$run = 0
+
+					; Not a supported installer
+					If $success <> $RESULT_SUCCESS Then
+						_DeleteTrayMessageBox()
+						Prompt(64, 'INIT_COMPLETE')
+					EndIf
+
+				; Not InstallShield
+				Case 3
+					Return False
+			EndSwitch
 
 		Case $TYPE_ISZ
 			_DeleteTrayMessageBox()
@@ -2579,7 +2567,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$isofile = $outdir & "\" & $filename & '.iso'
 
 		Case $TYPE_KGB
-			_Run($kgb & ' "' & $file & '"', $outdir, @SW_SHOW, True, False, False)
+			_Run($kgb & ' "' & $file & '"', $outdir, @SW_MINIMIZE, True, False, False)
 
 		Case $TYPE_LZ
 			_RunInTempOutdir($tempoutdir, $lz & ' -d -k -v -v "' & $file & '"', $tempoutdir, @SW_SHOW, True, True, False)
@@ -3042,25 +3030,29 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($ffmpeg & ' -i "' & $file & '" "' & GetFileName() & '.mp4"', $outdir, @SW_HIDE, True, True, False)
 
 		Case $TYPE_VISIONAIRE3
-			Local $ret = $outdir & '\names.txt"'
+			Local $tmp = $outdir & "\names.txt"
 			Local $f = $file
 
-			If $fileext <> "vis" Then
-				Local $sPath = _PathFull($filedir & "\..\")
-				$hSearch = FileFindFirstFile($sPath & "*.vis")
-				If $hSearch <> -1 Then
-					Local $ret2 = FileFindNextFile($hSearch)
-					If Not @error Then $f = $sPath & $ret2
-					FileClose($hSearch)
+			If Not FileExists($tmp) Then
+				If $fileext <> "vis" Then
+					Local $sPath = _PathFull($filedir & "\..\")
+					$hSearch = FileFindFirstFile($sPath & "*.vis")
+					If $hSearch = -1 Then
+						Cout("Failed to find main data file. Original file names will not be retained.")
+					Else
+						Local $ret = FileFindNextFile($hSearch)
+						If Not @error Then $f = $sPath & $ret
+						FileClose($hSearch)
+					EndIf
 				EndIf
+
+				Cout("Generating names with main file " & $f)
+				_Run($visionaire3 & ' "' & $f & '" /force /generateNames="' & $tmp & '"', $outdir, @SW_HIDE, True, True, False, False)
 			EndIf
 
-			Cout("Generating names with main file " & $f)
-			_Run($visionaire3 & ' "' & $f & '" /force /generateNames="' & $ret, $outdir, @SW_HIDE, True, True, False, False)
-
-			If FileGetSize(StringTrimRight($ret, 1)) > 0 Then
+			If FileGetSize($tmp) > 0 Then
 				Cout("Names generated successfully. Extracting...")
-				_Run($visionaire3 & ' "' & $file & '" /force /names="' & $ret, $outdir, @SW_HIDE, True, True, False, False)
+				_Run($visionaire3 & ' "' & $file & '" /force /names="' & $tmp & '"', $outdir, @SW_HIDE, True, True, False, False)
 			Else
 				Cout("Failed to extract names. Some files may not be usable.")
 				_Run($visionaire3 & ' "' & $file & '" /force', $outdir, @SW_HIDE, True, True, False, False)
@@ -3068,8 +3060,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_VSSFX
 			FileMove($file, $outdir)
-			RunWait(Warn_Execute($outdir & '\' & $filename & '.' & $fileext & ' /extract'), $outdir)
-			FileMove($outdir & '\' & $filename & '.' & $fileext, $filedir)
+			RunWait(Warn_Execute($outdir & '\' & $filenamefull & ' /extract'), $outdir)
+			FileMove($outdir & '\' & $filenamefull, $filedir)
 
 		Case $TYPE_VSSFX_PATH
 			RunWait(Warn_Execute($file & ' /extract:"' & $outdir & '" /quiet'), $outdir)
@@ -3124,15 +3116,15 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			MoveFiles($outdir & "\" & $filename, $outdir, True, '', True, True)
 
 		Case $TYPE_ZIP
-			If Not extract($TYPE_7Z, -1, $additionalParameters, True, True) Then
+			If Not extract($TYPE_7Z, -1, $additionalParameters, False, True) Then
 				If $arcdisp > -1 Then _CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 				_Run($zip & ' -x "' & $file & '"', $outdir, @SW_MINIMIZE, True, False)
 			EndIf
 
 		Case $TYPE_ZOO
 			FileMove($file, $tempoutdir, 8)
-			_Run($zoo & ' -x ' & $filename & '.' & $fileext, $tempoutdir, @SW_HIDE)
-			FileMove($tempoutdir & $filename & '.' & $fileext, $file)
+			_Run($zoo & ' -x ' & $filenamefull, $tempoutdir, @SW_HIDE)
+			FileMove($tempoutdir & $filenamefull, $file)
 			MoveFiles($tempoutdir, $outdir, False, "", True)
 
 		Case $TYPE_ZPAQ
@@ -3182,7 +3174,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Cout("Trying to extract sfx script")
 				Run(_MakeCommand($7zsplit & ' "' & $file & '"'), $outdir, @SW_HIDE)
 				WinWait("7z SFX Archives splitter")
-				;WinActivate("7z SFX Archives splitter")
 				ControlClick("7z SFX Archives splitter", "", "Button8")
 				ControlClick("7z SFX Archives splitter", "", "Button1")
 				$TimerStart = TimerInit()
@@ -3198,21 +3189,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				; Move sfx script to outdir
 				If FileExists($filedir & "\" & $filename & ".txt") Then FileMove($filedir & "\" & $filename & ".txt", $outdir & "\sfx_script_" & $filename & ".txt")
 				_DeleteTrayMessageBox()
-
-				; Check generic .exe ressource extraction
-				If FileExists($outdir & "\[0]") Then
-					; Try to extract unpacked file (skip file extension checks)
-					If Prompt(48 + 1, "UNPACK_GENERIC_ZIP", CreateArray($file, "7Zip", $outdir & "\[0]")) Then
-						Cout("Trying to extract unpacked file [0]")
-						$file = $outdir & "\[0]"
-						$outdir = $file & "\"
-						FilenameParse($file)
-						Return StartExtraction(False)
-					Else	; Try to find correct file extensions for unpacked files
-						Cout("Trying to find correct file extensions for unpacked file [0]")
-						AppendExtensions($outdir)
-					EndIf
-				EndIf
 			EndIf
 
 		Case $RESULT_NOFREESPACE
@@ -3468,13 +3444,41 @@ Func CanAccess($sPath)
 EndFunc
 
 ; Terminate if specified plugin was not found
-Func HasPlugin($plugin, $returnFail = False)
-	$plugin = StringReplace($plugin, '"', '')
-	Cout("Searching for plugin " & $plugin)
-	If FileExists($plugin) Or (_WinAPI_PathIsRelative($plugin) And (FileExists(_PathFull($plugin, $bindir)) Or FileExists(_PathFull($plugin, $archdir)))) Then Return True
+Func HasPlugin($sPlugin, $returnFail = False)
+	$sPlugin = StringReplace($sPlugin, '"', '')
+	Cout("Searching for plugin " & $sPlugin)
+	If FileExists($sPlugin) Or (_WinAPI_PathIsRelative($sPlugin) And (FileExists(_PathFull($sPlugin, $bindir)) Or FileExists(_PathFull($sPlugin, $archdir)))) Then Return True
+
 	Cout("Plugin not found")
 	If $returnFail Then Return False
-	terminate($STATUS_MISSINGEXE, $file, $plugin, $plugin)
+	If $silentmode Then terminate($STATUS_MISSINGEXE, $file, $sPlugin, $sPlugin)
+
+	Opt("GUIOnEventMode", 0)
+	Local $hGUI = GUICreate($name, 416, 176, -1, -1, $GUI_SS_DEFAULT_GUI)
+	_GuiSetColor()
+	GUICtrlCreateLabel(t('PLUGIN_MISSING', CreateArray($filenamefull, t('SELECT_FILE'))), 72, 20, 330, 113)
+	Local $idPluginManager = GUICtrlCreateButton(t('MENU_HELP_PLUGINS_LABEL'), 194, 142, 123, 25)
+	Local $idCancel = GUICtrlCreateButton(t('EXIT_BUT'), 332, 142, 75, 25)
+	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	GUISetState(@SW_SHOW)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idCancel
+				GUIDelete($hGUI)
+				SendStats($STATUS_MISSINGEXE, $sPlugin)
+				terminate($STATUS_SILENT)
+			Case $idPluginManager
+				GUI_Plugins($hGUI, $sPlugin)
+				Opt("GUIOnEventMode", 0)
+				If HasPlugin($sPlugin, True) Then ExitLoop
+		EndSwitch
+	WEnd
+
+	Opt("GUIOnEventMode", 1)
+	GUIDelete($hGUI)
+	Return True
 EndFunc
 
 ; Search for translation file for given language and return result
@@ -3515,13 +3519,14 @@ EndFunc
 ; Search for FFMPEG and prompt to download it if not found
 Func HasFFMPEG()
 	If HasPlugin($ffmpeg, True) Then Return
+	If $silentmode Then terminate($STATUS_MISSINGEXE, $filenamefull, "FFmpeg", "FFmpeg")
 
 	Opt("GUIOnEventMode", 0)
 	Local $sTranslation = t('TERM_DOWNLOAD')
 
 	Local $hGUI = GUICreate($name, 416, 201, 438, 245, $GUI_SS_DEFAULT_GUI)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filename, $sTranslation)), 72, 20, 330, 107)
+	GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filenamefull, $sTranslation)), 72, 20, 330, 107)
 	Local $idDownload = GUICtrlCreateButton($sTranslation, 242, 166, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 332, 166, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
@@ -3589,6 +3594,39 @@ Func HasFFMPEG()
 	GUIDelete($hGUI)
 
 	Opt("GUIOnEventMode", 1)
+EndFunc
+
+; Determine versions of installed .NET frameworks
+; Modified version of (https://www.autoitscript.com/forum/topic/164455-check-net-framework-4-or-45-is-installed/#comment-1199620)
+Func HasNetFramework($iVersion, $bTerminate = True)
+	Cout("Searching for .NET Framework " & $iVersion)
+	Local $sKey, $sBaseKeyName, $sBVersion, $sBBVersion, $z = 0, $i = 0
+    $sKey = "HKLM" & $reg64 & "\SOFTWARE\Microsoft\NET Framework Setup\NDP"
+
+    Do
+        $z += 1
+        $sBaseKeyName = RegEnumKey($sKey, $z)
+        If @error Or StringLeft($sBaseKeyName,1) <> "v" Then ContinueLoop
+
+        $sBVersion = RegRead($sKey & "\" & $sBaseKeyName, "Version")
+		If Not @error Then
+			If Number($sBVersion) >= $iVersion Then Return True
+		Else
+			$i = 0
+			Do
+				$i += 1
+				$sKeyName = RegEnumKey($sKey & "\" & $sBaseKeyName, $i)
+				If @error Then ExitLoop
+
+				$sBBVersion = RegRead($sKey & "\" & $sBaseKeyName & "\" & $sKeyName, "Version")
+			Until $sKeyName = '' Or $sBBVersion <> ''
+
+			If $sBBVersion <> '' And Number($sBBVersion) >= $iVersion Then Return True
+		EndIf
+    Until $sBaseKeyName = ''
+
+	If $bTerminate Then terminate($STATUS_MISSINGEXE, $file, ".Net Framework " & $iVersion)
+    Return False
 EndFunc
 
 ; Create a temporary directory which did not exist before
@@ -3725,7 +3763,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	If $Log And Not ($status = $STATUS_SILENT Or $status = $STATUS_SYNTAX Or $status = $STATUS_FILEINFO Or $status = $STATUS_NOTPACKED Or $status = $STATUS_BATCH) Or ($status = $STATUS_FILEINFO And $silentmode) Then _
 		$LogFile = CreateLog($shortStatus)
 
-	; Save statistics
+	; Save local statistics
 	IniWrite($prefs, "Statistics", $status, Number(IniRead($prefs, "Statistics", $status, 0)) + 1)
 	If $status = $STATUS_SUCCESS Then IniWrite($prefs, "Statistics", $arctype, Number(IniRead($prefs, "Statistics", $arctype, 0)) + 1)
 
@@ -3829,12 +3867,13 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	; Write error log if in batchmode
 	If $exitcode <> 0 And $silentmode And $extract Then
 		$handle = FileOpen($logdir & "errorlog.txt", 8 + 1)
-		FileWrite($handle, ($filename = ""? $fname: $filenamefull) & " (" & StringUpper($status) & ")" & @CRLF & @TAB & $arctype & @CRLF)
+		Local $sMsg = GetDateTime() & " " & ($filenamefull = ""? $fname: $filenamefull) & " (" & StringUpper($status)& ")" & " - " & $arctype  & @CRLF
+		FileWrite($handle, $sMsg)
 		FileClose($handle)
 	EndIf
 
 	; Delete empty output directory if failed
-	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 0)
+	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 1)
 
 	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Or $exitcode == 12) And $fileext <> "dll" Then GUI_Feedback_Prompt()
 
@@ -4163,39 +4202,6 @@ Func _GetOSLanguage()
 		EndIf
 	Next
 	Return $aLanguage[1]
-EndFunc
-
-; Determine versions of installed .NET frameworks
-; Modified version of (https://www.autoitscript.com/forum/topic/164455-check-net-framework-4-or-45-is-installed/#comment-1199620)
-Func HasNetFramework($iVersion, $bTerminate = True)
-	Cout("Searching for .NET Framework " & $iVersion)
-	Local $sKey, $sBaseKeyName, $sBVersion, $sBBVersion, $z = 0, $i = 0
-    $sKey = "HKLM" & $reg64 & "\SOFTWARE\Microsoft\NET Framework Setup\NDP"
-
-    Do
-        $z += 1
-        $sBaseKeyName = RegEnumKey($sKey, $z)
-        If @error Or StringLeft($sBaseKeyName,1) <> "v" Then ContinueLoop
-
-        $sBVersion = RegRead($sKey & "\" & $sBaseKeyName, "Version")
-		If Not @error Then
-			If Number($sBVersion) >= $iVersion Then Return True
-		Else
-			$i = 0
-			Do
-				$i += 1
-				$sKeyName = RegEnumKey($sKey & "\" & $sBaseKeyName, $i)
-				If @error Then ExitLoop
-
-				$sBBVersion = RegRead($sKey & "\" & $sBaseKeyName & "\" & $sKeyName, "Version")
-			Until $sKeyName = '' Or $sBBVersion <> ''
-
-			If $sBBVersion <> '' And Number($sBBVersion) >= $iVersion Then Return True
-		EndIf
-    Until $sBaseKeyName = ''
-
-	If $bTerminate Then terminate($STATUS_MISSINGEXE, $file, ".Net Framework " & $iVersion)
-    Return False
 EndFunc
 
 ; Determine whether Windows version >= Windows 7 or not; used for cascading context menu support
@@ -4544,7 +4550,7 @@ EndFunc
 ; Move file to tempoutdir and use _Run to execute a program
 ; $file is automatically replaced with the new temporary path
 Func _RunInTempOutdir($tempoutdir, $f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True, $bUseTee = True, $bPatternSearch = True, $bInitialShow = True)
-	Local $tmp = $tempoutdir & $filename & '.' & $fileext
+	Local $tmp = $tempoutdir & $filenamefull
 	FileMove($file, $tempoutdir, 8)
 	$f = StringReplace($f, $file, $tmp)
 
@@ -4742,12 +4748,17 @@ Func RestartWithoutAdminRights($sParameters = "")
 	terminate($STATUS_SILENT)
 EndFunc
 
+; Return current date and time
+Func GetDateTime()
+	Return @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC
+EndFunc
+
 ; Write data to stdout stream if enabled in options
-Func Cout($Data)
-	Local $Output = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & ":" & @MIN & ":" & @SEC & ":" & @MSEC & @TAB & $Data & @CRLF; & @CRLF
-	If $Opt_ConsoleOutput == 1 Then ConsoleWrite($Output)
-	$sFullLog &= $Output
-	Return $Data
+Func Cout($sMsg)
+	Local $sOutput = GetDateTime() & ":" & @MSEC & @TAB & $sMsg & @CRLF
+	If $Opt_ConsoleOutput == 1 Then ConsoleWrite($sOutput)
+	$sFullLog &= $sOutput
+	Return $sMsg
 EndFunc
 
 ; Open URL and evaluate success
@@ -4760,8 +4771,7 @@ EndFunc
 Func SendStats($a, $sResult = 1)
 	If Not $bSendStats Then Return
 
-	Cout($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID)
-	InetRead($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID, 1)
+	InetRead(Cout($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID & "&v=" & $sVersion), 1)
 EndFunc
 
 ; Check for new version
@@ -4784,7 +4794,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 	If Not IsArray($aReturn) Then Return Cout("Failed to get update file listing")
 
 	; Save date of last check for update
-	$lastupdate = @YEAR & "/" & @MON & "/" & @MDAY
+	Global $lastupdate = @YEAR & "/" & @MON & "/" & @MDAY
 	; In case of missing files, CheckUpdate can be run without any preferences being loaded
 	If StringLen($prefs) > 0 Then SavePref('lastupdate', $lastupdate)
 
@@ -4805,6 +4815,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 			Else
 				; If the user does not want to install the main update, let's not bother him with more 'update found' messages
 				$iMode = $UPDATE_MAIN
+				SendStats("UpdateMain", 0)
 			EndIf
 		EndIf
 	EndIf
@@ -4824,6 +4835,8 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 					Exit
 				EndIf
 				If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+			Else
+				SendStats("UpdateHelpers", 1)
 			EndIf
 		EndIf
 		If _UpdateFFmpeg($bShowProgress) Then $found = True
@@ -5079,6 +5092,8 @@ Func _AfterUpdate()
 	FileDelete($bindir & "disunity.jar")
 	FileDelete($bindir & "extractMHT.exe")
 	FileDelete($bindir & "MhtUnPack.wcx")
+	FileDelete($bindir & "STIX_D.exe")
+	FileDelete($bindir & "WDOSXLE.exe")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($docsdir & "flac_authors.txt")
@@ -5905,8 +5920,6 @@ EndFunc   ;==>WM_DROPFILES_UNICODE_FUNC
 
 ; Create Feedback GUI
 Func GUI_Feedback()
-	Opt("GUIOnEventMode", 0)
-
 	; Attach input file information
 	If $file Then
 		If Not $isexe Then Cout("--------------------------------------------------File dump--------------------------------------------------" & _
@@ -5949,14 +5962,21 @@ Func GUI_Feedback()
 	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Feedback")
 	GUISetState(@SW_SHOW)
 
+	; Warn if UniExtract is outdated
+	GUICtrlSetState($FB_Send, $GUI_DISABLE)
+	Local $aReturn = _UpdateGetIndex()
+	If IsArray($aReturn) And ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2] Then GUI_Feedback_Outdated()
+	GUICtrlSetState($FB_Send, $GUI_ENABLE)
+	Opt("GUIOnEventMode", 0)
+
 	While 1
 		$nMsg = GUIGetMsg()
 		Switch $nMsg
 			Case $FB_Send
 				If GUICtrlRead($FB_PrivacyPolicyCheckbox) = $GUI_CHECKED Then
 					GUICtrlSetState($FB_Send, $GUI_DISABLE)
-					GUI_Feedback_Send(GUICtrlRead($FB_SysCont), $file, GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont))
-					ExitLoop
+					If GUI_Feedback_Send(GUICtrlRead($FB_SysCont), $file, GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont)) Then ExitLoop
+					GUICtrlSetState($FB_Send, $GUI_ENABLE)
 				Else
 					MsgBox($iTopmost + 48, $name, t('FEEDBACK_PRIVACY_NOT_ACCETPED'))
 				EndIf
@@ -5973,11 +5993,39 @@ Func GUI_Feedback()
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
+; Display warning when using an outdated version of UniExtract
+Func GUI_Feedback_Outdated()
+	Opt("GUIOnEventMode", 0)
+
+	Local $hGUI = GUICreate($name, 416, 156, -1, -1, $GUI_SS_DEFAULT_GUI, -1, $FB_GUI)
+	_GuiSetColor()
+	GUICtrlCreateLabel(t('FEEDBACK_OUTDATED'), 72, 20, 330, 113)
+	Local $idInstall = GUICtrlCreateButton(t('UPDATE_ACTION_INSTALL'), 194, 120, 123, 25)
+	Local $idContinue = GUICtrlCreateButton(t('CONTINUE_BUT'), 332, 120, 75, 25)
+	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	GUISetState(@SW_SHOW)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idContinue
+				ExitLoop
+			Case $idInstall
+				GUIDelete($hGUI)
+				Opt("GUIOnEventMode", 1)
+				Return CheckUpdate($UPDATEMSG_FOUND_ONLY)
+		EndSwitch
+	WEnd
+
+	GUIDelete($hGUI)
+	Opt("GUIOnEventMode", 1)
+EndFunc
+
 ; Exit feedback GUI if OK clicked
 Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	If $FB_File = "" And $FB_Output = "" And $FB_Message = "" Then Return MsgBox($iTopmost + 16, $name, t('FEEDBACK_EMPTY'))
 
-	GUIDelete($FB_GUI)
+	GUISetState(@SW_HIDE, $FB_GUI)
 	If $guimain Then GUISetState(@SW_HIDE, $guimain)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
 
@@ -6021,13 +6069,18 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 
 	If $sResponse = "1" Then
 		Cout("Feedback successfully sent")
+		GUIDelete($FB_GUI)
 		MsgBox($iTopmost, $title, t('FEEDBACK_SUCCESS'))
 	Else
 		Cout("Error sending feedback")
 		MsgBox($iTopmost + 16, $title, t('FEEDBACK_ERROR'))
+		GUISetState(@SW_SHOW, $FB_GUI)
+		GUISetState(@SW_SHOW, $guimain)
+		Return False
 	EndIf
 
 	GUISetState(@SW_SHOW, $guimain)
+	Return True
 EndFunc
 
 ; Ask for feedback
@@ -6656,8 +6709,10 @@ Func GUI_UpdatePrompt()
 	Return $bChoice
 EndFunc
 
-; CreatePlugin GUI
-Func GUI_Plugins()
+; Create Plugin Manager GUI
+Func GUI_Plugins($hParent = 0, $sSelection = 0)
+	If @NumParams < 1 Then Local $hParent = $guimain, $sSelection = 0
+
 	; Define plugins
 	; executable|name|description|filetypes|filemask|extractionfilter|outdir|password
 	Local $aPluginInfo[11][8] = [ _
@@ -6675,18 +6730,21 @@ Func GUI_Plugins()
 	]
 
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
-	Local $current = -1, $sWorkingDir = @WorkingDir, $aReturn[0]
+	Local $current = -1, $sWorkingDir = @WorkingDir, $aReturn[0], $iIndex = -1
+	If $sSelection Then $iIndex = _ArraySearch($aPluginInfo, $sSelection, 0, 0, 0, 0, 1, 0)
 	FileChangeDir(@UserProfileDir)
 
-	$GUI_Plugins = GUICreate($name, 410, 167, -1, -1, -1, -1, $guimain)
+	$GUI_Plugins = GUICreate($name, 410, 167, -1, -1, -1, -1, $hParent)
 	_GuiSetColor()
 	$GUI_Plugins_List = GUICtrlCreateList("", 8, 8, 209, 149)
 	GUICtrlSetData(-1, _ArrayToString($aPluginInfo, "|", -1, -1, "|", 1, 1))
+	If $iIndex > -1 Then GUICtrlSetData($GUI_Plugins_List, $aPluginInfo[$iIndex][1])
 	$GUI_Plugins_SelectClose = GUICtrlCreateButton(t('FINISH_BUT'), 320, 132, 83, 25)
 	$GUI_Plugins_Download = GUICtrlCreateButton(t('TERM_DOWNLOAD'), 224, 132, 83, 25)
 	GUICtrlSetState(-1, $GUI_DISABLE)
 	$GUI_Plugins_Description = GUICtrlCreateEdit("", 224, 8, 177, 85, BitOR($ES_AUTOVSCROLL, $ES_WANTRETURN, $ES_READONLY, $ES_NOHIDESEL,$ES_MULTILINE))
 	$GUI_Plugins_FileTypes = GUICtrlCreateEdit("", 224, 96, 177, 33, BitOR($ES_AUTOVSCROLL, $ES_WANTRETURN, $ES_READONLY, $ES_NOHIDESEL,$ES_MULTILINE))
+	$current = GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_Description, $GUI_Plugins_Download, $GUI_Plugins_SelectClose, $sSupportedFileTypes, $aPluginInfo)
 	GUISetState(@SW_SHOW)
 
 	Opt("GUIOnEventMode", 0)
@@ -6697,26 +6755,7 @@ Func GUI_Plugins()
 			Case $GUI_EVENT_CLOSE
 				ExitLoop
 			Case $GUI_Plugins_List
-				GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes)
-				Local $current = _GUICtrlListBox_GetCurSel($GUI_Plugins_List)
-				If $current > -1 Then
-					Local $return = _GUICtrlListBox_GetText($GUI_Plugins_List, $current)
-					$current = _ArraySearch($aPluginInfo, $return)
-					If @error Then ContinueLoop
-
-					GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
-					GUICtrlSetData($GUI_Plugins_Description, $aPluginInfo[$current][2])
-					GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes & " " & $aPluginInfo[$current][3])
-
-					If HasPlugin($aPluginInfo[$current][0], True) Then ; Installed
-						GUICtrlSetData($GUI_Plugins_Download, t('TERM_INSTALLED'))
-						GUICtrlSetData($GUI_Plugins_SelectClose, t('FINISH_BUT'))
-					Else ; Not installed
-						GUICtrlSetData($GUI_Plugins_Download, t('TERM_DOWNLOAD'))
-						GUICtrlSetData($GUI_Plugins_SelectClose, t('SELECT_FILE'))
-						If $aPluginInfo[$current][1] <> 'iscab' Then GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
-					EndIf
-				EndIf
+				$current = GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_Description, $GUI_Plugins_Download, $GUI_Plugins_SelectClose, $sSupportedFileTypes, $aPluginInfo)
 			Case $GUI_Plugins_SelectClose
 				If $current = -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ExitLoop
 
@@ -6796,6 +6835,31 @@ Func GUI_Plugins()
 	FileChangeDir($sWorkingDir)	; Reset working dir in case it was changed by FileOpenDialog
 	GUIDelete($GUI_Plugins)
 	Opt("GUIOnEventMode", 1)
+EndFunc
+
+; Update Plugin Manager after list selecton has changed
+Func GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_Description, $GUI_Plugins_Download, $GUI_Plugins_SelectClose, $sSupportedFileTypes, $aPluginInfo)
+	GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes)
+	Local $iIndex = _GUICtrlListBox_GetCurSel($GUI_Plugins_List)
+	If $iIndex < 0 Then Return -1
+
+	$iIndex = _ArraySearch($aPluginInfo, _GUICtrlListBox_GetText($GUI_Plugins_List, $iIndex))
+	If @error Then Return -1
+
+	GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
+	GUICtrlSetData($GUI_Plugins_Description, $aPluginInfo[$iIndex][2])
+	GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes & " " & $aPluginInfo[$iIndex][3])
+
+	If HasPlugin($aPluginInfo[$iIndex][0], True) Then
+		GUICtrlSetData($GUI_Plugins_Download, t('TERM_INSTALLED'))
+		GUICtrlSetData($GUI_Plugins_SelectClose, t('FINISH_BUT'))
+	Else ; Not installed
+		GUICtrlSetData($GUI_Plugins_Download, t('TERM_DOWNLOAD'))
+		GUICtrlSetData($GUI_Plugins_SelectClose, t('SELECT_FILE'))
+		If $aPluginInfo[$iIndex][1] <> 'iscab' Then GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
+	EndIf
+
+	Return $iIndex
 EndFunc
 
 ; Open most recent log file

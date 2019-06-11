@@ -11,13 +11,13 @@ RC 3:
   Fixed Wise extraction methods 3 and 4 always failing
   Fixed some executables not being tested with 7zip
   Fixed some FMOD sound banks not being fully extracted, thanks to Sakkade
+  Fixed some zip extractions being detected as failed, although they completed successfully
   Fixed 'NScripter archive' false positives
-  Fixed SQLite extraction
-  Fixed Thinstall extraction not starting
+  Fixed SQLite, InstallShield Z, Thinstall extraction
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
-  Changed design of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt
-  Improved file type detection for .mht, .eml, some game archives
+  Changed design of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt, 'Plugin missing' error message
+  Improved file type detection for .mht, .eml, .xz, some game archives
   Updated EnigmaVB unpacker to 0.56
   Updated ExeInfo PE to 0.0.5.4
   Updated jsMSIx to 1.19.0.1
@@ -33,6 +33,7 @@ RC 3:
   Removed XAce, replaced with acefile
   Removed ExtractMht and MhtUnPack, replaced with 7zip and TotalObserver
   Removed GCFScape, replaced with TotalObserver
+  Removed STIX, replaced with TotalObserver
 
 RC 2b:
   RC 2b is a bugfix update adressing problems with the beta update channel
