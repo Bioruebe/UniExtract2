@@ -5,7 +5,7 @@
 #AutoIt3Wrapper_Res_Fileversion=2.0.0
 #AutoIt3Wrapper_Res_LegalCopyright=GNU General Public License v2
 #AutoIt3Wrapper_Res_Field=Author|Jared Breland, Bioruebe
-#AutoIt3Wrapper_Res_Field=Homepage|https://bioruebe.com/blog/dev/uniextract/
+#AutoIt3Wrapper_Res_Field=Homepage|https://bioruebe.com/dev/uniextract/
 #AutoIt3Wrapper_Res_Field=Timestamp|%date%
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
@@ -110,6 +110,14 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
 	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
 	  $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, $TYPE_CAB, _
+	  $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, $TYPE_FREEARC, _
+	  $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_IMG, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
+	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
+	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIM, _
+	  $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITY, _
+	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_WOLF, _
+	  $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -614,10 +622,20 @@ Func ParseCommandLine()
 				$bOptOpenOutDir = 0
 			EndIf
 
-			If $cmdline[0] > 2 And StringLeft($cmdline[3], 6) = "/type=" Then
+			; /type=arctype
+			If $cmdline[0] > 2 And StringLeft($cmdline[3], 6) = "/type" Then
 				$sArcTypeOverride = StringTrimLeft($cmdline[3], 6)
 				If StringLen($sArcTypeOverride) < 1 Then
-					; TODO: Display type select GUI
+					Local $aFiles = _FileListToArray($defdir, "*.ini", 1)
+					Local $iPos = _ArraySearch($aFiles, "registry.ini")
+					If $iPos > -1 Then _ArrayDelete($aFiles, $iPos)
+					_ArrayTrim($aFiles, 4, 1, 1)
+					_ArrayDelete($aFiles, 0)
+					_ArrayConcatenate($aFiles, $aExtractionTypes)
+					$aFiles = _ArrayUnique($aFiles, 0, 0, 0, 0)
+					_ArraySort($aFiles)
+;~ 					_ArrayDisplay($aFiles)
+					$sArcTypeOverride = GUI_MethodSelectList($aFiles, StringReplace(t('SCAN_FILE'), "&", ""), 'METHOD_EXTRACTOR_SELECT_LABEL')
 				EndIf
 			EndIf
 		Else
@@ -629,6 +647,8 @@ Func ParseCommandLine()
 			terminate($STATUS_SILENT)
 		EndIf
 	EndIf
+
+	If _ArraySearch($cmdline, "/close") > -1 Then terminate($STATUS_SILENT)
 EndFunc
 
 ; Read complete preferences
@@ -1896,8 +1916,8 @@ Func CheckGame($bUseGaup = True)
 	If $aReturn[0] > 1 Then
 		_ArrayDelete($aReturn, 0)
 		_ArraySort($aReturn)
-		Local $choice = GUI_GameSelect(_ArrayToString($aReturn), t('METHOD_GAME_NOGAME'))
-		BmsExtract($choice, $hDB)
+		Local $iChoice = GUI_MethodSelectList($aReturn, t('METHOD_GAME_NOGAME'))
+		BmsExtract($iChoice, $hDB)
 	EndIf
 
 	_SQLite_Close()
@@ -2432,7 +2452,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 			; (Re)move ',2' files and install_script.iss
-			Local $aCleanup = _FileListToArrayRec($return, "*,2.*", 1, 1, 0, 2)
+			Local $aCleanup = _FileListToArrayRec($return, "*,2.*;*,3.*", 1, 1, 0, 2)
 			_ArrayDelete($aCleanup, 0)
 			Cleanup($aCleanup)
 
@@ -2445,15 +2465,17 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $aCleanup[] = ["install_script.iss", "setup.iss"]
 			Cleanup($aCleanup)
 
-		Case $TYPE_ISCAB ; Test
-;~ 			Local $sReturn = _Run($unshield & ' -D 2 -d "' & $outdir & '" x "' & $file & '"', $outdir)
-;~ 			If StringInStr($sReturn, "Try unshield_file_save_old()") Then $sReturn = _Run($unshield & ' -O -D 2 -d "' & $outdir & '" x "' & $file & '"', $outdir)
-;~ 			If StringInStr($sReturn, "Failed to extract file") Then
+		Case $TYPE_ISCAB
+			; Unshield only works with UNIX-style paths
+			Local $sPath = StringReplace($file, "\", "/")
+			Local $sReturn = _Run($unshield & ' -D 2 -d "' & $outdir & '" x "' & $sPath & '"', $outdir)
+			If StringInStr($sReturn, "Try unshield_file_save_old()") Then $sReturn = _Run($unshield & ' -O -D 2 -d "' & $outdir & '" x "' & $sPath & '"', $outdir)
+			If StringInStr($sReturn, "Failed to extract file") Then
 
 			Local $aReturn = ['InstallShield Cabinet ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', 'is6comp'), t('METHOD_EXTRACTION_RADIO', 'is5comp'), t('METHOD_EXTRACTION_RADIO', 'iscab')]
-			$choice = MethodSelect($aReturn, $arcdisp)
+			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
-			Switch $choice
+			Switch $iChoice
 				Case 1
 					; List contents of archive
 					$return = FetchStdout($is6cab & ' l "' & $file & '"', $filedir, @SW_HIDE)
@@ -2476,7 +2498,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					RunWait($iscab & ' "' & $file & '" -i"files.ini" -x', $outdir, @SW_MINIMIZE)
 					FileDelete($outdir & "\files.ini")
 			EndSwitch
-;~ 			EndIf
+			EndIf
 
 		Case $TYPE_ISCRIPT
 			If Not extract($TYPE_QBMS, $arcdisp, $observer, False, True) Then
@@ -2488,9 +2510,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			CheckTotalObserver($arcdisp)
 
 			Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
-			$choice = MethodSelect($aReturn, $arcdisp)
+			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
-			Switch $choice
+			Switch $iChoice
 				; Extract using isxunpack
 				Case 1
 					FileMove($file, $outdir)
@@ -2580,9 +2602,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_MHT
 			Local $aReturn = ['MHTML ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', '7zip'), t('METHOD_EXTRACTION_RADIO', 'TotalObserver')]
-			$choice = MethodSelect($aReturn, $arcdisp)
+			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
-			If $choice == 1 Then
+			If $iChoice == 1 Then
 				extract($TYPE_7Z, $arcdisp)
 			Else
 				extract($TYPE_QBMS, $arcdisp, $observer)
@@ -2644,9 +2666,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If Not $ret Or $success == $RESULT_FAILED Then
 				$success = $RESULT_UNKNOWN
 				Local $aReturn = ['MSI ' & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'jsMSI Unpacker'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_ADMIN_RADIO', 'MSI')]
-				$choice = MethodSelect($aReturn, $arcdisp)
+				$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
-				Switch $choice
+				Switch $iChoice
 					Case 1 ; jsMSI Unpacker
 						_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_HIDE, False, False)
 						_FileRead($outdir & "\MSI Unpack.log", True)
@@ -2683,10 +2705,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_MSP
 			Local $aReturn = ['MSP ' & t('TERM_PACKAGE'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', '7-Zip')]
-			$choice = MethodSelect($aReturn, $arcdisp)
+			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 			DirCreate($tempoutdir)
-			Switch $choice
+			Switch $iChoice
 				Case 1 ; TC MSI
 					extract($TYPE_QBMS, $arcdisp, $msi_plug, True)
 				Case 2 ; MsiX
@@ -2831,54 +2853,57 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_SWF
 			; Run swfextract to get list of contents
 			$return = StringSplit(FetchStdout($swf & ' "' & $file & '"', $filedir, @SW_HIDE), @CRLF)
-;~ 			_ArrayDisplay($return)
-			For $i = 2 To $return[0]
-				$line = $return[$i]
-				; Extract files
-				If StringInStr($line, "MP3 Soundstream") Then
-					_Run($swf & ' -m "' & $file & '"', $outdir, @SW_HIDE, True, True, False, False)
-					If FileExists($outdir & "\output.mp3") Then FileMove($outdir & "\output.mp3", $outdir & "\MP3 Soundstream\soundstream.mp3", 8 + 1)
-				ElseIf $line <> "" Then
-					$swf_arr = StringSplit(StringRegExpReplace(StringStripWS($line, 8), '(?i)\[(-\w)\]\d+(.+):(.*?)\)', "$1,$2,"), ",")
-;~ 					_ArrayDisplay($swf_arr)
-					$j = 3
-					Do
-						;Cout("$j = " & $j & @TAB & $swf_arr[$j])
-						$swf_obj = StringInStr($swf_arr[$j], "-")
-						If $swf_obj Then
-							For $k = StringMid($swf_arr[$j], 1, $swf_obj - 1) To StringMid($swf_arr[$j], $swf_obj + 1)
-								_ArrayAdd($swf_arr, $k)
-							Next
-							$swf_arr[0] = UBound($swf_arr) - 1
-;~ 							_ArrayDisplay($swf_arr)
-						Else
-							; Progress indicator
-							GUICtrlSetData($idTrayStatusExt, $swf_arr[2] & ": " & $j & "/" & $swf_arr[0] + 1)
-
-							; Set output file name
-							$swf_arr[$j] = StringStripWS($swf_arr[$j], 1)
-							$fname = $swf_arr[$j]
-
-							If $swf_arr[2] = "Sounds" Or $swf_arr[2] = "Embedded MP3s" Then
-								$fname &= ".mp3"
-							ElseIf $swf_arr[2] = "PNGs" Then
-								$fname &= ".png"
-							ElseIf $swf_arr[2] = "JPEGs" Then
-								$fname &= ".jpg"
+			If @error Then
+				$success = $RESULT_FAILED
+			Else
+;~ 				_ArrayDisplay($return)
+				For $i = 2 To $return[0]
+					$line = $return[$i]
+					; Extract files
+					If StringInStr($line, "MP3 Soundstream") Then
+						_Run($swf & ' -m "' & $file & '"', $outdir, @SW_HIDE, True, True, False, False)
+						If FileExists($outdir & "\output.mp3") Then FileMove($outdir & "\output.mp3", $outdir & "\MP3 Soundstream\soundstream.mp3", 8 + 1)
+					ElseIf $line <> "" Then
+						$swf_arr = StringSplit(StringRegExpReplace(StringStripWS($line, 8), '(?i)\[(-\w)\]\d+(.+):(.*?)\)', "$1,$2,"), ",")
+;~ 						_ArrayDisplay($swf_arr)
+						$j = 3
+						Do
+							;Cout("$j = " & $j & @TAB & $swf_arr[$j])
+							$swf_obj = StringInStr($swf_arr[$j], "-")
+							If $swf_obj Then
+								For $k = StringMid($swf_arr[$j], 1, $swf_obj - 1) To StringMid($swf_arr[$j], $swf_obj + 1)
+									_ArrayAdd($swf_arr, $k)
+								Next
+								$swf_arr[0] = UBound($swf_arr) - 1
+;~ 								_ArrayDisplay($swf_arr)
 							Else
-								$fname &= ".swf"
+								; Progress indicator
+								GUICtrlSetData($idTrayStatusExt, $swf_arr[2] & ": " & $j & "/" & $swf_arr[0] + 1)
+
+								; Set output file name
+								$swf_arr[$j] = StringStripWS($swf_arr[$j], 1)
+								$fname = $swf_arr[$j]
+
+								If $swf_arr[2] = "Sounds" Or $swf_arr[2] = "Embedded MP3s" Then
+									$fname &= ".mp3"
+								ElseIf $swf_arr[2] = "PNGs" Then
+									$fname &= ".png"
+								ElseIf $swf_arr[2] = "JPEGs" Then
+									$fname &= ".jpg"
+								Else
+									$fname &= ".swf"
+								EndIf
+
+								_Run($swf & " " & $swf_arr[1] & " " & $swf_arr[$j] & ' -o ' & $fname & ' "' & $file & '"', $outdir, @SW_HIDE, True, True, -1, False)
+;~								_ArrayDisplay($swf_arr)
+
+								FileMove($outdir & "\" & $fname, $outdir & "\" & $swf_arr[2] & "\", 8 + 1)
 							EndIf
-
-							_Run($swf & " " & $swf_arr[1] & " " & $swf_arr[$j] & ' -o ' & $fname & ' "' & $file & '"', $outdir, @SW_HIDE, True, True, -1, False)
-;~							_ArrayDisplay($swf_arr)
-
-							FileMove($outdir & "\" & $fname, $outdir & "\" & $swf_arr[2] & "\", 8 + 1)
-						EndIf
-						$j += 1
-					Until $j = $swf_arr[0] + 1
-				EndIf
-			Next
-
+							$j += 1
+						Until $j = $swf_arr[0] + 1
+					EndIf
+				Next
+			EndIf
 		Case $TYPE_SWFEXE
 			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}") Then
 				MoveFiles($tempoutdir, $outdir, False, '', True, True)
@@ -2917,20 +2942,26 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Sleep(1000)
 			ProcessClose($pid)
 
-		Case $TYPE_TTARCH ; Test
+		Case $TYPE_TTARCH
+			If $gamefailed Then Return 0
+
 			; Get all supported games
-			$aReturn = _StringBetween(FetchStdout($ttarch, @ScriptDir, @SW_HIDE), "Games", "Examples")
+			$aReturn = _StringBetween(FetchStdout(Quote($bindir & $ttarch), @ScriptDir, @SW_HIDE, 0, False), "Games", "Examples")
 			If @error Then terminate($STATUS_FAILED, $file, $arctype, $arcdisp)
-			$gameformat = StringRegExp($aReturn[0], "\d+ +(.+)", 3)
-;~ 			_ArrayDisplay($gameformat)
+			$aGames = StringRegExp($aReturn[0], "\d+ +(.+)", 3)
+;~ 			_ArrayDisplay($aGames)
+
+			Local $tmp = $aGames
+			_ArraySort($tmp)
 
 			; Display game select GUI
-			Local $choice = GUI_GameSelect(_ArrayToString($gameformat), t('METHOD_GAME_NOGAME'))
-			Cout("Selected game: " & $choice)
-			If $choice Then
-				$choice = _ArraySearch($gameformat, $choice)
-				If $choice > -1 Then _Run($ttarch & ' -m ' & $choice & ' "' & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE)
-			Else ; Delete outdir and return
+			Local $iChoice = GUI_MethodSelectList($tmp, t('METHOD_GAME_NOGAME'))
+			Cout("Selected game: " & $iChoice)
+			If $iChoice Then
+				$iChoice = _ArraySearch($aGames, $iChoice)
+				If $iChoice > -1 Then _Run($ttarch & ' -m ' & $iChoice & ' "' & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE)
+			Else
+				$gamefailed = True
 				$returnFail = True
 			EndIf
 
@@ -3071,9 +3102,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If $success == $RESULT_FAILED Then
 				$success = $RESULT_UNKNOWN
 				Local $aOptions = ['Wise ' & t('TERM_INSTALLER'), t('METHOD_UNPACKER_RADIO', 'Wise UNpacker'), t('METHOD_SWITCH_RADIO', 'Wise Installer /x'), t('METHOD_EXTRACTION_RADIO', 'Wise MSI'), t('METHOD_EXTRACTION_RADIO', 'Unzip')]
-				$choice = MethodSelect($aOptions, $arcdisp)
+				$iChoice = GUI_MethodSelect($aOptions, $arcdisp)
 
-				Switch $choice
+				Switch $iChoice
 					; Extract with WUN
 					Case 1
 						RunWait(_MakeCommand($wise_wun, True) & ' "' & $filename & '" "' & $tempoutdir & '"', $filedir)
@@ -3893,64 +3924,6 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	Exit $exitcode
 EndFunc
 
-; Function to prompt user for choice of extraction method
-Func MethodSelect($aData, $arcdisp)
-	; Auto choose first extraction method in silent mode
-	If $silentmode Then
-		Cout("Extractor selected automatically - run again in normal mode if not extracted correctly")
-		Return 1
-	EndIf
-
-	_DeleteTrayMessageBox()
-	Local Const $base_height = 130, $base_radio = 100
-	Local $size = UBound($aData) - 1, $select[$size]
-
-	; Create GUI and set header information
-	Opt("GUIOnEventMode", 0)
-	Local $hGUI = GUICreate($title, 330, $base_height + ($size * 20))
-	_GuiSetColor()
-	$header = GUICtrlCreateLabel(t('METHOD_HEADER', $aData[0]), 5, 5, 320, 20)
-	GUICtrlSetFont(-1, -1, 1200)
-	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', $aData[0]), 5, 25, 320, 65, $SS_LEFT)
-
-	; Create radio selection options
-	GUICtrlCreateGroup(t('METHOD_RADIO_LABEL'), 5, $base_radio, 215, 25 + ($size * 20))
-	For $i = 0 To $size - 1
-		$select[$i] = GUICtrlCreateRadio($aData[$i + 1], 10, $base_radio + 20 + ($i * 20), 205, 20)
-	Next
-	GUICtrlCreateGroup("", -99, -99, 1, 1)
-
-	; Create buttons
-	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 235, $base_radio - 10 + ($size * 10), 80, 20)
-	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 235, $base_radio - 10 + ($size * 10) + 30, 80, 20)
-
-	; Set properties
-	GUICtrlSetState($select[0], $GUI_CHECKED)
-	GUICtrlSetState($idOk, $GUI_DEFBUTTON)
-	GUISetState(@SW_SHOW)
-
-	While 1
-		$nMsg = GUIGetMsg()
-		Switch $nMsg
-			; Set extract command
-			Case $idOk
-				For $i = 0 To $size - 1
-					If GUICtrlRead($select[$i]) == $GUI_CHECKED Then
-						GUIDelete($hGUI)
-						Opt("GUIOnEventMode", 1)
-						_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
-						Cout("Selected method: " & $i + 1)
-						Return $i + 1
-					EndIf
-				Next
-				; Exit if Cancel clicked or window closed
-			Case $GUI_EVENT_CLOSE, $idCancel
-				If $createdir Then DirRemove($outdir, 0)
-				terminate($STATUS_SILENT)
-		EndSwitch
-	WEnd
-EndFunc
-
 ; Warn user before executing files for extraction
 Func Warn_Execute($command)
 	If $warnexecute Then
@@ -4637,6 +4610,7 @@ EndFunc
 
 ; Build final command line from parameters
 Func _MakeCommand($f, $bUseCmd = False)
+;~ 	Cout("MakeCommand: " & $f)
 	If StringInStr($f, $cmd) Then Return $f
 
 	If Not StringInStr($f, $bindir) Then
@@ -6559,14 +6533,74 @@ Func GUI_FirstStart_Exit()
 	Cout("First start configuration finished")
 EndFunc   ;==>GUI_FirstStart_Exit
 
-; Create GUI to select game and return selection
-Func GUI_GameSelect($sEntries, $sStandard)
+; Display UI for extraction method selection (compact)
+Func GUI_MethodSelect($aData, $arcdisp)
+	; Auto choose first extraction method in silent mode
+	If $silentmode Then
+		Cout("Extractor selected automatically - run again in normal mode if not extracted correctly")
+		Return 1
+	EndIf
+
+	_DeleteTrayMessageBox()
+	Local Const $base_height = 130, $base_radio = 100
+	Local $size = UBound($aData) - 1, $select[$size]
+
+	; Create GUI and set header information
+	Opt("GUIOnEventMode", 0)
+	Local $hGUI = GUICreate($title, 330, $base_height + ($size * 20))
+	_GuiSetColor()
+	$header = GUICtrlCreateLabel(t('METHOD_HEADER', $aData[0]), 5, 5, 320, 20)
+	GUICtrlSetFont(-1, -1, 1200)
+	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', $aData[0]), 5, 25, 320, 65, $SS_LEFT)
+
+	; Create radio selection options
+	GUICtrlCreateGroup(t('METHOD_RADIO_LABEL'), 5, $base_radio, 215, 25 + ($size * 20))
+	For $i = 0 To $size - 1
+		$select[$i] = GUICtrlCreateRadio($aData[$i + 1], 10, $base_radio + 20 + ($i * 20), 205, 20)
+	Next
+	GUICtrlCreateGroup("", -99, -99, 1, 1)
+
+	; Create buttons
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 235, $base_radio - 10 + ($size * 10), 80, 20)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 235, $base_radio - 10 + ($size * 10) + 30, 80, 20)
+
+	; Set properties
+	GUICtrlSetState($select[0], $GUI_CHECKED)
+	GUICtrlSetState($idOk, $GUI_DEFBUTTON)
+	GUISetState(@SW_SHOW)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			; Set extract command
+			Case $idOk
+				For $i = 0 To $size - 1
+					If GUICtrlRead($select[$i]) == $GUI_CHECKED Then
+						GUIDelete($hGUI)
+						Opt("GUIOnEventMode", 1)
+						_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
+						Cout("Selected method: " & $i + 1)
+						Return $i + 1
+					EndIf
+				Next
+			; Exit if Cancel clicked or window closed
+			Case $GUI_EVENT_CLOSE, $idCancel
+				If $createdir Then DirRemove($outdir, 0)
+				terminate($STATUS_SILENT)
+		EndSwitch
+	WEnd
+EndFunc
+
+; Display UI for extraction method selection (list-based), mainly used for game selection
+Func GUI_MethodSelectList($aEntries, $sStandard = "", $sText = "METHOD_GAME_LABEL")
 	Local $sSelection = 0
+	If $silentmode Then Return $sSelection
+
 	Local $hGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('METHOD_GAME_LABEL', CreateArray($filenamefull, $sStandard)), 10, 8, 252, 210, $SS_CENTER)
-	Local $idList = GUICtrlCreateList("", 24, 225, 225, 188, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
-	GUICtrlSetData(-1, $sStandard & '|' & $sEntries)
+	GUICtrlCreateLabel(t($sText, CreateArray($filenamefull, $sStandard)), 10, 8, 252, 144, $SS_CENTER)
+	Local $idList = GUICtrlCreateList("", 24, 150, 225, 270, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
+	GUICtrlSetData(-1, $sStandard & '|' & _ArrayToString($aEntries))
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 152, 427, 81, 25)
 	_GUICtrlListBox_UpdateHScroll($idList)

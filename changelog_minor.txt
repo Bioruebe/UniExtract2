@@ -3,7 +3,7 @@ RC 3:
   Added support for Amiga Disk Files using unADF
   Added support for PDF files using Xpdf command line tools
   Added support for hundreds of game archives using GARbro
-  Improved speed of file type detection
+  Added unshield as the default extractor for InstallShield cab files
   Fixed some installers being misdetected as InstallShield
   Fixed swf exe extraction not terminating correctly
   Fixed console window always being visible for extractions using definition files
@@ -14,9 +14,12 @@ RC 3:
   Fixed some zip extractions being detected as failed, although they completed successfully
   Fixed 'NScripter archive' false positives
   Fixed SQLite, InstallShield Z, Thinstall extraction
+  Fixed ttarch extraction failing if UniExtract's path contains spaces, thanks to wwh1004
+  Fixed 'Game Select' dialog being displayed in silent mode
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
   Changed design of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt, 'Plugin missing' error message
+  Improved speed of file type detection
   Improved file type detection for .mht, .eml, .xz, some game archives
   Updated EnigmaVB unpacker to 0.56
   Updated ExeInfo PE to 0.0.5.4
