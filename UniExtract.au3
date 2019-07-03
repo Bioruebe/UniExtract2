@@ -133,7 +133,7 @@ Global $history = 1
 Global $appendext = 0
 Global $warnexecute = 1
 Global $freeSpaceCheck = 1
-Global $NoBox = 0
+Global $bOptNoStatusBox = 0
 Global $bHideStatusBoxIfFullscreen = 1
 Global $bOptOpenOutDir = 0
 Global $iDeleteOrigFile = $OPTION_KEEP
@@ -312,7 +312,7 @@ ParseCommandLine()
 
 ; Create tray menu items
 $Tray_Statusbox = TrayCreateItem(t('PREFS_HIDE_STATUS_LABEL'))
-If $NoBox Then TrayItemSetState(-1, $TRAY_CHECKED)
+If $bOptNoStatusBox Then TrayItemSetState(-1, $TRAY_CHECKED)
 TrayCreateItem("")
 $Tray_Exit = TrayCreateItem(t('MENU_FILE_QUIT_LABEL'))
 
@@ -692,8 +692,8 @@ Func ReadPrefs()
 	LoadPref("history", $history)
 	LoadPref("appendext", $appendext)
 	LoadPref("warnexecute", $warnexecute)
-	LoadPref("nostatusbox", $NoBox)
-	If Not $NoBox Then LoadPref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
+	LoadPref("nostatusbox", $bOptNoStatusBox)
+	If Not $bOptNoStatusBox Then LoadPref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 	LoadPref("openfolderafterextr", $bOptOpenOutDir)
 	LoadPref("deletesourcefile", $iDeleteOrigFile)
 	LoadPref("freespacecheck", $freeSpaceCheck)
@@ -754,7 +754,7 @@ Func WritePrefs()
 	SavePref('language', $language)
 	SavePref('appendext', $appendext)
 	SavePref('warnexecute', $warnexecute)
-	SavePref('nostatusbox', $NoBox)
+	SavePref('nostatusbox', $bOptNoStatusBox)
 	SavePref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 	SavePref('openfolderafterextr', $bOptOpenOutDir)
 	SavePref('deletesourcefile', $iDeleteOrigFile)
@@ -1065,7 +1065,7 @@ Func tridcompare($sFileType)
 			HasPlugin($archdir & "\Formats\Asar." & $iOsArch & ".dll")
 			extract($TYPE_7Z, 'ASAR ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "BCM compressed file")
+		Case StringInStr($sFileType, "BCM compressed")
 			extract($TYPE_BCM, 'BCM ' & t('TERM_COMPRESSED'))
 
 		Case StringInStr($sFileType, "bzip2 compressed archive")
@@ -1083,9 +1083,6 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "CDImage") Or StringInStr($sFileType, "null bytes")
 			CheckIso()
 			check7z()
-
-		Case StringInStr($sFileType, "Compiled HTML Help File")
-			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
 
 		Case StringInStr($sFileType, "CPIO Archive")
 			extract($TYPE_7Z, 'CPIO ' & t('TERM_ARCHIVE'))
@@ -1116,7 +1113,8 @@ Func tridcompare($sFileType)
 			extract($TYPE_7Z, 'gzip ' & t('TERM_COMPRESSED'), "gz")
 
 		Case StringInStr($sFileType, "Windows Help File")
-			extract($TYPE_HLP, 'Windows ' & t('TERM_HELP'))
+			extract($TYPE_HLP, 'Windows ' & t('TERM_HELP'), "", False, True)
+			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
 
 		Case StringInStr($sFileType, "Generic PC disk image")
 			CheckIso()
@@ -1163,7 +1161,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Microsoft Windows Installer") Or StringInStr($sFileType, "Generic OLE2 / Multistream Compound File")
 			extract($TYPE_MSI, 'Windows Installer (MSI) ' & t('TERM_PACKAGE'))
 
-		Case StringInStr($sFileType, "Microsoft Windows Installer patch")
+		Case StringInStr($sFileType, "Windows Installer Patch")
 			extract($TYPE_MSP, 'Windows Installer (MSP) ' & t('TERM_PATCH'))
 
 		Case StringInStr($sFileType, "MPQ Archive - Blizzard game data")
@@ -1426,9 +1424,6 @@ Func exescan($f, $scantype, $analyze = 1)
 		Case StringInStr($sFileType, "Microsoft Visual C++ 6.0", 0) And StringInStr($sFileType, "Custom", 0)
 			extract($TYPE_VSSFX_PATH, 'Visual C++ ' & t('TERM_SFX') & '' & t('TERM_INSTALLER'))
 
-		Case StringInStr($sFileType, "Netopsystems FEAD Optimizer", 0)
-			extract($TYPE_FEAD, 'Netopsystems FEAD ' & t('TERM_PACKAGE'))
-
 		Case StringInStr($sFileType, "Nullsoft PiMP SFX", 0)
 			checkNSIS()
 
@@ -1565,7 +1560,7 @@ Func advexescan($bUseCmd = $extract)
 		Case StringInStr($sFileType, "www.molebox.com")
 			extract($TYPE_MOLE, 'Mole Box ' & t('TERM_CONTAINER'))
 
-		Case StringInStr($sFileType, "Netopsystems FEAD Optimizer")
+		Case StringInStr($sFileType, "Netopsystems AG INSTALLER FEAD")
 			extract($TYPE_FEAD, 'Netopsystems FEAD ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Nullsoft")
@@ -2227,7 +2222,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			While WinExists("arc_conv")
 				$current = WinGetText("arc_conv")
 				If $current <> $last Then
-					GUICtrlSetData($idTrayStatusExt, StringInStr($current, "/")? $current: (t('TERM_FILE') & " #" & $current))
+					_SetTrayMessageBoxText(StringInStr($current, "/")? $current: (t('TERM_FILE') & " #" & $current))
 					$last = $current
 					Sleep(10)
 				EndIf
@@ -2242,7 +2237,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_BCM
 			_Run($bcm & ' -d "' & $file & '" "' & $outdir & '\' & GetFileName() & '"', $filedir, @SW_HIDE, True, True, False)
 
-		Case $TYPE_BOOTIMG ;Test
+		Case $TYPE_BOOTIMG
 			HasPlugin($bootimg)
 			$ret = $outdir & "\" & $bootimg
 			$ret2 = $outdir & '\boot.img'
@@ -2280,11 +2275,14 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$ret = FileOpen($return, 8+2)
 			FileWrite($ret, "1" & @LF & $file & @LF & $outdir & @LF & "3" & @LF & "1")
 			FileClose($ret)
-			_Run($ci & ' ' & $return, $outdir, @SW_SHOW, False, False, False)
+			$run = Run(_MakeCommand($ci & ' ' & $return, False), $outdir, @SW_SHOW)
+			WinWait("CreateInstall Setup Extractor", "Click Finish to close the program", $Timeout)
+			ControlClick("CreateInstall Setup Extractor", "", "Button1")
+			ProcessClose($run)
 			FileDelete($return)
 			terminate($STATUS_SILENT)
 
-		Case $TYPE_CTAR
+		Case $TYPE_CTAR ; Test
 			$oldfiles = ReturnFiles($outdir)
 
 			; Decompress archive with 7-zip
@@ -2332,7 +2330,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Warn_Execute($file & ' /batch /no-reg /no-postinstall /dest "' & $outdir & '"')
 			ShellExecuteWait($file, '/batch /no-reg /no-postinstall /dest "' & $outdir & '"', $outdir)
 
-		Case $TYPE_ENIGMA
+		Case $TYPE_ENIGMA ; Test
 			_RunInTempOutdir($tempoutdir, $enigma & ' /nogui "' & $file & '"', $tempoutdir, @SW_HIDE, True, False, False)
 
 			; Move files
@@ -2355,9 +2353,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($ethornell & ' "' & $file & '" "' & $outdir & '"', $outdir)
 
 		Case $TYPE_FEAD
-			RunWait(Warn_Execute($file & ' /s -nos_ne -nos_o"' & $tempoutdir & '"'), $filedir)
+			Local $tmp = ' /s -nos_ne -nos_o"' & $tempoutdir & '\"'
+			Warn_Execute($file & $tmp)
+			ShellExecuteWait($file, $tmp, $filedir)
 			FileSetAttrib($tempoutdir & '*', '-R', 1)
-			MoveFiles($tempoutdir, $outdir, False, "", True)
+			MoveFiles($tempoutdir, $outdir, False, "", True, True)
 			DirRemove($tempoutdir)
 
 		Case $TYPE_FREEARC
@@ -2372,7 +2372,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_GARBRO
 			_Run($garbro & ' x -ocu -if png -o "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE)
 
-		Case $TYPE_GHOST
+		Case $TYPE_GHOST ; Test
 			$ret = $outdir & "\" & $filename & ".exe"
 			Cout("Moving file to " & $ret)
 			FileMove($file, $ret)
@@ -2419,7 +2419,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		; Failsafe in case TrID misidentifies MS SFX hotfixes
-		Case $TYPE_HOTFIX
+		Case $TYPE_HOTFIX ; Test
 			Cout("Executing: " & Warn_Execute(Quote($file & '" /q /x:"' & $outdir)))
 			ShellExecuteWait($file, '/q /x:' & Quote($outdir), $outdir)
 
@@ -2502,6 +2502,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_ISCRIPT
 			If Not extract($TYPE_QBMS, $arcdisp, $observer, False, True) Then
+				$success = $RESULT_UNKNOWN
 				Warn_Execute($file & ' /extract_all:"' & $outdir & '"')
 				ShellExecuteWait($file, ' /extract_all:"' & $outdir & '"', $outdir, "open", @SW_MINIMIZE)
 			EndIf
@@ -2610,7 +2611,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				extract($TYPE_QBMS, $arcdisp, $observer)
 			EndIf
 
-		Case $TYPE_MOLE
+		Case $TYPE_MOLE ; Test
 			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 
 			; Move files
@@ -2669,7 +2670,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 				Switch $iChoice
-					Case 1 ; jsMSI Unpacker
+					Case 1 ; jsMSI Unpacker ; Test
 						_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_HIDE, False, False)
 						_FileRead($outdir & "\MSI Unpack.log", True)
 
@@ -2703,29 +2704,32 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Due to the appendext argument, a definition file cannot be used here
 			_Run($msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendext? '/ext': '', $filedir)
 
-		Case $TYPE_MSP
+		Case $TYPE_MSP ; Test
 			Local $aReturn = ['MSP ' & t('TERM_PACKAGE'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', '7-Zip')]
 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 			DirCreate($tempoutdir)
 			Switch $iChoice
 				Case 1 ; TC MSI
-					extract($TYPE_QBMS, $arcdisp, $msi_plug, True)
+					_Run($quickbms & ' "' & $bindir & $msi_plug & '" "' & $file & '" "' & $tempoutdir & '"', $tempoutdir, @SW_MINIMIZE, True, False)
+;~ 					extract($TYPE_QBMS, $arcdisp, $msi_plug, True)
 				Case 2 ; MsiX
 					_Run($msi_msix & ' "' & $file & '" /out "' & $tempoutdir & '"', $filedir)
 				Case 3 ; 7-Zip
-					_Run($7z & ' x "' & $file & '"', $outdir)
+					_Run($7z & ' x "' & $file & '"', $tempoutdir)
 			EndSwitch
 
 			; Regardless of method, extract files from extracted CABs
-			$cabfiles = FileSearch($tempoutdir)
-			For $i = 1 To $cabfiles[0]
-				filescan($cabfiles[$i], 0)
-				If StringInStr($sFileType, "Microsoft Cabinet Archive", 0) Then
-					_Run($7z & ' x "' & $cabfiles[$i] & '"', $outdir)
-					FileDelete($cabfiles[$i])
-				EndIf
-			Next
+			; TODO: This does not work with new filescan function.
+			; 		Basically we need to do: open dll, query each file, change extension if enabled, extract if cab, close DLL
+;~ 			$cabfiles = FileSearch($tempoutdir)
+;~ 			For $i = 1 To $cabfiles[0]
+;~ 				filescan($cabfiles[$i], 0)
+;~ 				If StringInStr($sFileType, "Microsoft Cabinet Archive", 0) Then
+;~ 					_Run($7z & ' x "' & $cabfiles[$i] & '"', $outdir)
+;~ 					FileDelete($cabfiles[$i])
+;~ 				EndIf
+;~ 			Next
 
 			; Append missing file extensions
 			If $appendext Then AppendExtensions($tempoutdir)
@@ -2784,7 +2788,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			HasNetFramework(2)
 			_Run($rgss & ' -p -o="' & $outdir & '" "' & $file & '"', $outdir, @SW_HIDE)
 
-		Case $TYPE_ROBO
+		Case $TYPE_ROBO ; Test
 			RunWait(Warn_Execute($file & ' /unpack="' & $outdir & '"'), $filedir)
 
 		Case $TYPE_RPA
@@ -2793,7 +2797,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_SFARK
 			_Run($sfark & ' "' & $file & '" "' & $outdir & '\' & $filename & '.sf2"', $filedir, @SW_SHOW)
 
-		Case $TYPE_SGB
+		Case $TYPE_SGB ; Test
 			$return = _Run($7z & ' x "' & $file & '"', $outdir, @SW_HIDE)
 			; Effect.sgr cannot be extracted by 7zip, that should not be considered failed extraction as all other files are OK
 			If StringInStr($return, "Headers Error : Effect.sgr") And StringInStr($return, "Sub items Errors: 1") Then $success = $RESULT_SUCCESS
@@ -2846,7 +2850,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			FileWrite($handle, $return)
 			FileClose($handle)
 
-		Case $TYPE_SUPERDAT
+		Case $TYPE_SUPERDAT ; Test
 			RunWait(Warn_Execute($file & ' /e "' & $outdir & '"'), $outdir)
 			_FileRead($filedir & '\SuperDAT.log', True)
 
@@ -2878,7 +2882,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 ;~ 								_ArrayDisplay($swf_arr)
 							Else
 								; Progress indicator
-								GUICtrlSetData($idTrayStatusExt, $swf_arr[2] & ": " & $j & "/" & $swf_arr[0] + 1)
+								_SetTrayMessageBoxText($swf_arr[2] & ": " & $j & "/" & $swf_arr[0] + 1)
 
 								; Set output file name
 								$swf_arr[$j] = StringStripWS($swf_arr[$j], 1)
@@ -2904,6 +2908,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					EndIf
 				Next
 			EndIf
+
 		Case $TYPE_SWFEXE
 			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}") Then
 				MoveFiles($tempoutdir, $outdir, False, '', True, True)
@@ -2919,7 +2924,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				FileDelete($outdir & '\' & $filename & '.tar')
 			EndIf
 
-		Case $TYPE_THINSTALL
+		Case $TYPE_THINSTALL ; Test
 			HasPlugin($thinstall)
 
 			$pid = Run(Warn_Execute($file), $filedir)
@@ -2987,7 +2992,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 ;~ 		Case $TYPE_UNITY
 ;~ 			_Run($unity & ' extract "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, True, False)
 
-		Case $TYPE_UNREAL
+		Case $TYPE_UNREAL ; Test
 			HasPlugin($unreal)
 			; Currently extracts files from all packages in folder, not only the selected one!
 			_Run($unreal & ' -export -all -sounds -3rdparty -path="' & $filedir & '" -out="' & $outdir & '" *', $outdir, @SW_MINIMIZE, True, True, False)
@@ -3089,12 +3094,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				_Run($visionaire3 & ' "' & $file & '" /force', $outdir, @SW_HIDE, True, True, False, False)
 			EndIf
 
-		Case $TYPE_VSSFX
+		Case $TYPE_VSSFX ; Test
 			FileMove($file, $outdir)
 			RunWait(Warn_Execute($outdir & '\' & $filenamefull & ' /extract'), $outdir)
 			FileMove($outdir & '\' & $filenamefull, $filedir)
 
-		Case $TYPE_VSSFX_PATH
+		Case $TYPE_VSSFX_PATH ; Test
 			RunWait(Warn_Execute($file & ' /extract:"' & $outdir & '" /quiet'), $outdir)
 
 		Case $TYPE_WISE
@@ -3267,7 +3272,7 @@ Func pluginExtract($sPlugin, $tempoutdir)
 	If $ret > 0 Then HasNetFramework($ret)
 
 	; Set status box
-	If Not $NoBox Then
+	If Not $bOptNoStatusBox Then
 		Local $arcdisp = t('EXTRACTING') & @CRLF & _ArrayGet($aIniSection, "display", $sPlugin)
 		$arcdisp = ReplacePlaceholders($arcdisp)
 		_CreateTrayMessageBox($arcdisp)
@@ -3719,13 +3724,16 @@ EndFunc
 
 ; Append missing file extensions using TrID
 Func AppendExtensions($dir)
+	Cout("Fixing file extensions")
+
 	Local $files = FileSearch($dir)
 	If $files[1] = '' Then Return
 	For $i = 1 To $files[0]
+		_SetTrayMessageBoxText(t('RENAMING_FILES', CreateArray($i, $files[0])))
 		If _IsDirectory($files[$i]) Then ContinueLoop
 		$filename = StringTrimLeft($files[$i], StringInStr($files[$i], '\', 0, -1))
 		If StringInStr($filename, '.') And Not (StringLeft($filename, 7) = 'Binary.' Or StringRight($filename, 4) = '.bin') Then ContinueLoop
-		RunWait($cmd & $trid & ' "' & $files[$i] & '" -ae', $dir, @SW_HIDE)
+		RunWait(Cout(_MakeCommand($trid & ' "' & $files[$i] & '" -ae')), $dir, @SW_HIDE)
 	Next
 EndFunc
 
@@ -3960,12 +3968,12 @@ Func Prompt($show_flag, $Message, $vars = 0, $terminate = False)
 	EndIf
 EndFunc
 
-; Show Tray Message
+; Show tray message box
 ; Based on work by Valuater (http://www.autoitscript.com/forum/topic/85977-system-tray-message-box-udf/)
 Func _CreateTrayMessageBox($TBText)
 	_DeleteTrayMessageBox()
 
-	If $NoBox = 1 Then Return
+	If $bOptNoStatusBox = 1 Then Return
 
 	; Hide if in fullscreen
 	If $bHideStatusBoxIfFullscreen Then
@@ -4016,7 +4024,13 @@ Func _CreateTrayMessageBox($TBText)
 	Next
 EndFunc
 
-; Close Tray Message
+; Set tray message extended status text
+Func _SetTrayMessageBoxText($sText)
+	If Not $TBgui Then Return
+	GUICtrlSetData($idTrayStatusExt, $sText)
+EndFunc
+
+; Close tray message box
 ; Based on work by Valuater (http://www.autoitscript.com/forum/topic/85977-system-tray-message-box-udf/)
 Func _DeleteTrayMessageBox()
 	If Not $TBgui Then Return
@@ -4331,7 +4345,7 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 	If Not StringInStr($return, $sIsProtectedText) And ($sIsProtectedText2 == 0 Or Not StringInStr($return, $sIsProtectedText2)) Then Return 0
 
 	Cout("Archive is password protected")
-	GUICtrlSetData($idTrayStatusExt, t('SEARCHING_PASSWORD'))
+	_SetTrayMessageBoxText(t('SEARCHING_PASSWORD'))
 	$aPasswords = FileReadToArray($sPasswordFile)
 	If @error Then
 		Cout("Error reading password file " & $sPasswordFile)
@@ -4344,7 +4358,7 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 	If $size > 0 Then Cout("Trying " & $size & " passwords from password list")
 	$sTestCmd = _MakeCommand($sTestCmd, True)
 	For $i = 0 To $size - 1
-		GUICtrlSetData($idTrayStatusExt, t('TESTING_PASSWORD', CreateArray($i, $size)))
+		_SetTrayMessageBoxText(t('TESTING_PASSWORD', CreateArray($i, $size)))
 		If StringInStr(FetchStdout(StringReplace($sTestCmd, "%PASSWORD%", $aPasswords[$i], 1), $outdir, @SW_HIDE, 0, False), $sTestText) Then
 			Cout("Password found")
 			$sPassword = $aPasswords[$i]
@@ -4352,7 +4366,7 @@ Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encr
 		EndIf
 	Next
 
-	GUICtrlSetData($idTrayStatusExt, "")
+	_SetTrayMessageBoxText("")
 	Return $sPassword
 EndFunc
 
@@ -4413,7 +4427,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 					Cout("User input needed")
 					WinSetState($runtitle, "", @SW_SHOW)
 					GUICtrlSetFont($idTrayStatusExt, 8.5, 900)
-					GUICtrlSetData($idTrayStatusExt, t('INPUT_NEEDED'))
+					_SetTrayMessageBoxText(t('INPUT_NEEDED'))
 					WinActivate($runtitle)
 					$lastSize = Round((_DirGetSize($outdir, 0) - $initdirsize) / 1024 / 1024, 3)
 					ContinueLoop
@@ -4427,7 +4441,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 ;~ 				Cout("Size: " & $size & @TAB & $lastSize)
 				If $size > 0 And $size <> $lastSize Then
 					Cout("Size: " & $size & @TAB & $lastSize)
-					GUICtrlSetData($idTrayStatusExt, $size & " MB")
+					_SetTrayMessageBoxText($size & " MB")
 				EndIf
 				$lastSize = $size
 				Sleep(50)
@@ -4502,7 +4516,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 		While ProcessExists($run)
 			$size = Round((DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
 			If $size > 0 And $bPatternSearch > -1 Then
-				If $TBgui Then GUICtrlSetData($idTrayStatusExt, $size & " MB")
+				If $TBgui Then _SetTrayMessageBoxText($size & " MB")
 			Else
 				If $TimerStart And TimerDiff($TimerStart) > 60000 Then
 					WinSetState($runtitle, "", @SW_SHOW)
@@ -4544,7 +4558,7 @@ Func _PatternSearch($sString)
 	If StringInStr($sString, "%", 0, -1) Then
 		$aReturn = StringRegExp($sString, "(\d{1,3})[\d\.,]* ?%", 3)
 ;~ 		_ArrayDisplay($aReturn)
-		If UBound($aReturn) > 0 Then Return GUICtrlSetData($idTrayStatusExt, _ArrayPop($aReturn) & "%")
+		If UBound($aReturn) > 0 Then Return _SetTrayMessageBoxText(_ArrayPop($aReturn) & "%")
 	EndIf
 
 ;~ 	Cout("[x on y]")
@@ -4552,7 +4566,7 @@ Func _PatternSearch($sString)
 		$aReturn = StringRegExp($sString, "\[(\d+) on (\d+)\]", 3)
 		If UBound($aReturn) > 1 Then
 			$Num = _ArrayPop($aReturn)
-			Return GUICtrlSetData($idTrayStatusExt, $sFile & _ArrayPop($aReturn) & "/" & $Num)
+			Return _SetTrayMessageBoxText($sFile & _ArrayPop($aReturn) & "/" & $Num)
 		EndIf
 	EndIf
 
@@ -4561,7 +4575,7 @@ Func _PatternSearch($sString)
 		$aReturn = StringRegExp($sString, "(\d+) of (\d+)", 3)
 		If UBound($aReturn) > 1 Then
 			$Num = _ArrayPop($aReturn)
-			Return GUICtrlSetData($idTrayStatusExt, $sFile & _ArrayPop($aReturn) & "/" & $Num)
+			Return _SetTrayMessageBoxText($sFile & _ArrayPop($aReturn) & "/" & $Num)
 		EndIf
 	EndIf
 
@@ -4570,7 +4584,7 @@ Func _PatternSearch($sString)
 		$aReturn = StringRegExp($sString, "(\d+)/(\d+)", 3)
 		If UBound($aReturn) > 1 Then
 			$Num = _ArrayPop($aReturn)
-			Return GUICtrlSetData($idTrayStatusExt, $sFile & _ArrayPop($aReturn) & "/" & $Num)
+			Return _SetTrayMessageBoxText($sFile & _ArrayPop($aReturn) & "/" & $Num)
 		EndIf
 	EndIf
 
@@ -4578,7 +4592,7 @@ Func _PatternSearch($sString)
 	$pos = StringInStr($sString, "#", 0, -1)
 	If $pos Then
 		$Num = Number(StringMid($sString, $pos + 1), 1)
-		If $Num > 0 Then Return GUICtrlSetData($idTrayStatusExt, $sFile & "#" & $Num)
+		If $Num > 0 Then Return _SetTrayMessageBoxText($sFile & "#" & $Num)
 	EndIf
 EndFunc
 
@@ -5560,7 +5574,7 @@ Func GUI_Prefs()
 	If $freeSpaceCheck Then GUICtrlSetState($freeSpaceCheckOpt, $GUI_CHECKED)
 	If $checkUnicode Then GUICtrlSetState($unicodecheckopt, $GUI_CHECKED)
 	If $appendext Then GUICtrlSetState($appendextopt, $GUI_CHECKED)
-	If $NoBox Then GUICtrlSetState($NoBoxOpt, $GUI_CHECKED)
+	If $bOptNoStatusBox Then GUICtrlSetState($NoBoxOpt, $GUI_CHECKED)
 	If $bHideStatusBoxIfFullscreen Then GUICtrlSetState($GameModeOpt, $GUI_CHECKED)
 	If $bOptOpenOutDir Then GUICtrlSetState($OpenOutDirOpt, $GUI_CHECKED)
 	If $FB_ask == 1 Then
@@ -5640,14 +5654,8 @@ Func GUI_Prefs_OK()
 	Local $aReturn = [1, 7, 30, 365, 999999, $updateinterval]
 	$updateinterval = $aReturn[$tmp]
 
-	; Format-specific preferences
-	If GUICtrlRead($NoBoxOpt) == $GUI_CHECKED Then
-		$NoBox = 1
-		TrayItemSetState($Tray_Statusbox, $TRAY_CHECKED)
-	Else
-		$NoBox = 0
-		TrayItemSetState($Tray_Statusbox, $TRAY_UNCHECKED)
-	EndIf
+	$bOptNoStatusBox = Number(GUICtrlRead($NoBoxOpt) == $GUI_CHECKED)
+	TrayItemSetState($Tray_Statusbox, $bOptNoStatusBox? $TRAY_CHECKED: $TRAY_UNCHECKED)
 
 	$warnexecute = Number(GUICtrlRead($warnexecuteopt) == $GUI_CHECKED)
 	$checkUnicode = Number(GUICtrlRead($unicodecheckopt) == $GUI_CHECKED)
@@ -6890,7 +6898,7 @@ Func GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_
 	Else ; Not installed
 		GUICtrlSetData($GUI_Plugins_Download, t('TERM_DOWNLOAD'))
 		GUICtrlSetData($GUI_Plugins_SelectClose, t('SELECT_FILE'))
-		If $aPluginInfo[$iIndex][1] <> 'iscab' Then GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
+		GUICtrlSetState($GUI_Plugins_Download, $GUI_ENABLE)
 	EndIf
 
 	Return $iIndex
@@ -7099,18 +7107,17 @@ EndFunc   ;==>Tray_ShowHide
 ; Change show statusbox option via tray
 Func Tray_Statusbox()
 	If TrayItemGetState($Tray_Statusbox) == 65 Then
-		$NoBox = 0
+		$bOptNoStatusBox = 0
 		If $TBgui Then GUISetState(@SW_SHOW, $TBgui)
 		TrayItemSetState($Tray_Statusbox, $TRAY_UNCHECKED)
 	Else
+		$bOptNoStatusBox = 1
 		If $TBgui Then GUISetState(@SW_HIDE, $TBgui)
-		$NoBox = 1
 		TrayItemSetState($Tray_Statusbox, $TRAY_CHECKED)
 	EndIf
 
-
-	SavePref('nostatusbox', $NoBox)
-EndFunc   ;==>Tray_Statusbox
+	SavePref('nostatusbox', $bOptNoStatusBox)
+EndFunc
 
 ; Exit and close helper binaries if necessary
 Func Tray_Exit()

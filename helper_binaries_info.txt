@@ -43,7 +43,7 @@ GARbro										\GARbro directory			1.5.44		x	-	x	MIT						mørkt								https://
 GNU gettext									msgunfmt.exe				0.19.8.1	-	-	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
 HelpDeco									helpdeco.exe				2.1				-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
 i6comp										i6comp.exe					0.2				-		Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
-innounp, the Inno Setup Unpacker			innounp.exe					0.48			-	o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
+innounp, the Inno Setup Unpacker			innounp.exe					0.49			-	o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
 IsXunpack									IsXunpack.exe				0.99			-		Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
 jsMSIx										jsMSIx.exe					1.19.0.1		-		Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
 KGB Archiver								\kgb directory				2 (beta 2)		-	-	GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								

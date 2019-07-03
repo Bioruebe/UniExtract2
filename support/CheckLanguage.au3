@@ -25,7 +25,7 @@ Do
 	If @error = -1 Then $error = 1
 	$return = StringInStr($line, "=")
 	If $return <> 0 Then
-		If NOT StringInStr($script, StringLeft($line, $return-2)) Then ConsoleWrite(StringLeft($line, $return-2) & @CRLF)
+		If NOT StringInStr($script, StringLeft($line, $return - 2)) Then ConsoleWrite(StringLeft($line, $return - 2) & @CRLF)
 	EndIf
 Until $error = 1
 
