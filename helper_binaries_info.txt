@@ -49,10 +49,10 @@ jsMSIx										jsMSIx.exe					1.19.0.1		-		Freeware				JSWare								http://www
 KGB Archiver								\kgb directory				2 (beta 2)		-	-	GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								
 lessmsi										\lessmsi directory			1.6.1 mod	-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
 lzip										lzip.exe					1.20		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
-lzop										lzop.exe					1.03			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
+lzop										lzop.exe					1.04			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
 MediaInfo 									MediaInfo.dll				19.04		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0				-		Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
-mtee										mtee.exe					2.1			---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
+mtee										mtee.exe					2.21			---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
 NBHextract									NBHextract.exe				1.0				-		Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
 Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation						https://github.com/HaxeFoundation/neko
 											gcmt-dll.dll				-------		---------	-------					-------								-------
@@ -109,7 +109,6 @@ UUDeview									uudeview.exe				0.5pl20			-		GNU GPL v2+				Frank Pilhofer					
 VISExt										VIS3Ext						2.2.6777.0	-	-	-	BSD 3-clause			Deniz Özmen							https://oezmen.eu/gameresources/
 											vis.key						-------		---------	-------					-------								-------
 Windows Installer XML Toolset Decompiler	/dark directory				3.11.1		-	-	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
-wintee										wtee.exe					1.0.1		---------	MPL 1.1					Ryan Buhl							https://code.google.com/p/wintee/
 Wise UNpacker								WUN.EXE						0.9a			-		Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906	[Offline]
 Xpdf command line tools						pdfdetach.exe				4.01.01		-	-	-	GNU GPL v2/v3			Glyph & Cog, LLC					http://www.xpdfreader.com/index.html
 											pdftohtml.exe				-------		---------	-------					-------								-------

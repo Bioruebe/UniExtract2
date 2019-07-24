@@ -52,6 +52,7 @@
 #include <StaticConstants.au3>
 #include <String.au3>
 #include <WinAPI.au3>
+#include <WinAPIFiles.au3>
 #include <WinAPIShellEx.au3>
 #include <WinAPIShPath.au3>
 #include <WindowsConstants.au3>
@@ -105,16 +106,16 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $T
 	  $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", _
 	  $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", _
 	  $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
-	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
-	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
-	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
+	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
+	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
+	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
 	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
 	  $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, $TYPE_CAB, _
 	  $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, $TYPE_FREEARC, _
 	  $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_IMG, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
 	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
-	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIM, _
+	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIM, $TYPE_SIS, _
 	  $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITY, _
 	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_WOLF, _
 	  $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
@@ -166,11 +167,11 @@ Global $trayX = -1, $trayY = -1
 Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
 Dim $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL
 Dim $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
-Dim $sFullLog = "", $guimain = False, $success = $RESULT_UNKNOWN, $TBgui = 0, $isofile = 0, $exStyle = -1, $sArcTypeOverride = 0
+Dim $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed, $unpackfailed, $exefailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
-Dim $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress
+Dim $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
 
@@ -247,7 +248,7 @@ Const $zip = "unzip.exe"
 Const $zpaq = Quote($archdir & "zpaq.exe", True)
 Const $zoo = "unzoo.exe"
 
-; Plugins
+; Exractor plugins
 Const $bms = "BMS.bms"
 Const $dbx = "dbxplug.wcx"
 Const $gaup = "gaup_pro.wcx"
@@ -258,18 +259,17 @@ Const $observer = "TotalObserver.wcx"
 Const $sis = "PDunSIS.wcx"
 
 ; Other
-Const $mtee = Quote($bindir & "mtee.exe")
-Const $wtee = Quote($bindir & "wtee.exe")
-Const $tee = @OSVersion = "WIN_10"? $wtee: $mtee
+Const $tee = Quote($bindir & "mtee.exe")
 Const $mediainfo = $bindir & "MediaInfo.dll"
 Const $xor = "xor.exe"
 
-; Not included binaries
+; UniExtract plugins
 Const $arc_conv = "arc_conv.exe"
 Const $bootimg = "bootimg.exe"
 Const $ci = "ci-extractor.exe"
 Const $dcp = "dcp_unpacker.exe"
 Const $dgca = "dgcac.exe"
+Const $extsis = "extsis.exe"
 Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
@@ -360,6 +360,11 @@ StartExtraction()
 Func StartExtraction()
 	Cout("------------------------------------------------------------")
 	$iUnicodeMode = False
+
+	If _IsDirectory($file) Then
+		GUI_Batch_AddDirectory($file)
+		terminate($STATUS_BATCH)
+	EndIf
 
 	FilenameParse($file)
 
@@ -504,8 +509,9 @@ Func FilenameParse($f)
 	$file = _PathFull($f)
 	$filedir = StringLeft($f, StringInStr($f, '\', 0, -1) - 1)
 	$filename = StringTrimLeft($f, StringInStr($f, '\', 0, -1))
-	If StringInStr($filename, '.') Then
-		$fileext = StringTrimLeft($filename, StringInStr($filename, '.', 0, -1))
+	Local $iPos = StringInStr($filename, '.', 0, -1)
+	If $iPos Then
+		$fileext = StringTrimLeft($filename, $iPos)
 		$filename = StringTrimRight($filename, StringLen($fileext) + 1)
 		$initoutdir = $filedir & '\' & $filename
 		If StringInStr($filename, ".") And  FileExists($initoutdir) And Not _IsDirectory($initoutdir) Then $initoutdir = $filedir & '\' & StringReplace($filename, ".", "_")
@@ -524,7 +530,7 @@ Func EnvParse($string)
 		$string = StringReplace($string, $arr[$i], EnvGet(StringReplace($arr[$i], "%", "")))
 	Next
 	Return $string
-EndFunc   ;==>EnvParse
+EndFunc
 
 ; Translate text
 Func t($t, $aVars = 0, $lang = $language, $sDefault = 0)
@@ -623,20 +629,33 @@ Func ParseCommandLine()
 			EndIf
 
 			; /type=arctype
-			If $cmdline[0] > 2 And StringLeft($cmdline[3], 6) = "/type" Then
+			If $cmdline[0] > 2 And StringLeft($cmdline[3], 5) = "/type" Then
+				Local $aReturn = _FileListToArray($defdir, "*.ini", 1)
+				Local $iPos = _ArraySearch($aReturn, "registry.ini")
+				If $iPos > -1 Then _ArrayDelete($aReturn, $iPos)
+				_ArrayTrim($aReturn, 4, 1, 1)
+				_ArrayDelete($aReturn, 0)
+				_ArrayConcatenate($aReturn, $aExtractionTypes)
+				$aReturn = _ArrayUnique($aReturn, 0, 0, 0, 0)
+				_ArraySort($aReturn)
+;~ 				_ArrayDisplay($aFiles)
+
 				$sArcTypeOverride = StringTrimLeft($cmdline[3], 6)
-				If StringLen($sArcTypeOverride) < 1 Then
-					Local $aFiles = _FileListToArray($defdir, "*.ini", 1)
-					Local $iPos = _ArraySearch($aFiles, "registry.ini")
-					If $iPos > -1 Then _ArrayDelete($aFiles, $iPos)
-					_ArrayTrim($aFiles, 4, 1, 1)
-					_ArrayDelete($aFiles, 0)
-					_ArrayConcatenate($aFiles, $aExtractionTypes)
-					$aFiles = _ArrayUnique($aFiles, 0, 0, 0, 0)
-					_ArraySort($aFiles)
-;~ 					_ArrayDisplay($aFiles)
-					$sArcTypeOverride = GUI_MethodSelectList($aFiles, StringReplace(t('SCAN_FILE'), "&", ""), 'METHOD_EXTRACTOR_SELECT_LABEL')
+				If StringLen($sArcTypeOverride) > 0 Then
+					If _ArrayBinarySearch($aReturn, $sArcTypeOverride) < 0 Then
+						Local $tmp = StringRight($sArcTypeOverride, 1)
+						While StringLen($sArcTypeOverride) > 0 And StringIsInt($tmp)
+							$sMethodSelectOverride = $tmp
+							$sArcTypeOverride = StringTrimRight($sArcTypeOverride, 1)
+
+							$tmp = StringRight($sArcTypeOverride, 1)
+						WEnd
+					EndIf
+				Else
+					$sArcTypeOverride = GUI_MethodSelectList($aReturn, StringReplace(t('SCAN_FILE'), "&", ""), 'METHOD_EXTRACTOR_SELECT_LABEL')
 				EndIf
+				Cout("Arctype override: " & $sArcTypeOverride)
+				Cout("Method select override: " & $sMethodSelectOverride)
 			EndIf
 		Else
 			$prompt = 1
@@ -917,7 +936,7 @@ Func RenameWithTridExtension($hDll)
 	If $ret = $file Then Return False
 
 	Cout("Changing file extension from ." & $fileext & " to ." & $aReturn[3])
-	If Not FileMove($file, $ret) Then Return False
+	If Not _FileMove($file, $ret) Then Return False
 
 	FilenameParse($file)
 	Return True
@@ -958,7 +977,7 @@ Func filecompare($sFileType)
 		Case StringInStr($sFileType, "UHarc archive data", 0)
 			extract($TYPE_UHA, 'UHARC ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "Symbian installation file", 0)
-			extract($TYPE_QBMS, 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
+			extract($TYPE_SIS, 'SymbianOS ' & t('TERM_INSTALLER'))
 		Case StringInStr($sFileType, "Zoo archive data", 0)
 			extract($TYPE_ZOO, 'ZOO ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "MS Outlook Express DBX file", 0)
@@ -1125,6 +1144,7 @@ Func tridcompare($sFileType)
 			checkInno()
 
 		Case StringInStr($sFileType, "InstallShield Z archive")
+			If Not (StringLower($fileext) = "z") Then CreateRenamedCopy("z")
 			CheckTotalObserver('InstallShield Z ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "InstallShield compressed archive")
@@ -1224,8 +1244,8 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "sfArk compressed SoundFont")
 			extract($TYPE_SFARK, 'sfArk ' & t('TERM_COMPRESSED'))
 
-		Case StringInStr($sFileType, "SymbianOS Installer")
-			extract($TYPE_QBMS, 'SymbianOS ' & t('TERM_INSTALLER'), $sis)
+		Case StringInStr($sFileType, "EPOC Installation package")
+			extract($TYPE_SIS, 'SymbianOS ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "Macromedia Flash Player")
 			extract($TYPE_SWF, 'Shockwave Flash ' & t('TERM_CONTAINER'))
@@ -1579,11 +1599,7 @@ Func advexescan($bUseCmd = $extract)
 			extract($TYPE_WIX, 'WiX ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "Microsoft SFX CAB") And StringInStr($sFileType, "rename file *.exe as *.cab")
-			Prompt(1, "FILE_COPY", $file, True)
-			Local $return = _TempFile($filedir, $filename & "_", ".cab")
-			FileCopy($file, $return)
-			$file = $return
-			Global $iDeleteOrigFile = $OPTION_DELETE
+			CreateRenamedCopy("cab")
 			check7z()
 
 		Case StringInStr($sFileType, "Smart Install Maker")
@@ -1591,9 +1607,6 @@ Func advexescan($bUseCmd = $extract)
 
 		Case StringInStr($sFileType, "SPx Method") Or StringInStr($sFileType, "Microsoft SFX CAB")
 			extract($TYPE_CAB, t('TERM_SFX') & ' Microsoft CAB ' & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "SuperDAT")
-			extract($TYPE_SUPERDAT, 'McAfee SuperDAT ' & t('TERM_UPDATER'))
 
 		Case StringInStr($sFileType, "Overlay :  SWF flash object ver", 0)
 			extract($TYPE_SWFEXE, 'Shockwave Flash ' & t('TERM_CONTAINER'))
@@ -1693,7 +1706,7 @@ Func RipExeInfo($f, $tempoutdir, $command)
 	DirCreate($tempoutdir)
 	$tmp = $tempoutdir & $filenamefull
 	Cout("Moving file to " & $tmp)
-	FileMove($file, $tmp)
+	_FileMove($file, $tmp)
 
 	$aReturn = OpenExeInfo($tmp)
 
@@ -1720,7 +1733,7 @@ Func RipExeInfo($f, $tempoutdir, $command)
 	CloseExeInfo($aReturn)
 
 	Cout("Moving file back")
-	FileMove($tmp, $filedir & "\")
+	_FileMove($tmp, $filedir & "\")
 
 	Return $success
 EndFunc
@@ -2069,11 +2082,12 @@ EndFunc
 ; Perform special actions for some file types
 Func InitialCheckExt()
 	If Not $extract Then Return
-	; Compound compressed files that require multiple actions
+
 	Switch $fileext
+		; Compound compressed files that require multiple actions
 		Case "ipk", "tbz2", "tgz", "tz", "tlz", "txz"
 			extract($TYPE_CTAR, 'Compressed Tar ' & t('TERM_ARCHIVE'))
-		; image files - TrID is not always reliable with these formats
+		; Disk images - file type identification is not always reliable
 		Case "bin", "cue", "cdi", "mdf"
 			CheckIso()
 		Case "dmg"
@@ -2116,7 +2130,7 @@ Func MoveInputFileIfNecessary()
 	_CreateTrayMessageBox(t('MOVING_FILE') & @CRLF & $new)
 
 	If StringLeft($file, 1) = StringLeft($new, 1) Then
-		If Not FileMove($file, $new) Then Return terminate($STATUS_MOVEFAILED, $new)
+		If Not _FileMove($file, $new) Then Return terminate($STATUS_MOVEFAILED, $new)
 		$iUnicodeMode = $UNICODE_MOVE
 	Else
 		If Not FileCopy($file, $new) Then Return terminate($STATUS_MOVEFAILED, $new)
@@ -2242,9 +2256,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$ret = $outdir & "\" & $bootimg
 			$ret2 = $outdir & '\boot.img'
 			FileCopy($bindir & $bootimg, $outdir)
-			FileMove($file, $ret2)
+			_FileMove($file, $ret2)
 			_Run($cmd & '"' & $ret & ' --unpack-bootimg"', $outdir, @SW_MINIMIZE, False, False)
-			FileMove($ret2, $file)
+			_FileMove($ret2, $file)
 			FileDelete($ret)
 
 		Case $TYPE_CAB
@@ -2282,7 +2296,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			FileDelete($return)
 			terminate($STATUS_SILENT)
 
-		Case $TYPE_CTAR ; Test
+		Case $TYPE_CTAR
 			$oldfiles = ReturnFiles($outdir)
 
 			; Decompress archive with 7-zip
@@ -2333,8 +2347,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_ENIGMA ; Test
 			_RunInTempOutdir($tempoutdir, $enigma & ' /nogui "' & $file & '"', $tempoutdir, @SW_HIDE, True, False, False)
 
-			; Move files
-			FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
+			_FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
 			; TODO: move other folders
 
 			; Read log file
@@ -2375,7 +2388,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_GHOST ; Test
 			$ret = $outdir & "\" & $filename & ".exe"
 			Cout("Moving file to " & $ret)
-			FileMove($file, $ret)
+			_FileMove($file, $ret)
 
 			$aReturn = OpenExeInfo($ret)
 
@@ -2396,7 +2409,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			CloseExeInfo($aReturn)
 
 			Cout("Moving file back")
-			FileMove($ret, $filedir & "\")
+			_FileMove($ret, $filedir & "\")
 
 			$ret2 = $ret & "-ovl"
 			Cout($ret2)
@@ -2414,7 +2427,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If _DirGetSize($outdir, $initdirsize + 1) > $initdirsize Then
 				DirCreate($tempoutdir)
 				_Run($hlp & ' /r /n "' & $file & '"', $tempoutdir)
-				FileMove($tempoutdir & $filename & '.rtf', $outdir & '\' & $filename & '_' & t('TERM_RECONSTRUCTED') & '.rtf')
+				_FileMove($tempoutdir & $filename & '.rtf', $outdir & '\' & $filename & '_' & t('TERM_RECONSTRUCTED') & '.rtf')
 				DirRemove($tempoutdir, 1)
 			EndIf
 
@@ -2447,7 +2460,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				For $i = 1 To $aReturn[0]
 					$ret = StringReplace($aReturn[$i], ",1", "", -1)
 					Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
-					FileMove($return & $aReturn[$i], $return & $ret)
+					_FileMove($return & $aReturn[$i], $return & $ret)
 				Next
 			EndIf
 
@@ -2516,13 +2529,13 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Switch $iChoice
 				; Extract using isxunpack
 				Case 1
-					FileMove($file, $outdir)
+					_FileMove($file, $outdir)
 					Run(_MakeCommand($isxunp & ' "' & $outdir & '\' & $filenamefull & '"', True), $outdir)
 					WinWait(@ComSpec)
 					WinActivate(@ComSpec)
 					Send("{ENTER}")
 					ProcessWaitClose($isxunp)
-					FileMove($outdir & '\' & $filenamefull, $filedir)
+					_FileMove($outdir & '\' & $filenamefull, $filedir)
 
 				; Try to extract MSI using cache switch
 				Case 2
@@ -2614,8 +2627,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_MOLE ; Test
 			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 
-			; Move files
-			FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
+			_FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
 
 			; Read log file
 			Local $sPath = $outdir & "\!unpacker.log"
@@ -2831,7 +2843,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					; Rename files/create sub directory
 					$return = $outdir & "\" & $j
 					If FileExists($return) Then
-						FileMove($return, $ret, 9)
+						_FileMove($return, $ret, 9)
 					Else
 						DirCreate($ret)
 					EndIf
@@ -2844,15 +2856,28 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $aCleanup[] = ["runtime.cab", "installer.config"]
 			Cleanup($aCleanup)
 
+		Case $TYPE_SIS
+			extract($TYPE_QBMS, -1, $sis, False, True)
+			HasPlugin($extsis)
+			DirCreate($tempoutdir)
+			_Run($extsis & ' -x -xcsd "' & $file & '" -d "' & $tempoutdir & '"', $tempoutdir, @SW_MINIMIZE)
+			MoveFiles($tempoutdir & StringLower($filename), $outdir, False, '', True, True)
+			FileDelete($bindir & "extsis.ini")
+			DirRemove($bindir & "Shell\", 1)
+			DirRemove(@MyDocumentsDir & "\SISContents", 0)
+
 		Case $TYPE_SQLITE
 			$return = FetchStdout($sqlite & ' "' & $file & '" .dump"', $filedir, @SW_HIDE, 0)
 			$handle = FileOpen($outdir & '\' & $filename & '.sql', 8+2)
 			FileWrite($handle, $return)
 			FileClose($handle)
 
-		Case $TYPE_SUPERDAT ; Test
-			RunWait(Warn_Execute($file & ' /e "' & $outdir & '"'), $outdir)
-			_FileRead($filedir & '\SuperDAT.log', True)
+		Case $TYPE_SUPERDAT
+			Local $sPath = $outdir & '\SuperDAT.log'
+			Local $sParameters = ' /LOGFILE "' & $sPath & '" /e "' & $outdir & '"'
+			Warn_Execute($file & $sParameters)
+			ShellExecuteWait($file, $sParameters, $outdir)
+			_FileRead($sPath, True)
 
 		Case $TYPE_SWF
 			; Run swfextract to get list of contents
@@ -2866,7 +2891,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					; Extract files
 					If StringInStr($line, "MP3 Soundstream") Then
 						_Run($swf & ' -m "' & $file & '"', $outdir, @SW_HIDE, True, True, False, False)
-						If FileExists($outdir & "\output.mp3") Then FileMove($outdir & "\output.mp3", $outdir & "\MP3 Soundstream\soundstream.mp3", 8 + 1)
+						If FileExists($outdir & "\output.mp3") Then _FileMove($outdir & "\output.mp3", $outdir & "\MP3 Soundstream\soundstream.mp3", 8 + 1)
 					ElseIf $line <> "" Then
 						$swf_arr = StringSplit(StringRegExpReplace(StringStripWS($line, 8), '(?i)\[(-\w)\]\d+(.+):(.*?)\)', "$1,$2,"), ",")
 ;~ 						_ArrayDisplay($swf_arr)
@@ -2901,7 +2926,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 								_Run($swf & " " & $swf_arr[1] & " " & $swf_arr[$j] & ' -o ' & $fname & ' "' & $file & '"', $outdir, @SW_HIDE, True, True, -1, False)
 ;~								_ArrayDisplay($swf_arr)
 
-								FileMove($outdir & "\" & $fname, $outdir & "\" & $swf_arr[2] & "\", 8 + 1)
+								_FileMove($outdir & "\" & $fname, $outdir & "\" & $swf_arr[2] & "\", 8 + 1)
 							EndIf
 							$j += 1
 						Until $j = $swf_arr[0] + 1
@@ -3095,9 +3120,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_VSSFX ; Test
-			FileMove($file, $outdir)
+			_FileMove($file, $outdir)
 			RunWait(Warn_Execute($outdir & '\' & $filenamefull & ' /extract'), $outdir)
-			FileMove($outdir & '\' & $filenamefull, $filedir)
+			_FileMove($outdir & '\' & $filenamefull, $filedir)
 
 		Case $TYPE_VSSFX_PATH ; Test
 			RunWait(Warn_Execute($file & ' /extract:"' & $outdir & '" /quiet'), $outdir)
@@ -3158,9 +3183,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_ZOO
-			FileMove($file, $tempoutdir, 8)
+			_FileMove($file, $tempoutdir, 8)
 			_Run($zoo & ' -x ' & $filenamefull, $tempoutdir, @SW_HIDE)
-			FileMove($tempoutdir & $filenamefull, $file)
+			_FileMove($tempoutdir & $filenamefull, $file)
 			MoveFiles($tempoutdir, $outdir, False, "", True)
 
 		Case $TYPE_ZPAQ
@@ -3223,7 +3248,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				ProcessClose("7ZSplit.exe")
 
 				; Move sfx script to outdir
-				If FileExists($filedir & "\" & $filename & ".txt") Then FileMove($filedir & "\" & $filename & ".txt", $outdir & "\sfx_script_" & $filename & ".txt")
+				If FileExists($filedir & "\" & $filename & ".txt") Then _FileMove($filedir & "\" & $filename & ".txt", $outdir & "\sfx_script_" & $filename & ".txt")
 				_DeleteTrayMessageBox()
 			EndIf
 
@@ -3330,13 +3355,14 @@ EndFunc
 ; Load a BMS script from the database and start extraction
 Func BmsExtract($sName, $hDB = 0)
 	If Not $sName Then Return
+	Cout('Extracting using BMS script "' & $sName & '"')
 
 	If $hDB == 0 Then $hDB = OpenDB("BMS.db")
 
 	If $hDB Then
 		Local $aReturn[0], $iRows, $iColumns
 		_SQLite_GetTable($hDB, Cout("SELECT s.Script FROM Scripts s, Names n WHERE s.SID = n.NID AND Name = '" & $sName & "'"), $aReturn, $iRows, $iColumns)
-		;_ArrayDisplay($aReturn)
+;~ 		_ArrayDisplay($aReturn)
 
 		; Write script to file and execute it
 		$bmsScript = FileOpen($bindir & $bms, 2)
@@ -3395,8 +3421,8 @@ Func unpack($packer)
 			_Run($upx & ' -d -k "' & $file & '"', $filedir)
 			$tempext = StringTrimRight($fileext, 1) & '~'
 			If FileExists($filedir & "\" & $filename & "." & $tempext) Then
-				FileMove($file, $ret)
-				FileMove($filedir & "\" & $filename & "." & $tempext, $file)
+				_FileMove($file, $ret)
+				_FileMove($filedir & "\" & $filename & "." & $tempext, $file)
 			EndIf
 		Case $PACKER_ASPACK
 			RunWait($aspack & ' "' & $file & '" "' & $filedir & '\' & $filename & '_' & t('TERM_UNPACKED') & _
@@ -3448,9 +3474,9 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 			If Not FileExists($dir) Then DirCreate($dir)
 			Cout("Cleanup: Moving " & $sFile & " to " & $dir)
 			If $bIsFolder Then
-				DirMove($sFile, $dir, 1)
+				_DirMove($sFile, $dir, 1)
 			Else
-				FileMove($sFile, $dir, 1)
+				_FileMove($sFile, $dir, 1)
 			EndIf
 		EndIf
 	Next
@@ -3678,9 +3704,9 @@ Func TempDir($sDir, $iLen)
 EndFunc
 
 ; Return list of files and directories in directory as a pipe-delimited string
-Func ReturnFiles($dir)
+Func ReturnFiles($sDir)
 	Local $hSearch, $files, $fname
-	$hSearch = FileFindFirstFile($dir & "\*")
+	$hSearch = FileFindFirstFile($sDir & "\*")
 	If @error Then Return SetError(1)
 
 	While 1
@@ -3698,7 +3724,9 @@ EndFunc
 ; $force is an integer that specifies whether or not to replace existing files
 ; $omit is a string that includes files to be excluded from move
 Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = False, $bShowStatus = False)
-	Local $hSearch, $fname
+	Local $hSearch, $fname, $iCount = 0, $iErrors = 0
+	Static $sTranslation = t('TERM_FILE') & " "
+
 	Cout("Moving files from " & $source & " to " & $dest)
 	If $bShowStatus Then _CreateTrayMessageBox(t('MOVING_FILE') & @CRLF & $dest)
 	DirCreate($dest)
@@ -3709,17 +3737,38 @@ Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = Fa
 		$fname = FileFindNextFile($hSearch)
 		If @error Then ExitLoop
 		If StringInStr($omit, $fname) Then ContinueLoop
+		$iCount += 1
 
-		If _IsDirectory($source & '\' & $fname) Then
-			DirMove($source & '\' & $fname, $dest, 1)
+		_SetTrayMessageBoxText($sTranslation & $iCount)
+		Local $sPath = $source & '\' & $fname
+		If _IsDirectory($sPath) Then
+			If Not _DirMove($sPath, $dest, 1) Then
+				$iErrors += 1
+				Cout("Failed to move directory " & $fname)
+			EndIf
 		Else
-			FileMove($source & '\' & $fname, $dest, $force)
+			If Not _FileMove($sPath, $dest, $force) Then
+				$iErrors += 1
+				Cout("Failed to move file " & $fname)
+			EndIf
 		EndIf
 	WEnd
 	FileClose($hSearch)
 
+	If $iErrors > 0 Then Cout($iErrors & " files/folders could not be moved")
 	If $bShowStatus Then _DeleteTrayMessageBox()
-	If $removeSourceDir Then Return DirRemove($source, ($omit = ""? 1: 0))
+	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
+EndFunc
+
+; Create a copy of the input file and change its extension
+Func CreateRenamedCopy($sExtension)
+	Cout("Creating copy with extension ." & $sExtension)
+	Prompt(64 + 1, "FILE_COPY", $file, True)
+	Local $tmp = _TempFile($filedir, $filename & "_", "." & $sExtension)
+	If Not FileCopy($file, $tmp) Then Return False
+	$file = $tmp
+	FilenameParse($file)
+	Global $iDeleteOrigFile = $OPTION_DELETE
 EndFunc
 
 ; Append missing file extensions using TrID
@@ -3781,11 +3830,11 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 		Cout("Renaming unicode file")
 		_CreateTrayMessageBox(t('MOVING_FILE') & @CRLF & $oldoutdir)
 		If $iUnicodeMode = $UNICODE_MOVE Then
-			FileMove($file, $oldpath, 1)
+			_FileMove($file, $oldpath, 1)
 		Else
 			If Not FileRecycle($file) Then Cout("Failed to recycle file")
 		EndIf
-		Cout("Moving extracted files: " & DirMove($outdir, $oldoutdir))
+		Cout("Moving extracted files: " & _DirMove($outdir, $oldoutdir))
 		$fname = $sUnicodeName
 		$file = $oldpath
 		$outdir = $oldoutdir
@@ -4026,8 +4075,8 @@ EndFunc
 
 ; Set tray message extended status text
 Func _SetTrayMessageBoxText($sText)
-	If Not $TBgui Then Return
-	GUICtrlSetData($idTrayStatusExt, $sText)
+	If Not $TBgui Then Return 0
+	Return GUICtrlSetData($idTrayStatusExt, $sText)
 EndFunc
 
 ; Close tray message box
@@ -4063,23 +4112,23 @@ Func GetCmd($silent = True)
 
 	If $silentmode Or $silent Then $return &= " /silent"
 	Return $return
-EndFunc   ;==>GetCmd
+EndFunc
 
 ; Add file to batch queue
 Func AddToBatch()
 	Local $cmdline = GetCmd()
-	$handle = FileOpen($batchQueue, 32 + 8 + 1)
-	FileSetPos($handle, 0, 0)
-	Local $return = FileRead($handle)
+	Local $hFile = FileOpen($batchQueue, 32 + 8 + 1)
+	FileSetPos($hFile, 0, 0)
+	Local $return = FileRead($hFile)
 	Local $ret = StringRegExpReplace($cmdline, '(".*?\.part)(\d+\.rar".*)', "$1", 1)
 	If (@extended > 0 And StringInStr($return, $ret)) Or _ ; Only add one file if multiple part rar
 	   (StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file)) Then
 		Cout("Not adding duplicate file " & $cmdline)
-		FileClose($handle)
+		FileClose($hFile)
 		Return
 	EndIf
-	FileWriteLine($handle, $cmdline)
-	FileClose($handle)
+	FileWriteLine($hFile, $cmdline)
+	FileClose($hFile)
 	Cout("File added to batch queue: " & $cmdline)
 	GetBatchQueue()
 EndFunc
@@ -4096,7 +4145,7 @@ Func GetBatchQueue()
 	EndIf
 
 	Return 0
-EndFunc   ;==>GetBatchQueue
+EndFunc
 
 ; Write batch queue array to file
 Func SaveBatchQueue()
@@ -4130,8 +4179,8 @@ Func BatchQueuePop()
 EndFunc   ;==>BatchQueuePop
 
 ; Enable batch mode
-Func EnableBatchMode($enable = True)
-	If $enable Then
+Func EnableBatchMode($bEnable = True)
+	If $bEnable Then
 		; Delete old filescan log file
 		If FileExists($fileScanLogFile) And $extract Then
 			If Not FileDelete($fileScanLogFile) Then
@@ -4162,10 +4211,9 @@ Func EnableBatchMode($enable = True)
 		EndIf
 	EndIf
 
-;~ 	If $batchEnabled == $enable Then Return
-	$batchEnabled = $enable
+	$batchEnabled = $bEnable
 	SavePref("batchenabled", Number($batchEnabled))
-EndFunc   ;==>EnableBatchMode
+EndFunc
 
 ; Detect language of user's operating system
 ; Based on work by guinness (http://www.autoitscript.com/forum/topic/131832-getoslanguage-retrieve-the-language-of-the-os/)
@@ -4538,12 +4586,12 @@ EndFunc
 ; $file is automatically replaced with the new temporary path
 Func _RunInTempOutdir($tempoutdir, $f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True, $bUseTee = True, $bPatternSearch = True, $bInitialShow = True)
 	Local $tmp = $tempoutdir & $filenamefull
-	FileMove($file, $tempoutdir, 8)
+	_FileMove($file, $tempoutdir, 8)
 	$f = StringReplace($f, $file, $tmp)
 
 	_Run($f, $sWorkingDir, $show_flag, $bUseCmd, $bUseTee, $bPatternSearch, $bInitialShow)
 
-	FileMove($tmp, $file)
+	_FileMove($tmp, $file)
 	MoveFiles($tempoutdir, $outdir, True, "", True, True)
 EndFunc
 
@@ -4551,7 +4599,8 @@ EndFunc
 Func _PatternSearch($sString)
 	If Not $TBgui Then Return False
 
-	Static $sFile = t('TERM_FILE') & " "
+	Local $iNum
+	Static $sTranslation = t('TERM_FILE') & " "
 ;~ 	Cout($sString & _StringRepeat(@CRLF, 5))
 
 ;~ 	Cout("x %")
@@ -4565,8 +4614,8 @@ Func _PatternSearch($sString)
 	If StringInStr($sString, " on ", 0, -1) Then
 		$aReturn = StringRegExp($sString, "\[(\d+) on (\d+)\]", 3)
 		If UBound($aReturn) > 1 Then
-			$Num = _ArrayPop($aReturn)
-			Return _SetTrayMessageBoxText($sFile & _ArrayPop($aReturn) & "/" & $Num)
+			$iNum = _ArrayPop($aReturn)
+			Return _SetTrayMessageBoxText($sTranslation & _ArrayPop($aReturn) & "/" & $iNum)
 		EndIf
 	EndIf
 
@@ -4574,8 +4623,8 @@ Func _PatternSearch($sString)
 	If StringInStr($sString, " of ", 0, -1) Then
 		$aReturn = StringRegExp($sString, "(\d+) of (\d+)", 3)
 		If UBound($aReturn) > 1 Then
-			$Num = _ArrayPop($aReturn)
-			Return _SetTrayMessageBoxText($sFile & _ArrayPop($aReturn) & "/" & $Num)
+			$iNum = _ArrayPop($aReturn)
+			Return _SetTrayMessageBoxText($sTranslation & _ArrayPop($aReturn) & "/" & $iNum)
 		EndIf
 	EndIf
 
@@ -4583,16 +4632,16 @@ Func _PatternSearch($sString)
 	If StringInStr($sString, "/", 0, -1) Then
 		$aReturn = StringRegExp($sString, "(\d+)/(\d+)", 3)
 		If UBound($aReturn) > 1 Then
-			$Num = _ArrayPop($aReturn)
-			Return _SetTrayMessageBoxText($sFile & _ArrayPop($aReturn) & "/" & $Num)
+			$iNum = _ArrayPop($aReturn)
+			Return _SetTrayMessageBoxText($sTranslation & _ArrayPop($aReturn) & "/" & $iNum)
 		EndIf
 	EndIf
 
 ;~ 	Cout("# x")
 	$pos = StringInStr($sString, "#", 0, -1)
 	If $pos Then
-		$Num = Number(StringMid($sString, $pos + 1), 1)
-		If $Num > 0 Then Return _SetTrayMessageBoxText($sFile & "#" & $Num)
+		$iNum = Number(StringMid($sString, $pos + 1), 1)
+		If $iNum > 0 Then Return _SetTrayMessageBoxText($sTranslation & "#" & $iNum)
 	EndIf
 EndFunc
 
@@ -4655,6 +4704,31 @@ Func _DirGetSize($f, $return = -1)
 	; so let's only calculate size if less than 4 GB space used on drive
 	If (StringLen($f) < 4 And DriveSpaceTotal($f) - DriveSpaceFree($f) > 4000) Then Return $return
 	Return DirGetSize($f)
+EndFunc
+
+; DirMove wrapper with error handling and auto-retry
+Func _DirMove($sDir, $sDestination, $iFlag = 0)
+	Return MovePath($sDir, $sDestination, $iFlag, True)
+EndFunc
+
+; FileMove wrapper with error handling and auto-retry
+Func _FileMove($sFile, $sDestination, $iFlag = 0)
+	Return MovePath($sFile, $sDestination, $iFlag, False)
+EndFunc
+
+; Move file/folder specified by path with error handling and auto-retry
+Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
+	If $bIsFolder Then
+		If DirMove($sPath, $sDestination, $iFlag) Then Return True
+	Else
+		If FileMove($sPath, $sDestination, $iFlag) Then Return True
+	EndIf
+
+	Cout("Failed to move " & ($bIsFolder? "directory": "file") & ", retrying")
+	Sleep($bIsFolder? 100: 50)
+	If _WinAPI_MoveFileEx($sPath, $sDestination, BitOR($MOVE_FILE_COPY_ALLOWED, $iFlag)) Then Return True
+	Cout("Failed again, error " & _WinAPI_GetLastError() & ": " & _WinAPI_GetLastErrorMessage())
+	Return False
 EndFunc
 
 ; Return the path to the download directory
@@ -5082,6 +5156,7 @@ Func _AfterUpdate()
 	FileDelete($bindir & "MhtUnPack.wcx")
 	FileDelete($bindir & "STIX_D.exe")
 	FileDelete($bindir & "WDOSXLE.exe")
+	FileDelete($bindir & "wtee.exe")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($docsdir & "flac_authors.txt")
@@ -5746,12 +5821,37 @@ Func GUI_Batch_OK()
 	terminate($STATUS_BATCH)
 EndFunc
 
+; Add all files from a directory to batch queue
+Func GUI_Batch_AddDirectory($sDir)
+	Local Static $bRecurse = Number(IniRead($prefs, "UniExtract Preferences", "batchrecurse", 1) )
+	If $bRecurse > 1 Then $bRecurse = 1
+
+	Local $aFiles = _FileListToArrayRec($sDir, "*", $FLTAR_FILES, $bRecurse, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+	If @error Then
+		Cout("Add to batch queue: Failed to read contents of directory " & $sDir)
+		Return False
+	EndIf
+;~ 	_ArrayDisplay($aFiles)
+
+	For $j = 1 To $aFiles[0]
+		If $guimain Then
+			GUI_Drop_Parse($aFiles[$j])
+			GUI_Batch()
+		Else
+			$file = $aFiles[$j]
+			AddToBatch()
+		EndIf
+	Next
+
+	Return $aFiles[0]
+EndFunc
+
 ; Display batch queue and allow changes
 Func GUI_Batch_Show()
 	Local Const $iListLeft = 8, $iListTop = 8
 	Local $iLastIndex = -1, $tt = False
 	Cout("Opening batch queue edit GUI")
-	$GUI_Batch = GUICreate($name, 418, 267, 476, 262, -1, -1, $guimain)
+	$GUI_Batch = GUICreate($name, 418, 267, 476, 262, BitOR($WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU, $WS_SIZEBOX), -1, $guimain)
 	_GuiSetColor()
 	$GUI_Batch_List = GUICtrlCreateList("", $iListLeft, $iListTop, 401, 201)
 	GUICtrlSetData(-1, _ArrayToString($queueArray, "|", 1))
@@ -5829,40 +5929,31 @@ EndFunc   ;==>GUI_Batch_Clear
 
 ; Process dropped files
 Func GUI_Drop()
-	;_ArrayDisplay($gaDropFiles)
+;~ 	_ArrayDisplay($gaDropFiles)
 	Cout("Drag and drop action detected")
 
 	$iCount = 0
-	For $sFile In $gaDropFiles
-		If Not FileExists($sFile) Then ContinueLoop
+	For $sPath In $gaDropFiles
+		If Not FileExists($sPath) Then ContinueLoop
 
-		If _IsDirectory($sFile) Then
-			Cout("Drag and drop - folder passed")
-			$return = ReturnFiles($sFile)
-			Local $files = StringSplit($return, "|")
-			;_ArrayDisplay($files)
-			For $j = 1 To $files[0]
-				If Not _IsDirectory($sFile & "\" & $files[$j]) Then
-					$iCount += 1
-					Global $file = $sFile & "\" & $files[$j]
-					GUI_Drop_Parse()
-					GUI_Batch()
-				EndIf
-			Next
+		If _IsDirectory($sPath) Then
+			Cout("Drag and drop: folder passed")
+			$iCount += GUI_Batch_AddDirectory($sPath)
 		Else
 			$iCount += 1
-			Global $file = $sFile
-			GUI_Drop_Parse()
+			GUI_Drop_Parse($sPath)
 			If UBound($gaDropFiles) == 1 Then Return
 
 			GUI_Batch()
 		EndIf
 	Next
-	Cout("Drag and drop - a total of " & $iCount & " files added to batch queue")
+
+	Cout("Drag and drop - a total of " & $iCount & " files were added to batch queue")
 EndFunc
 
 ; Process dropped files
-Func GUI_Drop_Parse()
+Func GUI_Drop_Parse($sFile = $file)
+	Global $file = $sFile
 	If $file == "" Then Return
 
 	If $history Then
@@ -6543,6 +6634,11 @@ EndFunc   ;==>GUI_FirstStart_Exit
 
 ; Display UI for extraction method selection (compact)
 Func GUI_MethodSelect($aData, $arcdisp)
+	If $sMethodSelectOverride > 0 Then
+		Cout("Method select override active, selected choice " & $sMethodSelectOverride)
+		Return $sMethodSelectOverride
+	EndIf
+
 	; Auto choose first extraction method in silent mode
 	If $silentmode Then
 		Cout("Extractor selected automatically - run again in normal mode if not extracted correctly")
@@ -6599,8 +6695,21 @@ Func GUI_MethodSelect($aData, $arcdisp)
 	WEnd
 EndFunc
 
-; Display UI for extraction method selection (list-based), mainly used for game selection
+; Display UI for extraction method selection (list-based)
 Func GUI_MethodSelectList($aEntries, $sStandard = "", $sText = "METHOD_GAME_LABEL")
+	If $sMethodSelectOverride > 0 Then
+		Local $iLen = UBound($aEntries)
+		Local $iIndex = $sMethodSelectOverride - 1
+		If $iIndex < 1 Then Return 0
+
+		If $iLen < $iIndex Then
+			Cout("Invalid method select override: index is " & $iIndex & ", but only " & $iLen & " choices available")
+		Else
+			Cout("Method select override active, selected option " & $iIndex)
+			Return $aEntries[$iIndex - 1]
+		EndIf
+	EndIf
+
 	Local $sSelection = 0
 	If $silentmode Then Return $sSelection
 
@@ -6670,8 +6779,9 @@ EndFunc
 
 ; Display unknown file type error message with file scan result box
 Func GUI_Error_UnknownExt()
-	Opt("GUIOnEventMode", 0)
+	If $silentmode Then Return
 
+	Opt("GUIOnEventMode", 0)
 	Local $sFileType = _FiletypeGet(True, 50)
 	Local $iCount = StringSplit($sFileType, @CR)[0]
 
@@ -6757,7 +6867,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 
 	; Define plugins
 	; executable|name|description|filetypes|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[11][8] = [ _
+	Local $aPluginInfo[12][8] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
@@ -6768,7 +6878,8 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
 		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
 		[$sim, 'Smart Install Maker unpacker', t('PLUGIN_SIM'), 'exe (Smart Install Maker)', 'sim_unpacker.7z', $sim, '', 0], _
-		[$wolf, 'WolfDec', t('PLUGIN_WOLF'), 'wolf (' & t('TERM_ENCRYPTED') & ')', $wolf, '', '', 0] _
+		[$wolf, 'WolfDec', t('PLUGIN_WOLF'), 'wolf (' & t('TERM_ENCRYPTED') & ')', $wolf, '', '', 0], _
+		[$extsis, 'ExtSIS', t('PLUGIN_EXTSIS'), 'sis, sisx', 'siscontents*.zip', $extsis, '', 0] _
 	]
 
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
