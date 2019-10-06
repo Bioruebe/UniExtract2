@@ -3,6 +3,7 @@ RC 3:
   Added support for Amiga Disk Files using unADF
   Added support for PDF files using Xpdf command line tools
   Added support for hundreds of game archives using GARbro
+  Added support for Godot engine packages using godotdec
   Added support for newer Symbian Os packages using extsis (plugin)
   Added unshield as the default extractor for InstallShield cab files, thanks to TAbdiukov
   Fixed some installers being misdetected as InstallShield
@@ -21,15 +22,16 @@ RC 3:
   Fixed some extracted files could be lost if moving the file/folder failed, thanks to patrickdrd
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
-  Changed design of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt, 'Plugin missing' error message
+  Changed design/usability of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt, 'Plugin missing' error message,
+							  'Batch mode duplicate' warning
   Changed drag and drop: when a folder is passed, all files in subfolders are added to batch mode as well
-						(this can be disabled by adding batchrecurse=0 to section UniExtract Preferences in UniExtract.ini)
+						(this can be disabled by adding batchrecurse=0 to section 'UniExtract Preferences' in UniExtract.ini)
   Improved speed of file type detection
   Improved file type detection for .eml, .mht, .xz, some game archives
+  Improved error detection for encrypted archives
   Updated EnigmaVB unpacker to 0.56
   Updated ExeInfo PE to 0.0.5.4
   Updated innounp to 0.49
-  Updated jsMSIx to 1.19.0.1
   Updated lzop to 1.04
   Updated MediaInfo to 19.04
   Updated mtee to 2.21

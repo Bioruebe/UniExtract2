@@ -86,6 +86,7 @@ Const $sRegExAscii = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöä
 ;~ Const $cmd = @ComSpec & ' /d /k ' ; Keep command prompt open for debugging
 Const $cmd = (FileExists(@ComSpec)? @ComSpec: @WindowsDir & '\system32\cmd.exe') & ' /d /c '
 Enum $OPTION_KEEP, $OPTION_DELETE, $OPTION_ASK, $OPTION_MOVE
+Enum $PROMPT_ASK, $PROMPT_ALWAYS, $PROMPT_NEVER
 Enum $RESULT_UNKNOWN, $RESULT_SUCCESS, $RESULT_FAILED, $RESULT_CANCELED, $RESULT_NOFREESPACE
 Enum $UNICODE_NONE, $UNICODE_MOVE, $UNICODE_COPY
 Enum $UPDATE_ALL, $UPDATE_HELPER, $UPDATE_MAIN
@@ -165,11 +166,12 @@ Global $trayX = -1, $trayY = -1
 
 ; Global variables
 Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
-Dim $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL
+Dim $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL, $eCustomPromptSetting = $PROMPT_ASK
 Dim $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Dim $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
 Dim $test, $test7z, $testzip, $testie, $testinno
-Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed, $unpackfailed, $exefailed
+Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
+Dim $unpackfailed, $exefailed, $ttarchfailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Dim $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
@@ -409,6 +411,7 @@ Func StartExtraction()
 	$zipfailed = False
 	$iefailed = False
 	$gamefailed = False
+	$ttarchfailed = False
 	$unpackfailed = False
 	$testinno = False
 	$test7z = False
@@ -2973,7 +2976,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			ProcessClose($pid)
 
 		Case $TYPE_TTARCH
-			If $gamefailed Then Return 0
+			If $ttarchfailed Then Return 0
 
 			; Get all supported games
 			$aReturn = _StringBetween(FetchStdout(Quote($bindir & $ttarch), @ScriptDir, @SW_HIDE, 0, False), "Games", "Examples")
@@ -2991,7 +2994,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$iChoice = _ArraySearch($aGames, $iChoice)
 				If $iChoice > -1 Then _Run($ttarch & ' -m ' & $iChoice & ' "' & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE)
 			Else
-				$gamefailed = True
+				$ttarchfailed = True
 				$returnFail = True
 			EndIf
 
@@ -3345,7 +3348,7 @@ Func ReplacePlaceholders($sString, $bQuote = True)
 	If @error Then Return $sString
 
 	For $sPlaceholder In $aReturn
-		If StringLen(StringStripWS($sPlaceholder, 8)) < 1 Then ContinueLoop
+		If StringInStr($sPlaceholder, " ") Then ContinueLoop
 		$sString = StringReplace($sString, "%" & $sPlaceholder & "%", t($sPlaceholder))
 	Next
 
@@ -4001,22 +4004,6 @@ Func CreateArray($i0, $i1 = 0, $i2 = 0, $i3 = 0, $i4 = 0, $i5 = 0, $i6 = 0, $i7 
 	Return $arr
 EndFunc
 
-; Display a custom prompt and return user choice
-Func Prompt($show_flag, $Message, $vars = 0, $terminate = False)
-	If $silentmode Then
-		Cout("Assuming yes to message " & $Message)
-		Return 1
-	EndIf
-	Local $return = MsgBox($iTopmost + $show_flag, $title, t($Message, $vars))
-	If $return == 1 Or $return == 6 Then
-		Return 1
-	Else
-		If Not $terminate Then Return 0
-		If $createdir Then DirRemove($outdir, 0)
-		terminate($STATUS_SILENT)
-	EndIf
-EndFunc
-
 ; Show tray message box
 ; Based on work by Valuater (http://www.autoitscript.com/forum/topic/85977-system-tray-message-box-udf/)
 Func _CreateTrayMessageBox($TBText)
@@ -4119,14 +4106,25 @@ Func AddToBatch()
 	Local $cmdline = GetCmd()
 	Local $hFile = FileOpen($batchQueue, 32 + 8 + 1)
 	FileSetPos($hFile, 0, 0)
-	Local $return = FileRead($hFile)
-	Local $ret = StringRegExpReplace($cmdline, '(".*?\.part)(\d+\.rar".*)', "$1", 1)
-	If (@extended > 0 And StringInStr($return, $ret)) Or _ ; Only add one file if multiple part rar
-	   (StringInStr($return, $cmdline) And Not Prompt(32 + 4, 'BATCH_DUPLICATE', $file)) Then
-		Cout("Not adding duplicate file " & $cmdline)
+	Local $sBatchQueueContent = FileRead($hFile)
+
+	Local $bAddFile = True
+
+	If StringInStr($sBatchQueueContent, $cmdline) Then
+		$bAddFile = CustomPrompt('BATCH_DUPLICATE', $filenamefull)
+	Else
+		; Only add one file if multipart archive
+		Local $ret = StringRegExpReplace($cmdline, '(".*?\.part)(\d+\.rar".*)', "$1", 1)
+		Local $bMultipart = @extended > 0 And StringInStr($sBatchQueueContent, $ret)
+		$bAddFile = Not $bMultipart
+	EndIf
+
+	If Not $bAddFile Then
+		Cout("Not adding duplicate file " & $filenamefull)
 		FileClose($hFile)
 		Return
 	EndIf
+
 	FileWriteLine($hFile, $cmdline)
 	FileClose($hFile)
 	Cout("File added to batch queue: " & $cmdline)
@@ -4504,8 +4502,9 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 		FileDelete($LogFile)
 
 		; Check for success or failure indicator in log
-		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) _
-		   Or StringInStr($return, "Archive encrypted.", 0) Or StringInStr($return, "Corrupt file or wrong password", 0) Then
+		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) Or _
+		   StringInStr($return, "Archive encrypted.", 0) Or StringInStr($return, "Corrupt file or wrong password", 0) Or _
+		   StringInStr(_StringGetLine($return, -1), "Enter password") Then
 			$success = $RESULT_FAILED
 			SetError(1, 1)
 		ElseIf StringInStr($return, "Break signaled") Or StringInStr($return, "Program aborted") Or StringInStr($return, "User break") Then
@@ -5369,6 +5368,63 @@ Func CreateGUI()
 	GUISetState(@SW_SHOW)
 EndFunc
 
+; Display a standard prompt and return user choice
+Func Prompt($iShowFlag, $sMsg, $aVars = 0, $bTerminate = False)
+	If $silentmode Then
+		Cout("Assuming yes to message " & $sMsg)
+		Return 1
+	EndIf
+	Local $return = MsgBox($iTopmost + $iShowFlag, $title, t($sMsg, $aVars))
+	If $return == 1 Or $return == 6 Then
+		Return 1
+	Else
+		If Not $bTerminate Then Return 0
+		If $createdir Then DirRemove($outdir, 0)
+		terminate($STATUS_SILENT)
+	EndIf
+EndFunc
+
+; Display a custom prompt with always, never buttons
+Func CustomPrompt($sMsg, $aVars)
+	If $eCustomPromptSetting == $PROMPT_ALWAYS Then Return True
+	If $eCustomPromptSetting == $PROMPT_NEVER Then Return False
+	If $silentmode Then Return True
+
+	Opt("GUIOnEventMode", 0)
+	Local $return = False
+
+	Local $hGUI = GUICreate($title, 417, 177, -1, -1, $GUI_SS_DEFAULT_GUI)
+	GUICtrlCreateLabel(t($sMsg, $aVars), 72, 20, 332, 113)
+	Local $idYes = GUICtrlCreateButton(t('YES_BUT'), 251, 142, 75, 25)
+	Local $idNo = GUICtrlCreateButton(t('NO_BUT'), 332, 142, 75, 25)
+	Local $idAlways = GUICtrlCreateButton(t('ALWAYS_BUT'), 71, 142, 75, 25)
+	Local $idNever = GUICtrlCreateButton(t('NEVER_BUT'), 154, 142, 75, 25)
+	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	GUISetState(@SW_SHOW)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idNo
+				ExitLoop
+			Case $idYes
+				$return = True
+				ExitLoop
+			Case $idAlways
+				$eCustomPromptSetting = $PROMPT_ALWAYS
+				$return = True
+				ExitLoop
+			Case $idNever
+				$eCustomPromptSetting = $PROMPT_NEVER
+				ExitLoop
+		EndSwitch
+	WEnd
+
+	GUIDelete($hGUI)
+	Opt("GUIOnEventMode", 1)
+	Return $return
+EndFunc
+
 ; Return control width (for dynamic positioning)
 Func GetPos($hGUI, $hControl, $iOffset = 0, $bX = True)
 	$aReturn = ControlGetPos($hGUI, '', $hControl)
@@ -5842,6 +5898,7 @@ Func GUI_Batch_AddDirectory($sDir)
 			AddToBatch()
 		EndIf
 	Next
+	$eCustomPromptSetting = $PROMPT_ASK
 
 	Return $aFiles[0]
 EndFunc
@@ -5947,6 +6004,7 @@ Func GUI_Drop()
 			GUI_Batch()
 		EndIf
 	Next
+	$eCustomPromptSetting = $PROMPT_ASK
 
 	Cout("Drag and drop - a total of " & $iCount & " files were added to batch queue")
 EndFunc
@@ -6077,6 +6135,7 @@ Func GUI_Feedback_Outdated()
 	Local $idContinue = GUICtrlCreateButton(t('CONTINUE_BUT'), 332, 120, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
 	GUISetState(@SW_SHOW)
+	SendStats("FeedbackOutdated")
 
 	While 1
 		$nMsg = GUIGetMsg()
@@ -6542,7 +6601,7 @@ Func GUI_FirstStart()
 	_GUICtrlCreatePic($sLogoFile, 8, 312, 65, 65)
 	GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 24, 800, 0, $FONT_ARIAL)
-	GUICtrlCreateLabel(t('FIRSTSTART_TITLE'), 8, 50, 488, 60, $SS_CENTER)
+	GUICtrlCreateLabel(StringReplace(t('FIRSTSTART_TITLE'), "&", ""), 8, 50, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 14, 800, 0, $FONT_ARIAL)
 	Global $FS_Section = GUICtrlCreateLabel("", 16, 85, 382, 28)
 	GUICtrlSetFont(-1, 14, 800, 4, $FONT_ARIAL)
