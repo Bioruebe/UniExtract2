@@ -34,7 +34,7 @@ lit extraction fails if output directory contains spaces (extractor bug)
 
 
 // Other:
-Logging: quickbms (+ 'you must choose a new filename' user input needed detection), Crage
+Logging: quickbms (+ 'you must choose a new filename' user input needed detection)
 'Extract as' command line parameter (call extract directly with $arctype as param) + GUI if nothing passed
 
 

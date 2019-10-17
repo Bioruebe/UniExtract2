@@ -38,6 +38,7 @@
 #include <Date.au3>
 #include <EditConstants.au3>
 #include <File.au3>
+#include <FileConstants.au3>
 #include <GDIPlus.au3>
 #include <GUIConstantsEx.au3>
 #include <GuiComboBox.au3>
@@ -288,13 +289,13 @@ Global $reguser = $regcurrent
 
 ; Define context menu commands
 ; On top to make remove via command line parameter possible
-; shell	| commandline parameter | translation
-Global $CM_Shells[5][3] = [ _
-	['uniextract_files', '', 'EXTRACT_FILES'], _
-	['uniextract_here', ' .', 'EXTRACT_HERE'], _
-	['uniextract_sub', ' /sub', 'EXTRACT_SUB'], _
-	['uniextract_last', ' /last', 'EXTRACT_LAST'], _
-	['uniextract_scan', ' /scan', 'SCAN_FILE'] _
+; Shell	| Commandline Parameter | Translation | MultiSelectModel
+Global $CM_Shells[5][4] = [ _
+	['uniextract_files', '', 'EXTRACT_FILES', "Single"], _
+	['uniextract_here', ' .', 'EXTRACT_HERE', "Player"], _
+	['uniextract_sub', ' /sub', 'EXTRACT_SUB', "Player"], _
+	['uniextract_last', ' /last', 'EXTRACT_LAST', "Player"], _
+	['uniextract_scan', ' /scan', 'SCAN_FILE', "Player"] _
 ]
 
 ; Make sure a language file exists
@@ -567,7 +568,9 @@ EndFunc
 
 ; Parse command line
 Func ParseCommandLine()
-	If $cmdline[0] = 0 Then
+	Local $iArgs = $cmdline[0]
+
+	If $iArgs = 0 Then
 		$prompt = 1
 		Return
 	EndIf
@@ -588,7 +591,7 @@ Func ParseCommandLine()
 		terminate($STATUS_SILENT)
 
 	ElseIf $cmdline[1] = "/help" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "/h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
-		terminate($STATUS_SYNTAX, "", $cmdline[0] > 1)
+		terminate($STATUS_SYNTAX, "", $iArgs > 1)
 
 	ElseIf $cmdline[1] = "/afterupdate" Then
 		_AfterUpdate()
@@ -617,10 +620,10 @@ Func ParseCommandLine()
 		terminate($STATUS_SILENT)
 
 	Else
-		If Not FileExists($cmdline[1]) Then	terminate($STATUS_INVALIDFILE, $cmdline[1])
-
 		$file = $cmdline[1]
-		If $cmdline[0] > 1 Then
+		If Not FileExists($file) Then terminate($STATUS_INVALIDFILE, $file)
+
+		If $iArgs > 1 Then
 			; Scan only
 			If $cmdline[2] = "/scan" Then
 				$extract = False
@@ -632,7 +635,7 @@ Func ParseCommandLine()
 			EndIf
 
 			; /type=arctype
-			If $cmdline[0] > 2 And StringLeft($cmdline[3], 5) = "/type" Then
+			If $iArgs > 2 And StringLeft($cmdline[3], 5) = "/type" Then
 				Local $aReturn = _FileListToArray($defdir, "*.ini", 1)
 				Local $iPos = _ArraySearch($aReturn, "registry.ini")
 				If $iPos > -1 Then _ArrayDelete($aReturn, $iPos)
@@ -647,8 +650,9 @@ Func ParseCommandLine()
 				If StringLen($sArcTypeOverride) > 0 Then
 					If _ArrayBinarySearch($aReturn, $sArcTypeOverride) < 0 Then
 						Local $tmp = StringRight($sArcTypeOverride, 1)
+						If StringIsInt($tmp) Then $sMethodSelectOverride = ""
 						While StringLen($sArcTypeOverride) > 0 And StringIsInt($tmp)
-							$sMethodSelectOverride = $tmp
+							$sMethodSelectOverride = $tmp & $sMethodSelectOverride
 							$sArcTypeOverride = StringTrimRight($sArcTypeOverride, 1)
 
 							$tmp = StringRight($sArcTypeOverride, 1)
@@ -1620,7 +1624,7 @@ Func advexescan($bUseCmd = $extract)
 		Case StringInStr($sFileType, "Wise") Or StringInStr($sFileType, "PEncrypt 4.0")
 			extract($TYPE_WISE, 'Wise Installer ' & t('TERM_PACKAGE'))
 
-		Case StringInStr($sFileType, "ZIP SFX")
+		Case StringInStr($sFileType, "ZIP SFX") Or (StringInStr($sFileType, "WinZip") And StringInStr($sFileType, "Sfx ver"))
 			extract($TYPE_ZIP, t('TERM_SFX') & ' ZIP ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Borland Delphi") And Not StringInStr($sFileType, "RAR SFX")
@@ -1718,8 +1722,8 @@ Func RipExeInfo($f, $tempoutdir, $command)
 	ControlClick($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]")
 	ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]", $command & "{ENTER}")
 
-	Local $handle = WinWait("[CLASS:TSViewer]", "", $Timeout)
-	Local $hControl = ControlGetHandle($handle, "", "TListBox1")
+	Local $hWnd = WinWait("[CLASS:TSViewer]", "", $Timeout)
+	Local $hControl = ControlGetHandle($hWnd, "", "TListBox1")
 
 	$TimerStart = TimerInit()
 	$return = -1
@@ -1910,7 +1914,7 @@ Func CheckGame($bUseGaup = True)
 
 	$gamefailed = True
 
-	If $silentmode Then
+	If $silentmode And Number($sMethodSelectOverride) < 1  Then
 		Cout("INFO: File may be extractable via BMS script, but user input is needed. Disable silent mode to try this method.")
 		_DeleteTrayMessageBox()
 		Return False
@@ -2289,7 +2293,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_CI
 			HasPlugin($ci)
 			$return = @TempDir & "\ci.txt"
-			$ret = FileOpen($return, 8+2)
+			$ret = FileOpen($return, $FO_CREATEPATH + $FO_OVERWRITE)
 			FileWrite($ret, "1" & @LF & $file & @LF & $outdir & @LF & "3" & @LF & "1")
 			FileClose($ret)
 			$run = Run(_MakeCommand($ci & ' ' & $return, False), $outdir, @SW_SHOW)
@@ -2685,9 +2689,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 				Switch $iChoice
-					Case 1 ; jsMSI Unpacker ; Test
+					Case 1 ; jsMSI Unpacker
 						_Run($msi_jsmsix & ' "' & $file & '"|"' & $outdir & '"', $filedir, @SW_HIDE, False, False)
 						_FileRead($outdir & "\MSI Unpack.log", True)
+						Cleanup("*.cab")
 
 					Case 2 ; MsiX
 						Local $appendargs = $appendext? '/ext': ''
@@ -2827,7 +2832,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Cleanup($ret, $OPTION_DELETE)
 
 			; Restore original file names and folder structure
-			$ret = _FileRead($outdir & "\installer.config", False, 16)
+			$ret = _FileRead($outdir & "\installer.config", False, $FO_BINARY)
 			If @error Then
 				$success = $RESULT_FAILED
 			Else
@@ -2871,9 +2876,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_SQLITE
 			$return = FetchStdout($sqlite & ' "' & $file & '" .dump"', $filedir, @SW_HIDE, 0)
-			$handle = FileOpen($outdir & '\' & $filename & '.sql', 8+2)
-			FileWrite($handle, $return)
-			FileClose($handle)
+			$hFile = FileOpen($outdir & '\' & $filename & '.sql', $FO_CREATEPATH + $FO_OVERWRITE)
+			FileWrite($hFile, $return)
+			FileClose($hFile)
 
 		Case $TYPE_SUPERDAT
 			Local $sPath = $outdir & '\SuperDAT.log'
@@ -3368,7 +3373,7 @@ Func BmsExtract($sName, $hDB = 0)
 ;~ 		_ArrayDisplay($aReturn)
 
 		; Write script to file and execute it
-		$bmsScript = FileOpen($bindir & $bms, 2)
+		$bmsScript = FileOpen($bindir & $bms, $FO_OVERWRITE)
 		FileWrite($bmsScript, $aReturn[2])
 		FileClose($bmsScript)
 		$return = FetchStdout($quickbms & ' -l "' & $bindir & $bms & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
@@ -3448,7 +3453,7 @@ Func unpack($packer)
 EndFunc
 
 ; Perform outdir cleanup: move/delete given files according to $iCleanup setting
-Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
+Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 	If Not $iMode Then Return
 	If Not IsArray($aFiles) Then
 		If Not FileExists($aFiles) And Not FileExists($outdir & "\" & $aFiles) Then
@@ -3459,7 +3464,7 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 		Dim $aFiles = [$return]
 	EndIf
 
-	If $iMode = $OPTION_MOVE And $dir == 0 Then $dir = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
+	If $iMode = $OPTION_MOVE And $sDestination == 0 Then $sDestination = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
 ;~ 	Cout("Cleanup - " & _ArrayToString($aFiles))
 
 	For $sFile In $aFiles
@@ -3474,12 +3479,12 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $dir = 0)
 				FileDelete($sFile)
 			EndIf
 		Else
-			If Not FileExists($dir) Then DirCreate($dir)
-			Cout("Cleanup: Moving " & $sFile & " to " & $dir)
+			If Not FileExists($sDestination) Then DirCreate($sDestination)
+			Cout("Cleanup: Moving " & $sFile & " to " & $sDestination)
 			If $bIsFolder Then
-				_DirMove($sFile, $dir, 1)
+				_DirMove($sFile, $sDestination, 1)
 			Else
-				_FileMove($sFile, $dir, 1)
+				_FileMove($sFile, $sDestination, 1)
 			EndIf
 		EndIf
 	Next
@@ -3498,12 +3503,13 @@ Func CanAccess($sPath)
 		If Not $bExists Then Return SetError(1, 0, False)
 	EndIf
 
-	$handle = FileOpen($sPath, 1)
-	If $handle == -1 Then
+	Local $hFile = FileOpen($sPath, $FO_APPEND)
+	If $hFile == -1 Then
 		Cout("Access denied")
 		Return False
 	EndIf
-	FileClose($handle)
+	FileClose($hFile)
+
 	If $bIsTemp Then FileDelete($sPath)
 	Return True
 EndFunc
@@ -3811,16 +3817,16 @@ Func FileSearch($s_Mask = '', $i_Recurse = 1)
 EndFunc
 
 ; Open file and return contents
-Func _FileRead($f, $delete = False, $iFlag = 0)
+Func _FileRead($f, $bDelete = False, $iFlag = 0)
 	Cout("Reading file " & $f)
-	$handle = FileOpen($f, $iFlag)
-	If $handle = -1 Then Return SetError(1, 0, "")
+	Local $hFile = FileOpen($f, $iFlag)
+	If $hFile = -1 Then Return SetError(1, 0, "")
 
-	$return = FileRead($handle)
-	FileClose($handle)
+	$return = FileRead($hFile)
+	FileClose($hFile)
 	Cout($return)
 
-	If $delete Then FileDelete($f)
+	If $bDelete Then FileDelete($f)
 	Return $return
 EndFunc
 
@@ -3888,9 +3894,9 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 		; Display file type information and exit
 		Case $STATUS_FILEINFO
 			If $silentmode Then ; Save info to result file if in silent mode
-				$handle = FileOpen($fileScanLogFile, 8 + 1)
-				FileWrite($handle, $file & @CRLF & @CRLF & $sFileType & @CRLF & "------------------------------------------------------------" & @CRLF)
-				FileClose($handle)
+				Local $hFile = FileOpen($fileScanLogFile, $FO_CREATEPATH + $FO_APPEND)
+				FileWrite($hFile, $file & @CRLF & @CRLF & $sFileType & @CRLF & "------------------------------------------------------------" & @CRLF)
+				FileClose($hFile)
 			Else
 				If UBound($aFiletype) < 1 Then
 					$exitcode = 4
@@ -3957,10 +3963,10 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 
 	; Write error log if in batchmode
 	If $exitcode <> 0 And $silentmode And $extract Then
-		$handle = FileOpen($logdir & "errorlog.txt", 8 + 1)
+		Local $hFile = FileOpen($logdir & "errorlog.txt", $FO_CREATEPATH + $FO_APPEND)
 		Local $sMsg = GetDateTime() & " " & ($filenamefull = ""? $fname: $filenamefull) & " (" & StringUpper($status)& ")" & " - " & $arctype  & @CRLF
-		FileWrite($handle, $sMsg)
-		FileClose($handle)
+		FileWrite($hFile, $sMsg)
+		FileClose($hFile)
 	EndIf
 
 	; Delete empty output directory if failed
@@ -4082,9 +4088,25 @@ Func _DeleteTrayMessageBox()
 	$TBgui = 0
 EndFunc
 
+; Test if a file is a known multipart archive and already in batch queue
+Func IsMultipartArchive($sBatchQueueContent)
+	If Not $filenamefull Then FilenameParse($file)
+
+	Return TestMultipart('(.*?\.part)(\d+\.rar)', $sBatchQueueContent) Or _
+		   TestMultipart('(.*?\.7z.)(\d{3})', $sBatchQueueContent) Or _
+		   TestMultipart('(.*?\.r)((\d{2})|ar)', $sBatchQueueContent)
+EndFunc
+
+; Test if a file matches a given regex and compare capture group with batch queue content
+Func TestMultipart($sRegEx, $sBatchQueueContent)
+;~ 	Cout("Testing " & $sRegEx)
+	Local $ret = StringRegExpReplace($filenamefull, $sRegEx, "$1", 1)
+	Return Cout(@extended > 0) And Cout(StringInStr($sBatchQueueContent, Cout($ret)))
+EndFunc
+
 ; Create command line for current file
 Func GetCmd($silent = True)
-	If Not $file Then Return
+	If Not $file Then Return SetError(1)
 	Local $return = Quote($file)
 
 	If $extract Then
@@ -4104,7 +4126,10 @@ EndFunc
 ; Add file to batch queue
 Func AddToBatch()
 	Local $cmdline = GetCmd()
-	Local $hFile = FileOpen($batchQueue, 32 + 8 + 1)
+	If @error Then Return Cout("Failed to add file to batch queue: invalid file parameter: " & $file)
+
+	Local $hFile = FileOpen($batchQueue, $FO_UNICODE + $FO_CREATEPATH + $FO_APPEND)
+	If @error Then Return Cout("Failed to open batch queue")
 	FileSetPos($hFile, 0, 0)
 	Local $sBatchQueueContent = FileRead($hFile)
 
@@ -4114,9 +4139,7 @@ Func AddToBatch()
 		$bAddFile = CustomPrompt('BATCH_DUPLICATE', $filenamefull)
 	Else
 		; Only add one file if multipart archive
-		Local $ret = StringRegExpReplace($cmdline, '(".*?\.part)(\d+\.rar".*)', "$1", 1)
-		Local $bMultipart = @extended > 0 And StringInStr($sBatchQueueContent, $ret)
-		$bAddFile = Not $bMultipart
+		$bAddFile = Not IsMultipartArchive($sBatchQueueContent)
 	EndIf
 
 	If Not $bAddFile Then
@@ -4133,11 +4156,14 @@ EndFunc
 
 ; Read batch queue from file
 Func GetBatchQueue()
-	_FileReadToArray($batchQueue, $queueArray)
+	Local $hFile = FileOpen($batchQueue, $FO_UNICODE)
+	$queueArray = FileReadToArray($hFile)
+	FileClose($hFile)
 
-	If Not @error And $queueArray[0] > 0 Then
+	Local $iSize = UBound($queueArray)
+	If IsArray($queueArray) And $iSize > 0 Then
 ;~ 		_ArrayDisplay($queueArray)
-		If $guimain Then GUICtrlSetData($BatchBut, t('BATCH_BUT') & " (" & $queueArray[0] & ")")
+		If $guimain Then GUICtrlSetData($BatchBut, t('BATCH_BUT') & " (" & $iSize & ")")
 		EnableBatchMode()
 		Return 1
 	EndIf
@@ -4148,18 +4174,17 @@ EndFunc
 ; Write batch queue array to file
 Func SaveBatchQueue()
 	Cout("Saving batch queue")
-;~ 	_ArrayDisplay($queueArray)
-	$handle = FileOpen($batchQueue, 8 + 2)
-	FileWrite($handle, _ArrayToString($queueArray, @CRLF, 1))
-	FileClose($handle)
-EndFunc   ;==>SaveBatchQueue
+	Local $hFile = FileOpen($batchQueue, $FO_UNICODE + $FO_CREATEPATH + $FO_OVERWRITE)
+	FileWrite($hFile, _ArrayToString($queueArray, @CRLF))
+	FileClose($hFile)
+EndFunc
 
 ; Returns first element of batch queue
 Func BatchQueuePop()
 ;~ 	_ArrayDisplay($queueArray)
-	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Then GetBatchQueue()
+	If Not IsArray($queueArray) Or UBound($queueArray) < 1 Then GetBatchQueue()
 
-	If Not IsArray($queueArray) Or UBound($queueArray) = 0 Or $queueArray[0] = 0 Then ; Queue empty
+	If Not IsArray($queueArray) Or UBound($queueArray) < 1 Then
 		Cout("Batch queue empty")
 		EnableBatchMode(False)
 		If FileExists($fileScanLogFile) Then ShellExecute($fileScanLogFile)
@@ -4167,14 +4192,13 @@ Func BatchQueuePop()
 		If $return <> "" Then MsgBox($iTopmost + 48, $name, t('BATCH_FINISH', $return))
 		If $KeepOpen Then Run(@ScriptFullPath)
 	Else ; Get next command and execute it
-		Local $element = $queueArray[1]
-		_ArrayDelete($queueArray, 1)
-		$queueArray[0] -= 1
+		Local $element = $queueArray[0]
+		_ArrayDelete($queueArray, 0)
 		Cout("Next batch element: " & $element)
 		SaveBatchQueue()
 		Run(@ScriptFullPath & " " & $element)
 	EndIf
-EndFunc   ;==>BatchQueuePop
+EndFunc
 
 ; Enable batch mode
 Func EnableBatchMode($bEnable = True)
@@ -4378,7 +4402,7 @@ Func CreateLog($status)
 	If $status <> $STATUS_SUCCESS Then $sName &= StringUpper($status)
 	If $file <> "" Then $sName &= "_" & GetFileName() & "." & $fileext
 	$sName &= ".log"
-	$hFile = FileOpen($sName, 32 + 8 + 2)
+	$hFile = FileOpen($sName, $FO_UNICODE + $FO_CREATEPATH + $FO_OVERWRITE)
 	FileWrite($hFile, $sFullLog)
 	FileClose($hFile)
 	Return $sName
@@ -4457,12 +4481,12 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 			Sleep(10)
 			If TimerDiff($TimerStart) > 5000 Then ExitLoop
 		Until FileExists($LogFile)
-		$handle = FileOpen($LogFile)
+		Local $hFile = FileOpen($LogFile)
 		$state = ""
 
 		; Show progress (percentage) in status box
 		While ProcessExists($run)
-			$return = FileRead($handle)
+			$return = FileRead($hFile)
 ;~ 			Cout($return)
 			If $return <> $state Then
 				$state = $return
@@ -4495,10 +4519,10 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 			Sleep(100)
 		WEnd
 		; Write tee log to UniExtract log file
-		FileSetPos($handle, 0, $FILE_BEGIN)
-		$return = FileRead($handle)
+		FileSetPos($hFile, 0, $FILE_BEGIN)
+		$return = FileRead($hFile)
 		If Not StringIsSpace($return) Then Cout("Teelog:" & @CRLF & $return)
-		FileClose($handle)
+		FileClose($hFile)
 		FileDelete($LogFile)
 
 		; Check for success or failure indicator in log
@@ -5163,6 +5187,9 @@ Func _AfterUpdate()
 	FileDelete($docsdir & "Expander_license.txt")
 	FileDelete($docsdir & "flvextractcl_icons.txt")
 	FileDelete($docsdir & "bcm_readme.txt")
+	FileDelete($docsdir & "wixtoolset_source.nz")
+	FileDelete($docsdir & "disunity_license.md")
+	FileDelete($docsdir & "disunity_readme.md")
 	FileDelete($langdir & "Chinese.ini")
 	FileDelete($langdir & "changes.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
@@ -5906,12 +5933,12 @@ EndFunc
 ; Display batch queue and allow changes
 Func GUI_Batch_Show()
 	Local Const $iListLeft = 8, $iListTop = 8
-	Local $iLastIndex = -1, $tt = False
+	Local $iLastIndex = -1, $bTooltip = False
 	Cout("Opening batch queue edit GUI")
 	$GUI_Batch = GUICreate($name, 418, 267, 476, 262, BitOR($WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU, $WS_SIZEBOX), -1, $guimain)
 	_GuiSetColor()
 	$GUI_Batch_List = GUICtrlCreateList("", $iListLeft, $iListTop, 401, 201)
-	GUICtrlSetData(-1, _ArrayToString($queueArray, "|", 1))
+	GUICtrlSetData(-1, _ArrayToString($queueArray, "|"))
 	$GUI_Batch_OK = GUICtrlCreateButton(t('OK_BUT'), 40, 225, 75, 25)
 	$GUI_Batch_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 171, 225, 75, 25)
 	$GUI_Batch_Delete = GUICtrlCreateButton(t('DELETE_BUT'), 304, 224, 73, 25)
@@ -5925,49 +5952,41 @@ Func GUI_Batch_Show()
 				GetBatchQueue()
 				ExitLoop
 			Case $GUI_Batch_OK
-				Cout("Batch queue was modified")
-				$return = UBound($queueArray)
-				If $return = 1 Then
+;~ 				Cout("Batch queue was modified")
+				If UBound($queueArray) < 1 Then
 					EnableBatchMode(False)
 					ExitLoop
 				EndIf
-				$queueArray[0] = $return
 ;~ 				_ArrayDisplay($queueArray)
 				SaveBatchQueue()
 				; Only called to update main GUI batch button
 				GetBatchQueue()
 				ExitLoop
 			Case $GUI_Batch_Delete
-				Local $pos = _GUICtrlListBox_GetCurSel($GUI_Batch_List)
-				If $pos > -1 Then
-					Local $return = _GUICtrlListBox_GetText($GUI_Batch_List, $pos)
-;~ 					Cout($return)
-					$pos = _ArraySearch($queueArray, $return)
-;~ 					Cout($pos)
-;~ 					_ArrayDisplay($queueArray)
-					If @error Then ContinueLoop
-					If _ArrayDelete($queueArray, $pos) Then GUICtrlSetData($GUI_Batch_List, "|" & _ArrayToString($queueArray, "|", 1))
-				EndIf
+				Local $iPos = _GUICtrlListBox_GetCurSel($GUI_Batch_List)
+				If $iPos < 0 Then ContinueLoop Cout("No item selected")
+
+				If _ArrayDelete($queueArray, $iPos) > -1 Then GUICtrlSetData($GUI_Batch_List, "|" & _ArrayToString($queueArray, "|"))
 			Case Else
 				; Display tooltips if file name too long
 				; Code by Malkey (https://www.autoitscript.com/forum/topic/146743-listbox-tooltip-for-long-items/?do=findComment&comment=1039835)
-				$aCI = GUIGetCursorInfo($GUI_Batch)
-				If $aCI[4] = $GUI_Batch_List Then
-					$iIndex = _GUICtrlListBox_ItemFromPoint($GUI_Batch_List, $aCI[0] - $iListLeft, $aCI[1] - $iListTop)
+				Local $aCursorInfo = GUIGetCursorInfo($GUI_Batch)
+				If $aCursorInfo[4] = $GUI_Batch_List Then
+					$iIndex = _GUICtrlListBox_ItemFromPoint($GUI_Batch_List, $aCursorInfo[0] - $iListLeft, $aCursorInfo[1] - $iListTop)
 					If $iLastIndex == $iIndex Then ContinueLoop
 					$iLastIndex = $iIndex
 					$sText = _GUICtrlListBox_GetText($GUI_Batch_List, $iIndex)
 					If StringLen($sText) > 72 Then
 						ToolTip($sText)
-						$tt = True
+						$bTooltip = True
 					Else
 						ToolTip("")
-						$tt = False
+						$bTooltip = False
 						$iLastIndex = -1
 					EndIf
 				EndIf
-				If $tt And $aCI[4] <> $GUI_Batch_List Then
-					$tt = False
+				If $bTooltip And $aCursorInfo[4] <> $GUI_Batch_List Then
+					$bTooltip = False
 					$iLastIndex = -1
 					ToolTip("")
 				EndIf
@@ -6267,9 +6286,11 @@ EndFunc
 ; Saves current position of main GUI
 Func GUI_SavePosition()
 	If Not $StoreGUIPosition Or Not $guimain Then Return
-	$pos = WinGetPos($guimain)
-	SavePref('posx', $pos[0])
-	SavePref('posy', $pos[1])
+	$aPos = WinGetPos($guimain)
+	If @error Then Return
+
+	SavePref('posx', $aPos[0])
+	SavePref('posy', $aPos[1])
 EndFunc
 
 ; Set minimal size of main GUI
@@ -6435,27 +6456,33 @@ Func GUI_ContextMenu_OK()
 			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
 				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
-					RegWrite($reguser & $CM_Shells[$i][0], "", "REG_SZ", t($CM_Shells[$i][2]))
-					RegWrite($reguser & $CM_Shells[$i][0] & "\command", "", "REG_SZ", $command)
-					; Add icon to context menu, seems to work only on win 7
-					If $win7 Then RegWrite($reguser & $CM_Shells[$i][0], "Icon", "REG_SZ", @ScriptFullPath & ",0")
+					Local $sKey = $reguser & $CM_Shells[$i][0]
+					RegWrite($sKey, "", "REG_SZ", t($CM_Shells[$i][2]))
+					RegWrite($sKey & "\command", "", "REG_SZ", $command)
+					If $CM_Shells[$i][3] Then RegWrite($sKey, "MultiSelectModel", "REG_SZ", $CM_Shells[$i][3])
+
+					; Add icon to context menu, only works on win 7 or newer
+					If $win7 Then RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
 				EndIf
 			Next
 
 		; cascading
 		ElseIf $win7 And GUICtrlRead($CM_Cascading_Radio) == $GUI_CHECKED Then
-			RegWrite($reguser & "uniextract", "MUIVerb", "REG_SZ", "Universal Extractor")
-			RegWrite($reguser & "uniextract", "Icon", "REG_SZ", @ScriptFullPath & ",0")
-			RegWrite($reguser & "uniextract", "SubCommands", "REG_SZ", "")
+			Local $sKey = $reguser & "uniextract"
+			RegWrite($sKey, "MUIVerb", "REG_SZ", "Universal Extractor")
+			RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
+			RegWrite($sKey, "SubCommands", "REG_SZ", "")
+			RegWrite($sKey, "MultiSelectModel", "REG_SZ", "Player")
 
 			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
+				$sKey = $reguser & "uniextract\Shell\" & $CM_Shells[$i][0]
 				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
-					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0], "", "REG_SZ", t($CM_Shells[$i][2]))
-					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0] & "\command", "", "REG_SZ", $command)
+					RegWrite($sKey, "", "REG_SZ", t($CM_Shells[$i][2]))
+					RegWrite($sKey & "\command", "", "REG_SZ", $command)
 
 					; Icon
-					RegWrite($reguser & "Uniextract\Shell\" & $CM_Shells[$i][0], "Icon", "REG_SZ", @ScriptFullPath & ",0")
+					RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
 				EndIf
 			Next
 		EndIf
@@ -6470,7 +6497,7 @@ Func GUI_ContextMenu_OK()
 		If $addassocenabled Then GUI_ContextMenu_fileassoc(0)
 	EndIf
 	GUIDelete($CM_GUI)
-EndFunc   ;==>GUI_ContextMenu_OK
+EndFunc
 
 ; (De)activate controls if enabled but not checked
 Func GUI_ContextMenu_activate()
@@ -7198,9 +7225,10 @@ EndFunc
 ; Open password list file
 Func GUI_Password()
 	If Not FileExists($sPasswordFile) Then
-		$handle = FileOpen($sPasswordFile, 1)
-		FileClose($handle)
+		Local $hFile = FileOpen($sPasswordFile, $FO_APPEND)
+		FileClose($hFile)
 	EndIf
+
 	ShellExecute($sPasswordFile)
 EndFunc
 
