@@ -100,27 +100,28 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
 	  $STATUS_MISSINGDEF = "missingdef", $STATUS_MOVEFAILED = "movefailed", $STATUS_NOFREESPACE = "nofreespace", $STATUS_MISSINGPART = "missingpart", _
 	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent"
-Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", $TYPE_AUDIO = "audio", _
-	  $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", $TYPE_CTAR = "ctar", _
-	  $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ETHORNELL = "ethornell", $TYPE_ENIGMA = "enigma", _
-	  $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", _
-	  $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", _
-	  $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", _
-	  $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", _
-	  $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
-	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
-	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", _
-	  $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", _
-	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
-	  $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
-Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, $TYPE_CAB, _
-	  $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, $TYPE_FREEARC, _
-	  $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_IMG, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
-	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
-	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIM, $TYPE_SIS, _
-	  $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITY, _
-	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_WOLF, _
-	  $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "ActualInstaller", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
+	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
+	  $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ETHORNELL = "ethornell", _
+	  $TYPE_ENIGMA = "enigma", $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", _
+	  $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", _
+	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
+	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
+	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", _
+	  $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", _
+	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", _
+	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", _
+	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", $TYPE_VISIONAIRE3 = "visionaire3", _
+	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", _
+	  $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
+	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, _
+	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_IMG, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, _
+	  $TYPE_ISEXE, $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, _
+	  $TYPE_NBH, $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
+	  $TYPE_SIM, $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, _
+	  $TYPE_UIF, $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, _
+	  $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -148,7 +149,6 @@ Global $addassocallusers = 0
 Global $addassoc = ""
 Global $ID = ""
 Global $FB_ask = 0
-Global $Opt_ConsoleOutput = 0
 Global $Log = 0
 Global $CheckGame = 1
 Global $bSendStats = 1
@@ -160,9 +160,9 @@ Global $silentmode = 0
 Global $extract = 1
 Global $checkUnicode = 1
 Global $bExtractVideo = 1
-Global $StoreGUIPosition = 0
+Global $bOptRememberGuiSizePosition = 0
 Global $iTopmost = 0
-Global $posx = -1, $posy = -1
+Global $iOptGuiPosX = -1, $iOptGuiPosY = -1, $iOptGuiWidth = -1, $iOptGuiHeight = -1
 Global $trayX = -1, $trayY = -1
 
 ; Global variables
@@ -708,7 +708,6 @@ Func ReadPrefs()
 	Global $fileScanLogFile = $logdir & "filescan.txt"
 	Global Const $sPasswordFile = $settingsdir & "\passwords.txt"
 
-	LoadPref("consoleoutput", $Opt_ConsoleOutput)
 	LoadPref("language", $language, False)
 	LoadPref("batchqueue", $batchQueue, False)
 	If $batchQueue Then $batchQueue = _PathFull($batchQueue, $settingsdir)
@@ -738,12 +737,14 @@ Func ReadPrefs()
 	LoadPref("unicodecheck", $checkUnicode)
 	LoadPref("extractvideotrack", $bExtractVideo)
 	LoadPref("silentmode", $silentmode)
-	LoadPref("storeguiposition", $StoreGUIPosition)
+	LoadPref("storeguiposition", $bOptRememberGuiSizePosition)
 	LoadPref("cleanup", $iCleanup)
 
-	If $StoreGUIPosition Then
-		LoadPref("posx", $posx)
-		LoadPref("posy", $posy)
+	If $bOptRememberGuiSizePosition Then
+		LoadPref("posx", $iOptGuiPosX, True, $iOptGuiPosX)
+		LoadPref("posy", $iOptGuiPosY, True, $iOptGuiPosY)
+		LoadPref("GuiWidth", $iOptGuiWidth, True, $iOptGuiWidth)
+		LoadPref("GuiHeight", $iOptGuiHeight, True, $iOptGuiHeight)
 	EndIf
 
 	LoadPref("statusposx", $trayX)
@@ -787,12 +788,11 @@ Func WritePrefs()
 	SavePref('freespacecheck', $freeSpaceCheck)
 	SavePref('unicodecheck', $checkUnicode)
 	SavePref('feedbackprompt', $FB_ask)
-	SavePref('consoleoutput', $Opt_ConsoleOutput)
 	SavePref('log', $Log)
 	SavePref('checkgame', $CheckGame)
 	SavePref('sendstats', $bSendStats)
 	SavePref("extractvideotrack", $bExtractVideo)
-	SavePref('storeguiposition', $StoreGUIPosition)
+	SavePref('storeguiposition', $bOptRememberGuiSizePosition)
 	SavePref('updateinterval', $updateinterval)
 	SavePref('nightlyupdates', $bOptNightlyUpdates)
 	SavePref('cleanup', $iCleanup)
@@ -800,27 +800,27 @@ Func WritePrefs()
 EndFunc
 
 ; Save single preference
-Func SavePref($name, $value)
-	IniWrite($prefs, "UniExtract Preferences", $name, $value)
-	Cout("Saving: " & $name & " = " & $value)
+Func SavePref($sName, $value)
+	IniWrite($prefs, "UniExtract Preferences", $sName, $value)
+	Cout("Saving: " & $sName & " = " & $value)
 EndFunc
 
 ; Load single preference
-Func LoadPref($name, ByRef $value, $int = True)
-	Local $return = IniRead($prefs, "UniExtract Preferences", $name, "#Error#")
+Func LoadPref($sName, ByRef $value, $bInt = True, $iMin = -1)
+	Local $return = IniRead($prefs, "UniExtract Preferences", $sName, "#Error#")
 	If @error Or $return = "#Error#" Then
-		Cout("Failed to read option " & $name)
-		SavePref($name, $value)
+		Cout("Failed to read option " & $sName)
+		SavePref($sName, $value)
 		Return SetError(1, "", -1)
 	EndIf
 
-	If $int Then
-		$value = Int($return)
+	If $bInt Then
+		$value = _Max(Int($return), $iMin)
 	Else
 		$value = $return
 	EndIf
 
-	Cout("Option: " & $name & " = " & $value)
+	Cout("Option: " & $sName & " = " & $value)
 EndFunc
 
 ; Read history
@@ -1094,6 +1094,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "BCM compressed")
 			extract($TYPE_BCM, 'BCM ' & t('TERM_COMPRESSED'))
 
+		Case StringInStr($sFileType, "BZA compressed") Or StringInStr($sFileType, "GZA compressed")
+			extract($TYPE_7Z, 'BGA ' & t('TERM_COMPRESSED'))
+
 		Case StringInStr($sFileType, "bzip2 compressed archive")
 			extract($TYPE_7Z, 'bzip2 ' & t('TERM_COMPRESSED'), "bz2")
 
@@ -1334,7 +1337,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
 			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump") Or _
-			 StringInStr($sFileType, "Windows Shortcut")
+			 StringInStr($sFileType, "Windows Shortcut") Or StringInStr($sFileType, "JPEG bitmap")
 			terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
 		; Not supported filetypes
@@ -1542,6 +1545,9 @@ Func advexescan($bUseCmd = $extract)
 
 		Case StringInStr($sFileType, "WinAce / SFX Factory")
 			extract($TYPE_ACE, t('TERM_SFX') & ' ACE ' & t('TERM_ARCHIVE'))
+
+		Case StringInStr($sFileType, "Actual Installer")
+			extract($TYPE_ACTUAL, 'Actual Installer ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Advanced Installer")
 			extract($TYPE_AI, 'Advanced Installer ' & t('TERM_PACKAGE'))
@@ -1785,19 +1791,22 @@ Func MediaFileScan($f)
 	Cout($return[0])
 
 	; Return if file is not a media file
-	$return = StringSplit($return[0], @CRLF, 2)
-	If UBound($return) < 10 Then Return _DeleteTrayMessageBox()
+	$aReturn = StringSplit($return[0], @CRLF, 2)
+	If UBound($aReturn) < 10 Then Return _DeleteTrayMessageBox()
 
 	; Format returned string to align in message box
-	For $i in $return
-		$return = StringSplit($i, " : ", 2+1)
+	For $i in $aReturn
+		Local $aSplit = StringSplit($i, " : ", 2+1)
+
 		If @error Then
 			If Not StringIsSpace($i) Then $sFileType &= @CRLF & "[" & $i & "]" & @CRLF
 			ContinueLoop
 		EndIf
-		$sType = StringStripWS($return[0], 4+2+1)
-		$iLen = StringLen($sType)
-		$sFileType &= $sType & _StringRepeat(@TAB, 3 - Floor($iLen / 10)) & (($iLen > 20 And $iLen < 25)? @TAB: "") & StringStripWS($return[1], 4+2+1) & @CRLF
+
+		$sType = StringStripWS($aSplit[0], 4+2+1)
+		If $sType == "Complete name" Then ContinueLoop
+
+		$sFileType &= StringFormat("%-24s%s\r\n", $sType, StringStripWS($aSplit[1], 4+2+1))
 	Next
 
 	_FiletypeAdd("MediaInfo", $sFileType)
@@ -2222,6 +2231,40 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; TODO: _FindArchivePassword
 			_Run($ace & ' -x -v -d "' & $outdir & '" "' & $file & '"', $outdir, @SW_HIDE, True, True, True, True)
 
+		Case $TYPE_ACTUAL
+			; Actual installers contain two blobs of zip data.
+			; First, extract the meta data, which is needed later.
+			DirCreate($tempoutdir)
+			_Run($zip & ' "' & $file & '"', $tempoutdir, @SW_MINIMIZE)
+			Local $aFiles = IniReadSection($tempoutdir & "aisetup.ini", "Files")
+			Cleanup($tempoutdir & "*")
+
+			; Now get the actual files
+			; Different zip implementations parse archives differently.
+			; We can just abuse this fact instead of writing a proper extractor for these installers.
+			If Not extract($TYPE_7Z, -1, "", True, True) Then
+				Cout("Failed to extract files")
+				$success = $RESULT_FAILED
+			ElseIf Not IsArray($aFiles) Then
+				Cout("Failed to read file names")
+			Else
+				; Extracted files do not have original names, we need to parse the installer configuration file
+				; and rename the files accordingly.
+				For $i = 1 To $aFiles[0][0]
+					; Remove invalid characters
+					Local $sDestination = StringReplace($aFiles[$i][1], "<", "[")
+					$sDestination = StringReplace($sDestination, ">", "]")
+					Local $iPos = StringInStr($sDestination, "?")
+					If $iPos > -1 Then $sDestination = StringLeft($sDestination, $iPos - 1)
+
+					Local $sSource = $outdir & "\" & $aFiles[$i][0]
+					$sDestination = $outdir & "\" & $sDestination
+
+					Cout("Renaming " & $sSource & " to " & $sDestination)
+					_FileMove($sSource, $sDestination, $FC_CREATEPATH)
+				Next
+			EndIf
+
 		Case $TYPE_AI
 			Warn_Execute($file & ' /extract:"' & $outdir & '"')
 			; ShellExecute is needed here to display UAC prompt, fails with Run()
@@ -2392,7 +2435,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_GARBRO
 			_Run($garbro & ' x -ocu -if png -o "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE)
 
-		Case $TYPE_GHOST ; Test
+		Case $TYPE_GHOST
 			$ret = $outdir & "\" & $filename & ".exe"
 			Cout("Moving file to " & $ret)
 			_FileMove($file, $ret)
@@ -2829,7 +2872,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Extract cab files
 			$ret = $outdir & "\data.cab"
 			_Run($7z & ' x "' & $ret & '"', $outdir, @SW_SHOW, True, True, True)
-			Cleanup($ret, $OPTION_DELETE)
+			If $success == $RESULT_SUCCESS Then Cleanup($ret, $OPTION_DELETE)
 
 			; Restore original file names and folder structure
 			$ret = _FileRead($outdir & "\installer.config", False, $FO_BINARY)
@@ -3103,20 +3146,26 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $f = $file
 
 			If Not FileExists($tmp) Then
-				If $fileext <> "vis" Then
-					Local $sPath = _PathFull($filedir & "\..\")
-					$hSearch = FileFindFirstFile($sPath & "*.vis")
-					If $hSearch = -1 Then
-						Cout("Failed to find main data file. Original file names will not be retained.")
-					Else
-						Local $ret = FileFindNextFile($hSearch)
-						If Not @error Then $f = $sPath & $ret
-						FileClose($hSearch)
-					EndIf
-				EndIf
+				Local $sBasePath = _PathFull($filedir & "\..\")
+				For $i = 0 To 2
+					Local $sPath = $sBasePath & _StringRepeat("..\", $i)
+					Cout("Searching for main data file in " & $sPath)
 
-				Cout("Generating names with main file " & $f)
-				_Run($visionaire3 & ' "' & $f & '" /force /generateNames="' & $tmp & '"', $outdir, @SW_HIDE, True, True, False, False)
+					Local $aReturn = _FileListToArray($sPath, "data*.vis", $FLTA_FILES)
+					If @error Then ContinueLoop
+
+					_ArrayDelete($aReturn, 0)
+					Local $sChoice = $aReturn[0]
+					If UBound($aReturn) > 1 Then
+						Local $sChoice = GUI_MethodSelectList($aReturn, t('METHOD_NOT_IN_LIST'), 'METHOD_FILE_SELECT_LABEL')
+						If Not $sChoice Then ContinueLoop
+					EndIf
+
+					$sPath &= $sChoice
+					Cout("Generating names with main file " & $sPath)
+					_Run($visionaire3 & ' "' & $sPath & '" /force /generateNames="' & $tmp & '"', $outdir, @SW_HIDE, True, True, False, False)
+					ExitLoop
+				Next
 			EndIf
 
 			If FileGetSize($tmp) > 0 Then
@@ -3824,10 +3873,23 @@ Func _FileRead($f, $bDelete = False, $iFlag = 0)
 
 	$return = FileRead($hFile)
 	FileClose($hFile)
-	Cout($return)
+	If $iFlag <> $FO_BINARY Then Cout($return)
 
 	If $bDelete Then FileDelete($f)
 	Return $return
+EndFunc
+
+; Delete a file and retry if it fails
+Func _FileDelete($sFile, $iSleep = 100)
+	If Not FileExists($sFile) Then Return SetError(1, 0, False)
+	If _IsDirectory($sFile) Then Return SetError(2, 0, False)
+
+	If FileDelete($sFile) Then Return True
+
+	Cout('Failed to delete file "' & $sFile & '", retrying')
+	If $iSleep > 0 Then Sleep($iSleep)
+	If _WinAPI_DeleteFile($sFile) Then Return True
+	Cout("Failed again, error " & _WinAPI_GetLastError() & ": " & _WinAPI_GetLastErrorMessage())
 EndFunc
 
 ; Handle program termination with appropriate error message
@@ -4130,11 +4192,10 @@ Func AddToBatch()
 
 	Local $hFile = FileOpen($batchQueue, $FO_UNICODE + $FO_CREATEPATH + $FO_APPEND)
 	If @error Then Return Cout("Failed to open batch queue")
-	FileSetPos($hFile, 0, 0)
+;~ 	FileSetPos($hFile, 0, 0)
 	Local $sBatchQueueContent = FileRead($hFile)
 
 	Local $bAddFile = True
-
 	If StringInStr($sBatchQueueContent, $cmdline) Then
 		$bAddFile = CustomPrompt('BATCH_DUPLICATE', $filenamefull)
 	Else
@@ -4148,10 +4209,10 @@ Func AddToBatch()
 		Return
 	EndIf
 
-	FileWriteLine($hFile, $cmdline)
+	FileWrite($hFile, $cmdline & @CRLF)
 	FileClose($hFile)
 	Cout("File added to batch queue: " & $cmdline)
-	GetBatchQueue()
+	EnableBatchMode()
 EndFunc
 
 ; Read batch queue from file
@@ -4204,12 +4265,7 @@ EndFunc
 Func EnableBatchMode($bEnable = True)
 	If $bEnable Then
 		; Delete old filescan log file
-		If FileExists($fileScanLogFile) And $extract Then
-			If Not FileDelete($fileScanLogFile) Then
-				Sleep(2000)
-				FileDelete($fileScanLogFile)
-			EndIf
-		EndIf
+		_FileDelete($fileScanLogFile)
 
 		If $guimain Then
 			GUICtrlSetOnEvent($GUI_Main_Ok, "GUI_Batch_OK")
@@ -4218,12 +4274,7 @@ Func EnableBatchMode($bEnable = True)
 		EndIf
 	Else
 		; Delete empty batch queue file
-		If FileExists($batchQueue) Then
-			If Not FileDelete($batchQueue) Then
-				Sleep(2000)
-				FileDelete($batchQueue)
-			EndIf
-		EndIf
+		_FileDelete($batchQueue)
 
 		If $guimain Then
 			GUICtrlSetOnEvent($GUI_Main_Ok, "GUI_OK")
@@ -4275,6 +4326,9 @@ EndFunc
 
 ; Determine whether a path is a directory or not
 Func _IsDirectory($sPath)
+	; Wildcards should not be considered directories
+	If StringRight($sPath, 1) == "*" Then Return False
+
 	Return StringInStr(FileGetAttrib($sPath), "D")
 EndFunc
 
@@ -4841,7 +4895,7 @@ EndFunc
 ; Write data to stdout stream if enabled in options
 Func Cout($sMsg)
 	Local $sOutput = GetDateTime() & ":" & @MSEC & @TAB & $sMsg & @CRLF
-	If $Opt_ConsoleOutput == 1 Then ConsoleWrite($sOutput)
+	If Not @Compiled Then ConsoleWrite($sOutput)
 	$sFullLog &= $sOutput
 	Return $sMsg
 EndFunc
@@ -5217,6 +5271,7 @@ Func _AfterUpdate()
 
 	; Ini changes
 	IniDelete($prefs, "UniExtract Preferences", "removetemp")
+	IniDelete($prefs, "UniExtract Preferences", "consoleoutput")
 
 	SendStats("UpdateMain", 1)
 
@@ -5254,7 +5309,7 @@ Func CreateGUI()
 	EndSwitch
 
 	; Create GUI
-	Global $guimain = GUICreate($title, 310, 160 + GUI_GetFontScalingModifier(True), $posx, $posy, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
+	Global $guimain = GUICreate($title, 310, 160 + GUI_GetFontScalingModifier(True), -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 
 	_GuiSetColor()
 	Local $dropzone = GUICtrlCreateLabel("", 0, 0, 300, 135)
@@ -5309,9 +5364,9 @@ Func CreateGUI()
 	Local $filebut = GUICtrlCreateButton("...", 270, 20, 25, 20)
 
 	; Directory controls
-	Local $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
+	Global $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
 	Global $dircont = $history? GUICtrlCreateCombo("", 5, 60, 260, 20): GUICtrlCreateInput("", 5, 60, 260, 20)
-	Local $dirbut = GUICtrlCreateButton("...", 270, 60, 25, 20)
+	Global $dirbut = GUICtrlCreateButton("...", 270, 60, 25, 20)
 	Global $GUI_Main_Lock = GUICtrlCreateCheckbox(t('MAIN_DIRECTORY_LOCK'), GetPos($guimain, $GUI_Main_Destination_Label, 5), 44, Default, 15)
 	GUICtrlSetTip($GUI_Main_Lock, t('MAIN_DIRECTORY_LOCK_TOOLTIP'))
 
@@ -5390,9 +5445,12 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($quititem, "GUI_Exit")
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Exit")
 
+	GUI_ScanOnly(False)
 	GetBatchQueue()
 
 	GUISetState(@SW_SHOW)
+
+	If $bOptRememberGuiSizePosition Then WinMove($guimain, "", $iOptGuiPosX, $iOptGuiPosY, $iOptGuiWidth, $iOptGuiHeight)
 EndFunc
 
 ; Display a standard prompt and return user choice
@@ -5610,16 +5668,24 @@ Func GUI_KeepOutdir()
 EndFunc
 
 ; Option to scan file without extracting
-Func GUI_ScanOnly()
-	If _IsChecked($GUI_Main_Extract) Then
+Func GUI_ScanOnly($bSave = True)
+	Global $extract = Number(_IsChecked($GUI_Main_Extract))
+	Local $state = $GUI_ENABLE
+
+	If $extract Then
 		GUICtrlSetState($GUI_Main_Extract, $GUI_CHECKED)
-		$extract = 1
 	Else
 		GUICtrlSetState($GUI_Main_Scan, $GUI_CHECKED)
-		$extract = 0
+		$state = $GUI_DISABLE
 	EndIf
 
-	SavePref('extract', $extract)
+	; Enable/disable destination directory input
+	GUICtrlSetState($dircont, $state)
+	GUICtrlSetState($dirbut, $state)
+	GUICtrlSetState($GUI_Main_Destination_Label, $state)
+	GUICtrlSetState($GUI_Main_Lock, $state)
+
+	If @NumParams < 1 Or $bSave Then SavePref('extract', $extract)
 EndFunc
 
 ; Option to scan file without extracting
@@ -5740,7 +5806,7 @@ Func GUI_Prefs()
 	ElseIf $FB_ask == 2 Then
 		GUICtrlSetState($FeedbackPromptOpt, $GUI_INDETERMINATE)
 	EndIf
-	If $StoreGUIPosition Then GUICtrlSetState($StoreGUIPositionOpt, $GUI_CHECKED)
+	If $bOptRememberGuiSizePosition Then GUICtrlSetState($StoreGUIPositionOpt, $GUI_CHECKED)
 	If $bSendStats Then GUICtrlSetState($UsageStatsOpt, $GUI_CHECKED)
 	If $Log Then GUICtrlSetState($LogOpt, $GUI_CHECKED)
 	If $bExtractVideo Then GUICtrlSetState($VideoTrackOpt, $GUI_CHECKED)
@@ -5825,7 +5891,7 @@ Func GUI_Prefs_OK()
 	If $FB_ask > 2 Then $FB_ask = 0
 	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
 	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
-	$StoreGUIPosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
+	$bOptRememberGuiSizePosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
 	$bSendStats = Number(GUICtrlRead($UsageStatsOpt) == $GUI_CHECKED)
 	$iCleanup = GUICtrlRead($idOptDeleteAdditionalFiles) == $GUI_CHECKED? $OPTION_DELETE: $OPTION_MOVE
 	$tmp = Number(GUICtrlRead($idOptBetaUpdates) == $GUI_CHECKED)
@@ -5906,7 +5972,7 @@ EndFunc
 
 ; Add all files from a directory to batch queue
 Func GUI_Batch_AddDirectory($sDir)
-	Local Static $bRecurse = Number(IniRead($prefs, "UniExtract Preferences", "batchrecurse", 1) )
+	Local Static $bRecurse = Number(IniRead($prefs, "UniExtract Preferences", "BatchRecurse", 1) )
 	If $bRecurse > 1 Then $bRecurse = 1
 
 	Local $aFiles = _FileListToArrayRec($sDir, "*", $FLTAR_FILES, $bRecurse, $FLTAR_NOSORT, $FLTAR_FULLPATH)
@@ -6285,12 +6351,15 @@ EndFunc
 
 ; Saves current position of main GUI
 Func GUI_SavePosition()
-	If Not $StoreGUIPosition Or Not $guimain Then Return
+	If Not $guimain Or Not $bOptRememberGuiSizePosition Then Return
+
 	$aPos = WinGetPos($guimain)
 	If @error Then Return
 
 	SavePref('posx', $aPos[0])
 	SavePref('posy', $aPos[1])
+	SavePref('GuiWidth', $aPos[2])
+	SavePref('GuiHeight', $aPos[3])
 EndFunc
 
 ; Set minimal size of main GUI

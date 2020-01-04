@@ -1,6 +1,6 @@
 //If this file is not displayed correctly, open it with notepad++
 
-2.0.0 (2019):
+2.0.0 (2020):
   Added filter for specific files to file selection dialog (GUI only)
   Added option not to display extraction status box
   Added option to open destination folder after extraction
@@ -67,30 +67,31 @@
   Added support for .dmg files using 7zip
   Added support for .sfArk files using sfarkxtc
   Added support for .flv files using FLV Extract
-  Added support for .swf files using swfextract (slow)
+  Added support for .swf files using swfextract
   Added support for .uif image files using uif2iso
   Added support for .daa, .gbi image files using daa2iso
   Added support for .pex scripts using Champollion
   Added support for .rpgmvp files
   Added support for .sgbpack files
   Added support for .utage files
+  Added support for ECM compressed disk images
   Added support for ISO zipped image files using unisz
   Added support for MDF image files
-  Added support for ECM compressed disk images
   Added support for CreateInstall installers (plugin)
   Added support for DGCA compressed files (plugin)
   Added support for Android boot images (plugin)
+  Added support for Actual Installer executables
   Added support for Advanced Installer executables
   Added support for Excelsior Installer executables
+  Added support for Ghost Installer Studio installers
+  Added support for InstallAware installers
+  Added support for InstallScript installers
+  Added support for Smart Install Maker installers (plugin)
+  Added support for Spoon installers
+  Added support for wix installers
   Added support for Enigma Virtual Box executables using EnigmaVB unpacker
   Added support for Mole Box executables using demoleition
   Added support for Visionaire game archives using VISExt
-  Added support for Ghost Installer Studio installers
-  Added support for Smart Install Maker installers (plugin)
-  Added support for wix installers
-  Added support for Spoon installers
-  Added support for InstallAware installers
-  Added support for InstallScript installers
   Added support for various CD/DVD image files (bin/cue, img, nrg, c2d, xbox iso, cdi) using iso.wcx plugin
   Added support for ThinApp/Thinstall portable software using h4sh3m Virtual Apps Dependency Extractor (plugin, experimental)
   Added support for audio decompression to wav using FFmpeg

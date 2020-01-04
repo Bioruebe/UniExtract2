@@ -4,6 +4,7 @@ RC 3:
   Added support for PDF files using Xpdf command line tools
   Added support for hundreds of game archives using GARbro
   Added support for Godot engine packages using godotdec
+  Added support for Actual Installer executables
   Added support for newer Symbian Os packages using extsis (plugin)
   Added unshield as the default extractor for InstallShield cab files, thanks to TAbdiukov
   Fixed some installers being misdetected as InstallShield
@@ -27,12 +28,14 @@ RC 3:
 							  'Batch mode duplicate' warning
   Changed drag and drop: when a folder is passed, all files in subfolders are added to batch mode as well
 						(this can be disabled by adding batchrecurse=0 to section 'UniExtract Preferences' in UniExtract.ini)
+  Changed 'Remember window position' option to also store window size, thanks to ltdeta
   Improved speed of file type detection
   Improved file type detection for .eml, .mht, .xz, some game archives
   Improved detection of multipart archives when adding files to batch queue
   Improved error detection for encrypted archives
+  Improved Visionaire extraction for many games: fixed file naming and corrupt webp images
   Updated EnigmaVB unpacker to 0.57
-  Updated ExeInfo PE to 0.0.5.4
+  Updated ExeInfo PE to 0.0.5.6
   Updated innounp to 0.49
   Updated lzop to 1.04
   Updated MediaInfo to 19.04
@@ -42,11 +45,13 @@ RC 3:
   Updated SQLite to 3.38.0
   Updated UnRAR to 5.71; added x64 version
   Updated unrpa to 1.6
+  Updated unshield to 1.4.d14d2e2 x86, thanks to lifenjoiner
   Updated upx to 3.95w
   Updated WiX to 3.11.2
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated French translation, thanks to Pierre le Lidgeu
   Updated Polish translation, thanks to Barnaba
+  Updated Turkish translation, thanks to MinTR
   Updated Japanese translation, thanks to maboroshin
   Removed Crass/Crage and disunity, replaced with GARbro
   Removed XAce, replaced with acefile

@@ -36,10 +36,13 @@ lit extraction fails if output directory contains spaces (extractor bug)
 // Other:
 Logging: quickbms (+ 'you must choose a new filename' user input needed detection)
 'Extract as' command line parameter (call extract directly with $arctype as param) + GUI if nothing passed
+Rewrite 7z SFX extraction to use seperate $TYPE to make recursive 7z extract() run faster
+Consistency: $outdir should end with \
 
 
 // Short term
 Disk image status text
+File scan: remove "is not exe" generic exeinfo result
 
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu

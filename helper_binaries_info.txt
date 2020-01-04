@@ -1,4 +1,4 @@
-//If this file is not displayed correctly open it with notepad++
+//If this file is not displayed correctly open it with notepad++ or any other source code editor
 
 Universal Extractor 2.0.0
 ----------------------------
@@ -32,7 +32,7 @@ demoleition									demoleition.exe				0.60		x	-	-	Freeware*				kao									http
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.57		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.4		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.6		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 Extract NT									EXTRNT.EXE					2.10			-		Freeware				Gilles Vollant						http://www.winimage.com/extract.htm								
 FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
@@ -95,7 +95,7 @@ Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					htt
 UnLZX										unlzx.exe					1.21?		-	-	-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
 UnRAR										UnRAR.exe					5.71		x	-	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										unrpa.exe					1.6	mod		x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
-Unshield									unshield.exe				1.4			-	-	-	Freeware				David Eriksson						http://github.com/twogood/unshield/					
+Unshield									unshield.exe				1.4.d14d2e2	-	-	-	MIT						David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	-	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
 											UHARC04.EXE					0.4			?	-	?	-------					-------								http://www.klaimsoft.com/forum/index.php?showtopic=25			
 											UNUHARC06.EXE				0.6b		x	-	x	-------					-------								-------
