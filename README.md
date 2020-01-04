@@ -1,31 +1,31 @@
-# UniExtract
-Universal Extractor 2 or Universal Extractor (Bioruebe version) as it is also called to avoid confusion is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forked (modified and maintained by the community) Universal Extractors have arised. This is the most advanced and the only one with a fully transparent development using a public GitHub-powered source code repository.
+# Universal Extractor 2 _(UniExtract2)_
+Universal Extractor 2 is designed to extract files from a very long list of file formats, including standard archives such as `.zip` and `.rar`, application installers and disk images.
+
+This program is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forks (modified versions, maintained by volunteers from the community) have arised. This is the most advanced of them, featuring a very long list of enhancements.
 
 ## New features
 
-- Batch mode
-- Scan only mode to determine file types without extracting
-- Built-in updater
 - 100+ new supported file types
-- Audio and video extraction for multimedia files
-- Cascading context menu
+- Batch mode
+- Scan only mode to detect the type of any given file
+- Built-in updater
 - Support for password list for common archives
-- Improved optional status box with progress indicator
+- Improved context menu integration and status box
 - Better and faster file analysis
-- Support for some extractors not shipping with UniExtract as plugins
 - Silent mode, not showing any prompts
 - Many interface improvements and redesigned dialogs
-- Resource usage/speed improvements, lots of fixes
-- Auto-using 64 bit versions of extractors if supported by OS
+- Resource usage/speed improvements, lots of bug fixes
 
 See the changelog for a complete log of all improvements.
 
 ## Download
 Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases)
 
-Virus alert? - Universal Extractor does not contain any malware. Some anti-virus software occasionally misdetects files inside UniExtract's program directory. (You know, better warn too much than let any malware slip through.) But you can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
+###### Virus alert?
+Universal Extractor does not contain any malware. Some anti-virus software occasionally misdetects files inside UniExtract's program directory. (You know, better warn too much than let any malware slip through.) But you can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
 
-'Windows protected your PC'? - Modern versions of Windows have a feature called SmartScreen, which warns about unknown files. This means software without a big company behind it and/or a huge userbase produces a warning. Don't panic! Mostly this happens after a new version of UniExtract has been released. After enough users updated their installation, the warning might vanish, because it now has reputation. If you see a SmartScreen warning, you can safely click 'More info', then 'Run anyway'.
+###### 'Windows protected your PC'?
+Modern versions of Windows have a feature called SmartScreen, which warns about unknown files. This means software without a big company behind it and/or a huge userbase produces a warning. Don't panic! Mostly this happens after a new version of UniExtract has been released. After enough users updated their installation, the warning might vanish, because it now has reputation. If you see a SmartScreen warning, you can safely click 'More info', then 'Run anyway'.
 
 ## FAQ
 
