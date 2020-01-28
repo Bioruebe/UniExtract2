@@ -50,8 +50,10 @@ RC 3:
   Updated upx to 3.95w
   Updated WiX to 3.11.2
   Updated Chinese (Simplified) translation, thanks to SeaHOH
-  Updated French translation, thanks to Pierre le Lidgeu
+  Updated French translation, thanks to Pierre le Lidgeu and zorbao
   Updated Polish translation, thanks to Barnaba
+  Updated Portuguese (Brazilian) translation, thanks to igorruckert
+  Updated Russian translation, thanks to wvxwxvw
   Updated Turkish translation, thanks to MinTR
   Updated Japanese translation, thanks to maboroshin
   Removed Crass/Crage, disunity and ns2dec, replaced with GARbro
