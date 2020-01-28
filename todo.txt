@@ -4,7 +4,7 @@
 check control size for other languages
 
 // Unpacker changes:
-7z support for nifs, fat, vhd, mbr?, mslz?, APM?
+7z support for nifs, fat, mbr?, mslz?, APM?
 
 // New unpackers
 sqx
@@ -15,7 +15,7 @@ paq
 // Extraction logic updates
 Add cleanup function call if necessary
 Disable _Run function's pattern search for extractors that do not provide percentage indicators
-Additional file types for arc_conv, ffmpeg
+Additional file types for ffmpeg
 
 
 // Usability:
@@ -29,13 +29,11 @@ Extracting to C:/ creates file in @ScriptDir
 Unicode files are not moved to outdir if using unpack() function
 is6cab extractor might crash ('... is not working anymore'), resulting in batch processing stop
 TrID detection fails if UniExtract is run from an UNC path
-.wma detected as video
 lit extraction fails if output directory contains spaces (extractor bug)
-
+Unreal definition
 
 // Other:
 Logging: quickbms (+ 'you must choose a new filename' user input needed detection)
-'Extract as' command line parameter (call extract directly with $arctype as param) + GUI if nothing passed
 Rewrite 7z SFX extraction to use seperate $TYPE to make recursive 7z extract() run faster
 Consistency: $outdir should end with \
 
@@ -56,7 +54,7 @@ generic error message for failed extraction: check if only some file has errors 
 Converting to iso failes when iso file already exists (helper binary not terminating correctly)
 Overwriting files in general depends on extractor (sometimes asks, sometimes overwrites without asking)
 Error messages appear sometimes althought extracted correctly
-batch mode might stop depending on the extractor, when user input is needed //make sure files do not exist before starting batch mode to avoid this
+Batch mode might stop depending on the extractor, when user input is needed //make sure files do not exist before starting batch mode to avoid this
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 
 !!Compiling 64 bit version results in drag & drop application error!!
@@ -65,15 +63,8 @@ qbms process seems to hang (with increased cpu usage) on large files with gaup_p
 
 // Not necessary/declined:
 Incorporate output within AutoIt GUI rather than spawning external shell(s)   //possibility to hide cmd windows implemented
-Add option to copy rather than move temporary files - 439
-support LiberalInstaller - 562 (probably not possible)   //no sample files, no unpacker available
 vmunpacker - packed file decompressor (http://unpacking.narod.ru/unpackers/universal/VMUnpacker1.2.rar)
-LinMSI - req 51   //added jsMSI from same developer (http://www.jsware.net/jsware/msicode.php3)
-new formats? - Dragon UnPACKer, Game Extractor, Quick Unpack - 405; MultiExtractor - 395 //limited usefullness, no command line interface, license
 include menu bar in dropzone for files //doesn't seem possible, aim better :)
-new CD image converter - http://iat.berlios.de/ - 832
 replace booz with unzoo (http://archives.math.utk.edu/software/multi-platform/gap/util/unzoo.c) //"LZD not yet implemented" error
 TTComp archive data decompressor (http://www.exelana.com/techie/c/ttdecomp.html) //output mostly unusable, only one single file extractable
-FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765 //There seems to be no fast enough and reliable way to do that
-jsmsi: .cab not found // extractor only used as fallback on older systems
-
+FileGetSize Caching --> http://www.autoit.de/index.php?page=Thread&threadID=31765 //There seems to be no fast and reliable way to do that

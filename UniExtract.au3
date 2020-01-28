@@ -46,6 +46,7 @@
 #include <GUIEdit.au3>
 #include <GuiListBox.au3>
 #include <INet.au3>
+#include <InetConstants.au3>
 #include <Math.au3>
 #include <Misc.au3>
 #include <ProgressConstants.au3>
@@ -104,7 +105,7 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "ActualInstaller", $TYP
 	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
 	  $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ETHORNELL = "ethornell", _
 	  $TYPE_ENIGMA = "enigma", $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", _
-	  $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_IMG = "img", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", _
+	  $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", _
 	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
 	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
 	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", _
@@ -116,12 +117,12 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "ActualInstaller", $TYP
 	  $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, _
-	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_IMG, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, _
-	  $TYPE_ISEXE, $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, _
-	  $TYPE_NBH, $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
-	  $TYPE_SIM, $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, _
-	  $TYPE_UIF, $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, _
-	  $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
+	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
+	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIM, _
+	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, _
+	  $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, _
+	  $TYPE_WOLF, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -176,7 +177,7 @@ Dim $unpackfailed, $exefailed, $ttarchfailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Dim $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
-Dim $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0]
+Dim $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aGUIs[0]
 
 ; Check if OS is 64 bit version
 If @OSArch == "X64" Or @OSArch == "IA64" Then
@@ -205,7 +206,6 @@ Const $fsb = "fsbext.exe"
 Const $garbro = Quote($bindir & "GARbro\GARbro.Console.exe", True)
 Const $gcf = $archdir & "GCFScape.exe"
 Const $hlp = "helpdeco.exe"
-Const $img = "EXTRNT.EXE"
 Const $inno = "innounp.exe"
 Const $is6cab = "i6comp.exe"
 Const $isxunp = "IsXunpack.exe"
@@ -1145,10 +1145,13 @@ Func tridcompare($sFileType)
 			extract($TYPE_HLP, 'Windows ' & t('TERM_HELP'), "", False, True)
 			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
 
-		Case StringInStr($sFileType, "Generic PC disk image")
+		Case StringInStr($sFileType, "VirtualBox Disk Image") Or StringInStr($sFileType, "Virtual HD image") Or _
+			 StringInStr($sFileType, "VMware 4 Virtual Disk")
+			extract($TYPE_7Z, t('TERM_DISK') & " " & t('TERM_IMAGE'))
+
+		Case StringInStr($sFileType, "Generic PC disk image") Or StringInStr($sFileType, "WinImage compressed disk image")
 			CheckIso()
 			check7z()
-			extract($TYPE_IMG, 'Floppy ' & t('TERM_DISK') & ' ' & t('TERM_IMAGE'))
 
 		Case StringInStr($sFileType, "Inno Setup installer")
 			checkInno()
@@ -1325,7 +1328,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "audio") Or StringInStr($sFileType, "FLAC lossless")
 			extract($TYPE_AUDIO, t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
 
-		Case StringInStr($sFileType, "Smacker movie/video")
+		Case StringInStr($sFileType, "Smacker movie/video") Or StringInStr($sFileType, "Bink video")
 			extract($TYPE_VIDEO_CONVERT, t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
 		Case StringInStr($sFileType, "Video") Or StringInStr($sFileType, "QuickTime Movie") Or _
@@ -2486,9 +2489,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Cout("Executing: " & Warn_Execute(Quote($file & '" /q /x:"' & $outdir)))
 			ShellExecuteWait($file, '/q /x:' & Quote($outdir), $outdir)
 
-		Case $TYPE_IMG ; Test
-			_Run($img & ' -x "' & $file & '"', $outdir, True, True, False)
-
 		Case $TYPE_INNO
 			If StringInStr($sFileType, "Reflexive Arcade", 0) Then
 				DirCreate($tempoutdir)
@@ -2855,7 +2855,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			RunWait(Warn_Execute($file & ' /unpack="' & $outdir & '"'), $filedir)
 
 		Case $TYPE_RPA
-			_Run($rpa & ' -m -v -p "' & $outdir & '" "' & $file & '"', @ScriptDir, True, True, True)
+			_Run($rpa & ' -m -v --continue-on-error -p "' & $outdir & '" "' & $file & '"', @ScriptDir, True, True, True)
 
 		Case $TYPE_SFARK
 			_Run($sfark & ' "' & $file & '" "' & $outdir & '\' & $filename & '.sf2"', $filedir, @SW_SHOW)
@@ -3083,14 +3083,19 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Terminate if file could not be read by FFmpeg
 			If StringInStr($return, "Invalid data found when processing input") Or Not StringInStr($return, "Stream") Then terminate($STATUS_FAILED, $file, $arctype, $arcdisp)
 
+			$aStreams = StringSplit($return, "Stream", 1)
+			$iStreams = $aStreams[0] - 2
+			Cout($iStreams & " streams found in file")
+;~ 			_ArrayDisplay($aStreams)
+
+			; We don't want to extract a .wma file from a .wma file
+			If $fileext == "wma" And $iStreams < 2 Then extract($TYPE_AUDIO, t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
+
 			; Otherwise, extract all tracks
-			$Streams = StringSplit($return, "Stream", 1)
-			;_ArrayDisplay($Streams)
 			Local $iVideo = 0, $iAudio = 0
-			For $i = 2 To $Streams[0]
-				$Streams[$i] = StringRegExpReplace($Streams[$i], "(?i)(?s).*?#(\d:\d)(.*?): (\w+): (\w+).*", "$3,$4,$1,$2")
-;~ 				_ArrayDisplay($Streams)
-				$aStreamType = StringSplit($Streams[$i], ",")
+			For $i = 2 To $aStreams[0]
+				$aStreams[$i] = StringRegExpReplace($aStreams[$i], "(?i)(?s).*?#(\d:\d)(.*?): (\w+): (\w+).*", "$3,$4,$1,$2")
+				$aStreamType = StringSplit($aStreams[$i], ",")
 ;~ 				_ArrayDisplay($aStreamType)
 
 				If $aStreamType[1] == "Video" Then
@@ -3120,7 +3125,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					EndIf
 				ElseIf $aStreamType[1] == "Audio" Then
 					$iAudio += 1
-					; Special cases
+					; Special cases:
+					; The stream type can be different from the file extension, so we need to change it for some files
 					If StringInStr($aStreamType[2], "wma") Then
 						$aStreamType[2] = "wma" ;wmav2
 					ElseIf StringInStr($aStreamType[2], "vorbis") Then
@@ -4163,7 +4169,7 @@ EndFunc
 Func TestMultipart($sRegEx, $sBatchQueueContent)
 ;~ 	Cout("Testing " & $sRegEx)
 	Local $ret = StringRegExpReplace($filenamefull, $sRegEx, "$1", 1)
-	Return Cout(@extended > 0) And Cout(StringInStr($sBatchQueueContent, Cout($ret)))
+	Return @extended > 0 And StringInStr($sBatchQueueContent, $ret)
 EndFunc
 
 ; Create command line for current file
@@ -5071,7 +5077,7 @@ Func _UpdateHelpers($aFiles)
 			; Update progress bar
 			While Not InetGetInfo($hDownload, 2)
 				Sleep(50)
-				If InetGetInfo($hDownload, 4) <> 0 Then
+				If InetGetInfo($hDownload, $INET_DOWNLOADERROR) <> 0 Then
 					Cout("Download failed")
 					$success = False
 					ContinueLoop 2
@@ -5234,8 +5240,11 @@ Func _AfterUpdate()
 	FileDelete($bindir & "STIX_D.exe")
 	FileDelete($bindir & "WDOSXLE.exe")
 	FileDelete($bindir & "wtee.exe")
+	FileDelete($bindir & "ns2dec.exe")
+	FileDelete($bindir & "EXTRNT.EXE")
 
 	FileDelete($defdir & "flv.ini")
+	FileDelete($defdir & "ns2.ini")
 	FileDelete($docsdir & "flac_authors.txt")
 	FileDelete($docsdir & "flac_readme.txt")
 	FileDelete($docsdir & "Expander_license.txt")
@@ -5244,6 +5253,10 @@ Func _AfterUpdate()
 	FileDelete($docsdir & "wixtoolset_source.nz")
 	FileDelete($docsdir & "disunity_license.md")
 	FileDelete($docsdir & "disunity_readme.md")
+	FileDelete($docsdir & "xace_license.txt")
+	FileDelete($docsdir & "GCFScape_license.txt")
+	FileDelete($docsdir & "ns2dec_readme.txt")
+	FileDelete($docsdir & "extract_license.txt")
 	FileDelete($langdir & "Chinese.ini")
 	FileDelete($langdir & "changes.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
@@ -5297,6 +5310,8 @@ EndFunc
 
 ; Build and display GUI if necessary
 Func CreateGUI()
+	Local Const $iWidth = 344, $iHeight = 182, $iLeft = 12, $iTop = 10, $iInputWidth = 290
+	Local $iPosY = $iTop - 1
 	Cout("Creating main GUI")
 	GUIRegisterMsg($WM_DROPFILES, "WM_DROPFILES_UNICODE_FUNC")
 	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Main")
@@ -5309,10 +5324,10 @@ Func CreateGUI()
 	EndSwitch
 
 	; Create GUI
-	Global $guimain = GUICreate($title, 310, 160 + GUI_GetFontScalingModifier(True), -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
+	Global $guimain = GUICreate($title, $iWidth, $iHeight + GUI_GetFontScalingModifier(True), -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 
 	_GuiSetColor()
-	Local $dropzone = GUICtrlCreateLabel("", 0, 0, 300, 135)
+	Local $dropzone = GUICtrlCreateLabel("", 0, 0, $iWidth, $iHeight)
 
 	; Menu controls
 	Local $filemenu = GUICtrlCreateMenu(t('MENU_FILE_LABEL'))
@@ -5355,25 +5370,30 @@ Func CreateGUI()
 	GUI_UpdateLogItem()
 
 	; File controls
-	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), 5, 4, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
-	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 5), 3, Default, 15)
-	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), 3, 100, 15)
+	Local $filelabel = GUICtrlCreateLabel(t('MAIN_FILE_LABEL'), $iLeft, $iTop, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
+	Global $GUI_Main_Extract = GUICtrlCreateRadio(t('TERM_EXTRACT'), GetPos($guimain, $filelabel, 5), $iPosY, Default, 15)
+	Global $GUI_Main_Scan = GUICtrlCreateRadio(t('TERM_SCAN'), GetPos($guimain, $GUI_Main_Extract, 10), $iPosY, 100, 15)
 	GUICtrlSetState($extract? $GUI_Main_Extract: $GUI_Main_Scan, $GUI_CHECKED)
 
-	Global $filecont = $history? GUICtrlCreateCombo("", 5, 20, 260, 20): GUICtrlCreateInput("", 5, 20, 260, 20)
-	Local $filebut = GUICtrlCreateButton("...", 270, 20, 25, 20)
+	$iPosY = GetPos($guimain, $filelabel, 1, False)
+	Global $filecont = $history? GUICtrlCreateCombo("", $iLeft, $iPosY, $iInputWidth, 20): GUICtrlCreateInput("", $iLeft, $iPosY, $iInputWidth, 20)
+	Local $filebut = GUICtrlCreateButton("...", GetPos($guimain, $filecont, 4), $iPosY, 25, 20)
 
 	; Directory controls
-	Global $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), 5, 45, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
-	Global $dircont = $history? GUICtrlCreateCombo("", 5, 60, 260, 20): GUICtrlCreateInput("", 5, 60, 260, 20)
-	Global $dirbut = GUICtrlCreateButton("...", 270, 60, 25, 20)
-	Global $GUI_Main_Lock = GUICtrlCreateCheckbox(t('MAIN_DIRECTORY_LOCK'), GetPos($guimain, $GUI_Main_Destination_Label, 5), 44, Default, 15)
+	$iPosY = GetPos($guimain, $filecont, 10, False)
+	Global $GUI_Main_Destination_Label = GUICtrlCreateLabel(t('MAIN_DEST_DIR_LABEL'), $iLeft, $iPosY, $exStyle == $WS_EX_LAYOUTRTL? 50: -1, 15)
+	Global $GUI_Main_Lock = GUICtrlCreateCheckbox(t('MAIN_DIRECTORY_LOCK'), GetPos($guimain, $GUI_Main_Destination_Label, 5), $iPosY - 1, Default, 15)
 	GUICtrlSetTip($GUI_Main_Lock, t('MAIN_DIRECTORY_LOCK_TOOLTIP'))
 
+	$iPosY = GetPos($guimain, $GUI_Main_Destination_Label, 1, False)
+	Global $dircont = $history? GUICtrlCreateCombo("", $iLeft, $iPosY, $iInputWidth, 20): GUICtrlCreateInput("", $iLeft, $iPosY, $iInputWidth, 20)
+	Global $dirbut = GUICtrlCreateButton("...", GetPos($guimain, $dircont, 4), $iPosY, 25, 20)
+
 	; Buttons
-	Global $GUI_Main_Ok = GUICtrlCreateButton(t('OK_BUT'), 10, 90, 80, 20)
-	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 110, 90, 80, 20)
-	Global $BatchBut = GUICtrlCreateButton(t('BATCH_BUT'), 210, 90, 80, 20)
+	$iPosY = GetPos($guimain, $dircont, 12, False)
+	Global $GUI_Main_Ok = GUICtrlCreateButton(t('OK_BUT'), $iLeft + 20, $iPosY, 80, 22)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), $iLeft + 118, $iPosY, 80, 22)
+	Global $BatchBut = GUICtrlCreateButton(t('BATCH_BUT'), $iLeft + 212, $iPosY, 80, 22)
 
 	; Set properties
 	GUICtrlSetBkColor($dropzone, $GUI_BKCOLOR_TRANSPARENT)
@@ -5735,7 +5755,7 @@ Func GUI_Prefs()
 	Cout("Creating preferences GUI")
 
 	; Create GUI
-	Global $guiprefs = GUICreate(t('PREFS_TITLE_LABEL'), 426, 330, -1, -1, -1, $exStyle, $guimain)
+	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), 426, 330, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
 	; General options
@@ -5844,9 +5864,9 @@ EndFunc
 
 ; Exit preferences GUI if Cancel clicked or window closed
 Func GUI_Prefs_Exit()
-	GUIDelete($guiprefs)
-	$guiprefs = False
 	Cout("Closing preferences GUI")
+	GUI_Close()
+	$guiprefs = False
 EndFunc
 
 ; Exit preferences GUI if OK clicked
@@ -5905,8 +5925,7 @@ Func GUI_Prefs_OK()
 
 	WritePrefs()
 
-	GUIDelete($guiprefs)
-	$guiprefs = False
+	GUI_Prefs_Exit()
 
 	If $bUpdate Then CheckUpdate()
 
@@ -6001,23 +6020,23 @@ Func GUI_Batch_Show()
 	Local Const $iListLeft = 8, $iListTop = 8
 	Local $iLastIndex = -1, $bTooltip = False
 	Cout("Opening batch queue edit GUI")
-	$GUI_Batch = GUICreate($name, 418, 267, 476, 262, BitOR($WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU, $WS_SIZEBOX), -1, $guimain)
+	Local $hGUI = GUICreate($name, 418, 267, 476, 262, BitOR($WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU, $WS_SIZEBOX), -1, $guimain)
 	_GuiSetColor()
-	$GUI_Batch_List = GUICtrlCreateList("", $iListLeft, $iListTop, 401, 201)
+	Local $idList = GUICtrlCreateList("", $iListLeft, $iListTop, 401, 201)
 	GUICtrlSetData(-1, _ArrayToString($queueArray, "|"))
-	$GUI_Batch_OK = GUICtrlCreateButton(t('OK_BUT'), 40, 225, 75, 25)
-	$GUI_Batch_Cancel = GUICtrlCreateButton(t('CANCEL_BUT'), 171, 225, 75, 25)
-	$GUI_Batch_Delete = GUICtrlCreateButton(t('DELETE_BUT'), 304, 224, 73, 25)
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 40, 225, 75, 25)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 171, 225, 75, 25)
+	Local $idDelete	= GUICtrlCreateButton(t('DELETE_BUT'), 304, 224, 73, 25)
 	GUISetState(@SW_SHOW)
 	Opt("GUIOnEventMode", 0)
 
 	While 1
 		$nMsg = GUIGetMsg()
 		Switch $nMsg
-			Case $GUI_EVENT_CLOSE, $GUI_Batch_Cancel
+			Case $GUI_EVENT_CLOSE, $idCancel
 				GetBatchQueue()
 				ExitLoop
-			Case $GUI_Batch_OK
+			Case $idOk
 ;~ 				Cout("Batch queue was modified")
 				If UBound($queueArray) < 1 Then
 					EnableBatchMode(False)
@@ -6028,20 +6047,20 @@ Func GUI_Batch_Show()
 				; Only called to update main GUI batch button
 				GetBatchQueue()
 				ExitLoop
-			Case $GUI_Batch_Delete
-				Local $iPos = _GUICtrlListBox_GetCurSel($GUI_Batch_List)
+			Case $idDelete
+				Local $iPos = _GUICtrlListBox_GetCurSel($idList)
 				If $iPos < 0 Then ContinueLoop Cout("No item selected")
 
-				If _ArrayDelete($queueArray, $iPos) > -1 Then GUICtrlSetData($GUI_Batch_List, "|" & _ArrayToString($queueArray, "|"))
+				If _ArrayDelete($queueArray, $iPos) > -1 Then GUICtrlSetData($idList, "|" & _ArrayToString($queueArray, "|"))
 			Case Else
 				; Display tooltips if file name too long
 				; Code by Malkey (https://www.autoitscript.com/forum/topic/146743-listbox-tooltip-for-long-items/?do=findComment&comment=1039835)
-				Local $aCursorInfo = GUIGetCursorInfo($GUI_Batch)
-				If $aCursorInfo[4] = $GUI_Batch_List Then
-					$iIndex = _GUICtrlListBox_ItemFromPoint($GUI_Batch_List, $aCursorInfo[0] - $iListLeft, $aCursorInfo[1] - $iListTop)
+				Local $aCursorInfo = GUIGetCursorInfo($hGUI)
+				If $aCursorInfo[4] = $idList Then
+					$iIndex = _GUICtrlListBox_ItemFromPoint($idList, $aCursorInfo[0] - $iListLeft, $aCursorInfo[1] - $iListTop)
 					If $iLastIndex == $iIndex Then ContinueLoop
 					$iLastIndex = $iIndex
-					$sText = _GUICtrlListBox_GetText($GUI_Batch_List, $iIndex)
+					$sText = _GUICtrlListBox_GetText($idList, $iIndex)
 					If StringLen($sText) > 72 Then
 						ToolTip($sText)
 						$bTooltip = True
@@ -6051,7 +6070,7 @@ Func GUI_Batch_Show()
 						$iLastIndex = -1
 					EndIf
 				EndIf
-				If $bTooltip And $aCursorInfo[4] <> $GUI_Batch_List Then
+				If $bTooltip And $aCursorInfo[4] <> $idList Then
 					$bTooltip = False
 					$iLastIndex = -1
 					ToolTip("")
@@ -6059,7 +6078,7 @@ Func GUI_Batch_Show()
 		EndSwitch
 	WEnd
 
-	GUIDelete($GUI_Batch)
+	GUIDelete($hGUI)
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
@@ -6091,6 +6110,7 @@ Func GUI_Drop()
 	Next
 	$eCustomPromptSetting = $PROMPT_ASK
 
+	GetBatchQueue()
 	Cout("Drag and drop - a total of " & $iCount & " files were added to batch queue")
 EndFunc
 
@@ -6400,7 +6420,7 @@ Func GUI_ContextMenu()
 	Local $iSize = UBound($CM_Shells) - 1
 	Global $CM_Checkbox[$iSize + 1]
 
-	Global $CM_GUI = GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, $exStyle, $guimain)
+	Global $CM_GUI = _GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
 	GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 8, 4, 434, 495)
@@ -6497,7 +6517,7 @@ Func GUI_ContextMenu()
 	GUI_ContextMenu_ChangePic()
 
 	GUISetState(@SW_SHOW)
-EndFunc   ;==>GUI_ContextMenu
+EndFunc
 
 ; Change picture according to selected context menu type
 Func GUI_ContextMenu_ChangePic()
@@ -7217,13 +7237,13 @@ Func GUI_Stats()
 	Local $aReturn = IniReadSection($prefs, "Statistics")
 	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + 48, $name, t('STATS_NO_DATA'))
 
-	Local $ret = t('MENU_HELP_STATS_LABEL')
-	$GUI_Stats = GUICreate($ret, 730, 434, 315, 209)
+	Local $sTitle = StringReplace(t('MENU_HELP_STATS_LABEL'), "&", "")
+	$GUI_Stats = GUICreate($sTitle, 730, 434, 315, 209)
 	$GUI_Stats_Status_Pie = GUICtrlCreatePic("", 8, 72, 209, 209)
 	$GUI_Stats_Types_Pie = GUICtrlCreatePic("", 368, 72, 353, 353)
 	$GUI_Stats_Types_Legend = GUICtrlCreatePic("", 8, 312, 337, 113)
 	$GUI_Stats_Status_Legend = GUICtrlCreatePic("", 232, 72, 113, 209)
-	GUICtrlCreateLabel($ret, 8, 8, 715, 33, $SS_CENTER)
+	GUICtrlCreateLabel($sTitle, 8, 8, 715, 33, $SS_CENTER)
 	GUICtrlSetFont(-1, 18, 500, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 212, 24, $SS_CENTER)
 	GUICtrlSetFont(-1, 12, 300, 0, $FONT_ARIAL)
@@ -7313,27 +7333,44 @@ EndFunc
 
 ; Create about GUI
 Func GUI_About()
-	Local Const $width = 437, $height = 285
+	Local Const $iWidth = 437, $iHeight = 285
 	Cout("Creating about GUI")
-	Local $hGUI = GUICreate($title & " " & $codename, $width, $height, -1, -1, -1, $exStyle, $guimain)
+
+	Local $hGUI = _GUICreate($title & " " & $codename, $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
-	GUICtrlCreateLabel($name, 16, 16, $width - 32, 52, $SS_CENTER)
+	GUICtrlCreateLabel($name, 16, 16, $iWidth - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
-	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $width - 32, 17, $SS_CENTER)
-	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $width - 32, -1, $SS_CENTER)
-	GUICtrlCreateLabel($ID, 5, $height - 15, 175, 15)
+	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $iWidth - 32, 17, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, -1, $SS_CENTER)
+	GUICtrlCreateLabel($ID, 5, $iHeight - 15, 175, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
-	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.png", $width - 100 - 10, $height - 48 - 10, 100, 48)
-	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $width / 2 - 45, $height - 50, 90, 25)
+	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.png", $iWidth - 100 - 10, $iHeight - 48 - 10, 100, 48)
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $iWidth / 2 - 45, $iHeight - 50, 90, 25)
 	GUISetState(@SW_SHOW)
 
 	GUICtrlSetOnEvent($idOk, "GUI_Close")
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Close")
 EndFunc
 
-; Delete GUI if OK clicked or window closed
+; Create a GUI and save window handle
+Func _GUICreate($sTitle, $iWidth, $iHeight, $iLeft = -1, $iTop = -1, $iStyle = -1, $iExStyle = -1, $hParent = 0)
+	Local $hGUI = GUICreate($sTitle, $iWidth, $iHeight, $iLeft, $iTop, $iStyle, $iExStyle, $hParent)
+	_ArrayAdd($aGUIs, $hGUI)
+	Return $hGUI
+EndFunc
+
+; Close active GUI
+; This makes it possible to have multiple windows open and close the correct one
+; via OnEventMode without having to create a wrapper function for each GUI
 Func GUI_Close()
-	GUIDelete()
+	For $hGUI In $aGUIs
+		If WinActive($hGUI) Then ExitLoop
+	Next
+
+	; Fallback: use the last created GUI if finding the active one fails
+	If Not $hGUI Then $hGUI = _ArrayPop($aGUIs)
+
+	GUIDelete($hGUI)
 EndFunc
 
 ; Launch Universal Extractor website if help menu item clicked

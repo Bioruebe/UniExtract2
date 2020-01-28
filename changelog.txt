@@ -12,7 +12,6 @@
 		--> using standard configuration, a confirmation prompt will be displayed
   Added option to store window position between starts
   Added option to check free disk space before extraction (in silent mode files will be skipped if not enough space available)
-  Added optional stdout debug output (--> http://www.autoitscript.com/autoit3/docs/functions/ConsoleWrite.htm)
   Added optional log file (with error type in filename)
   Added option to delete all log files from menu
   Added option to always keep GUI in foreground
