@@ -23,6 +23,7 @@ RC 3:
   Fixed some extracted files could be lost if moving the file/folder failed, thanks to patrickdrd
   Fixed context menu items not being shown if more than 15 files are selected
   Fixed several UI issues, thanks to stdedos
+  Fixed rare problem during program files updates preventing some files from being downloaded correctly
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
   Changed design/usability of 'Unknown file type' error dialog, feedback prompt, FFmpeg prompt, 'Plugin missing' error message,

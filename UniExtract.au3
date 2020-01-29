@@ -1996,8 +1996,7 @@ Func checkInno()
 	_DeleteTrayMessageBox()
 
 	If (StringInStr($return, "Version detected:", 0) And Not (StringInStr($return, "error", 0))) _
-			Or (StringInStr($return, "Signature detected:", 0) _
-			And Not StringInStr($return, "not a supported version", 0)) Then _
+	Or (StringInStr($return, "Signature detected:", 0) And Not StringInStr($return, "not a supported version", 0)) Then _
 		extract($TYPE_INNO, 'Inno Setup ' & t('TERM_INSTALLER'))
 
 	$innofailed = True
@@ -5041,11 +5040,11 @@ Func _UpdateHelpers($aFiles)
 	_GuiSetColor()
 	GUISetState(@SW_SHOW)
 
-	Local $i = 0, $iSize = UBound($aFiles), $iProgress = 0, $success = True, $iBytesReceived
+	Local $i = 0, $iSize = UBound($aFiles), $iProgress = 0, $success = True
 
 	While $i < $iSize
 		; Update progress
-		$ret = (($i + 1) / $iSize) * 100
+		Local $ret = (($i + 1) / $iSize) * 100
 		$iProgress = $ret > $iProgress? $ret: $iProgress + 0.2
 		GUICtrlSetData($idProgressTotal, $iProgress)
 
@@ -5054,7 +5053,6 @@ Func _UpdateHelpers($aFiles)
 		$sPath = @ScriptDir & "\" & $a[0]
 		If $sPath == @ScriptFullPath Then ContinueLoop
 
-;~ 		Cout($sPath)
 		If Not _UpdateFileCompare($sPath, $a) Then ContinueLoop
 
 		GUICtrlSetData($idProgressCurrent, 0)
@@ -5071,18 +5069,22 @@ Func _UpdateHelpers($aFiles)
 		Else
 			GUICtrlSetData($idLabel, $sText & $a[0] & " (" & $a[1] & " bytes" & ")")
 
-			$iBytesReceived = 0
-			Local $hDownload = InetGet($sUpdateURL & $a[0], @ScriptDir & "\" & $a[0], 1, 1)
+			; Failsafe. Overwriting existing files fails under certain (unknown) conditions. Deleting the old file beforehand helps.
+			_FileDelete($sPath)
+
+			Local $iBytesReceived = 0
+			Local $hDownload = InetGet($sUpdateURL & $a[0], $sPath, $INET_FORCERELOAD, $INET_DOWNLOADBACKGROUND)
 
 			; Update progress bar
-			While Not InetGetInfo($hDownload, 2)
+			While Not InetGetInfo($hDownload, $INET_DOWNLOADCOMPLETE)
 				Sleep(50)
-				If InetGetInfo($hDownload, $INET_DOWNLOADERROR) <> 0 Then
-					Cout("Download failed")
+				Local $iError = InetGetInfo($hDownload, $INET_DOWNLOADERROR)
+				If $iError <> 0 Then
+					Cout("Download failed: error " & $iError)
 					$success = False
 					ContinueLoop 2
 				EndIf
-				$iBytesReceived = InetGetInfo($hDownload, 0)
+				$iBytesReceived = InetGetInfo($hDownload, $INET_DOWNLOADREAD)
 				GUICtrlSetData($idProgressCurrent, Int($iBytesReceived / $a[1] * 100))
 			WEnd
 			GUICtrlSetData($idProgressCurrent, 100)
