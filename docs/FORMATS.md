@@ -15,7 +15,7 @@
 | **BGA**        | .bza, .gza                                                   |
 | bzip2          | .bz2, .tbz2, .tar.bz2                                        |
 | CPIO           | .cpio                                                        |
-| DGCA*          | .dgc                                                         |
+| **DGCA**       | .dgc                                                         |
 | **FreeArc**¹   | .arc                                                         |
 | gzip archive   | .gz, .tgz, .tar.gz, .ipk                                     |
 | KGB            | .kgb, kge, .exe                                              |
