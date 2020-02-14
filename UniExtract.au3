@@ -63,7 +63,7 @@
 
 Const $name = "Universal Extractor"
 Const $sVersion = "2.0.0 RC 3"
-Const $codename = '"Still Alive"'
+Const $codename = '"in memoriam"'
 Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
 Const $website2 = "https://bioruebe.com/dev/uniextract"
@@ -79,6 +79,7 @@ Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
 Const $docsdir = @ScriptDir & "\docs\"
+Const $licensedir = $docsdir & "third-party\"
 Const $sUpdater = @ScriptDir & '\UniExtractUpdater.exe'
 Const $sUpdaterNoAdmin = @ScriptDir & '\UniExtractUpdater_NoAdmin.exe'
 Const $sEnglishLangFile = @ScriptDir & '\English.ini'
@@ -108,21 +109,21 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "ActualInstaller", $TYP
 	  $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", _
 	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
 	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
-	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAR = "rar", _
-	  $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", _
-	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", _
-	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", _
-	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "video_convert", $TYPE_VISIONAIRE3 = "visionaire3", _
-	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", _
-	  $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", _
+	  $TYPE_RAI = "Reflexive Arcade Installer", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
+	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
+	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", _
+	  $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", _
+	  $TYPE_VIDEO_CONVERT = "Video (convert)", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", _
+	  $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
 	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
-	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIM, _
-	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, _
-	  $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, _
-	  $TYPE_WOLF, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
+	  $TYPE_SIM, $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, _
+	  $TYPE_UIF, $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, _
+	  $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -171,7 +172,6 @@ Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir
 Dim $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL, $eCustomPromptSetting = $PROMPT_ASK
 Dim $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Dim $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
-Dim $test, $test7z, $testzip, $testie, $testinno
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Dim $unpackfailed, $exefailed, $ttarchfailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
@@ -414,10 +414,6 @@ Func StartExtraction()
 	$gamefailed = False
 	$ttarchfailed = False
 	$unpackfailed = False
-	$testinno = False
-	$test7z = False
-	$testzip = False
-	$testie = False
 	ReDim $aFiletype[0][2]
 
 	; If an extractor is specified via command line parameter, we simply use that without scanning
@@ -491,11 +487,8 @@ Func IsExe()
 	If Not $extract Then Return
 
 	; Perform additional tests if necessary
-	If $testinno And Not $innofailed Then checkInno()
-	If $testzip Then checkZip()
-	If $testie And Not $iefailed Then checkIE()
-
-	If Not $iefailed Then checkIE()
+	checkInno()
+	checkIE()
 
 	CheckGame()
 
@@ -1153,6 +1146,9 @@ Func tridcompare($sFileType)
 			CheckIso()
 			check7z()
 
+		Case StringInStr($sFileType, "Reflexive Arcade Installer")
+			extract($TYPE_RAI, "Reflexive Arcade " & t('TERM_INSTALLER'))
+
 		Case StringInStr($sFileType, "Inno Setup installer")
 			checkInno()
 
@@ -1306,9 +1302,6 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "ZIP compressed archive") Or StringInStr($sFileType, "Winzip Win32 self-extracting archive")
 			extract($TYPE_ZIP, 'ZIP ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "Zip Self-Extracting archive")
-			checkInno()
-
 		Case StringInStr($sFileType, "ZOO compressed archive")
 			extract($TYPE_ZOO, 'ZOO ' & t('TERM_ARCHIVE'))
 
@@ -1431,10 +1424,6 @@ Func exescan($f, $scantype, $analyze = 1)
 		Case StringInStr($sFileType, "ARJ SFX", 0)
 			extract($TYPE_7Z, t('TERM_SFX') & ' ARJ ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "Borland Delphi", 0) And Not StringInStr($sFileType, "RAR SFX", 0)
-			$testinno = True
-			$testzip = True
-
 		Case StringInStr($sFileType, "Gentee Installer", 0)
 			checkIE()
 
@@ -1446,10 +1435,6 @@ Func exescan($f, $scantype, $analyze = 1)
 
 		Case StringInStr($sFileType, "KGB SFX", 0)
 			extract($TYPE_KGB, t('TERM_SFX') & ' KGB ' & t('TERM_PACKAGE'))
-
-		Case StringInStr($sFileType, "Microsoft Visual C++", 0) And Not StringInStr($sFileType, "SPx Method", 0) And Not StringInStr($sFileType, "Custom", 0) And Not StringInStr($sFileType, "7.0", 0)
-			$test7z = True
-			$testie = True
 
 		Case StringInStr($sFileType, "Microsoft Visual C++ 7.0", 0) And StringInStr($sFileType, "Custom", 0) And Not StringInStr($sFileType, "Hotfix", 0)
 			extract($TYPE_VSSFX, 'Visual C++ ' & t('TERM_SFX') & ' ' & t('TERM_INSTALLER'))
@@ -1636,10 +1621,6 @@ Func advexescan($bUseCmd = $extract)
 		Case StringInStr($sFileType, "ZIP SFX") Or (StringInStr($sFileType, "WinZip") And StringInStr($sFileType, "Sfx ver"))
 			extract($TYPE_ZIP, t('TERM_SFX') & ' ZIP ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "Borland Delphi") And Not StringInStr($sFileType, "RAR SFX")
-			$testinno = True
-			$testzip = True
-
 		Case StringInStr($sFileType, "Enigma Virtual Box")
 			extract($TYPE_ENIGMA, 'Enigma Virtual Box ' & t('TERM_PACKAGE'))
 
@@ -1669,10 +1650,6 @@ Func advexescan($bUseCmd = $extract)
 		; Needs to be at the end, otherwise files might not be recognized
 		Case StringInStr($sFileType, "upx")
 			unpack($PACKER_UPX)
-
-		Case StringInStr($sFileType, "Microsoft Visual C++", 0) And Not StringInStr($sFileType, "SPx Method", 0) And Not StringInStr($sFileType, "Custom", 0) And Not StringInStr($sFileType, "7.0", 0)
-			$test7z = True
-			$testie = True
 	EndSelect
 
 	Cout("No matches for known Exeinfo PE types")
@@ -1971,6 +1948,8 @@ EndFunc
 
 ; Determine if InstallExplorer can extract the file
 Func checkIE()
+	If $iefailed Then Return False
+
 	Cout("Testing InstallExplorer")
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' InstallExplorer ' & t('TERM_INSTALLER'))
 	$return = FetchStdout($quickbms & ' -l "' & $bindir & $ie & '" "' & $file & '"', $filedir, @SW_HIDE)
@@ -1988,6 +1967,8 @@ EndFunc
 
 ; Determine if file is Inno Setup installer
 Func checkInno()
+	If $innofailed Then Return False
+
 	Cout("Testing Inno Setup")
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' Inno Setup ' & t('TERM_INSTALLER'))
 
@@ -2060,22 +2041,6 @@ Func checkNSIS()
 
 	_DeleteTrayMessageBox()
 	checkIE()
-	Return False
-EndFunc
-
-; Determine if file is self-extracting Zip archive
-Func checkZip()
-	if $zipfailed Then Return
-	Cout("Testing Zip")
-	_CreateTrayMessageBox(t('TERM_TESTING') & ' SFX ZIP ' & t('TERM_ARCHIVE'))
-	$return = FetchStdout($zip & ' -l "' & $file & '"', $filedir, @SW_HIDE)
-	If Not StringInStr($return, "signature not found", 0) Then
-		_DeleteTrayMessageBox()
-		extract($TYPE_ZIP, t('TERM_SFX') & ' ZIP ' & t('TERM_ARCHIVE'))
-	EndIf
-
-	_DeleteTrayMessageBox()
-	$zipfailed = True
 	Return False
 EndFunc
 
@@ -2489,16 +2454,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			ShellExecuteWait($file, '/q /x:' & Quote($outdir), $outdir)
 
 		Case $TYPE_INNO
-			If StringInStr($sFileType, "Reflexive Arcade", 0) Then
-				DirCreate($tempoutdir)
-				$ret = $tempoutdir & $filename & '.exe"'
-				_Run($rai & ' "' & $file & '" "' & $ret, $filedir)
-				_Run($inno & ' -x -m -a "' & $ret, $outdir)
-				FileDelete($tempoutdir & $filename & '.exe')
-				DirRemove($tempoutdir)
-			Else
-				_Run($inno & ' -x -m -a "' & $file & '"', $outdir)
-			EndIf
+			_Run($inno & ' -x -m -a "' & $file & '"', $outdir)
 
 			; Inno setup files can contain multiple versions of files, they are named ',1', ',2',... after extraction
 			; rename the first file(s), so extracted programs do not fail with not found exceptions
@@ -2839,6 +2795,15 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Local $aCleanup[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
 				Cleanup($aCleanup)
 			EndIf
+
+		Case $TYPE_RAI
+			DirCreate($tempoutdir)
+			Local $tmp = $tempoutdir & $filename & '_' & t('TERM_UNPACKED') & '.exe'
+			_Run($rai & ' "' & $file & '" "' & $tmp & '"', $filedir)
+			$file = $tmp
+			extract($TYPE_INNO, $arcdisp, "", True)
+			Cleanup($tmp)
+			DirRemove($tempoutdir)
 
 		Case $TYPE_RAR
 			Local $sPassword = _FindArchivePassword($rar & ' lt -p- "' & $file & '"', $rar & ' t -p"%PASSWORD%" "' & $file & '"', "encrypted", 0, 0)
@@ -3781,46 +3746,6 @@ Func ReturnFiles($sDir)
 	$files = StringTrimRight($files, 1)
 	FileClose($hSearch)
 	Return $files
-EndFunc
-
-; Move all files and subdirectories from one directory to another
-; $force is an integer that specifies whether or not to replace existing files
-; $omit is a string that includes files to be excluded from move
-Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = False, $bShowStatus = False)
-	Local $hSearch, $fname, $iCount = 0, $iErrors = 0
-	Static $sTranslation = t('TERM_FILE') & " "
-
-	Cout("Moving files from " & $source & " to " & $dest)
-	If $bShowStatus Then _CreateTrayMessageBox(t('MOVING_FILE') & @CRLF & $dest)
-	DirCreate($dest)
-
-	$hSearch = FileFindFirstFile($source & "\*")
-	If @error Then Return SetError(1)
-	While 1
-		$fname = FileFindNextFile($hSearch)
-		If @error Then ExitLoop
-		If StringInStr($omit, $fname) Then ContinueLoop
-		$iCount += 1
-
-		_SetTrayMessageBoxText($sTranslation & $iCount)
-		Local $sPath = $source & '\' & $fname
-		If _IsDirectory($sPath) Then
-			If Not _DirMove($sPath, $dest, 1) Then
-				$iErrors += 1
-				Cout("Failed to move directory " & $fname)
-			EndIf
-		Else
-			If Not _FileMove($sPath, $dest, $force) Then
-				$iErrors += 1
-				Cout("Failed to move file " & $fname)
-			EndIf
-		EndIf
-	WEnd
-	FileClose($hSearch)
-
-	If $iErrors > 0 Then Cout($iErrors & " files/folders could not be moved")
-	If $bShowStatus Then _DeleteTrayMessageBox()
-	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
 EndFunc
 
 ; Create a copy of the input file and change its extension
@@ -4813,6 +4738,46 @@ Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
 	Return False
 EndFunc
 
+; Move all files and subdirectories from one directory to another
+; $force is an integer that specifies whether or not to replace existing files
+; $omit is a string that includes files to be excluded from move
+Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = False, $bShowStatus = False)
+	Local $hSearch, $fname, $iCount = 0, $iErrors = 0
+	Static $sTranslation = t('TERM_FILE') & " "
+
+	Cout("Moving files from " & $source & " to " & $dest)
+	If $bShowStatus Then _CreateTrayMessageBox(t('MOVING_FILE') & @CRLF & $dest)
+	DirCreate($dest)
+
+	$hSearch = FileFindFirstFile($source & "\*")
+	If @error Then Return SetError(1)
+	While 1
+		$fname = FileFindNextFile($hSearch)
+		If @error Then ExitLoop
+		If StringInStr($omit, $fname) Then ContinueLoop
+		$iCount += 1
+
+		_SetTrayMessageBoxText($sTranslation & $iCount)
+		Local $sPath = $source & '\' & $fname
+		If _IsDirectory($sPath) Then
+			If Not _DirMove($sPath, $dest, 1) Then
+				$iErrors += 1
+				Cout("Failed to move directory " & $fname)
+			EndIf
+		Else
+			If Not _FileMove($sPath, $dest, $force) Then
+				$iErrors += 1
+				Cout("Failed to move file " & $fname)
+			EndIf
+		EndIf
+	WEnd
+	FileClose($hSearch)
+
+	If $iErrors > 0 Then Cout($iErrors & " files/folders could not be moved")
+	If $bShowStatus Then _DeleteTrayMessageBox()
+	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
+EndFunc
+
 ; Return the path to the download directory
 Func _GetFileOpenDialogInitDir()
 	Local $sDir = _WinAPI_ShellGetKnownFolderPath($FOLDERID_Downloads)
@@ -5280,9 +5245,9 @@ Func _AfterUpdate()
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03-src", 1)
 
 	; Move files
-	FileMove(@ScriptDir & "\UniExtractUpdater.exe.new", @ScriptDir & "\UniExtractUpdater.exe", 1)
 	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
 	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
+	If FileExists($docsdir & "7zip_readme.txt") Then MoveFiles($docsdir, $licensedir, True)
 
 	; Ini changes
 	IniDelete($prefs, "UniExtract Preferences", "removetemp")
@@ -6892,7 +6857,7 @@ Func GUI_MethodSelectList($aEntries, $sStandard = "", $sText = "METHOD_GAME_LABE
 
 	Local $hGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
 	_GuiSetColor()
-	GUICtrlCreateLabel(t($sText, CreateArray($filenamefull, $sStandard)), 10, 8, 252, 144, $SS_CENTER)
+	GUICtrlCreateLabel(t($sText, CreateArray($filenamefull, $sStandard, t('CANCEL_BUT'))), 10, 8, 252, 144, $SS_CENTER)
 	Local $idList = GUICtrlCreateList("", 24, 150, 225, 270, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
 	GUICtrlSetData(-1, $sStandard & '|' & _ArrayToString($aEntries))
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)

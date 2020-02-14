@@ -16,7 +16,7 @@ RC 3:
   Fixed some FMOD sound banks not being fully extracted, thanks to Sakkade
   Fixed some zip extractions being detected as failed, although they completed successfully
   Fixed 'NScripter archive' false positives
-  Fixed problems with BCM, Bink, CHM, CreateInstall, FEAD, InstallShield Z, MSP, SuperDAT, SQLite, Thinstall, UU, VMDK, WMA extraction
+  Fixed problems with BCM, Bink, CHM, CreateInstall, FEAD, InstallShield Z, MSP, Reflexive Arcade Installers, SuperDAT, SQLite, Thinstall, UU, VMDK, WMA extraction
   Fixed ttarch extraction failing if UniExtract's path contains spaces, thanks to wwh1004
   Fixed 'Game Select' dialog being displayed in silent mode
   Fixed batch mode not being enabled if directory is passed via command line
@@ -50,13 +50,15 @@ RC 3:
   Updated unshield to 1.4.d14d2e2 x86, thanks to lifenjoiner
   Updated upx to 3.95w
   Updated WiX to 3.11.2
+  Updated Bulgarian translation, thanks to jekovcar
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated French translation, thanks to Pierre le Lidgeu and zorbao
+  Updated German translation, thanks to Mr-Update
+  Updated Japanese translation, thanks to maboroshin
   Updated Polish translation, thanks to Barnaba
   Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Russian translation, thanks to wvxwxvw
   Updated Turkish translation, thanks to MinTR
-  Updated Japanese translation, thanks to maboroshin
   Removed Crass/Crage, disunity and ns2dec, replaced with GARbro
   Removed XAce, replaced with acefile
   Removed Extract NT, replaced with 7zip
