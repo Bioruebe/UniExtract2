@@ -1,11 +1,11 @@
 # Universal Extractor 2 _(UniExtract2)_
-Universal Extractor 2 is designed to extract files from a very long list of file formats, including standard archives such as `.zip` and `.rar`, application installers and disk images.
+Universal Extractor 2 is designed to extract files from a very long list of file formats, including standard archives such as `.zip` and `.rar`, application installers and disk images. An overview of supported file types can be found [here](/docs/FORMATS.md)
 
-This program is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forks (modified versions, maintained by volunteers from the community) have arised. This is the most advanced of them, featuring a very long list of enhancements.
+This program is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forks (modified versions, maintained by volunteers from the community) have arisen. This is the most advanced of them, featuring a very long list of enhancements.
 
 ## New features
 
-- 100+ new supported file types
+- 500+ new supported file types
 - Batch mode
 - Scan only mode to detect the type of any given file
 - Built-in updater
@@ -65,7 +65,7 @@ Did you encounter a problem with UniExtract? Please report what went wrong to us
 2. Download and install [SciTE](https://www.autoitscript.com/site/autoit-script-editor/downloads/) (Optional)
 3. Clone this repository **or** download a snapshot and unpack into a folder of your likings
 4. Open UniExtract.au3 in SciTE and hit `F5` to run in debug mode; `F7` to build an executable file **or** run UniExtract.au3 through Aut2Exe (look [here](https://github.com/Bioruebe/UniExtract2/issues/72#issuecomment-313288728) for more information about Aut2Exe)
-5. ~Download the latest release version and unpack into the same directory to install additional program files not included in the source distribution. Do not overwrite files.~ Beginning with RC 1, this has been simplified: just run the updater after building. All neccessary files are downloaded automatically. Make sure to not overwrite UniExtract.exe: if the update message says an update for Universal Extractor is available select no, then answer with yes when being notified about 'Universal Extractor program files'.
+5. ~Download the latest release version and unpack into the same directory to install additional program files not included in the source distribution. Do not overwrite files.~ Beginning with RC 1, this has been simplified: just run the updater after building. All necessary files are downloaded automatically. Make sure to check 'Install beta updates' from the settings dialog to get the most recent versions of the program files.
 
 ## Contributions
 
