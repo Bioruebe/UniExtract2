@@ -5,6 +5,7 @@ RC 3:
   Added support for hundreds of game archives using GARbro
   Added support for Godot engine packages using godotdec
   Added support for Actual Installer executables
+  Added support for Clickteam Install Creator installers using cicdec
   Added support for newer Symbian Os packages using extsis (plugin)
   Added unshield as the default extractor for InstallShield cab files, thanks to TAbdiukov
   Fixed some installers being misdetected as InstallShield
@@ -59,7 +60,7 @@ RC 3:
   Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Russian translation, thanks to wvxwxvw
   Updated Turkish translation, thanks to MinTR
-  Removed Crass/Crage, disunity and ns2dec, replaced with GARbro
+  Removed Arc-reader, Crass/Crage, disunity and ns2dec, replaced with GARbro
   Removed XAce, replaced with acefile
   Removed Extract NT, replaced with 7zip
   Removed ExtractMht and MhtUnPack, replaced with 7zip and TotalObserver

@@ -32,15 +32,18 @@ TrID detection fails if UniExtract is run from an UNC path
 lit extraction fails if output directory contains spaces (extractor bug)
 Unreal definition
 
+
 // Other:
 Logging: quickbms (+ 'you must choose a new filename' user input needed detection)
 Rewrite 7z SFX extraction to use seperate $TYPE to make recursive 7z extract() run faster
 Consistency: $outdir should end with \
+Save BMS to temp
+Inno: detect encrypted error
 
 
 // Short term
 Disk image status text
-File scan: remove "is not exe" generic exeinfo result
+
 
 // Long Term
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu

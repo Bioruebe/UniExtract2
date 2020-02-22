@@ -104,20 +104,20 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent"
 Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "ActualInstaller", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
 	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
-	  $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ETHORNELL = "ethornell", _
+	  $TYPE_CIC = "Clickteam Install Creator", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", _
 	  $TYPE_ENIGMA = "enigma", $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", _
 	  $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", _
 	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
 	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
-	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", _
-	  $TYPE_RAI = "Reflexive Arcade Installer", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
-	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", _
-	  $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", _
-	  $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", _
-	  $TYPE_VIDEO_CONVERT = "Video (convert)", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", _
-	  $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "Reflexive Arcade Installer", _
+	  $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", _
+	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", _
+	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", _
+	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "Video (convert)", $TYPE_VISIONAIRE3 = "visionaire3", _
+	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", _
+	  $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
-	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ETHORNELL, $TYPE_ENIGMA, $TYPE_FEAD, _
+	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
 	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
 	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
@@ -196,9 +196,9 @@ Const $alz = "unalz.exe"
 Const $arj = "arj.exe"
 Const $aspack = "AspackDie.exe"
 Const $bcm = Quote($archdir & "bcm.exe", True)
+Const $cic = "cicdec.exe"
 Const $daa = "daa2iso.exe"
 Const $enigma = "EnigmaVBUnpacker.exe"
-Const $ethornell = "ethornell.exe"
 Const $exeinfope = Quote($bindir & "exeinfope.exe")
 Const $filetool = Quote($bindir & "file\bin\file.exe", True)
 Const $freearc = "unarc.exe"
@@ -1238,8 +1238,8 @@ Func tridcompare($sFileType)
 			CheckGarbro()
 			extract($TYPE_ARC_CONV, "ERISA archive file" & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "Ethornell")
-			extract($TYPE_ETHORNELL, "Ethornell Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+		Case StringInStr($sFileType, "BGI (Buriko General Interpreter) engine")
+			CheckGarbro()
 
 		Case StringInStr($sFileType, "Reflexive Arcade installer wrapper")
 			extract($TYPE_INNO, 'Reflexive Arcade ' & t('TERM_INSTALLER'))
@@ -1333,7 +1333,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
 			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump") Or _
-			 StringInStr($sFileType, "Windows Shortcut") Or StringInStr($sFileType, "JPEG bitmap")
+			 StringInStr($sFileType, "Windows Shortcut") Or StringInStr($sFileType, "JPEG bitmap") Or StringInStr($sFileType, "Windows Registry Data")
 			terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
 		; Not supported filetypes
@@ -1521,6 +1521,9 @@ Func advexescan($bUseCmd = $extract)
 	; Return if file is too big
 	If StringInStr($sFileType, "Skipped") Then Return
 
+	; Do not display 'unknown file type' scan result in scan only mode
+	If Not $extract And StringInStr($sFileType, "file is not EXE or DLL") Then Return
+
 	_FiletypeAdd("Exeinfo PE", $sFileType)
 
 	; Return filetype without matching if specified
@@ -1562,6 +1565,9 @@ Func advexescan($bUseCmd = $extract)
 		; Needs to be before InstallShield
 		Case StringInStr($sFileType, "InstallAware")
 			extract($TYPE_7Z, 'InstallAware ' & t('TERM_INSTALLER') & ' ' & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "Install Creator/Pro")
+			extract($TYPE_CIC, 'Clickteam Install Creator ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "InstallScript Setup Launcher")
 			extract($TYPE_ISCRIPT, 'InstallScript ' & t('TERM_INSTALLER'))
@@ -2094,7 +2100,7 @@ Func MoveInputFileIfNecessary()
 			$new = _TempFile($filedir, "Unicode_", $fileext)
 		Else
 			Cout("Path seems to be unicode")
-			If Not StringRegExp(@TempDir, $sRegExAscii, 0) Then Return Cout("Temp directory contains unicode characters, aborting")
+			If Not StringRegExp(@TempDir, $sRegExAscii, 0) Then Return Cout("Temp directory contains unicode characters: " & @TempDir)
 			$new = StringRegExp($filename, $sRegExAscii, 0)? @TempDir & "\" & $filenamefull: _TempFile(@TempDir, "Unicode_", $fileext)
 		EndIf
 	EndIf
@@ -2313,6 +2319,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			FileDelete($return)
 			terminate($STATUS_SILENT)
 
+		Case $TYPE_CIC
+			HasNetFramework(4.5)
+			_Run($cic & ' -db "' & $file & '" "' & $outdir & '"', $filedir, @SW_HIDE)
+			Cleanup("Block 0x*.bin")
+
 		Case $TYPE_CTAR
 			$oldfiles = ReturnFiles($outdir)
 
@@ -2378,9 +2389,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			ElseIf StringInStr($return, '[+] Finished!') Then
 				$success = $RESULT_SUCCESS
 			EndIf
-
-		Case $TYPE_ETHORNELL ; Test
-			_Run($ethornell & ' "' & $file & '" "' & $outdir & '"', $outdir)
 
 		Case $TYPE_FEAD
 			Local $tmp = ' /s -nos_ne -nos_o"' & $tempoutdir & '\"'
@@ -3891,8 +3899,8 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 				FileClose($hFile)
 			Else
 				If UBound($aFiletype) < 1 Then
+					GUI_Error_UnknownExt()
 					$exitcode = 4
-					MsgBox($iTopmost + 64, $title, t('UNKNOWN_EXT', CreateArray($file, "")))
 				Else
 					_GUI_FileScan()
 				EndIf
@@ -3980,18 +3988,6 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	EndIf
 
 	Exit $exitcode
-EndFunc
-
-; Warn user before executing files for extraction
-Func Warn_Execute($command)
-	If $warnexecute Then
-		Cout("Displaying warn_execute message")
-		If MsgBox($iTopmost + 49, $title, t('WARN_EXECUTE', $command)) <> 1 Then
-			If $createdir Then DirRemove($outdir, 0)
-			terminate($STATUS_SILENT)
-		EndIf
-	EndIf
-	Return $command
 EndFunc
 
 ; Create array on the fly
@@ -5186,6 +5182,11 @@ EndFunc
 
 ; Perform special actions after update, e.g. delete files
 Func _AfterUpdate()
+	; Move files
+	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
+	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
+	If FileExists($docsdir & "7zip_readme.txt") Then MoveFiles($docsdir, $licensedir, True)
+
 	; Remove unused files
 	FileDelete($bindir & "faad.exe")
 	FileDelete($bindir & "MediaInfo64.dll")
@@ -5209,21 +5210,27 @@ Func _AfterUpdate()
 	FileDelete($bindir & "wtee.exe")
 	FileDelete($bindir & "ns2dec.exe")
 	FileDelete($bindir & "EXTRNT.EXE")
+	FileDelete($bindir & "ethornell.exe")
+	FileDelete($bindir & "libpng12.dll")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
-	FileDelete($docsdir & "flac_authors.txt")
-	FileDelete($docsdir & "flac_readme.txt")
-	FileDelete($docsdir & "Expander_license.txt")
-	FileDelete($docsdir & "flvextractcl_icons.txt")
-	FileDelete($docsdir & "bcm_readme.txt")
-	FileDelete($docsdir & "wixtoolset_source.nz")
-	FileDelete($docsdir & "disunity_license.md")
-	FileDelete($docsdir & "disunity_readme.md")
-	FileDelete($docsdir & "xace_license.txt")
-	FileDelete($docsdir & "GCFScape_license.txt")
-	FileDelete($docsdir & "ns2dec_readme.txt")
-	FileDelete($docsdir & "extract_license.txt")
+	FileDelete($licensedir & "flac_authors.txt")
+	FileDelete($licensedir & "flac_readme.txt")
+	FileDelete($licensedir & "Expander_license.txt")
+	FileDelete($licensedir & "flvextractcl_icons.txt")
+	FileDelete($licensedir & "bcm_readme.txt")
+	FileDelete($licensedir & "wixtoolset_source.nz")
+	FileDelete($licensedir & "disunity_license.md")
+	FileDelete($licensedir & "disunity_readme.md")
+	FileDelete($licensedir & "xace_license.txt")
+	FileDelete($licensedir & "GCFScape_license.txt")
+	FileDelete($licensedir & "ns2dec_readme.txt")
+	FileDelete($licensedir & "extract_license.txt")
+	FileDelete($licensedir & "Arc-reader_licence.txt")
+	FileDelete($licensedir & "Arc-reader_readme.txt")
+	FileDelete($licensedir & "libpng_license.txt")
+
 	FileDelete($langdir & "Chinese.ini")
 	FileDelete($langdir & "changes.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
@@ -5243,11 +5250,6 @@ Func _AfterUpdate()
 	DirRemove($bindir & "lib", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
 	DirRemove($bindir & "file\contrib\file\5.03\file-5.03-src", 1)
-
-	; Move files
-	FileMove($bindir & "x86\sqlite3.dll", @ScriptDir)
-	FileMove($bindir & "x64\sqlite3.dll", @ScriptDir & "\sqlite3_x64.dll")
-	If FileExists($docsdir & "7zip_readme.txt") Then MoveFiles($docsdir, $licensedir, True)
 
 	; Ini changes
 	IniDelete($prefs, "UniExtract Preferences", "removetemp")
@@ -5606,6 +5608,36 @@ Func GUI_GetFontScalingModifier($bOutput = False)
 	If $bOutput Then Cout("Font scaling: height = " & $ret & ", modifier = " & $iModifier)
 
 	Return $iModifier
+EndFunc
+
+; Drag and drop handler for multiple file support
+; http://www.autoitscript.com/forum/topic/28062-drop-multiple-files-on-any-control/page__view__findpost__p__635231
+Func WM_DROPFILES_UNICODE_FUNC($hWnd, $msgID, $wParam, $lParam)
+	Local $nSize, $pFileName
+	Local $nAmt = DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", 0xFFFFFFFF, "ptr", 0, "int", 255)
+	For $i = 0 To $nAmt[0] - 1
+		$nSize = DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", $i, "ptr", 0, "int", 0)
+		$nSize = $nSize[0] + 1
+		$pFileName = DllStructCreate("wchar[" & $nSize & "]")
+		DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", $i, "int", DllStructGetPtr($pFileName), "int", $nSize)
+		ReDim $gaDropFiles[$i + 1]
+		$gaDropFiles[$i] = DllStructGetData($pFileName, 1)
+		$pFileName = 0
+	Next
+;~ 	_ArrayDisplay($gaDropFiles)
+EndFunc
+
+; Warn user before executing files for extraction
+Func Warn_Execute($sCommand)
+	If Not $warnexecute Then Return $sCommand
+
+	Cout("Displaying execution warning message")
+	If MsgBox($iTopmost + 49, $title, t('WARN_EXECUTE', $sCommand)) <> 1 Then
+		If $createdir Then DirRemove($outdir, 0)
+		terminate($STATUS_SILENT)
+	EndIf
+
+	Return $sCommand
 EndFunc
 
 ; Prompt user for file
@@ -6103,23 +6135,6 @@ Func GUI_Drop_Parse($sFile = $file)
 		EndIf
 	EndIf
 EndFunc
-
-; Drag and drop handler for multiple file support
-; http://www.autoitscript.com/forum/topic/28062-drop-multiple-files-on-any-control/page__view__findpost__p__635231
-Func WM_DROPFILES_UNICODE_FUNC($hWnd, $msgID, $wParam, $lParam)
-	Local $nSize, $pFileName
-	Local $nAmt = DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", 0xFFFFFFFF, "ptr", 0, "int", 255)
-	For $i = 0 To $nAmt[0] - 1
-		$nSize = DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", $i, "ptr", 0, "int", 0)
-		$nSize = $nSize[0] + 1
-		$pFileName = DllStructCreate("wchar[" & $nSize & "]")
-		DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", $i, "int", DllStructGetPtr($pFileName), "int", $nSize)
-		ReDim $gaDropFiles[$i + 1]
-		$gaDropFiles[$i] = DllStructGetData($pFileName, 1)
-		$pFileName = 0
-	Next
-;~ 	_ArrayDisplay($gaDropFiles)
-EndFunc   ;==>WM_DROPFILES_UNICODE_FUNC
 
 ; Create Feedback GUI
 Func GUI_Feedback()
@@ -6924,25 +6939,33 @@ Func GUI_Error_UnknownExt()
 	If $silentmode Then Return
 
 	Opt("GUIOnEventMode", 0)
-	Local $sFileType = _FiletypeGet(True, 50)
-	Local $iCount = StringSplit($sFileType, @CR)[0]
+	Local $idEdit, $idCopy
 
-	Local $hGUI = GUICreate($name, 488, 290)
+	Local $sFileType = _FiletypeGet(True, 50)
+	Local Const $bHasResult = StringLen($sFileType) > 0
+	Local Const $iHeight = $bHasResult? 290: 190
+	Local Const $iPosY = $iHeight - 34
+
+	Local $hGUI = GUICreate($name, 488, $iHeight)
 	_GuiSetColor()
 
 	GUICtrlCreateLabel(t('UNKNOWN_FILETYPE_TITLE'), 96, 10, 375, 28)
 	GUICtrlSetFont(-1, 16, 400, 4, $FONT_ARIAL)
-	GUICtrlCreateLabel(t('FILESCAN_TITLE'), 96, 118, 375, 17)
-	GUICtrlSetFont(-1, 8.5, 0, 4, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('UNKNOWN_FILETYPE', $filenamefull), 96, 42, 375, 71)
 	Local $idImage = _GUICtrlCreatePic($sLogoFile, 10, 26, 73, 73)
-	Local $idEdit = GUICtrlCreateEdit($sFileType, 96, 134, 379, 115, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 14? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
-	GUICtrlSetFont(-1, 8.5, 0, 0, "Courier New")
-	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 395, 256, 81, 25)
-	Local $idCopy = GUICtrlCreateButton(t('COPY_BUT'), 296, 256, 81, 25)
-	Local $idFeedback = GUICtrlCreateButton("Feedback", 95, 256, 81, 25)
 
-	GUICtrlSetBkColor($idEdit, $COLOR_WHITE)
+	If $bHasResult Then
+		Local $iCount = StringSplit($sFileType, @CR)[0]
+		GUICtrlCreateLabel(t('FILESCAN_TITLE'), 96, 118, 375, 17)
+		GUICtrlSetFont(-1, 8.5, 0, 4, $FONT_ARIAL)
+		$idEdit = GUICtrlCreateEdit($sFileType, 96, 134, 379, 115, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 14? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
+		GUICtrlSetFont(-1, 8.5, 0, 0, "Courier New")
+		GUICtrlSetBkColor($idEdit, $COLOR_WHITE)
+		$idCopy = GUICtrlCreateButton(t('COPY_BUT'), 296, $iPosY, 81, 25)
+	EndIf
+
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 395, $iPosY, 81, 25)
+	Local $idFeedback = GUICtrlCreateButton("Feedback", 95, $iPosY, 81, 25)
 
 	GUISetState(@SW_SHOW)
 

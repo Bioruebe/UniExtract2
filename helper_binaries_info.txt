@@ -14,9 +14,6 @@ Name										Files						Version		Features	License					Author								Website
 7z SFX Archives splitter					7ZSplit.exe					0.2			---------	GNU LGPL v3				Oleg Scherbakov						http://www.7zsfx.info/en/										
 acefile										acefile.exe					0.6.11		-	-	-	modified BSD 2-clause	Daniel Roethlisberger				https://github.com/droe/acefile
 ARC - Archive utility						arc.exe						5.21i		-	-	-	GNU GPL v2				Howard Chu							http://gnuwin32.sourceforge.net/packages/arc.htm				
-Arc-reader									ethornell.exe				unknown		-	-	-	zlib License			Alexander Roper						https://github.com/minirop/arc-reader/downloads
-											libpng12.dll				-------		---------	-------					-------								-------
-											zlib1.dll					1.2.8		---------	zlib license			Jean-loup Gailly, Mark Adler		http://zlib.net/
 ARJ32										arj.exe						3.10		!	-	!	GNU GPL v2				Andrew Belov						http://arj.sourceforge.net/										
 AspackDie									AspackDie.exe				1.41			-		Open Source				yoda								http://scifi.pages.at/yoda9k/									
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
@@ -26,6 +23,8 @@ brunsdec									brunsdec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							http
 											neko runtime files			-------		---------	-------					-------								-------
 BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
+cicdec										cicdec						1.2.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
+											ICSharpCode.SharpZipLib.dll	1.2.0		---------	MIT						SharpZipLib Contributors			https://github.com/icsharpcode/SharpZipLib
 ConvertLIT									clit.exe					1.8			-	-	-	GNU GPL v3				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	-	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
 demoleition									demoleition.exe				0.60		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
@@ -52,7 +51,7 @@ lzip										lzip.exe					1.20		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http
 lzop										lzop.exe					1.04			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
 MediaInfo 									MediaInfo.dll				19.04		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0				-		Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
-mtee										mtee.exe					2.21			---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
+mtee										mtee.exe					2.21		---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
 NBHextract									NBHextract.exe				1.0				-		Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
 Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation						https://github.com/HaxeFoundation/neko
 											gcmt-dll.dll				-------		---------	-------					-------								-------
