@@ -94,9 +94,9 @@
 
 | File type                   | Common file extensions                                      | Details                                        |
 | ------------------------------ | ----------------------------------------------------------- | ---------------------------------------------- |
-| **Animated images**            | .gif, .png                                                  | Extracts individual frames fro animated images |
+| **Animated images**            | .gif, .png                                                  | Extracts individual frames from animated images |
 | **Audio files**                | .mp3, .ogg, .flac, .wma, .m4a, .aa,...                      | Convert compressed audio to .wav               |
-| **Flash files**                | .swf, .exe                                                  |                                                |
+| **Flash files**                | .swf, .exe                                                  | Extract images, audio, flash components |
 | **FMOD Sample Bank**           | .fsb                                                        |                                                |
 | **sfArk compressed soundfont** | .sfark                                                      |                                                |
 | **Video files**                | .avi, .mp4, .mkv, .ogv, .webm, .wmv, .3gp, .m4v, .flv, .smk | Extracts all audio and video tracks            |
@@ -107,7 +107,7 @@
 | ------------------------------ | --------------------------------------------------- | ------- |
 | **Bethesda Archive**           | .bsa, .ba2, .dat, .pex                              |         |
 | **Bruns Engine**               | .png,...                                            |         |
-| **Godot Engine packages**      | .pck                                                |         |
+| **Godot Engine packages**      | .exe, .pck                                          |         |
 | **KiriKiri**                   | .xp3                                                |         |
 | **LiveMaker**                  | .dat, .gal                                          |         |
 | **NScripter**                  | .nsa, .ns2, .sar                                    |         |
@@ -130,7 +130,7 @@
 | File type                       | Common file extension(s)                |
 | ------------------------------- | --------------------------------------- |
 | **E-Mail message format**       | .eml                                    |
-| Encoded files                   | .b64, .uu, .uue, .xx, .xxe, .yenc, .ntx |
+| Encoded files                   | .b64, .ntx, .uu, .uue, .xx, .xxe, .yenc |
 | **GNU Gettext message catalog** | .mo                                     |
 | Microsoft Compiled Help file    | .chm                                    |
 | Microsoft Reader eBook          | .lit                                    |

@@ -1,9 +1,9 @@
 # Universal Extractor 2 _(UniExtract2)_
-Universal Extractor 2 is designed to extract files from a very long list of file formats, including standard archives such as `.zip` and `.rar`, application installers and disk images. An overview of supported file types can be found [here](/docs/FORMATS.md)
+Universal Extractor 2 is a tool designed to extract files from any type of extractable file. Unlike most archiving programs, UniExtract is not limited to **standard archives** such as `.zip` and `.rar`. It can also deal with **application installers**, **disk images** and even **game archives** and other **multimedia files**. An overview of supported file types can be found [here](/docs/FORMATS.md)
 
 This program is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forks (modified versions, maintained by volunteers from the community) have arisen. This is the most advanced of them, featuring a very long list of enhancements.
 
-## New features
+## New features in version 2
 
 - 500+ new supported file types
 - Batch mode
@@ -25,7 +25,7 @@ Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases)
 Universal Extractor does not contain any malware. Some anti-virus software occasionally misdetects files inside UniExtract's program directory. (You know, better warn too much than let any malware slip through.) But you can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
 
 ###### 'Windows protected your PC'?
-Modern versions of Windows have a feature called SmartScreen, which warns about unknown files. This means software without a big company behind it and/or a huge userbase produces a warning. Don't panic! Mostly this happens after a new version of UniExtract has been released. After enough users updated their installation, the warning might vanish, because it now has reputation. If you see a SmartScreen warning, you can safely click 'More info', then 'Run anyway'.
+Modern versions of Windows have a feature called *SmartScreen*, which warns about unknown files. This means software without a big company behind it and/or a huge userbase produces a warning. Don't panic! Mostly this happens after a new version of UniExtract has been released. After enough users updated their installation, the warning might vanish, because it now has reputation. If you see a *SmartScreen* warning, you can safely click 'More info', then 'Run anyway'.
 
 ## FAQ
 
