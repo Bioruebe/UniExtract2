@@ -1337,7 +1337,8 @@ Func tridcompare($sFileType)
 			terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
 		; Not supported filetypes
-		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File")
+		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File") Or _
+			 StringInStr($sFileType, "Foxit Reader Add-on")
 			terminate($STATUS_NOTSUPPORTED, $file, $fileext, $sFileType)
 
 		; Check for .exe file, only when fileext not .exe
@@ -1898,7 +1899,7 @@ Func CheckGame($bUseGaup = True)
 		; Check GAUP first
 		$return = FetchStdout($quickbms & ' -l "' & $bindir & $gaup & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
 
-		If StringInStr($return, "Target directory:", 0) Or StringInStr($return, "0 files found", 0) Or StringInStr($return, "Error", 0) _
+		If @error Or StringInStr($return, "Target directory:", 0) Or StringInStr($return, "0 files found", 0) Or StringInStr($return, "Error", 0) _
 		Or StringInStr($return, "exception occured", 0) Or StringInStr($return, "not supported", 0) Or $return == "" Then
 
 		Else
@@ -1943,7 +1944,7 @@ Func CheckGarbro()
 	Cout("Testing GARbro")
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' GARbro ' & t('TERM_ARCHIVE'))
 	Local $return = FetchStdout($garbro & ' l "' & $file & '"', $filedir, @SW_HIDE)
-	If Not StringInStr($return, "Error: Input file has an unknown format") And Not StringInStr($return, "Error: Archive is empty") Then
+	If Not @error And Not StringInStr($return, "Error: Input file has an unknown format") And Not StringInStr($return, "Error: Archive is empty") Then
 		$return = StringStripWS(StringStripCR(FetchStdout($garbro & ' i "' & $file & '"', $filedir, @SW_HIDE, -1)), 8)
 		extract($TYPE_GARBRO, $return & ' ' & t('TERM_ARCHIVE'))
 	EndIf
@@ -1976,7 +1977,7 @@ Func checkInno()
 	If $innofailed Then Return False
 
 	Cout("Testing Inno Setup")
-	_CreateTrayMessageBox(t('TERM_TESTING') & ' Inno Setup ' & t('TERM_INSTALLER'))
+	_CreateTrayMessageBox(t('TERM_TESTING') & " Inno Setup " & t('TERM_INSTALLER'))
 
 	$return = FetchStdout($inno & ' "' & $file & '"', $filedir, @SW_HIDE)
 
@@ -1984,7 +1985,7 @@ Func checkInno()
 
 	If (StringInStr($return, "Version detected:", 0) And Not (StringInStr($return, "error", 0))) _
 	Or (StringInStr($return, "Signature detected:", 0) And Not StringInStr($return, "not a supported version", 0)) Then _
-		extract($TYPE_INNO, 'Inno Setup ' & t('TERM_INSTALLER'))
+		extract($TYPE_INNO, "Inno Setup " & t('TERM_INSTALLER'))
 
 	$innofailed = True
 	checkIE()
@@ -2637,20 +2638,25 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				extract($TYPE_QBMS, $arcdisp, $observer)
 			EndIf
 
-		Case $TYPE_MOLE ; Test
+		Case $TYPE_MOLE
 			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 
-			_FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
+			; Move files
+			Local $sPath = $outdir & "\" & $filename & "_unpacked.exe"
+			If FileExists($sPath) Then _FileMove($sPath, $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
+
+			$sPath = $outdir & "\_extracted"
+			If FileExists($sPath) Then MoveFiles($sPath, $outdir, False, "", True, True)
 
 			; Read log file
-			Local $sPath = $outdir & "\!unpacker.log"
-			$return = Cout(FileRead($sPath))
+			$sPath = $outdir & "\!unpacker.log"
+			Local $sLog = Cout(FileRead($sPath))
 			FileDelete($sPath)
 
 			; Success evaluation
-			If StringInStr($return, '[x] Not a Molebox or unknown version') Then
+			If StringInStr($sLog, '[x] Not a Molebox or unknown version') Then
 				$success = $RESULT_FAILED
-			ElseIf StringInStr($return, '[i] Finished! Have a nice day!') Then
+			ElseIf StringInStr($sLog, '[i] Finished! Have a nice day!') Then
 				$success = $RESULT_SUCCESS
 			EndIf
 
@@ -4721,6 +4727,13 @@ EndFunc
 
 ; Move file/folder specified by path with error handling and auto-retry
 Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
+	Cout("Moving " & $sPath & " to " & $sDestination)
+
+	If Not FileExists($sPath) Then
+		Cout("Error: input file does not exist")
+		Return SetError(1, 0, False)
+	EndIf
+
 	If $bIsFolder Then
 		If DirMove($sPath, $sDestination, $iFlag) Then Return True
 	Else
@@ -4730,8 +4743,10 @@ Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
 	Cout("Failed to move " & ($bIsFolder? "directory": "file") & ", retrying")
 	Sleep($bIsFolder? 100: 50)
 	If _WinAPI_MoveFileEx($sPath, $sDestination, BitOR($MOVE_FILE_COPY_ALLOWED, $iFlag)) Then Return True
-	Cout("Failed again, error " & _WinAPI_GetLastError() & ": " & _WinAPI_GetLastErrorMessage())
-	Return False
+
+	Local $iError = _WinAPI_GetLastError()
+	Cout("Failed again, error " & $iError & ": " & _WinAPI_GetLastErrorMessage())
+	Return SetError($iError, 0, False)
 EndFunc
 
 ; Move all files and subdirectories from one directory to another
@@ -6958,7 +6973,7 @@ Func GUI_Error_UnknownExt()
 		Local $iCount = StringSplit($sFileType, @CR)[0]
 		GUICtrlCreateLabel(t('FILESCAN_TITLE'), 96, 118, 375, 17)
 		GUICtrlSetFont(-1, 8.5, 0, 4, $FONT_ARIAL)
-		$idEdit = GUICtrlCreateEdit($sFileType, 96, 134, 379, 115, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 14? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
+		$idEdit = GUICtrlCreateEdit($sFileType, 96, 134, 379, 115, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 7? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
 		GUICtrlSetFont(-1, 8.5, 0, 0, "Courier New")
 		GUICtrlSetBkColor($idEdit, $COLOR_WHITE)
 		$idCopy = GUICtrlCreateButton(t('COPY_BUT'), 296, $iPosY, 81, 25)
