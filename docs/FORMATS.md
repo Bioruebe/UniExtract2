@@ -106,7 +106,7 @@
 | Game engine/archive            | Common file extensions                              | Details |
 | ------------------------------ | --------------------------------------------------- | ------- |
 | **Bethesda Archive**           | .bsa, .ba2, .dat, .pex                              |         |
-| **Bruns Engine**               | .png,...                                            |         |
+| **Bruns Engine**               | .png, .um3                                          |         |
 | **Godot Engine packages**      | .exe, .pck                                          |         |
 | **KiriKiri**                   | .xp3                                                |         |
 | **LiveMaker**                  | .dat, .gal                                          |         |

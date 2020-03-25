@@ -23,7 +23,7 @@ RC 3:
   Fixed batch mode not being enabled if directory is passed via command line
   Fixed some extracted files could be lost if moving the file/folder failed, thanks to patrickdrd
   Fixed context menu items not being shown if more than 15 files are selected
-  Fixed several UI issues, thanks to stdedos
+  Fixed several UI issues, thanks to stdedos and wvxwxvw
   Fixed rare problem during program files updates preventing some files from being downloaded correctly
   Changed Wise extraction: E_WISE is now used automatically, the method select dialog only appears if it fails
   Changed output directory input field to autofill after typing an input file path
@@ -53,6 +53,7 @@ RC 3:
   Updated WiX to 3.11.2
   Updated Bulgarian translation, thanks to jekovcar
   Updated Chinese (Simplified) translation, thanks to SeaHOH
+  Updated Dutch translation, thanks to Wouterdek
   Updated French translation, thanks to Pierre le Lidgeu and zorbao
   Updated German translation, thanks to Mr-Update
   Updated Hungarian translation, thanks to hevesij
@@ -61,7 +62,7 @@ RC 3:
   Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Russian translation, thanks to wvxwxvw
   Updated Turkish translation, thanks to MinTR and Yakup Kök
-  Removed Arc-reader, Crass/Crage, disunity and ns2dec, replaced with GARbro
+  Removed Arc-reader, brunsdec, Crass/Crage, disunity and ns2dec, replaced with GARbro
   Removed XAce, replaced with acefile
   Removed Extract NT, replaced with 7zip
   Removed ExtractMht and MhtUnPack, replaced with 7zip and TotalObserver

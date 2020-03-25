@@ -1093,9 +1093,6 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "bzip2 compressed archive")
 			extract($TYPE_7Z, 'bzip2 ' & t('TERM_COMPRESSED'), "bz2")
 
-		Case StringInStr($sFileType, "Broken Age package")
-			CheckGame(False)
-
 		Case StringInStr($sFileType, "Microsoft Cabinet Archive") Or StringInStr($sFileType, "IncrediMail letter/ecard")
 			extract($TYPE_CAB, 'Microsoft CAB ' & t('TERM_ARCHIVE'))
 
@@ -1114,9 +1111,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Debian Linux Package")
 			extract($TYPE_7Z, 'Debian ' & t('TERM_PACKAGE'))
-
-		Case StringInStr($sFileType, "Wintermute Engine data")
-			extract($TYPE_DCP, 'Wintermute Engine ' & t('TERM_GAME') & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "DGCA Digital G Codec Archiver")
 			extract($TYPE_DGCA, 'DGCA ' & t('TERM_ARCHIVE'))
@@ -1162,18 +1156,11 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "ISo Zipped format")
 			extract($TYPE_ISZ, 'Zipped ISO ' & t('TERM_IMAGE'))
 
-		Case StringInStr($sFileType, "KiriKiri Adventure Game System Package")
-			CheckGarbro()
-			extract($TYPE_ARC_CONV, 'KiriKiri Adventure Game System ' & t('TERM_PACKAGE'))
-
 		Case StringInStr($sFileType, "KGB archive")
 			extract($TYPE_KGB, 'KGB ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "LHARC/LZARK compressed archive")
 			extract($TYPE_7Z, 'LZH ' & t('TERM_COMPRESSED'))
-
-		Case StringInStr($sFileType, "Livemaker Engine main game executable")
-			CheckGarbro()
 
 		Case StringInStr($sFileType, "lzop compressed")
 			extract($TYPE_LZO, 'LZO ' & t('TERM_COMPRESSED'))
@@ -1211,11 +1198,36 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "RAR compressed archive")
 			extract($TYPE_RAR, 'RAR ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "RPG Maker") And Not StringInStr($sFileType, "MV encrypted")
-			extract($TYPE_RGSS, "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+		; Game Archives
+
+		Case StringInStr($sFileType, "BGI (Buriko General Interpreter) engine")
+			CheckGarbro()
+
+		Case StringInStr($sFileType, "Broken Age package")
+			CheckGame(False)
+
+		Case StringInStr($sFileType, "Bruns Engine encrypted") Or StringInStr($sFileType, "Ultramarine 3 encrypted audio file")
+			CheckGarbro()
+
+		Case StringInStr($sFileType, "ClsFileLink") Or StringInStr($sFileType, "ERISA archive file")
+			CheckGarbro()
+			extract($TYPE_ARC_CONV, "ERISA archive file" & t('TERM_GAME') & t('TERM_ARCHIVE'))
+
+		Case StringInStr($sFileType, "KiriKiri Adventure Game System Package")
+			CheckGarbro()
+			extract($TYPE_ARC_CONV, 'KiriKiri Adventure Game System ' & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "Livemaker Engine main game executable")
+			CheckGarbro()
 
 		Case StringInStr($sFileType, "NScripter archive, version 1")
 			CheckGarbro()
+
+		Case StringInStr($sFileType, "Ren'Py data file")
+			extract($TYPE_RPA, "Ren'Py " & t('TERM_ARCHIVE'))
+
+		Case StringInStr($sFileType, "RPG Maker") And Not StringInStr($sFileType, "MV encrypted")
+			extract($TYPE_RGSS, "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Smile Game Builder")
 			extract($TYPE_SGB, "Smile Game Builder " & t('TERM_GAME') & t('TERM_ARCHIVE'))
@@ -1223,8 +1235,21 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Telltale Games ressource archive")
 			extract($TYPE_TTARCH, "Telltale " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
+;~ 		Case StringInStr($sFileType, "Unity Engine Asset file")
+;~ 			extract($TYPE_UNITY, 'Unity Engine Asset ' & t('TERM_FILE'))
+
+		Case StringInStr($sFileType, "Unreal Package")
+			extract($TYPE_UNREAL, 'Unreal Engine ' & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "Valve package") Or StringInStr($sFileType, "WAD3 game data") Or _
+			 StringInStr($sFileType, "Valve Source map") Or StringInStr($sFileType, "Valve Source BSP")
+			CheckTotalObserver('Valve ' & StringUpper($fileext) & " " & t('TERM_PACKAGE'))
+
 		Case StringInStr($sFileType, "Visionaire Studio V3 archive")
 			extract($TYPE_VISIONAIRE3, "Visionaire Studio V3 " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+
+		Case StringInStr($sFileType, "Wintermute Engine data")
+			extract($TYPE_DCP, 'Wintermute Engine ' & t('TERM_GAME') & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Wolf RPG Editor")
 			CheckGarbro()
@@ -1234,18 +1259,6 @@ Func tridcompare($sFileType)
 			CheckGarbro()
 			extract($TYPE_ARC_CONV, "YU-RIS Script Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "ClsFileLink") Or StringInStr($sFileType, "ERISA archive file")
-			CheckGarbro()
-			extract($TYPE_ARC_CONV, "ERISA archive file" & t('TERM_GAME') & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "BGI (Buriko General Interpreter) engine")
-			CheckGarbro()
-
-		Case StringInStr($sFileType, "Reflexive Arcade installer wrapper")
-			extract($TYPE_INNO, 'Reflexive Arcade ' & t('TERM_INSTALLER'))
-
-		Case StringInStr($sFileType, "Ren'Py data file")
-			extract($TYPE_RPA, "Ren'Py " & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "RPM Package")
 			extract($TYPE_7Z, 'RPM ' & t('TERM_PACKAGE'))
@@ -1265,12 +1278,6 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "UHARC compressed archive")
 			extract($TYPE_UHA, 'UHARC ' & t('TERM_ARCHIVE'))
 
-;~ 		Case StringInStr($sFileType, "Unity Engine Asset file")
-;~ 			extract($TYPE_UNITY, 'Unity Engine Asset ' & t('TERM_FILE'))
-
-		Case StringInStr($sFileType, "Unreal Package")
-			extract($TYPE_UNREAL, 'Unreal Engine ' & t('TERM_PACKAGE'))
-
 		Case StringInStr($sFileType, "Base64 Encoded file")
 			extract("uu", 'Base64 ' & t('TERM_ENCODED'))
 
@@ -1282,10 +1289,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "yEnc Encoded file")
 			extract("uu", 'yEnc ' & t('TERM_ENCODED'))
-
-		Case StringInStr($sFileType, "Valve package") Or StringInStr($sFileType, "WAD3 game data") Or _
-			 StringInStr($sFileType, "Valve Source map") Or StringInStr($sFileType, "Valve Source BSP")
-			CheckTotalObserver('Valve ' & StringUpper($fileext) & " " & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Windows Imaging Format")
 			extract($TYPE_7Z, 'WIM ' & t('TERM_IMAGE'))
@@ -1946,7 +1949,7 @@ Func CheckGarbro()
 	Local $return = FetchStdout($garbro & ' l "' & $file & '"', $filedir, @SW_HIDE)
 	If Not @error And Not StringInStr($return, "Error: Input file has an unknown format") And Not StringInStr($return, "Error: Archive is empty") Then
 		$return = StringStripWS(StringStripCR(FetchStdout($garbro & ' i "' & $file & '"', $filedir, @SW_HIDE, -1)), 8)
-		extract($TYPE_GARBRO, $return & ' ' & t('TERM_ARCHIVE'))
+		extract($TYPE_GARBRO, $return & ' ' & t('TERM_GAME') & t('TERM_FILE'))
 	EndIf
 
 	_DeleteTrayMessageBox()
@@ -3130,12 +3133,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $f = $file
 
 			If Not FileExists($tmp) Then
-				Local $sBasePath = _PathFull($filedir & "\..\")
 				For $i = 0 To 2
-					Local $sPath = $sBasePath & _StringRepeat("..\", $i)
+					Local $sPath = _PathFull(_StringRepeat("..\", $i), $filedir & "\")
 					Cout("Searching for main data file in " & $sPath)
 
-					Local $aReturn = _FileListToArray($sPath, "data*.vis", $FLTA_FILES)
+					Local $aReturn = _FileListToArray($sPath, "*.vis", $FLTA_FILES)
 					If @error Then ContinueLoop
 
 					_ArrayDelete($aReturn, 0)
@@ -5227,9 +5229,11 @@ Func _AfterUpdate()
 	FileDelete($bindir & "EXTRNT.EXE")
 	FileDelete($bindir & "ethornell.exe")
 	FileDelete($bindir & "libpng12.dll")
+	FileDelete($bindir & "brunsdec.exe")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
+	FileDelete($defdir & "bruns.ini")
 	FileDelete($licensedir & "flac_authors.txt")
 	FileDelete($licensedir & "flac_readme.txt")
 	FileDelete($licensedir & "Expander_license.txt")
@@ -5294,8 +5298,10 @@ EndFunc
 
 ; Build and display GUI if necessary
 Func CreateGUI()
-	Local Const $iWidth = 344, $iHeight = 182, $iLeft = 12, $iTop = 10, $iInputWidth = 290
+	Global $iGuiMainWidth = 344, $iGuiMainHeight = 182
+	Local Const $iLeft = 12, $iTop = 10, $iInputWidth = 290
 	Local $iPosY = $iTop - 1
+
 	Cout("Creating main GUI")
 	GUIRegisterMsg($WM_DROPFILES, "WM_DROPFILES_UNICODE_FUNC")
 	GUIRegisterMsg($WM_GETMINMAXINFO, "GUI_WM_GETMINMAXINFO_Main")
@@ -5308,10 +5314,10 @@ Func CreateGUI()
 	EndSwitch
 
 	; Create GUI
-	Global $guimain = GUICreate($title, $iWidth, $iHeight + GUI_GetFontScalingModifier(True), -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
+	Global $guimain = GUICreate($title, $iGuiMainWidth, $iGuiMainHeight + GUI_GetFontScalingModifier(True), -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 
 	_GuiSetColor()
-	Local $dropzone = GUICtrlCreateLabel("", 0, 0, $iWidth, $iHeight)
+	Local $dropzone = GUICtrlCreateLabel("", 0, 0, $iGuiMainWidth, $iGuiMainHeight)
 
 	; Menu controls
 	Local $filemenu = GUICtrlCreateMenu(t('MENU_FILE_LABEL'))
@@ -5451,6 +5457,14 @@ Func CreateGUI()
 
 	GUI_ScanOnly(False)
 	GetBatchQueue()
+
+	; Set minimum GUI size for WM_GETMINMAXINFO and $bOptRememberGuiSizePosition
+	; GuiCreate width/height refers to the client area while resizing sets the dimensions for the whole window
+	; including window decorations (title bar, window borders). These elements can be of different sizes,
+	; depending on the theme and version of Windows, so we have to get the real window size dynamically.
+	Local $aPos = WinGetPos($guimain)
+	$iGuiMainWidth = $aPos[2]
+	$iGuiMainHeight = $aPos[3]
 
 	GUISetState(@SW_SHOW)
 
@@ -6382,8 +6396,8 @@ EndFunc
 ; Set minimal size of main GUI
 Func GUI_WM_GETMINMAXINFO_Main($hwnd, $Msg, $wParam, $lParam)
     $tagMaxinfo = DllStructCreate("int;int;int;int;int;int;int;int;int;int", $lParam)
-    DllStructSetData($tagMaxinfo, 7, 320) ; min X
-    DllStructSetData($tagMaxinfo, 8, 170) ; min Y
+    DllStructSetData($tagMaxinfo, 7, $iGuiMainWidth) ; min X
+    DllStructSetData($tagMaxinfo, 8, $iGuiMainHeight) ; min Y
     ;DllStructSetData($tagMaxinfo, 9, 1200); max X
     ;DllStructSetData($tagMaxinfo, 10, 160) ; max Y
 EndFunc
@@ -7139,7 +7153,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 						If $size = 1 Then ; Move single file directly
 							Cout("Copying plugin file " & $aReturn[0] & " to " & $aPluginInfo[$current][6])
 							FileCopy($aReturn[0], $aPluginInfo[$current][6], 1)
-						Else ; Multiple files are returned as path|file1|filen
+						Else ; Multiple files are returned as path|file1|fileN
 							For $i = 1 To $size - 1
 								$aReturn[$i] = $aReturn[0] & "\" & $aReturn[$i]
 								Cout("Copying plugin file " & $aReturn[$i] & " to " & $aPluginInfo[$current][6])
@@ -7183,7 +7197,7 @@ Func GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_
 	GUICtrlSetData($GUI_Plugins_Description, $aPluginInfo[$iIndex][2])
 	GUICtrlSetData($GUI_Plugins_FileTypes, $sSupportedFileTypes & " " & $aPluginInfo[$iIndex][3])
 
-	If HasPlugin($aPluginInfo[$iIndex][0], True) Then
+	If @Compiled And HasPlugin($aPluginInfo[$iIndex][0], True) Then
 		GUICtrlSetData($GUI_Plugins_Download, t('TERM_INSTALLED'))
 		GUICtrlSetData($GUI_Plugins_SelectClose, t('FINISH_BUT'))
 	Else ; Not installed

@@ -1,16 +1,13 @@
 //If this file is not displayed correctly, open it with notepad++
 
-// Language:
-check control size for other languages
-
 // Unpacker changes:
 7z support for nifs, fat, mbr?, mslz?, APM?
+
 
 // New unpackers
 sqx
 paq
 
-// Detection
 
 // Extraction logic updates
 Add cleanup function call if necessary
@@ -39,6 +36,7 @@ Rewrite 7z SFX extraction to use seperate $TYPE to make recursive 7z extract() r
 Consistency: $outdir should end with \
 Save BMS to temp
 Inno: detect encrypted error
+teelog dir
 
 
 // Short term
@@ -56,7 +54,6 @@ generic error message for failed extraction: check if only some file has errors 
 // Known bugs:
 Converting to iso failes when iso file already exists (helper binary not terminating correctly)
 Overwriting files in general depends on extractor (sometimes asks, sometimes overwrites without asking)
-Error messages appear sometimes althought extracted correctly
 Batch mode might stop depending on the extractor, when user input is needed //make sure files do not exist before starting batch mode to avoid this
 qbms process seems to hang (with increased cpu usage) on large files with gaup_pro plugin (confirmed for null bytes, image file; might continue after a long time?)
 
