@@ -5780,62 +5780,67 @@ EndFunc
 
 ; Build and display preferences GUI
 Func GUI_Prefs()
+	Local $iPosX, $iWidth = 230
 	Cout("Creating preferences GUI")
 
 	; Create GUI
-	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), 426, 330, -1, -1, -1, $exStyle, $guimain)
+	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), 466, 330, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
 	; General options
-	GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 8, 6, 240, 98)
+	GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 8, 6, 260, 98)
 	GUICtrlCreateLabel(t('PREFS_LANG_LABEL'), 14, 36, 72, 15)
 	GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 14, 72, 108, 15)
-	Global $langselect = GUICtrlCreateCombo("", 90, 32, 149, 25, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
-	Global $IntervalCont = GUICtrlCreateCombo("", 128, 68, 108, 21, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
+	Global $langselect = GUICtrlCreateCombo("", 100, 32, 160, 25, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
+	Global $IntervalCont = GUICtrlCreateCombo("", 140, 68, 120, 21, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
 	Local $aUpdateInterval = [t('PREFS_UPDATE_DAILY'), t('PREFS_UPDATE_WEEKLY'), t('PREFS_UPDATE_MONTHLY'), t('PREFS_UPDATE_YEARLY'), t('PREFS_UPDATE_NEVER'), t('PREFS_UPDATE_CUSTOM', $updateinterval)]
 	GUICtrlSetData($IntervalCont, _ArrayToString($aUpdateInterval), $aUpdateInterval[0])
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Source file options
-	GUICtrlCreateGroup(t('PREFS_SOURCE_FILES_LABEL'), 256, 6, 160, 98)
-	Local $pos = 300
-	$DeleteOrigFileOpt[$OPTION_KEEP] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_KEEP'), $pos, 22, 113, 17)
-	$DeleteOrigFileOpt[$OPTION_ASK] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_ASK'), $pos, 40, 113, 17)
-	$DeleteOrigFileOpt[$OPTION_DELETE] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_DELETE'), $pos, 58, 113, 17)
-	Global $idOptDeleteAdditionalFiles = GUICtrlCreateCheckbox(t('PREFS_DELETE_ADDITIONAL_FILES_LABEL'), 270, 76)
+	$iPosX = 330
+	GUICtrlCreateGroup(t('PREFS_SOURCE_FILES_LABEL'), 276, 6, 180, 98)
+	$DeleteOrigFileOpt[$OPTION_KEEP] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_KEEP'), $iPosX, 22, 113, 17)
+	$DeleteOrigFileOpt[$OPTION_ASK] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_ASK'), $iPosX, 40, 113, 17)
+	$DeleteOrigFileOpt[$OPTION_DELETE] = GUICtrlCreateRadio(t('PREFS_SOURCE_FILES_OPT_DELETE'), $iPosX, 58, 113, 17)
+	Global $idOptDeleteAdditionalFiles = GUICtrlCreateCheckbox(t('PREFS_DELETE_ADDITIONAL_FILES_LABEL'), 300, 76)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Format-specific preferences
-	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 8, 116, 408, 168)
-	Global $warnexecuteopt = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), 214, 136, 192, 20)
-	Global $freeSpaceCheckOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_FREE_SPACE_LABEL'), 14, 176, 192, 20)
-	Global $unicodecheckopt = GUICtrlCreateCheckbox(t('PREFS_CHECK_UNICODE_LABEL'), 214, 156, 192, 20)
-	Global $appendextopt = GUICtrlCreateCheckbox(t('PREFS_APPEND_EXT_LABEL'), 214, 176, 192, 20)
-	Global $NoBoxOpt = GUICtrlCreateCheckbox(t('PREFS_HIDE_STATUS_LABEL'), 14, 216, 192, 20)
-	Global $GameModeOpt = GUICtrlCreateCheckbox(t('PREFS_HIDE_STATUS_FULLSCREEN_LABEL'), 14, 236, 192, 20)
-	Global $OpenOutDirOpt = GUICtrlCreateCheckbox(t('PREFS_OPEN_FOLDER_LABEL'), 14, 156, 192, 20)
-	Global $FeedbackPromptOpt = GUICtrlCreateCheckbox(t('PREFS_FEEDBACK_PROMPT_LABEL'), 214, 216, 192, 20, $BS_AUTO3STATE)
-	Global $StoreGUIPositionOpt = GUICtrlCreateCheckbox(t('PREFS_WINDOW_POSITION_LABEL'), 14, 196, 192, 20)
-	Global $UsageStatsOpt = GUICtrlCreateCheckbox(t('PREFS_SEND_STATS_LABEL'), 214, 236, 192, 20)
-	Global $LogOpt = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), 214, 196, 192, 20)
-	Global $VideoTrackOpt = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), 14, 256, 192, 20)
-	Global $historyopt = GUICtrlCreateCheckbox(t('PREFS_HISTORY_LABEL'), 14, 136, 192, 20)
-	Global $idOptBetaUpdates = GUICtrlCreateCheckbox(t('PREFS_BETA_UPDATES_LABEL'), 214, 256, 193, 17)
+	$iPosX = 14
+	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 8, 116, 448, 168)
+	Global $historyopt = GUICtrlCreateCheckbox(t('PREFS_HISTORY_LABEL'), $iPosX, 136, $iWidth, 20)
+	Global $idOptOpenOutDir = GUICtrlCreateCheckbox(t('PREFS_OPEN_FOLDER_LABEL'), $iPosX, 156, $iWidth, 20)
+	Global $freeSpaceCheckOpt = GUICtrlCreateCheckbox(t('PREFS_CHECK_FREE_SPACE_LABEL'), $iPosX, 176, $iWidth, 20)
+	Global $idOptRememberGuiSizePosition = GUICtrlCreateCheckbox(t('PREFS_WINDOW_POSITION_LABEL'), $iPosX, 196, $iWidth, 20)
+	Global $idOptNoStatusBox = GUICtrlCreateCheckbox(t('PREFS_HIDE_STATUS_LABEL'), $iPosX, 216, $iWidth, 20)
+	Global $idOptGameMode = GUICtrlCreateCheckbox(t('PREFS_HIDE_STATUS_FULLSCREEN_LABEL'), $iPosX, 236, $iWidth, 20)
+	Global $idOptExtractVideo = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), $iPosX, 256, $iWidth, 20)
+
+	$iPosX += 236
+	$iWidth = 204
+	Global $warnexecuteopt = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), $iPosX, 136, $iWidth, 20)
+	Global $unicodecheckopt = GUICtrlCreateCheckbox(t('PREFS_CHECK_UNICODE_LABEL'), $iPosX, 156, $iWidth, 20)
+	Global $appendextopt = GUICtrlCreateCheckbox(t('PREFS_APPEND_EXT_LABEL'), $iPosX, 176, $iWidth, 20)
+	Global $idOptCreateLog = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), $iPosX, 196, $iWidth, 20)
+	Global $idOptFeedbackPrompt = GUICtrlCreateCheckbox(t('PREFS_FEEDBACK_PROMPT_LABEL'), $iPosX, 216, $iWidth, 20, $BS_AUTO3STATE)
+	Global $idOptSendStats = GUICtrlCreateCheckbox(t('PREFS_SEND_STATS_LABEL'), $iPosX, 236, $iWidth, 20)
+	Global $idOptBetaUpdates = GUICtrlCreateCheckbox(t('PREFS_BETA_UPDATES_LABEL'), $iPosX, 256, $iWidth, 20)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Buttons
-	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 142, 296, 60, 24)
-	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 222, 296, 60, 24)
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 132, 296, 80, 24)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 248, 296, 80, 24)
 
 	; Tooltips
 	GUICtrlSetTip($warnexecuteopt, t('PREFS_WARN_EXECUTE_TOOLTIP'))
 	GUICtrlSetTip($freeSpaceCheckOpt, t('PREFS_CHECK_FREE_SPACE_TOOLTIP'))
 	GUICtrlSetTip($unicodecheckopt, t('PREFS_CHECK_UNICODE_TOOLTIP'))
 	GUICtrlSetTip($appendextopt, t('PREFS_APPEND_EXT_TOOLTIP'))
-	GUICtrlSetTip($GameModeOpt, t('PREFS_HIDE_STATUS_FULLSCREEN_TOOLTIP'))
-	GUICtrlSetTip($FeedbackPromptOpt, t('PREFS_FEEDBACK_PROMPT_TOOLTIP'))
-	GUICtrlSetTip($UsageStatsOpt, t('PREFS_SEND_STATS_TOOLTIP'))
-	GUICtrlSetTip($VideoTrackOpt, t('PREFS_VIDEOTRACK_TOOLTIP'))
+	GUICtrlSetTip($idOptGameMode, t('PREFS_HIDE_STATUS_FULLSCREEN_TOOLTIP'))
+	GUICtrlSetTip($idOptFeedbackPrompt, t('PREFS_FEEDBACK_PROMPT_TOOLTIP'))
+	GUICtrlSetTip($idOptSendStats, t('PREFS_SEND_STATS_TOOLTIP'))
+	GUICtrlSetTip($idOptExtractVideo, t('PREFS_VIDEOTRACK_TOOLTIP'))
 	GUICtrlSetTip($DeleteOrigFileOpt[$OPTION_ASK], t('PREFS_SOURCE_FILES_OPT_KEEP_TOOLTIP'))
 	GUICtrlSetTip($idOptDeleteAdditionalFiles, t('PREFS_DELETE_ADDITIONAL_FILES_TOOLTIP', t('DIR_ADDITIONAL_FILES')))
 
@@ -5846,18 +5851,18 @@ Func GUI_Prefs()
 	If $freeSpaceCheck Then GUICtrlSetState($freeSpaceCheckOpt, $GUI_CHECKED)
 	If $checkUnicode Then GUICtrlSetState($unicodecheckopt, $GUI_CHECKED)
 	If $appendext Then GUICtrlSetState($appendextopt, $GUI_CHECKED)
-	If $bOptNoStatusBox Then GUICtrlSetState($NoBoxOpt, $GUI_CHECKED)
-	If $bHideStatusBoxIfFullscreen Then GUICtrlSetState($GameModeOpt, $GUI_CHECKED)
-	If $bOptOpenOutDir Then GUICtrlSetState($OpenOutDirOpt, $GUI_CHECKED)
+	If $bOptNoStatusBox Then GUICtrlSetState($idOptNoStatusBox, $GUI_CHECKED)
+	If $bHideStatusBoxIfFullscreen Then GUICtrlSetState($idOptGameMode, $GUI_CHECKED)
+	If $bOptOpenOutDir Then GUICtrlSetState($idOptOpenOutDir, $GUI_CHECKED)
 	If $FB_ask == 1 Then
-		GUICtrlSetState($FeedbackPromptOpt, $GUI_CHECKED)
+		GUICtrlSetState($idOptFeedbackPrompt, $GUI_CHECKED)
 	ElseIf $FB_ask == 2 Then
-		GUICtrlSetState($FeedbackPromptOpt, $GUI_INDETERMINATE)
+		GUICtrlSetState($idOptFeedbackPrompt, $GUI_INDETERMINATE)
 	EndIf
-	If $bOptRememberGuiSizePosition Then GUICtrlSetState($StoreGUIPositionOpt, $GUI_CHECKED)
-	If $bSendStats Then GUICtrlSetState($UsageStatsOpt, $GUI_CHECKED)
-	If $Log Then GUICtrlSetState($LogOpt, $GUI_CHECKED)
-	If $bExtractVideo Then GUICtrlSetState($VideoTrackOpt, $GUI_CHECKED)
+	If $bOptRememberGuiSizePosition Then GUICtrlSetState($idOptRememberGuiSizePosition, $GUI_CHECKED)
+	If $bSendStats Then GUICtrlSetState($idOptSendStats, $GUI_CHECKED)
+	If $Log Then GUICtrlSetState($idOptCreateLog, $GUI_CHECKED)
+	If $bExtractVideo Then GUICtrlSetState($idOptExtractVideo, $GUI_CHECKED)
 	If $iCleanup == $OPTION_DELETE Then GUICtrlSetState($idOptDeleteAdditionalFiles, $GUI_CHECKED)
 	If $bOptNightlyUpdates Then GUICtrlSetState($idOptBetaUpdates, $GUI_CHECKED)
 
@@ -5926,21 +5931,21 @@ Func GUI_Prefs_OK()
 	Local $aReturn = [1, 7, 30, 365, 999999, $updateinterval]
 	$updateinterval = $aReturn[$tmp]
 
-	$bOptNoStatusBox = Number(GUICtrlRead($NoBoxOpt) == $GUI_CHECKED)
+	$bOptNoStatusBox = Number(GUICtrlRead($idOptNoStatusBox) == $GUI_CHECKED)
 	TrayItemSetState($Tray_Statusbox, $bOptNoStatusBox? $TRAY_CHECKED: $TRAY_UNCHECKED)
 
 	$warnexecute = Number(GUICtrlRead($warnexecuteopt) == $GUI_CHECKED)
 	$checkUnicode = Number(GUICtrlRead($unicodecheckopt) == $GUI_CHECKED)
 	$freeSpaceCheck = Number(GUICtrlRead($freeSpaceCheckOpt) == $GUI_CHECKED)
 	$appendext = Number(GUICtrlRead($appendextopt) == $GUI_CHECKED)
-	$bHideStatusBoxIfFullscreen = Number(GUICtrlRead($GameModeOpt) == $GUI_CHECKED)
-	$bOptOpenOutDir = Number(GUICtrlRead($OpenOutDirOpt) == $GUI_CHECKED)
-	$FB_ask = Number(GUICtrlRead($FeedbackPromptOpt))
+	$bHideStatusBoxIfFullscreen = Number(GUICtrlRead($idOptGameMode) == $GUI_CHECKED)
+	$bOptOpenOutDir = Number(GUICtrlRead($idOptOpenOutDir) == $GUI_CHECKED)
+	$FB_ask = Number(GUICtrlRead($idOptFeedbackPrompt))
 	If $FB_ask > 2 Then $FB_ask = 0
-	$Log = Number(GUICtrlRead($LogOpt) == $GUI_CHECKED)
-	$bExtractVideo = Number(GUICtrlRead($VideoTrackOpt) == $GUI_CHECKED)
-	$bOptRememberGuiSizePosition = Number(GUICtrlRead($StoreGUIPositionOpt) == $GUI_CHECKED)
-	$bSendStats = Number(GUICtrlRead($UsageStatsOpt) == $GUI_CHECKED)
+	$Log = Number(GUICtrlRead($idOptCreateLog) == $GUI_CHECKED)
+	$bExtractVideo = Number(GUICtrlRead($idOptExtractVideo) == $GUI_CHECKED)
+	$bOptRememberGuiSizePosition = Number(GUICtrlRead($idOptRememberGuiSizePosition) == $GUI_CHECKED)
+	$bSendStats = Number(GUICtrlRead($idOptSendStats) == $GUI_CHECKED)
 	$iCleanup = GUICtrlRead($idOptDeleteAdditionalFiles) == $GUI_CHECKED? $OPTION_DELETE: $OPTION_MOVE
 	$tmp = Number(GUICtrlRead($idOptBetaUpdates) == $GUI_CHECKED)
 	$bUpdate = Not ($bOptNightlyUpdates == $tmp)
