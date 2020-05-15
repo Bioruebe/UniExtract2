@@ -17,7 +17,7 @@ RC 3:
   Fixed some FMOD sound banks not being fully extracted, thanks to Sakkade
   Fixed some zip extractions being detected as failed, although they completed successfully
   Fixed 'NScripter archive' false positives
-  Fixed problems with BCM, Bink, CHM, CreateInstall, FEAD, InstallShield Z, MSP, Reflexive Arcade Installers, SuperDAT, SQLite, Thinstall, UU, VMDK, WMA extraction
+  Fixed problems with BCM, Bink, CHM, CreateInstall, FEAD, InstallShield Z, MSP, Reflexive Arcade Installers, SQLite, SuperDAT, SWF, Thinstall, UU, VMDK, WMA extraction
   Fixed ttarch extraction failing if UniExtract's path contains spaces, thanks to wwh1004
   Fixed 'Game Select' dialog being displayed in silent mode
   Fixed batch mode not being enabled if directory is passed via command line
@@ -38,18 +38,18 @@ RC 3:
   Improved error detection for encrypted archives
   Improved Visionaire extraction for many games: fixed file naming and corrupt webp images
   Updated EnigmaVB unpacker to 0.57
-  Updated ExeInfo PE to 0.0.5.6
+  Updated ExeInfo PE to 0.0.5.9
   Updated innounp to 0.49
   Updated lzop to 1.04
   Updated MediaInfo to 19.04
   Updated mtee to 2.21
-  Updated PeaZip to 0.65
-  Updated QuickBMS to 1.9.2
-  Updated SQLite to 3.38.0
-  Updated UnRAR to 5.71; added x64 version
+  Updated PeaZip to 0.70
+  Updated QuickBMS to 0.10.1
+  Updated SQLite to 3.31.1
+  Updated UnRAR to 5.90; added x64 version
   Updated unrpa to 2.3.0
   Updated unshield to 1.4.d14d2e2 x86, thanks to lifenjoiner
-  Updated upx to 3.95w
+  Updated upx to 3.96
   Updated WiX to 3.11.2
   Updated Bulgarian translation, thanks to jekovcar
   Updated Chinese (Simplified) translation, thanks to SeaHOH

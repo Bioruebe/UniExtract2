@@ -29,7 +29,7 @@ demoleition									demoleition.exe				0.60		x	-	-	Freeware*				kao									http
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.57		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.6		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.9		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											Ext_Detector.dll			-------		---------	-------					-------								-------
 FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
@@ -55,11 +55,11 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 											gcmt-dll.dll				-------		---------	-------					-------								-------
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
-PeaZip										pea.exe						0.65		-	-	-	GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
+PeaZip										pea.exe						0.70		-	-	-	GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
 Qt Linguist									lconvert.exe				5.11.1		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
-QuickBMS									quickbms.exe				0.9.2		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
+QuickBMS									quickbms.exe				0.10.1		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
 RA Installer Unwrapper						RAIU.exe					0.1a		-	-	-	Open Source				Icebird								http://legroom.net/node/539										
@@ -69,11 +69,13 @@ rmvdec										rmvdec.exe					1.1.0		x	-	x	BSD 3-clause			Bioruebe							https:
 											neko runtime files			-------		---------	-------					-------								-------
 sfarkxtc									sfarkxtc.exe				3.0 mod		x	-	x	GNU GPL v3				Arnout Engelen						https://github.com/raboof/sfarkxtc
 											zlib1.dll					1.2.8		---------	zlib license			Jean-loup Gailly, Mark Adler		http://zlib.net/
-Command Line Shell For SQLite				sqlite3.exe					3.30.0		-	-	-	Public Domain			SQLite developers					http://sqlite.org/
 spoondec									spoondec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/spoondec
 											neko runtime files			-------		---------	-------					-------								-------
 											regexp.ndll					-------		---------	-------					-------								-------
 											lime.ndll					-------		---------	-------					-------								-------
+SQLite										sqlite3.exe					3.31.1		-	-	-	Public Domain			SQLite developers					http://sqlite.org/
+											sqlite.dll					-------		---------	-------					-------								-------
+											sqlite_x64.dll				-------		---------	-------					-------								-------
 swfextract (part of swftools)				swfextract.exe				0.9.2			-		GNU GPL v3				Ricardo Pedroso?					http://www.swftools.org/										
 											---------					-------		---------	-------					-------								http://unxutils.sourceforge.net/								
 TrID										trid.exe					2.24		---------	Freeware				Marco Pontello						http://mark0.net/soft-trid-e.html								
@@ -88,7 +90,7 @@ FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin	
 unecm										unecm.exe					1.0			x	-	x	GNU GPL v2				Neill Corlett						http://www.neillcorlett.com/ecm
 Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-	-	-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					5.71		x	-	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
+UnRAR										UnRAR.exe					5.90		x	-	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
 unrpa										unrpa.exe					2.3.0 mod	x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				1.4.d14d2e2	-	-	-	MIT						David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	-	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
@@ -97,7 +99,7 @@ UnUHARC										UHARC02.EXE					0.2			?	-	?	Freeware				Uwe Herklotz						http:
 unzoo										unzoo.exe					4.5			-	-	-	Public Domain			Martin Schoenert					http://archives.math.utk.edu/software/multi-platform/gap/util/
 Info-ZIPs UnZip								unzip.exe					6.00		-	-	-	Open Source				Info-ZIP							http://www.info-zip.org/pub/infozip/							
 uif2iso										uif2iso.exe					0.1.7c		-	-	x	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#uif2iso				
-UPX - The Ultimate Packer for eXecutables	upx.exe						3.95w		-	-	?	modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		https://github.com/upx/upx									
+UPX - The Ultimate Packer for eXecutables	upx.exe						3.96w		-	-	?	modified GNU GPL v2+	Laszlo Molnar, John Reiser, 		https://github.com/upx/upx									
 											---------					-------		---------	(UPX License)			Markus Oberhumer					-------															
 utagedec									utagedec.exe				1.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/utagedec
 											neko runtime files			-------		---------	-------					-------								-------

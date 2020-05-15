@@ -102,18 +102,17 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
 	  $STATUS_MISSINGDEF = "missingdef", $STATUS_MOVEFAILED = "movefailed", $STATUS_NOFREESPACE = "nofreespace", $STATUS_MISSINGPART = "missingpart", _
 	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent"
-Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "ActualInstaller", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
+Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
 	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
-	  $TYPE_CIC = "Clickteam Install Creator", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", _
-	  $TYPE_ENIGMA = "enigma", $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", _
-	  $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", _
-	  $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", _
-	  $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", _
-	  $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "Reflexive Arcade Installer", _
-	  $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIM = "sim", _
-	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", _
-	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", _
-	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "Video (convert)", $TYPE_VISIONAIRE3 = "visionaire3", _
+	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
+	  $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", _
+	  $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
+	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", _
+	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
+	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
+	  $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
+	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
+	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", _
 	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", _
 	  $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
@@ -175,7 +174,7 @@ Dim $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride 
 Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Dim $unpackfailed, $exefailed, $ttarchfailed
 Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
-Dim $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress
+Dim $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress, $sComError = 0
 Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Dim $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aGUIs[0]
 
@@ -653,6 +652,7 @@ Func ParseCommandLine()
 					EndIf
 				Else
 					$sArcTypeOverride = GUI_MethodSelectList($aReturn, StringReplace(t('SCAN_FILE'), "&", ""), 'METHOD_EXTRACTOR_SELECT_LABEL')
+					If $sArcTypeOverride < 0 Then terminate($STATUS_SILENT)
 				EndIf
 				Cout("Arctype override: " & $sArcTypeOverride)
 				Cout("Method select override: " & $sMethodSelectOverride)
@@ -1333,13 +1333,15 @@ Func tridcompare($sFileType)
 			 StringInStr($sFileType, "MPEG-2 Transport Stream")
 			extract($TYPE_VIDEO, t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 
+		; Not packed
 		Case StringInStr($sFileType, "null bytes") Or StringInStr($sFileType, "phpMyAdmin SQL dump") Or _
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
 			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump") Or _
-			 StringInStr($sFileType, "Windows Shortcut") Or StringInStr($sFileType, "JPEG bitmap") Or StringInStr($sFileType, "Windows Registry Data")
+			 StringInStr($sFileType, "Windows Shortcut") Or StringInStr($sFileType, "JPEG bitmap") Or StringInStr($sFileType, "Windows Registry Data") Or _
+			 StringInStr($sFileType, "X509 Certificate")
 			terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
-		; Not supported filetypes
+		; Not supported
 		Case StringInStr($sFileType, "Long Range ZIP") Or StringInStr($sFileType, "Kremlin Encrypted File") Or _
 			 StringInStr($sFileType, "Foxit Reader Add-on")
 			terminate($STATUS_NOTSUPPORTED, $file, $fileext, $sFileType)
@@ -1931,7 +1933,7 @@ Func CheckGame($bUseGaup = True)
 		_ArrayDelete($aReturn, 0)
 		_ArraySort($aReturn)
 		Local $iChoice = GUI_MethodSelectList($aReturn, t('METHOD_GAME_NOGAME'))
-		BmsExtract($iChoice, $hDB)
+		If $iChoice > -1 Then BmsExtract($iChoice, $hDB)
 	EndIf
 
 	_SQLite_Close()
@@ -2632,14 +2634,14 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($lzx & ' -x "' & $file & '"', $outdir)
 
 		Case $TYPE_MHT
-			Local $aReturn = ['MHTML ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', '7zip'), t('METHOD_EXTRACTION_RADIO', 'TotalObserver')]
-			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
-
-			If $iChoice == 1 Then
+			If HasPlugin($archdir & "\Formats\eDecoder." & $iOsArch & ".dll", True) Then
 				extract($TYPE_7Z, $arcdisp)
 			Else
 				extract($TYPE_QBMS, $arcdisp, $observer)
 			EndIf
+
+;~ 			Local $aReturn = ['MHTML ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', '7zip'), t('METHOD_EXTRACTION_RADIO', 'TotalObserver')]
+;~ 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 		Case $TYPE_MOLE
 			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
@@ -2913,13 +2915,13 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_SWF
 			; Run swfextract to get list of contents
-			$return = StringSplit(FetchStdout($swf & ' "' & $file & '"', $filedir, @SW_HIDE), @CRLF)
+			$aReturn = StringSplit(FetchStdout($swf & ' "' & $file & '"', $filedir, @SW_HIDE), @CRLF)
 			If @error Then
 				$success = $RESULT_FAILED
 			Else
 ;~ 				_ArrayDisplay($return)
-				For $i = 2 To $return[0]
-					$line = $return[$i]
+				For $i = 2 To $aReturn[0] - 1
+					$line = $aReturn[$i]
 					; Extract files
 					If StringInStr($line, "MP3 Soundstream") Then
 						_Run($swf & ' -m "' & $file & '"', $outdir, @SW_HIDE, True, True, False, False)
@@ -3144,7 +3146,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Local $sChoice = $aReturn[0]
 					If UBound($aReturn) > 1 Then
 						Local $sChoice = GUI_MethodSelectList($aReturn, t('METHOD_NOT_IN_LIST'), 'METHOD_FILE_SELECT_LABEL')
-						If Not $sChoice Then ContinueLoop
+						If $sChoice < 1 Then ContinueLoop
 					EndIf
 
 					$sPath &= $sChoice
@@ -4384,6 +4386,11 @@ Func _Zlib_Compress($Data)
 	Return $ret2
 EndFunc
 
+; Error handler for COM objects, currently used for sending feedback
+Func _ComErrorHandler($oError)
+	Global $sComError = $oError.description & "(0x" & Hex($oError.number) & ") in " & $oError.source
+EndFunc
+
 ; Dump complete debug content to log file
 Func CreateLog($status)
 	Local $sName = $logdir & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
@@ -4907,12 +4914,10 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 	EndIf
 
 	Cout("Checking for update")
-	Local $ret2 = $silentmode, $return = 0, $found = False
-	If $silent == $UPDATEMSG_SILENT Or $silent == $UPDATEMSG_FOUND_ONLY Then $silentmode = 1
+	Local $return = 0, $found = False
 
 	; Get index
-	$aReturn = _UpdateGetIndex()
-	If $silent <> $UPDATEMSG_SILENT Then $silentmode = $ret2
+	$aReturn = _UpdateGetIndex("", $silent == $UPDATEMSG_SILENT Or $silent == $UPDATEMSG_FOUND_ONLY)
 	If Not IsArray($aReturn) Then Return Cout("Failed to get update file listing")
 
 	; Save date of last check for update
@@ -4956,7 +4961,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 					If Not ShellExecute($sUpdater, "/helper") Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
 					Exit
 				EndIf
-				If Not _UpdateHelpers($aReturn) And Not $ret2 Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
+				If Not _UpdateHelpers($aReturn) And Not $silentmode Then MsgBox($iTopmost + 16, $title, t('UPDATE_FAILED'))
 			Else
 				SendStats("UpdateHelpers", 1)
 			EndIf
@@ -4970,7 +4975,6 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 	EndIf
 	Cout("Check for updates finished")
 
-	If $silent == $UPDATEMSG_SILENT Then $silentmode = $ret2
 	If IsAdmin() Then RestartWithoutAdminRights()
 EndFunc
 
@@ -5101,19 +5105,19 @@ Func _UpdateFFmpeg($bShowProgress = True)
 EndFunc
 
 ; Helper function for updater, downloads index file for subdirectories
-Func _UpdateGetIndex($sURL = "")
+Func _UpdateGetIndex($sURL = "", $bSilent = $silentmode)
 	$sURL = $sUpdateURL & $sURL & "index"
 ;~ 	Cout("Sending request: " & $sURL)
 
 	$return = _INetGetSource($sURL)
-	If @error Then Return _UpdateCheckFailed()
+	If @error Then Return _UpdateCheckFailed($bSilent)
 
 	$aReturn = StringSplit($return, @LF, 2)
 ;~ 	_ArrayDisplay($aReturn)
 
 	For $i = 0 To UBound($aReturn) - 1
 		$aReturn[$i] = StringSplit($aReturn[$i], ",", 2)
-		If @error Then Return _UpdateCheckFailed()
+		If @error Then Return _UpdateCheckFailed($bSilent)
 	Next
 
 	Return $aReturn
@@ -5167,8 +5171,8 @@ Func _UpdateFileCompare($sPath, $a)
 EndFunc
 
 ; Display update failed message
-Func _UpdateCheckFailed()
-	If Not $silentmode Then MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
+Func _UpdateCheckFailed($bSilent = $silentmode)
+	If Not $bSilent Then MsgBox($iTopmost + 48, $title, t('UPDATECHECK_FAILED'))
 	Return False
 EndFunc
 
@@ -5790,7 +5794,7 @@ Func GUI_Prefs()
 	; General options
 	GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 8, 6, 260, 98)
 	GUICtrlCreateLabel(t('PREFS_LANG_LABEL'), 14, 36, 72, 15)
-	GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 14, 72, 108, 15)
+	GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 14, 72, 128, 15)
 	Global $langselect = GUICtrlCreateCombo("", 100, 32, 160, 25, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
 	Global $IntervalCont = GUICtrlCreateCombo("", 140, 68, 120, 21, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
 	Local $aUpdateInterval = [t('PREFS_UPDATE_DAILY'), t('PREFS_UPDATE_WEEKLY'), t('PREFS_UPDATE_MONTHLY'), t('PREFS_UPDATE_YEARLY'), t('PREFS_UPDATE_NEVER'), t('PREFS_UPDATE_CUSTOM', $updateinterval)]
@@ -6216,8 +6220,8 @@ Func GUI_Feedback()
 
 	; Warn if UniExtract is outdated
 	GUICtrlSetState($FB_Send, $GUI_DISABLE)
-	Local $aReturn = _UpdateGetIndex()
-	If IsArray($aReturn) And ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2] Then GUI_Feedback_Outdated()
+	Local $aReturn = _UpdateGetIndex("", True)
+	If IsArray($aReturn) And (($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2]) Then GUI_Feedback_Outdated()
 	GUICtrlSetState($FB_Send, $GUI_ENABLE)
 	Opt("GUIOnEventMode", 0)
 
@@ -6302,21 +6306,30 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 		$FB_Text = 'Content-Type: text/plain' & @CRLF & @CRLF & $FB_Text
 	EndIf
 
-	Local $Data = $boundary & @CRLF & 'Content-Disposition: form-data; name="file"; filename="UE_Feedback"' & @CRLF & $FB_Text & @CRLF & _
-				  $boundary & @CRLF & 'Content-Disposition: form-data; name="id"' & @CRLF & @CRLF & $ID & @CRLF & $boundary & '--'
+	Local $sData = $boundary & @CRLF & 'Content-Disposition: form-data; name="file"; filename="UE_Feedback"' & @CRLF & $FB_Text & @CRLF & _
+				   $boundary & @CRLF & 'Content-Disposition: form-data; name="id"' & @CRLF & @CRLF & $ID & @CRLF & $boundary & '--'
+	Local $sResponse = 0
 
 	$http = ObjCreate("winhttp.winhttprequest.5.1")
-	$http.Open("POST", $sSupportURL, False)
-	$http.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" & StringTrimLeft($boundary, 2))
+	If @error Then
+		_DeleteTrayMessageBox()
+		Return GUI_Feedback_Error("Failed to create winhttp object")
+	Else
+		Global $sComError = 0
+		Local $oErrorHandler = ObjEvent("AutoIt.Error", "_ComErrorHandler")
 
-	; Debug only: use MITM proxy to see raw HTTP data
-;~ 	$http.SetProxy(2, "127.0.0.1:8080", "")
-;~ 	$http.Option(4) = 0x3300
+		$http.Open("POST", $sSupportURL, False)
+		$http.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" & StringTrimLeft($boundary, 2))
 
-	Cout("Sending feedback (" & ($bUseGzip? "gzip": "plain") & " @ " & Round($iSize / 1024, 2) & "kb/" & Round(BinaryLen(StringToBinary($FB_Text)) / 1024, 2) & "kb)")
-	$http.Send($Data)
-	$http.WaitForResponse()
-	Local $sResponse = $http.ResponseText()
+		; Debug only: use MITM proxy to see raw HTTP data
+;~ 		$http.SetProxy(2, "127.0.0.1:8080", "")
+;~ 		$http.Option(4) = 0x3300
+
+		Cout("Sending feedback (" & ($bUseGzip? "gzip": "plain") & " @ " & Round($iSize / 1024, 2) & "kb/" & Round(BinaryLen(StringToBinary($FB_Text)) / 1024, 2) & "kb)")
+		$http.Send($sData)
+		$http.WaitForResponse()
+		$sResponse = $http.ResponseText()
+	EndIf
 
 	_DeleteTrayMessageBox()
 
@@ -6325,15 +6338,22 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 		GUIDelete($FB_GUI)
 		MsgBox($iTopmost, $title, t('FEEDBACK_SUCCESS'))
 	Else
-		Cout("Error sending feedback")
-		MsgBox($iTopmost + 16, $title, t('FEEDBACK_ERROR'))
-		GUISetState(@SW_SHOW, $FB_GUI)
-		GUISetState(@SW_SHOW, $guimain)
-		Return False
+		Return GUI_Feedback_Error($sComError == 0? "Invalid response from server": $sComError)
 	EndIf
 
 	GUISetState(@SW_SHOW, $guimain)
 	Return True
+EndFunc
+
+; Display error message if sending feedback failed
+Func GUI_Feedback_Error($sError)
+	Cout("Error sending feedback: " & $sError)
+	MsgBox($iTopmost + 16, $title, t('FEEDBACK_ERROR', $sError))
+
+	GUISetState(@SW_SHOW, $FB_GUI)
+	GUISetState(@SW_SHOW, $guimain)
+
+	Return False
 EndFunc
 
 ; Ask for feedback
@@ -6415,20 +6435,23 @@ Func GUI_WM_GETMINMAXINFO_Feedback($hWnd, $Msg, $wParam, $lParam)
 EndFunc
 
 ; Tooltip does not work for disabled controls, so here's a workaround
-Func GUI_Create_Tooltip($gui, $hWnd, $Data)
-	Local $pos = ControlGetPos($gui, "", $hWnd)
+Func GUI_Create_Tooltip($hGui, $hWnd, $sMsg)
+	Local $pos = ControlGetPos($hGui, "", $hWnd)
 	If @error Then
 		Cout("Error creating tooltip: failed to determine size of control")
 		Return SetError(1, 0, -1)
 	EndIf
-	Local $label = GUICtrlCreateLabel("", $pos[0], $pos[1], $pos[2], $pos[3])
-	GUICtrlSetTip($label, $Data)
+
+	Local $idLabel = GUICtrlCreateLabel("", $pos[0], $pos[1], $pos[2], $pos[3])
+	GUICtrlSetTip($idLabel, $sMsg)
+
 	; Set initial control on top
 	; Based on http://www.autoitscript.com/forum/topic/146182-solved-change-z-ordering-of-controls/#entry1034567
 	If Not IsHWnd($hWnd) Then $hWnd = GUICtrlGetHandle($hWnd)
 	_WinAPI_SetWindowPos($hWnd, $HWND_BOTTOM, 0, 0, 0, 0, $SWP_NOMOVE + $SWP_NOSIZE + $SWP_NOCOPYBITS)
-	Return $label
-EndFunc   ;==>GUI_Create_Tooltip
+
+	Return $idLabel
+EndFunc
 
 ; Create GUI to change context menu
 Func GUI_ContextMenu()
@@ -6924,11 +6947,14 @@ Func GUI_MethodSelectList($aEntries, $sStandard = "", $sText = "METHOD_GAME_LABE
 				If $sSelection == $sStandard Then $sSelection = 0
 				ExitLoop
 			Case $GUI_EVENT_CLOSE, $idCancel
+				$sSelection = -1
 				ExitLoop
 		EndSwitch
 	WEnd
+
 	GUIDelete($hGUI)
 	Opt("GUIOnEventMode", 1)
+
 	Return $sSelection
 EndFunc
 
