@@ -1,5 +1,7 @@
 # Universal Extractor 2 _(UniExtract2)_
-Universal Extractor 2 is a tool designed to extract files from any type of extractable file. Unlike most archiving programs, UniExtract is not limited to **standard archives** such as `.zip` and `.rar`. It can also deal with **application installers**, **disk images** and even **game archives** and other **multimedia files**. An overview of supported file types can be found [here](/docs/FORMATS.md)
+Universal Extractor 2 is a tool designed to **extract files from any type of extractable file**.
+
+Unlike most archiving programs, UniExtract is not limited to **standard archives** such as `.zip` and `.rar`. It can also deal with **application installers**, **disk images** and even **game archives** and other **multimedia files**. An overview of supported file types can be found [here](/docs/FORMATS.md)
 
 This program is an unofficial updated and extended version of the [original UniExtract by Jared Breland](http://legroom.net/software/uniextract). As the development of the original version has stopped and no update has been published for years, many forks (modified versions, maintained by volunteers from the community) have arisen. This is the most advanced of them, featuring a very long list of enhancements.
 
@@ -22,10 +24,21 @@ See the changelog for a complete log of all improvements.
 Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases)
 
 ###### Virus alert?
-Universal Extractor does not contain any malware. Some anti-virus software occasionally misdetects files inside UniExtract's program directory. (You know, better warn too much than let any malware slip through.) But you can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
+Universal Extractor does not contain any malware. Some anti-virus programs occasionally misdetect files inside UniExtract's program directory. You can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
 
 ###### 'Windows protected your PC'?
+
 Modern versions of Windows have a feature called *SmartScreen*, which warns about unknown files. This means software without a big company behind it and/or a huge userbase produces a warning. Don't panic! Mostly this happens after a new version of UniExtract has been released. After enough users updated their installation, the warning might vanish, because it now has reputation. If you see a *SmartScreen* warning, you can safely click 'More info', then 'Run anyway'.
+
+###### System requirements
+
+In short: Windows XP or newer.
+However, outdated version of Windows only have limited support:
+
+- Windows 7: sending feedback requires you to follow [this guide by Microsoft](https://support.microsoft.com/en-us/help/3140245/update-to-enable-tls-1-1-and-tls-1-2-as-default-secure-protocols-in-wi), otherwise it will fail
+- Windows XP: any online functionality, such as the updater or the feedback dialog, is disabled for security reasons. Also some extractors might not work.
+
+(Online functionality for these systems might be restored in a future version of Universal Extractor.)
 
 ## FAQ
 
