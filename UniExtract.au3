@@ -290,16 +290,16 @@ Global $reguser = $regcurrent
 ; On top to make remove via command line parameter possible
 ; Shell	| Commandline Parameter | Translation | MultiSelectModel
 Global $CM_Shells[5][4] = [ _
-	['uniextract_files', '', 'EXTRACT_FILES', "Single"], _
-	['uniextract_here', ' .', 'EXTRACT_HERE', "Player"], _
-	['uniextract_sub', ' /sub', 'EXTRACT_SUB', "Player"], _
-	['uniextract_last', ' /last', 'EXTRACT_LAST', "Player"], _
-	['uniextract_scan', ' /scan', 'SCAN_FILE', "Player"] _
+	["uniextract_files", "", "EXTRACT_FILES", "Single"], _
+	["uniextract_here", " .", "EXTRACT_HERE", "Player"], _
+	["uniextract_sub", " /sub", "EXTRACT_SUB", "Player"], _
+	["uniextract_last", " /last", "EXTRACT_LAST", "Player"], _
+	["uniextract_scan", " /scan", "SCAN_FILE", "Player"] _
 ]
 
 ; Make sure a language file exists
 If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
-	If MsgBox(48+1, $title, "No language file found." & @CRLF & @CRLF & "Click OK to download all missing files or Cancel to exit") == 1 Then
+	If MsgBox($MB_ICONWARNING + $MB_YESNO, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") == $IDYES Then
 		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
 		Run($sUniExtract, @ScriptDir)
 	EndIf
@@ -600,7 +600,7 @@ Func ParseCommandLine()
 		$prompt = 1
 		GUI_Plugins()
 
-	ElseIf $cmdline[1] = "/remove" Then
+	ElseIf $cmdline[1] = "/remove" Or $cmdline[1] = "/uninstall" Then
 		; Completely delete registry entries, used by uninstaller
 		_IsWin7()
 		GUI_ContextMenu_remove()
@@ -1561,8 +1561,11 @@ Func advexescan($bUseCmd = $extract)
 		Case StringInStr($sFileType, "Ghost Installer Studio")
 			extract($TYPE_GHOST, 'Ghost Installer Studio ' & t('TERM_INSTALLER'))
 
-		Case StringInStr($sFileType, "Gentee Installer") Or StringInStr($sFileType, "Installer VISE") Or _
-			 StringInStr($sFileType, "Setup Factory 6.x")
+		Case StringInStr($sFileType, "Gentee Installer") Or StringInStr($sFileType, "Installer VISE")
+			checkIE()
+
+		Case StringInStr($sFileType, "Setup Factory")
+			CheckTotalObserver('Setup Factory ' & t('TERM_INSTALLER'))
 			checkIE()
 
 		Case StringInStr($sFileType, "install4j")
@@ -1647,7 +1650,8 @@ Func advexescan($bUseCmd = $extract)
 
 		; Not supported
 		Case StringInStr($sFileType, "Astrum InstallWizard") Or StringInStr($sFileType, "clickteam") Or _
-			 StringInStr($sFileType, "BitRock InstallBuilder") Or StringInStr($sFileType, "NE <- Windows 16bit")
+			 StringInStr($sFileType, "BitRock InstallBuilder") Or StringInStr($sFileType, "NE <- Windows 16bit") Or _
+			 StringInStr($sFileType, "Enigma Protector")
 			terminate($STATUS_NOTSUPPORTED, $file, $sFileType, $sFileType)
 
 		; Terminate if file cannot be unpacked
@@ -3652,7 +3656,7 @@ Func HasFFMPEG()
 				GUIDelete($hGUI)
 				terminate($STATUS_SILENT)
 			Case $idDownload
-				If GUICtrlRead($idCheckbox) = $GUI_CHECKED Then
+				If _IsChecked($idCheckbox) Then
 					GUIDelete($hGUI)
 					GetFFmpeg()
 					If @error Then terminate($STATUS_SILENT)
@@ -3840,6 +3844,16 @@ Func _FileDelete($sFile, $iSleep = 100)
 	Cout("Failed again, error " & _WinAPI_GetLastError() & ": " & _WinAPI_GetLastErrorMessage())
 EndFunc
 
+Func _RegWrite($sKey, $sValueName, $sType = "REG_SZ", $sValue = "")
+	Cout("Creating registry key " & $sKey & "/" & $sValueName)
+	RegWrite($sKey, $sValueName, $sType, $sValue)
+	Local $iError = @error
+	If Not $iError Then Return True
+
+	Cout("Failed to write to registry, error " & @error)
+	Return SetError($iError, 0, False)
+EndFunc
+
 ; Handle program termination with appropriate error message
 Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	Local $LogFile = 0, $exitcode = 0, $sFileType = _FiletypeGet(False), $shortStatus = ($status = $STATUS_SUCCESS)? $arctype: $status
@@ -3933,7 +3947,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 			Prompt(48, 'NOT_PACKED', CreateArray($file, $sFileType))
 			$exitcode = 6
 		Case $STATUS_NOTSUPPORTED
-			Prompt(16, 'NOT_SUPPORTED', CreateArray($file, StringReplace(t('MENU_HELP_FEEDBACK_LABEL'), "&", ""), StringReplace(t('MENU_HELP_LABEL'), "&", "")))
+			GUI_Error_WithFeedbackButton("NOT_SUPPORTED_TITLE", t('NOT_SUPPORTED', $filename))
 			$exitcode = 7
 		Case $STATUS_MISSINGEXE
 			Prompt(48, 'MISSING_EXE', CreateArray($file, $arctype))
@@ -3982,7 +3996,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	; Delete empty output directory if failed
 	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 1)
 
-	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 7 Or $exitcode == 12) And $fileext <> "dll" Then GUI_Feedback_Prompt()
+	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 12) And $fileext <> "dll" Then GUI_Feedback_Prompt()
 
 	If $batchEnabled = 1 And $status <> $STATUS_SILENT Then ; Don't start batch if gui is closed
 		; Start next extraction
@@ -4609,8 +4623,9 @@ Func _RunInTempOutdir($tempoutdir, $f, $sWorkingDir = $outdir, $show_flag = @SW_
 
 	_Run($f, $sWorkingDir, $show_flag, $bUseCmd, $bUseTee, $bPatternSearch, $bInitialShow)
 
+	Sleep(1000)
 	_FileMove($tmp, $file)
-	MoveFiles($tempoutdir, $outdir, True, "", True, True)
+	MoveFiles($tempoutdir, $outdir, False, "", True, True)
 EndFunc
 
 ; Search console output for progress indicator patterns and update status box
@@ -4956,7 +4971,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 				_ProgressOff()
 			EndIf
 			$found = True
-			If Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES')) Then
+			If $silent == $UPDATEMSG_SILENT Or Prompt(48 + 4, 'UPDATE_PROMPT', t('UPDATE_TERM_PROGRAM_FILES')) Then
 				If Not CanAccess($bindir) Then
 					If Not ShellExecute($sUpdater, "/helper") Then MsgBox($iTopmost + 16, $title, t('UPDATE_NOADMIN'))
 					Exit
@@ -5259,6 +5274,8 @@ Func _AfterUpdate()
 	FileDelete(@ScriptDir & "\todo.txt")
 	FileDelete(@ScriptDir & "\useful_software.txt")
 	FileDelete(@ScriptDir & "\support\Icons\Bioruebe.jpg")
+	FileDelete(@ScriptDir & "\changelog_minor.txt")
+	FileDelete(@ScriptDir & "\changelog.txt")
 
 	_DeleteFromArchDir("flac.exe")
 	_DeleteFromArchDir("7z.dll.new")
@@ -5554,6 +5571,26 @@ EndFunc   ;==>CharCount
 ; Return the checked state of a checkbox
 Func _IsChecked($idControlID)
     Return BitAND(GUICtrlRead($idControlID), $GUI_CHECKED) = $GUI_CHECKED
+EndFunc
+
+; Test if any of the controls in an array is checked
+Func _IsAnyChecked($aControls)
+	If Not IsArray($aControls) Then $aControls = [$aControls]
+
+	For $idControlID In $aControls
+		If _IsChecked($idControlID) Then Return True
+	Next
+
+	Return False
+EndFunc
+
+; Set checked tate of all controls in given array
+Func _SetState($aControls, $state)
+	If Not IsArray($aControls) Then $aControls = [$aControls]
+
+	For $idControlID In $aControls
+		GUICtrlSetState($idControlID, $state)
+	Next
 EndFunc
 
 ; Get title of a window by PID as returned by Run()
@@ -5908,10 +5945,9 @@ EndFunc
 
 ; Exit preferences GUI if OK clicked
 Func GUI_Prefs_OK()
-	; Universal preferences
 	$redrawgui = False
 
-	If GUICtrlRead($historyopt) == $GUI_CHECKED Then
+	If _IsChecked($historyopt) Then
 		If $history == 0 Then
 			$history = 1
 			$redrawgui = True
@@ -5935,29 +5971,29 @@ Func GUI_Prefs_OK()
 	Local $aReturn = [1, 7, 30, 365, 999999, $updateinterval]
 	$updateinterval = $aReturn[$tmp]
 
-	$bOptNoStatusBox = Number(GUICtrlRead($idOptNoStatusBox) == $GUI_CHECKED)
+	$bOptNoStatusBox = Number(_IsChecked($idOptNoStatusBox))
 	TrayItemSetState($Tray_Statusbox, $bOptNoStatusBox? $TRAY_CHECKED: $TRAY_UNCHECKED)
 
-	$warnexecute = Number(GUICtrlRead($warnexecuteopt) == $GUI_CHECKED)
-	$checkUnicode = Number(GUICtrlRead($unicodecheckopt) == $GUI_CHECKED)
-	$freeSpaceCheck = Number(GUICtrlRead($freeSpaceCheckOpt) == $GUI_CHECKED)
-	$appendext = Number(GUICtrlRead($appendextopt) == $GUI_CHECKED)
-	$bHideStatusBoxIfFullscreen = Number(GUICtrlRead($idOptGameMode) == $GUI_CHECKED)
-	$bOptOpenOutDir = Number(GUICtrlRead($idOptOpenOutDir) == $GUI_CHECKED)
+	$warnexecute = Number(_IsChecked($warnexecuteopt))
+	$checkUnicode = Number(_IsChecked($unicodecheckopt))
+	$freeSpaceCheck = Number(_IsChecked($freeSpaceCheckOpt))
+	$appendext = Number(_IsChecked($appendextopt))
+	$bHideStatusBoxIfFullscreen = Number(_IsChecked($idOptGameMode))
+	$bOptOpenOutDir = Number(_IsChecked($idOptOpenOutDir))
 	$FB_ask = Number(GUICtrlRead($idOptFeedbackPrompt))
 	If $FB_ask > 2 Then $FB_ask = 0
-	$Log = Number(GUICtrlRead($idOptCreateLog) == $GUI_CHECKED)
-	$bExtractVideo = Number(GUICtrlRead($idOptExtractVideo) == $GUI_CHECKED)
-	$bOptRememberGuiSizePosition = Number(GUICtrlRead($idOptRememberGuiSizePosition) == $GUI_CHECKED)
-	$bSendStats = Number(GUICtrlRead($idOptSendStats) == $GUI_CHECKED)
-	$iCleanup = GUICtrlRead($idOptDeleteAdditionalFiles) == $GUI_CHECKED? $OPTION_DELETE: $OPTION_MOVE
-	$tmp = Number(GUICtrlRead($idOptBetaUpdates) == $GUI_CHECKED)
+	$Log = Number(_IsChecked($idOptCreateLog))
+	$bExtractVideo = Number(_IsChecked($idOptExtractVideo))
+	$bOptRememberGuiSizePosition = Number(_IsChecked($idOptRememberGuiSizePosition))
+	$bSendStats = Number(_IsChecked($idOptSendStats))
+	$iCleanup = _IsChecked($idOptDeleteAdditionalFiles)? $OPTION_DELETE: $OPTION_MOVE
+	$tmp = Number(_IsChecked($idOptBetaUpdates))
 	$bUpdate = Not ($bOptNightlyUpdates == $tmp)
 	$bOptNightlyUpdates = $tmp
 	$sUpdateURL = $bOptNightlyUpdates == 1? $sNightlyUpdateURL: $sDefaultUpdateURL
 
 	For $i = 0 To 2
-		If GUICtrlRead($DeleteOrigFileOpt[$i]) == $GUI_CHECKED Then $iDeleteOrigFile = $i
+		If _IsChecked($DeleteOrigFileOpt[$i]) Then $iDeleteOrigFile = $i
 	Next
 
 	WritePrefs()
@@ -6189,7 +6225,7 @@ Func GUI_Feedback()
 	_GuiSetColor()
 
 	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 8, 8, 384, 17)
-	$FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 8, 24, 385, 21)
+	$FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 8, 24, 385, 21, $ES_READONLY)
 
 	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 56, 384, 17)
 	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
@@ -6229,7 +6265,7 @@ Func GUI_Feedback()
 		$nMsg = GUIGetMsg()
 		Switch $nMsg
 			Case $FB_Send
-				If GUICtrlRead($FB_PrivacyPolicyCheckbox) = $GUI_CHECKED Then
+				If _IsChecked($FB_PrivacyPolicyCheckbox) Then
 					GUICtrlSetState($FB_Send, $GUI_DISABLE)
 					If GUI_Feedback_Send(GUICtrlRead($FB_SysCont), $file, GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont)) Then ExitLoop
 					GUICtrlSetState($FB_Send, $GUI_ENABLE)
@@ -6551,7 +6587,6 @@ Func GUI_ContextMenu()
 
 	GUICtrlSetData($CM_add_input, $addassoc)
 
-	; Activate controls if context menu entries are enabled
 	GUI_ContextMenu_activate()
 	GUI_ContextMenu_ChangePic()
 
@@ -6560,7 +6595,7 @@ EndFunc
 
 ; Change picture according to selected context menu type
 Func GUI_ContextMenu_ChangePic()
-	Local $sPath = @ScriptDir & "\support\Icons\" & (GUICtrlRead($CM_Cascading_Radio) = $GUI_CHECKED? "cascading.jpg": "simple.jpg")
+	Local $sPath = @ScriptDir & "\support\Icons\" & (_IsChecked($CM_Cascading_Radio)? "cascading.jpg": "simple.jpg")
 	GUICtrlSetImage($CM_Picture, $sPath)
 EndFunc
 
@@ -6574,43 +6609,45 @@ Func GUI_ContextMenu_OK()
 	GUI_ContextMenu_remove()
 
 	Cout("Registering context menu entries")
-	If GUICtrlRead($CM_Checkbox_enabled) == $GUI_CHECKED Then
+	If _IsChecked($CM_Checkbox_enabled) Then
+		If Not _IsAnyChecked($CM_Checkbox) Then _SetState($CM_Checkbox, $GUI_CHECKED)
 
 		; Select registry key
-		Global $reguser = GUICtrlRead($CM_Checkbox_allusers) == $GUI_CHECKED? $regall: $regcurrent
+		Global $reguser = _IsChecked($CM_Checkbox_allusers)? $regall: $regcurrent
+		Cout("Using base key " & $reguser)
 
 		; simple
-		If GUICtrlRead($CM_Simple_Radio) == $GUI_CHECKED Then
+		If _IsChecked($CM_Simple_Radio) Then
+			Cout("Creating simple context menu")
 			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
-				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
+				If _IsChecked($CM_Checkbox[$i]) Then
 					Local $sKey = $reguser & $CM_Shells[$i][0]
-					RegWrite($sKey, "", "REG_SZ", t($CM_Shells[$i][2]))
-					RegWrite($sKey & "\command", "", "REG_SZ", $command)
-					If $CM_Shells[$i][3] Then RegWrite($sKey, "MultiSelectModel", "REG_SZ", $CM_Shells[$i][3])
+					_RegWrite($sKey, "", "REG_SZ", t($CM_Shells[$i][2]))
+					_RegWrite($sKey & "\command", "", "REG_SZ", $command)
+					If $CM_Shells[$i][3] Then _RegWrite($sKey, "MultiSelectModel", "REG_SZ", $CM_Shells[$i][3])
 
-					; Add icon to context menu, only works on win 7 or newer
-					If $win7 Then RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
+					; Icons only work on win 7 or newer
+					If $win7 Then _RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
 				EndIf
 			Next
 
 		; cascading
-		ElseIf $win7 And GUICtrlRead($CM_Cascading_Radio) == $GUI_CHECKED Then
+		ElseIf $win7 And _IsChecked($CM_Cascading_Radio) Then
+			Cout("Creating cascading context menu")
 			Local $sKey = $reguser & "uniextract"
-			RegWrite($sKey, "MUIVerb", "REG_SZ", "Universal Extractor")
-			RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
-			RegWrite($sKey, "SubCommands", "REG_SZ", "")
-			RegWrite($sKey, "MultiSelectModel", "REG_SZ", "Player")
+			_RegWrite($sKey, "MUIVerb", "REG_SZ", "Universal Extractor")
+			_RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
+			_RegWrite($sKey, "SubCommands", "REG_SZ", "")
+			_RegWrite($sKey, "MultiSelectModel", "REG_SZ", "Player")
 
 			For $i = 0 To $iSize
 				$command = '"' & @ScriptFullPath & '" "%1"' & $CM_Shells[$i][1]
 				$sKey = $reguser & "uniextract\Shell\" & $CM_Shells[$i][0]
-				If GUICtrlRead($CM_Checkbox[$i]) == $GUI_CHECKED Then
-					RegWrite($sKey, "", "REG_SZ", t($CM_Shells[$i][2]))
-					RegWrite($sKey & "\command", "", "REG_SZ", $command)
-
-					; Icon
-					RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
+				If _IsChecked($CM_Checkbox[$i]) Then
+					_RegWrite($sKey, "", "REG_SZ", t($CM_Shells[$i][2]))
+					_RegWrite($sKey & "\command", "", "REG_SZ", $command)
+					_RegWrite($sKey, "Icon", "REG_SZ", @ScriptFullPath & ",0")
 				EndIf
 			Next
 		EndIf
@@ -6618,62 +6655,55 @@ Func GUI_ContextMenu_OK()
 
 	; File associations
 	If GUICtrlRead($CM_add_input) == "" Then GUICtrlSetState($CM_Checkbox_add, $GUI_UNCHECKED)
-	If GUICtrlRead($CM_Checkbox_add) == $GUI_CHECKED Then
+	If _IsChecked($CM_Checkbox_add) Then
 		$return = MsgBox($iTopmost + 48 + 4, $name, t('CONTEXT_DANGEROUS'))
-		If $return == 6 And ($addassocenabled == 0 Or ($addassocenabled = 1 And $addassoc <> GUICtrlRead($CM_add_input))) Then GUI_ContextMenu_fileassoc(1)
+		If $return == $IDYES  And ($addassocenabled == 0 Or ($addassocenabled = 1 And $addassoc <> GUICtrlRead($CM_add_input))) Then GUI_ContextMenu_fileassoc(1)
 	Else
 		If $addassocenabled Then GUI_ContextMenu_fileassoc(0)
 	EndIf
 	GUIDelete($CM_GUI)
 EndFunc
 
-; (De)activate controls if enabled but not checked
+; (De)activate context menu controls based on main 'enabled' checkbox state
 Func GUI_ContextMenu_activate()
-	; Set state according to main enable checkbox
-	Local $state = GUICtrlRead($CM_Checkbox_enabled) = $GUI_CHECKED? $GUI_ENABLE: $GUI_DISABLE
+	Local $bEnabled = _IsChecked($CM_Checkbox_enabled)? $GUI_ENABLE: $GUI_DISABLE
 
-	If IsAdmin() Then GUICtrlSetState($CM_Checkbox_allusers, $state)
-	GUICtrlSetState($CM_Simple_Radio, $state)
+	If IsAdmin() Then GUICtrlSetState($CM_Checkbox_allusers, $bEnabled)
+	GUICtrlSetState($CM_Simple_Radio, $bEnabled)
 
-	For $i = 0 To UBound($CM_Shells) - 1
-		GUICtrlSetState($CM_Checkbox[$i], $state)
-	Next
+	_SetState($CM_Checkbox, $bEnabled)
 
-	If $win7 Then GUICtrlSetState($CM_Cascading_Radio, $state)
-	If GUICtrlRead($CM_Checkbox_add) = $GUI_CHECKED Then
+	If $bEnabled == $GUI_ENABLE And Not _IsAnyChecked($CM_Checkbox) Then _SetState($CM_Checkbox, $GUI_CHECKED)
+
+	If $win7 Then GUICtrlSetState($CM_Cascading_Radio, $bEnabled)
+	If _IsChecked($CM_Checkbox_add) Then
 		If IsAdmin() Then GUICtrlSetState($CM_Checkbox_allusers2, $GUI_ENABLE)
 		GUICtrlSetState($CM_add_input, $GUI_ENABLE)
 	Else
 		GUICtrlSetState($CM_Checkbox_allusers2, $GUI_DISABLE)
 		GUICtrlSetState($CM_add_input, $GUI_DISABLE)
 	EndIf
-EndFunc   ;==>GUI_ContextMenu_activate
+EndFunc
 
 ; Create/remove file associations
-Func GUI_ContextMenu_fileassoc($enable)
+Func GUI_ContextMenu_fileassoc($bEnable)
+	$sRegistryKey = ($addassocallusers? "HKLM": "HKCU") & $reg64 & "\SOFTWARE\Classes\"
+
 	; Delete old file associations
-
-	If $addassocallusers Then
-		$sRegistryKey = "HKLM" & $reg64 & "\SOFTWARE\Classes\"
-	Else
-		$sRegistryKey = "HKCU" & $reg64 & "\SOFTWARE\Classes\"
-	EndIf
-
 	Local $files = StringSplit($addassoc, ",")
-	;_ArrayDisplay($files)
 	For $i = 1 To $files[0]
 		_ShellFile_Uninstall(StringStripWS($files[$i], 1), $sRegistryKey)
 	Next
 	$files = 0
 
-	$addassocenabled = $enable
+	$addassocenabled = $bEnable
 	SavePref("addassocenabled", $addassocenabled)
 
 	; Return if associations are disabled
-	If Not $enable Then Return
+	If Not $bEnable Then Return
 
 	; Select registry key
-	If GUICtrlRead($CM_Checkbox_allusers2) == $GUI_CHECKED Then
+	If _IsChecked($CM_Checkbox_allusers2) Then
 		$sRegistryKey = "HKLM" & $reg64 & "\SOFTWARE\Classes\"
 		$addassocallusers = 1
 	Else
@@ -6692,7 +6722,7 @@ Func GUI_ContextMenu_fileassoc($enable)
 	; Save associated filetypes
 	SavePref('addassoc', $addassoc)
 	SavePref('addassocallusers', $addassocallusers)
-EndFunc   ;==>GUI_ContextMenu_fileassoc
+EndFunc
 
 ; Creates file association for a specified file
 ; Based on _ShellFile.au3 by guinness (http://www.autoitscript.com/forum/topic/129955-shellfile-create-an-entry-in-the-
@@ -6701,17 +6731,17 @@ Func _ShellFile_Install($sText, $sFileType, $sName, $sRegistryKey)
 	Cout("Creating File Association: ." & $sFileType)
 	If StringLeft($sFileType, 1) = "." Then $sFileType = StringTrimLeft($sFileType, 1)
 
-	RegWrite($sRegistryKey & "." & $sFileType, "", "REG_SZ", $sName)
-	RegWrite($sRegistryKey & $sName & "\DefaultIcon\", "", "REG_SZ", @ScriptFullPath & ",0")
-	RegWrite($sRegistryKey & $sName & "\shell\open", "", "REG_SZ", $sText)
-	RegWrite($sRegistryKey & $sName & "\shell\open", "Icon", "REG_EXPAND_SZ", @ScriptFullPath & ",0")
-	RegWrite($sRegistryKey & $sName & "\shell\open\command\", "", "REG_SZ", '"' & @ScriptFullPath & '" "%1"')
-	RegWrite($sRegistryKey & $sName, "", "REG_SZ", $sText)
-	RegWrite($sRegistryKey & $sName, "Icon", "REG_EXPAND_SZ", @ScriptFullPath & ",0")
-	RegWrite($sRegistryKey & $sName & "\command", "", "REG_SZ", '"' & @ScriptFullPath & '" "%1"')
+	_RegWrite($sRegistryKey & "." & $sFileType, "", "REG_SZ", $sName)
+	_RegWrite($sRegistryKey & $sName & "\DefaultIcon\", "", "REG_SZ", @ScriptFullPath & ",0")
+	_RegWrite($sRegistryKey & $sName & "\shell\open", "", "REG_SZ", $sText)
+	_RegWrite($sRegistryKey & $sName & "\shell\open", "Icon", "REG_EXPAND_SZ", @ScriptFullPath & ",0")
+	_RegWrite($sRegistryKey & $sName & "\shell\open\command\", "", "REG_SZ", '"' & @ScriptFullPath & '" "%1"')
+	_RegWrite($sRegistryKey & $sName, "", "REG_SZ", $sText)
+	_RegWrite($sRegistryKey & $sName, "Icon", "REG_EXPAND_SZ", @ScriptFullPath & ",0")
+	_RegWrite($sRegistryKey & $sName & "\command", "", "REG_SZ", '"' & @ScriptFullPath & '" "%1"')
 
 	Return SetError(@error, 0, @error)
-EndFunc   ;==>_ShellFile_Install
+EndFunc
 
 ; Removes file association for a specified file
 ; Based on _ShellFile.au3 by guinness (http://www.autoitscript.com/forum/topic/129955-shellfile-create-an-entry-in-the-
@@ -6893,7 +6923,7 @@ Func GUI_MethodSelect($aData, $arcdisp)
 			; Set extract command
 			Case $idOk
 				For $i = 0 To $size - 1
-					If GUICtrlRead($select[$i]) == $GUI_CHECKED Then
+					If _IsChecked($select[$i]) Then
 						GUIDelete($hGUI)
 						Opt("GUIOnEventMode", 1)
 						_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
@@ -6994,6 +7024,40 @@ Func _GUI_FileScan()
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
+; Display an error message along with a button to open the feedback GUI
+Func GUI_Error_WithFeedbackButton($sTitle, $sText)
+	If $silentmode Then Return
+
+	Opt("GUIOnEventMode", 0)
+
+	Local $hGui = GUICreate($name, 436, 194)
+	_GuiSetColor()
+
+	Local $idImage = _GUICtrlCreatePic($sLogoFile, 10, 26, 73, 73)
+	GUICtrlCreateLabel(t($sTitle), 102, 10, 308, 28)
+	GUICtrlSetFont(-1, 14, 400, 4, $FONT_ARIAL)
+	GUICtrlCreateLabel($sText, 102, 42, 301, 104)
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 336, 158, 81, 25)
+	Local $idFeedback = GUICtrlCreateButton(t('FEEDBACK_TITLE_LABEL'), 101, 158, 81, 25)
+
+	GUISetState(@SW_SHOW)
+
+	While 1
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idOk
+				ExitLoop
+			Case $idFeedback
+				GUIDelete($hGUI)
+				GUI_Feedback()
+				ExitLoop
+		EndSwitch
+	WEnd
+
+	Opt("GUIOnEventMode", 1)
+	GUIDelete($hGUI)
+EndFunc
+
 ; Display unknown file type error message with file scan result box
 Func GUI_Error_UnknownExt()
 	If $silentmode Then Return
@@ -7025,7 +7089,7 @@ Func GUI_Error_UnknownExt()
 	EndIf
 
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 395, $iPosY, 81, 25)
-	Local $idFeedback = GUICtrlCreateButton("Feedback", 95, $iPosY, 81, 25)
+	Local $idFeedback = GUICtrlCreateButton(t('FEEDBACK_TITLE_LABEL'), 95, $iPosY, 81, 25)
 
 	GUISetState(@SW_SHOW)
 

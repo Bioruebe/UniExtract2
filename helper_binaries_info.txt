@@ -19,25 +19,28 @@ AspackDie									AspackDie.exe				1.41			-		Open Source				yoda								http://s
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
 BCM											x86\bcm.exe					1.30		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
 											x64\bcm.exe					-------		---------	-------					-------								-------
+BioLib										Bio.cs.dll					1.0.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
 BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
-cicdec										cicdec						1.2.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
+cicdec										cicdec						2.1.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
+											BioLib						-------		---------	-------					-------								-------
 											ICSharpCode.SharpZipLib.dll	1.2.0		---------	MIT						SharpZipLib Contributors			https://github.com/icsharpcode/SharpZipLib
 ConvertLIT									clit.exe					1.8			-	-	-	GNU GPL v3				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	-	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
-demoleition									demoleition.exe				0.60		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
-Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.57		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
+demoleition									demoleition.exe				0.61		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
+Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.58		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.5.9		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
-											Ext_Detector.dll			-------		---------	-------					-------								-------
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.0		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+											Ext_Detector.dll			0.5.5.2		---------	-------					-------								-------
 FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
 FSB files extractor							fsbext.exe					0.3.8		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
 GARbro										\GARbro directory			1.5.44		x	-	x	MIT						mørkt								https://github.com/morkt/GARbro
 GNU gettext									msgunfmt.exe				0.19.8.1	-	-	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
-godotdec									godotdec.exe				2.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/godotdec
+godotdec									godotdec.exe				2.1.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/godotdec
+											BioLib						-------		---------	-------					-------								-------
 HelpDeco									helpdeco.exe				2.1				-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
 i6comp										i6comp.exe					0.2				-		Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
 innounp, the Inno Setup Unpacker			innounp.exe					0.49			-	o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
@@ -47,7 +50,7 @@ KGB Archiver								\kgb directory				2 (beta 2)		-	-	GNU GPL v2				Thomasz Pawl
 lessmsi										\lessmsi directory			1.6.1 mod	-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
 lzip										lzip.exe					1.20		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
 lzop										lzop.exe					1.04			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
-MediaInfo 									MediaInfo.dll				19.04		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
+MediaInfo 									MediaInfo.dll				20.03		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0				-		Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
 mtee										mtee.exe					2.21		---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
 NBHextract									NBHextract.exe				1.0				-		Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
@@ -55,10 +58,10 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 											gcmt-dll.dll				-------		---------	-------					-------								-------
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
-PeaZip										pea.exe						0.70		-	-	-	GNU LGPL				Giorgio Tani						http://peazip.sourceforge.net/									
+PeaZip										pea.exe						0.72		-	-	-	GNU LGPL				Giorgio Tani						https://www.peazip.org/								
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
-Qt Linguist									lconvert.exe				5.11.1		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
+Qt Linguist									lconvert.exe				5.13.2		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
 QuickBMS									quickbms.exe				0.10.1		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
@@ -130,12 +133,8 @@ Total Commander plugins:
 											observer.ini				-------		---------	-------					-------								-------
 											\modules directory			-------		---------	-------					-------								-------
 
-Notes
-----------------------------
 
 Further information about every program can be found in the \docs directory. If there is no licensing information, see the appropriate gpl.txt.
-Total Commander plugins are used with QuickBMS
-If there is a 64 bit version, the appropriate file is used.
 
 This file is intended only for informative pupose. There might be mistakes. For more reliable information see /docs directory.
 
