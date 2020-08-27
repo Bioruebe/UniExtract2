@@ -1,4 +1,8 @@
-2.0.0 RC 3 (2020):
+2.0.0 RC 4 (2020):
+  Changed design/usability of 'Execution warning' dialog
+  Removed WolfDec plugin, replaced with GARbro
+
+2.0.0 RC 3 (24/08/2020):
   Added support for MSCF installers
   Added support for Amiga Disk Files using unADF
   Added support for PDF files using Xpdf command line tools

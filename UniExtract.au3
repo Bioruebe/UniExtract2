@@ -54,6 +54,7 @@
 #include <StaticConstants.au3>
 #include <String.au3>
 #include <WinAPI.au3>
+#include <WinAPICom.au3>
 #include <WinAPIFiles.au3>
 #include <WinAPIShellEx.au3>
 #include <WinAPIShPath.au3>
@@ -62,7 +63,8 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $sVersion = "2.0.0 RC 3"
+Const $sVersion = "2.0.0 RC 4"
+Const $sVersionId = "2R4"
 Const $codename = '"in memoriam"'
 Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
@@ -113,8 +115,8 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
 	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
 	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", _
-	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", _
-	  $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
+	  $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
@@ -122,7 +124,7 @@ Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_AL
 	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
 	  $TYPE_SIM, $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, _
 	  $TYPE_UIF, $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, _
-	  $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_WIX, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -136,7 +138,7 @@ Global $batchEnabled = 0
 Global $language = ""
 Global $history = 1
 Global $appendext = 0
-Global $warnexecute = 1
+Global $bOptWarnExecute = 1
 Global $freeSpaceCheck = 1
 Global $bOptNoStatusBox = 0
 Global $bHideStatusBoxIfFullscreen = 1
@@ -148,7 +150,7 @@ Global $lastupdate = "2010/12/05" ; last official version
 Global $addassocenabled = 0
 Global $addassocallusers = 0
 Global $addassoc = ""
-Global $ID = ""
+Global $sOptGuid = ""
 Global $FB_ask = 0
 Global $Log = 0
 Global $CheckGame = 1
@@ -167,16 +169,16 @@ Global $iOptGuiPosX = -1, $iOptGuiPosY = -1, $iOptGuiWidth = -1, $iOptGuiHeight 
 Global $trayX = -1, $trayY = -1
 
 ; Global variables
-Dim $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
-Dim $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL, $eCustomPromptSetting = $PROMPT_ASK
-Dim $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
-Dim $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
-Dim $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
-Dim $unpackfailed, $exefailed, $ttarchfailed
-Dim $oldpath, $oldoutdir, $sUnicodeName, $createdir
-Dim $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress, $sComError = 0
-Dim $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
-Dim $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aGUIs[0]
+Global $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
+Global $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL, $eCustomPromptSetting = $PROMPT_ASK
+Global $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
+Global $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
+Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
+Global $unpackfailed, $exefailed, $ttarchfailed
+Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
+Global $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress, $sComError = 0
+Global $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
+Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aGUIs[0]
 
 ; Check if OS is 64 bit version
 If @OSArch == "X64" Or @OSArch == "IA64" Then
@@ -278,7 +280,6 @@ Const $is5cab = "i5comp.exe"
 Const $sim = "sim_unpacker.exe"
 Const $thinstall = Quote($bindir & "Extractor.exe")
 Const $unreal = "umodel.exe"
-Const $wolf = "WolfDec.exe"
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -324,11 +325,15 @@ TraySetToolTip($name)
 TraySetClick(8)
 
 ; Check if Universal Extractor is started the first time
-If $ID = "" Or StringIsSpace($ID) Then
-	$ID = StringRight(String(_Crypt_EncryptData(Random(10000, 1000000), @ComputerName & Random(10000, 1000000), $CALG_AES_256)), 25)
-	Cout("Created User ID: " & $ID)
-	SavePref("ID", $ID)
+If $sOptGuid = "" Or StringIsSpace($sOptGuid) Then
+	$sOptGuid = StringTrimLeft(StringTrimRight(_WinAPI_CreateGUID(), 1), 1)
+	If $sOptGuid = "" Then $sOptGuid = StringRight(String(_Crypt_EncryptData(Random(10000, 1000000), Random(10000, 1000000), $CALG_AES_256)), 25)
+	$sOptGuid = $sVersionId & "-" & $sOptGuid
+
+	Cout("Created user ID: " & $sOptGuid)
+	SavePref("ID", $sOptGuid)
 	GUI_FirstStart()
+
 	While $FS_GUI
 		Sleep(250)
 	WEnd
@@ -709,7 +714,7 @@ Func ReadPrefs()
 	LoadPref("batchenabled", $batchEnabled, 0)
 	LoadPref("history", $history)
 	LoadPref("appendext", $appendext)
-	LoadPref("warnexecute", $warnexecute)
+	LoadPref("warnexecute", $bOptWarnExecute)
 	LoadPref("nostatusbox", $bOptNoStatusBox)
 	If Not $bOptNoStatusBox Then LoadPref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 	LoadPref("openfolderafterextr", $bOptOpenOutDir)
@@ -751,7 +756,7 @@ Func ReadPrefs()
 	LoadPref("updateinterval", $updateinterval)
 	If $updateinterval < 1 Then $updateinterval = 1
 	LoadPref("lastupdate", $lastupdate, False)
-	LoadPref("ID", $ID, False)
+	LoadPref("ID", $sOptGuid, False)
 	LoadPref("nightlyupdates", $bOptNightlyUpdates)
 	If $bOptNightlyUpdates == 1 Then $sUpdateURL = $sNightlyUpdateURL
 
@@ -773,7 +778,7 @@ Func WritePrefs()
 	SavePref('history', $history)
 	SavePref('language', $language)
 	SavePref('appendext', $appendext)
-	SavePref('warnexecute', $warnexecute)
+	SavePref('warnexecute', $bOptWarnExecute)
 	SavePref('nostatusbox', $bOptNoStatusBox)
 	SavePref("hidestatusboxiffullscreen", $bHideStatusBoxIfFullscreen)
 	SavePref('openfolderafterextr', $bOptOpenOutDir)
@@ -1253,7 +1258,7 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Wolf RPG Editor")
 			CheckGarbro()
-			extract($TYPE_WOLF, "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+			extract($TYPE_ARC_CONV, "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "YU-RIS Script Engine")
 			CheckGarbro()
@@ -2401,9 +2406,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_FEAD
-			Local $tmp = ' /s -nos_ne -nos_o"' & $tempoutdir & '\"'
-			Warn_Execute($file & $tmp)
-			ShellExecuteWait($file, $tmp, $filedir)
+			Local $sParameters = ' /s -nos_ne -nos_o"' & $tempoutdir & '\"'
+			Warn_Execute($file & $sParameters)
+			ShellExecuteWait($file, $sParameters, $filedir)
 			FileSetAttrib($tempoutdir & '*', '-R', 1)
 			MoveFiles($tempoutdir, $outdir, False, "", True, True)
 			DirRemove($tempoutdir)
@@ -3218,13 +3223,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			HasNetFramework(4)
 			_Run($wix & ' -x "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False)
 
-		Case $TYPE_WOLF
-			extract($TYPE_ARC_CONV, -1, "", False, True)
-			HasPlugin($wolf)
-			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
-			_RunInTempOutdir($tempoutdir, $wolf & ' ' & Quote($file), $outdir, @SW_MINIMIZE, True, True, False)
-			MoveFiles($outdir & "\" & $filename, $outdir, True, '', True, True)
-
 		Case $TYPE_ZIP
 			If Not extract($TYPE_7Z, -1, $additionalParameters, False, True) Then
 				If $arcdisp > -1 Then _CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
@@ -3973,7 +3971,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($file, $arcdisp)) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($filenamefull, $arcdisp)) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
 			$exitcode = 1
 
 			; Exit successfully
@@ -4915,7 +4913,7 @@ EndFunc
 Func SendStats($a, $sResult = 1)
 	If Not $bSendStats Then Return
 
-	InetRead(Cout($sStatsURL & $a & "&r=" & $sResult & "&id=" & $ID & "&v=" & $sVersion), 1)
+	InetRead(Cout($sStatsURL & $a & "&r=" & $sResult & "&id=" & $sOptGuid & "&v=" & $sVersion), 1)
 EndFunc
 
 ; Check for new version
@@ -5274,6 +5272,7 @@ Func _AfterUpdate()
 	FileDelete(@ScriptDir & "\todo.txt")
 	FileDelete(@ScriptDir & "\useful_software.txt")
 	FileDelete(@ScriptDir & "\support\Icons\Bioruebe.jpg")
+	FileDelete(@ScriptDir & "\helper_binaries_info.txt")
 	FileDelete(@ScriptDir & "\changelog_minor.txt")
 	FileDelete(@ScriptDir & "\changelog.txt")
 
@@ -5371,7 +5370,7 @@ Func CreateGUI()
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $webitem = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', $name), $helpmenu)
 	Local $web2item = GUICtrlCreateMenuItem(t('MENU_HELP_WEB_LABEL', $name & " 2"), $helpmenu)
-	Local $gititem = GUICtrlCreateMenuItem(t('MENU_HELP_GITHUB_LABEL'), $helpmenu)
+	Local $gititem = GUICtrlCreateMenuItem(t('MENU_HELP_GITHUB_LABEL', $name & " 2"), $helpmenu)
 	GUICtrlCreateMenuItem("", $helpmenu)
 	Local $statsitem = GUICtrlCreateMenuItem(t('MENU_HELP_STATS_LABEL'), $helpmenu)
 	Local $programdiritem = GUICtrlCreateMenuItem(t('MENU_HELP_PROGDIR_LABEL'), $helpmenu)
@@ -5594,19 +5593,17 @@ Func _SetState($aControls, $state)
 EndFunc
 
 ; Get title of a window by PID as returned by Run()
-; Script by SmOke_N (http://www.autoitscript.com/forum/topic/136271-solved-wingethandle-from-wingetprocess/#entry952135)
-Func _WinGetByPID($iPID, $iString = 1) ; 0 Will Return 1 Base Array & 1 Will Return The First Window.
-	Local $aError[1] = [0], $aWinList, $sReturn
+; Based on code by SmOke_N (http://www.autoitscript.com/forum/topic/136271-solved-wingethandle-from-wingetprocess/#entry952135)
+Func _WinGetByPID($iPID)
 	If IsString($iPID) Then $iPID = ProcessExists($iPID)
-	$aWinList = WinList()
-	For $A = 1 To $aWinList[0][0]
-		If WinGetProcess($aWinList[$A][1]) = $iPID Then ;And BitAND(WinGetState($aWinList[$A][1]), 2) Then
-			If $iString Then Return $aWinList[$A][1]
-			$sReturn &= $aWinList[$A][1] & Chr(1)
-		EndIf
+
+	Local $aWinList = WinList()
+
+	For $i = 1 To $aWinList[0][0]
+		If WinGetProcess($aWinList[$i][1]) = $iPID Then Return $aWinList[$i][1]
 	Next
-	If $sReturn Then Return StringSplit(StringTrimRight($sReturn, 1), Chr(1))
-	Return SetError(1, 0, $iString? 0: $aError)
+
+	Return SetError(1, 0, 0)
 EndFunc
 
 ; Round corners of status box
@@ -5699,15 +5696,45 @@ EndFunc
 
 ; Warn user before executing files for extraction
 Func Warn_Execute($sCommand)
-	If Not $warnexecute Then Return $sCommand
+	If Not $bOptWarnExecute Or GUI_Warn_Execute() Then Return $sCommand
 
-	Cout("Displaying execution warning message")
-	If MsgBox($iTopmost + 49, $title, t('WARN_EXECUTE', $sCommand)) <> 1 Then
-		If $createdir Then DirRemove($outdir, 0)
-		terminate($STATUS_SILENT)
+	If $createdir Then DirRemove($outdir, 0)
+	terminate($STATUS_SILENT)
+EndFunc
+
+; Display Warn_Execute GUI
+Func GUI_Warn_Execute()
+	Local $bChoice = False
+
+	Opt("GUIOnEventMode", 0)
+	Local $hGUI = GUICreate($title, 416, 177, -1, -1, $GUI_SS_DEFAULT_GUI)
+	GUICtrlCreateLabel(t('WARN_EXECUTE'), 72, 20, 332, 97)
+	Local $idContinue = GUICtrlCreateButton(t('CONTINUE_BUT'), 242, 142, 75, 25)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 332, 142, 75, 25)
+	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	Local $idRemember = GUICtrlCreateCheckbox(t('CHECKBOX_DONT_ASK_AGAIN'), 12, 148, 217, 17)
+	GUISetState(@SW_SHOW)
+
+	While True
+		$nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idCancel
+				ExitLoop
+			Case $idContinue
+				$bChoice = True
+				ExitLoop
+		EndSwitch
+	WEnd
+
+	If _IsChecked($idRemember) Then
+		$bOptWarnExecute = 0
+		SavePref("warnexecute", $bOptWarnExecute)
 	EndIf
 
-	Return $sCommand
+	GUIDelete($hGUI)
+	Opt("GUIOnEventMode", 0)
+
+	Return $bChoice
 EndFunc
 
 ; Prompt user for file
@@ -5752,7 +5779,7 @@ EndFunc
 
 ; Option to keep the destination directory
 Func GUI_KeepOutdir()
-	$KeepOutdir = Int(_IsChecked($GUI_Main_Lock))
+	$KeepOutdir = Number(_IsChecked($GUI_Main_Lock))
 	SavePref('keepoutputdir', $KeepOutdir)
 EndFunc
 
@@ -5860,7 +5887,7 @@ Func GUI_Prefs()
 
 	$iPosX += 236
 	$iWidth = 204
-	Global $warnexecuteopt = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), $iPosX, 136, $iWidth, 20)
+	Global $idOptWarnExecute = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), $iPosX, 136, $iWidth, 20)
 	Global $unicodecheckopt = GUICtrlCreateCheckbox(t('PREFS_CHECK_UNICODE_LABEL'), $iPosX, 156, $iWidth, 20)
 	Global $appendextopt = GUICtrlCreateCheckbox(t('PREFS_APPEND_EXT_LABEL'), $iPosX, 176, $iWidth, 20)
 	Global $idOptCreateLog = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), $iPosX, 196, $iWidth, 20)
@@ -5874,7 +5901,7 @@ Func GUI_Prefs()
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 248, 296, 80, 24)
 
 	; Tooltips
-	GUICtrlSetTip($warnexecuteopt, t('PREFS_WARN_EXECUTE_TOOLTIP'))
+	GUICtrlSetTip($idOptWarnExecute, t('PREFS_WARN_EXECUTE_TOOLTIP'))
 	GUICtrlSetTip($freeSpaceCheckOpt, t('PREFS_CHECK_FREE_SPACE_TOOLTIP'))
 	GUICtrlSetTip($unicodecheckopt, t('PREFS_CHECK_UNICODE_TOOLTIP'))
 	GUICtrlSetTip($appendextopt, t('PREFS_APPEND_EXT_TOOLTIP'))
@@ -5888,7 +5915,7 @@ Func GUI_Prefs()
 	; Set properties
 	GUICtrlSetState($idOk, $GUI_DEFBUTTON)
 	If $history Then GUICtrlSetState($historyopt, $GUI_CHECKED)
-	If $warnexecute Then GUICtrlSetState($warnexecuteopt, $GUI_CHECKED)
+	If $bOptWarnExecute Then GUICtrlSetState($idOptWarnExecute, $GUI_CHECKED)
 	If $freeSpaceCheck Then GUICtrlSetState($freeSpaceCheckOpt, $GUI_CHECKED)
 	If $checkUnicode Then GUICtrlSetState($unicodecheckopt, $GUI_CHECKED)
 	If $appendext Then GUICtrlSetState($appendextopt, $GUI_CHECKED)
@@ -5974,7 +6001,7 @@ Func GUI_Prefs_OK()
 	$bOptNoStatusBox = Number(_IsChecked($idOptNoStatusBox))
 	TrayItemSetState($Tray_Statusbox, $bOptNoStatusBox? $TRAY_CHECKED: $TRAY_UNCHECKED)
 
-	$warnexecute = Number(_IsChecked($warnexecuteopt))
+	$bOptWarnExecute = Number(_IsChecked($idOptWarnExecute))
 	$checkUnicode = Number(_IsChecked($unicodecheckopt))
 	$freeSpaceCheck = Number(_IsChecked($freeSpaceCheckOpt))
 	$appendext = Number(_IsChecked($appendextopt))
@@ -6330,7 +6357,7 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 			"----------------------------------------------------------------------------------------------------" _
 			 & @CRLF & @CRLF & "Output:" & @CRLF & $FB_Output & @CRLF & @CRLF & _
 			"----------------------------------------------------------------------------------------------------" _
-			 & @CRLF & "Sent by: " & @CRLF & $ID
+			 & @CRLF & "Sent by: " & @CRLF & $sOptGuid
 
 	Const $boundary = "--UniExtractLog"
 	Local $iSize = BinaryLen(StringToBinary($FB_Text))
@@ -6343,7 +6370,7 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	EndIf
 
 	Local $sData = $boundary & @CRLF & 'Content-Disposition: form-data; name="file"; filename="UE_Feedback"' & @CRLF & $FB_Text & @CRLF & _
-				   $boundary & @CRLF & 'Content-Disposition: form-data; name="id"' & @CRLF & @CRLF & $ID & @CRLF & $boundary & '--'
+				   $boundary & @CRLF & 'Content-Disposition: form-data; name="id"' & @CRLF & @CRLF & $sOptGuid & @CRLF & $boundary & '--'
 	Local $sResponse = 0
 
 	$http = ObjCreate("winhttp.winhttprequest.5.1")
@@ -7156,7 +7183,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 
 	; Define plugins
 	; executable|name|description|filetypes|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[12][8] = [ _
+	Local $aPluginInfo[11][8] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
@@ -7167,7 +7194,6 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
 		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
 		[$sim, 'Smart Install Maker unpacker', t('PLUGIN_SIM'), 'exe (Smart Install Maker)', 'sim_unpacker.7z', $sim, '', 0], _
-		[$wolf, 'WolfDec', t('PLUGIN_WOLF'), 'wolf (' & t('TERM_ENCRYPTED') & ')', $wolf, '', '', 0], _
 		[$extsis, 'ExtSIS', t('PLUGIN_EXTSIS'), 'sis, sisx', 'siscontents*.zip', $extsis, '', 0] _
 	]
 
@@ -7456,7 +7482,7 @@ Func GUI_About()
 	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $iWidth - 32, 17, $SS_CENTER)
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, -1, $SS_CENTER)
-	GUICtrlCreateLabel($ID, 5, $iHeight - 15, 175, 15)
+	GUICtrlCreateLabel($sOptGuid, 5, $iHeight - 15, 275, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
 	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.png", $iWidth - 100 - 10, $iHeight - 48 - 10, 100, 48)
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $iWidth / 2 - 45, $iHeight - 50, 90, 25)
