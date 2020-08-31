@@ -19,10 +19,10 @@ AspackDie									AspackDie.exe				1.41			-		Open Source				yoda								http://s
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
 BCM											x86\bcm.exe					1.30		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
 											x64\bcm.exe					-------		---------	-------					-------								-------
-BioLib										Bio.cs.dll					1.0.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
+BioLib										Bio.cs.dll					2.0.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
 BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
-cicdec										cicdec						2.1.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
+cicdec										cicdec						2.1.1		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
 											BioLib						-------		---------	-------					-------								-------
 											ICSharpCode.SharpZipLib.dll	1.2.0		---------	MIT						SharpZipLib Contributors			https://github.com/icsharpcode/SharpZipLib
 ConvertLIT									clit.exe					1.8			-	-	-	GNU GPL v3				Dan A. Jackson						http://www.convertlit.com/										
@@ -31,15 +31,15 @@ demoleition									demoleition.exe				0.61		x	-	-	Freeware*				kao									http
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.58		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.0		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
-											Ext_Detector.dll			0.5.5.2		---------	-------					-------								-------
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.1		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+											Ext_Detector.dll			0.5.6.2		---------	-------					-------								-------
 FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
 FSB files extractor							fsbext.exe					0.3.8		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
 GARbro										\GARbro directory			1.5.44		x	-	x	MIT						mørkt								https://github.com/morkt/GARbro
 GNU gettext									msgunfmt.exe				0.19.8.1	-	-	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
-godotdec									godotdec.exe				2.1.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/godotdec
+godotdec									godotdec.exe				2.1.1		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/godotdec
 											BioLib						-------		---------	-------					-------								-------
 HelpDeco									helpdeco.exe				2.1				-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
 i6comp										i6comp.exe					0.2				-		Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
@@ -72,6 +72,11 @@ rmvdec										rmvdec.exe					1.1.0		x	-	x	BSD 3-clause			Bioruebe							https:
 											neko runtime files			-------		---------	-------					-------								-------
 sfarkxtc									sfarkxtc.exe				3.0 mod		x	-	x	GNU GPL v3				Arnout Engelen						https://github.com/raboof/sfarkxtc
 											zlib1.dll					1.2.8		---------	zlib license			Jean-loup Gailly, Mark Adler		http://zlib.net/
+simdec										simdec.exe					1.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/simdec
+											BioLib						-------		---------	-------					-------								-------
+											Microsoft.Deployment		-------		---------	-------					-------								-------
+												.Compression.dll		3.11.2		---------	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
+												.Compression.Cab.dll	-------		---------	-------					-------								-------
 spoondec									spoondec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/spoondec
 											neko runtime files			-------		---------	-------					-------								-------
 											regexp.ndll					-------		---------	-------					-------								-------

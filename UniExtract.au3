@@ -112,19 +112,18 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", _
 	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
 	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
-	  $TYPE_SGB = "sgb", $TYPE_SIM = "sim", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
-	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
-	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", _
-	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
-	  $TYPE_ZPAQ = "zpaq"
+	  $TYPE_SGB = "sgb", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
+	  $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", _
+	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
+	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
 	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
 	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
-	  $TYPE_SIM, $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, _
-	  $TYPE_UIF, $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, _
-	  $TYPE_WIX, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, _
+	  $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, _
+	  $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -178,7 +177,7 @@ Global $unpackfailed, $exefailed, $ttarchfailed
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Global $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress, $sComError = 0
 Global $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
-Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aGUIs[0]
+Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aExeinfoDefinitions[0][0], $aGUIs[0]
 
 ; Check if OS is 64 bit version
 If @OSArch == "X64" Or @OSArch == "IA64" Then
@@ -277,7 +276,6 @@ Const $extsis = "extsis.exe"
 Const $ffmpeg = Quote($archdir & "ffmpeg.exe", True)
 Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
-Const $sim = "sim_unpacker.exe"
 Const $thinstall = Quote($bindir & "Extractor.exe")
 Const $unreal = "umodel.exe"
 
@@ -1623,9 +1621,6 @@ Func advexescan($bUseCmd = $extract)
 			CreateRenamedCopy("cab")
 			check7z()
 
-		Case StringInStr($sFileType, "Smart Install Maker")
-			extract($TYPE_SIM, 'Smart Install Maker ' & t('TERM_INSTALLER'))
-
 		Case StringInStr($sFileType, "SPx Method") Or StringInStr($sFileType, "Microsoft SFX CAB")
 			extract($TYPE_CAB, t('TERM_SFX') & ' Microsoft CAB ' & t('TERM_ARCHIVE'))
 
@@ -1671,6 +1666,9 @@ Func advexescan($bUseCmd = $extract)
 		; Needs to be at the end, otherwise files might not be recognized
 		Case StringInStr($sFileType, "upx")
 			unpack($PACKER_UPX)
+
+		Case Else
+			UserDefCompare($aExeinfoDefinitions, $sFileType, "Exeinfo")
 	EndSelect
 
 	Cout("No matches for known Exeinfo PE types")
@@ -2153,7 +2151,7 @@ Func MoveInputFileIfNecessary()
 	EndIf
 EndFunc
 
-; Extract from known archive format
+; Extract known archive formats
 Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
 	Local $dirmtime = -1
 	$success = $RESULT_UNKNOWN
@@ -2419,7 +2417,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 		Case $TYPE_FSB
 			_Run($fsb & ' -o -1 -A -d "' & $outdir & '" "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, False)
 
-			; Ogg files are raw dumps and not playable
+			; Ogg files are raw dumps and cannot be played
 			Cleanup("*.ogg")
 
 		Case $TYPE_GARBRO
@@ -2494,8 +2492,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 			; (Re)move ',2' files and install_script.iss
 			Local $aCleanup = _FileListToArrayRec($return, "*,2.*;*,3.*", 1, 1, 0, 2)
-			_ArrayDelete($aCleanup, 0)
-			Cleanup($aCleanup)
+			If Not @error And IsArray($aCleanup) Then
+				_ArrayDelete($aCleanup, 0)
+				Cleanup($aCleanup)
+			EndIf
 
 			; Change output directory structure
 			Local $aCleanup[] = ["embedded", "{tmp}", "{commonappdata}", "{cf}", "{cf32}", "{group}", "{{userappdata}}", "{{userdocs}}"]
@@ -2856,48 +2856,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$return = _Run($7z & ' x "' & $file & '"', $outdir, @SW_HIDE)
 			; Effect.sgr cannot be extracted by 7zip, that should not be considered failed extraction as all other files are OK
 			If StringInStr($return, "Headers Error : Effect.sgr") And StringInStr($return, "Sub items Errors: 1") Then $success = $RESULT_SUCCESS
-
-		Case $TYPE_SIM
-			HasPlugin($sim)
-			_Run($sim & ' "' & $file & '" "' & $outdir & '"', $outdir, @SW_SHOW)
-
-			; Extract cab files
-			$ret = $outdir & "\data.cab"
-			_Run($7z & ' x "' & $ret & '"', $outdir, @SW_SHOW, True, True, True)
-			If $success == $RESULT_SUCCESS Then Cleanup($ret, $OPTION_DELETE)
-
-			; Restore original file names and folder structure
-			$ret = _FileRead($outdir & "\installer.config", False, $FO_BINARY)
-			If @error Then
-				$success = $RESULT_FAILED
-			Else
-				Local $j = 0, $aReturn = StringSplit($ret, "00402426253034", 1)
-				For $i = 1 To $aReturn[0]
-					If StringLeft($aReturn[$i], 2) <> "5C" Then ContinueLoop
-
-					$ret = StringRight($aReturn[$i], 4)
-					$bNext = $ret = "0031" Or $ret = "0032"
-					If Not $bNext And $i <> $aReturn[0] Then ContinueLoop
-
-					; Get file/directory name
-					$ret = StringReplace(StringSplit($aReturn[$i], "0031", 1)[1], "0032", "")
-					$ret = $outdir & BinaryToString("0x" & $ret)
-
-					; Rename files/create sub directory
-					$return = $outdir & "\" & $j
-					If FileExists($return) Then
-						_FileMove($return, $ret, 9)
-					Else
-						DirCreate($ret)
-					EndIf
-
-					; Update next file name variable
-					If $bNext Then $j += 1
-				Next
-			EndIf
-
-			Local $aCleanup[] = ["runtime.cab", "installer.config"]
-			Cleanup($aCleanup)
 
 		Case $TYPE_SIS
 			extract($TYPE_QBMS, -1, $sis, False, True)
@@ -3324,6 +3282,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	Return 1
 EndFunc
 
+; Extract via definition files
 Func pluginExtract($sPlugin, $tempoutdir)
 	Cout("Starting custom " & $sPlugin & " extraction")
 
@@ -3495,8 +3454,8 @@ EndFunc
 Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 	If Not $iMode Then Return
 	If Not IsArray($aFiles) Then
-		If Not FileExists($aFiles) And Not FileExists($outdir & "\" & $aFiles) Then
-			Cout("Cleanup: Invalid path " & $aFiles)
+		If $aFiles == "" Or (Not FileExists($aFiles) And Not FileExists($outdir & "\" & $aFiles)) Then
+			Cout("Cleanup: Invalid path: " & $aFiles)
 			Return SetError(1, 0, 0)
 		EndIf
 		$return = $aFiles
@@ -3936,7 +3895,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 			GUI_Error_UnknownExt()
 			$exitcode = 4
 		Case $STATUS_INVALIDFILE
-			Prompt(16, 'INVALID_FILE', $fname)
+			Prompt(16, 'INVALID_FILE', $file)
 			$exitcode = 5
 		Case $STATUS_INVALIDDIR
 			Prompt(16, 'INVALID_DIR', $fname)
@@ -5247,6 +5206,8 @@ Func _AfterUpdate()
 	FileDelete($bindir & "ethornell.exe")
 	FileDelete($bindir & "libpng12.dll")
 	FileDelete($bindir & "brunsdec.exe")
+	FileDelete($bindir & "WolfDec.exe")
+	FileDelete($bindir & "sim_unpacker.exe")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
@@ -6054,7 +6015,7 @@ EndFunc
 Func GUI_OK_Set($bShowError = False)
 	$file = EnvParse(GUICtrlRead($filecont))
 	If Not FileExists($file) Then
-		If $bShowError Then MsgBox($iTopmost + 48, $title, t('INVALID_FILE_SELECTED', $file))
+		If $bShowError Then MsgBox($iTopmost + 48, $title, t('INVALID_FILE', $file))
 		Return 0
 	EndIf
 
@@ -6072,7 +6033,7 @@ Func GUI_Batch()
 		If Not $KeepOutdir Then GUICtrlSetData($dircont, "")
 	Else ; Start batch process if items in queue and input fields empty
 		If GetBatchQueue() Then Return GUI_Batch_OK()
-		MsgBox($iTopmost + 48, $title, t('INVALID_FILE_SELECTED', $file))
+		MsgBox($iTopmost + 48, $title, t('INVALID_FILE', $file))
 	EndIf
 EndFunc
 
@@ -7183,7 +7144,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 
 	; Define plugins
 	; executable|name|description|filetypes|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[11][8] = [ _
+	Local $aPluginInfo[10][8] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
@@ -7193,7 +7154,6 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'dgca_v*.zip', 'dgcac.exe', '', 0], _
 		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
 		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
-		[$sim, 'Smart Install Maker unpacker', t('PLUGIN_SIM'), 'exe (Smart Install Maker)', 'sim_unpacker.7z', $sim, '', 0], _
 		[$extsis, 'ExtSIS', t('PLUGIN_EXTSIS'), 'sis, sisx', 'siscontents*.zip', $extsis, '', 0] _
 	]
 

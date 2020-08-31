@@ -1,5 +1,11 @@
 2.0.0 RC 4 (2020):
+  Added better support for Smart Install Maker installers using simdec
+  Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav
   Changed design/usability of 'Execution warning' dialog
+  Updated cicdec to 2.1.1
+  Updated Exeinfo PE to 0.0.6.1
+  Updated godotdec to 2.1.1
+  Removed Smart Install Maker Unpacker, replaced with simdec
   Removed WolfDec plugin, replaced with GARbro
 
 2.0.0 RC 3 (24/08/2020):
