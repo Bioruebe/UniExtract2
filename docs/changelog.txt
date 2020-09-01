@@ -1,10 +1,15 @@
 2.0.0 RC 4 (2020):
   Added better support for Smart Install Maker installers using simdec
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav
+  Fixed some rare problems if the file extension contains upper case
+  Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
+  Fixed 'File not found' errors after file got renamed by 'Fix file extensions' option, thanks to demberto
+  Fixed several typos in English language file, thanks to Mr-Update
   Changed design/usability of 'Execution warning' dialog
   Updated cicdec to 2.1.1
   Updated Exeinfo PE to 0.0.6.1
   Updated godotdec to 2.1.1
+  Updated German translation, thanks to Mr-Update
   Removed Smart Install Maker Unpacker, replaced with simdec
   Removed WolfDec plugin, replaced with GARbro
 
