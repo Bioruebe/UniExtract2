@@ -32,9 +32,7 @@ Unreal definition
 
 // Other:
 Logging: quickbms (+ 'you must choose a new filename' user input needed detection)
-Rewrite 7z SFX extraction to use seperate $TYPE to make recursive 7z extract() run faster
 Consistency: $outdir should end with \
-Save BMS to temp
 Inno: detect encrypted error
 teelog dir
 
@@ -47,7 +45,6 @@ Disk image status text
 investigate archive listing - req 44 // Add file list display for extractors that support it, create command line parameter, include into context menu
 smart extraction - archive contains: single file/folder -> file dir; multiple files -> sub dir; folder with same name as filedir && filedir only contains archive -> files into filedir
 global ignore list, e.g. don't extract .url files, readme.txt, etc.
-include tridscan gui?
 generic error message for failed extraction: check if only some file has errors and display different error message
 
 

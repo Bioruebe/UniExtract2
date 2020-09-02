@@ -252,7 +252,7 @@ Const $zpaq = Quote($archdir & "zpaq.exe", True)
 Const $zoo = "unzoo.exe"
 
 ; Exractor plugins
-Const $bms = "BMS.bms"
+Const $bms = @TempDir & "\BMS.bms"
 Const $dbx = "dbxplug.wcx"
 Const $gaup = "gaup_pro.wcx"
 Const $ie = "InstExpl.wcx"
@@ -2212,6 +2212,28 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					_Run($7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
 					FileDelete($outdir & '\' & $filename)
 				EndIf
+			ElseIf StringInStr($sFileType, "SFX") Then
+				Cout("Trying to extract sfx script")
+				_CreateTrayMessageBox(t('SCANNING_FILE', "7z SFX Archives splitter"))
+
+				Run(_MakeCommand($7zsplit & ' "' & $file & '"'), $outdir, @SW_HIDE)
+				WinWait("7z SFX Archives splitter")
+				ControlClick("7z SFX Archives splitter", "", "Button8")
+				ControlClick("7z SFX Archives splitter", "", "Button1")
+				$TimerStart = TimerInit()
+
+				Do
+					Sleep(100)
+					If WinExists("7z SFX Archives splitter warning") Then WinClose("7z SFX Archives splitter warning")
+					$TimerDiff = TimerDiff($TimerStart)
+					If $TimerDiff > $Timeout Then ExitLoop
+				Until FileExists($filedir & "\" & $filename & ".txt") Or WinExists("7z SFX Archives splitter error")
+
+				ProcessClose("7ZSplit.exe")
+				_DeleteTrayMessageBox()
+
+				Local $sPath = $filedir & "\" & $filename & ".txt"
+				If FileExists($sPath) Then _FileMove($sPath, $outdir & "\" & $filename & "_SFX-Script.txt")
 			EndIf
 
 		Case $TYPE_ACE
@@ -2817,8 +2839,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			FileDelete($bindir & "rnd")
 
 		Case $TYPE_QBMS
-			_Run($quickbms & ' "' & $bindir & $additionalParameters & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, True, False)
-			If FileExists($bindir & $bms) Then FileDelete($bindir & $bms)
+			Local $sPlugin = $additionalParameters? $bindir & $additionalParameters: $bms
+			_Run($quickbms & ' "' & $sPlugin & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, True, False)
+			If FileExists($bms) Then FileDelete($bms)
 
 			If $additionalParameters == $ie Then
 				Local $aCleanup[] = ["[NSIS].nsi", "[LICENSE].*", "$PLUGINSDIR", "$TEMP", "uninstall.exe", "[LICENSE]"]
@@ -3234,29 +3257,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 	Switch $success
 		Case $RESULT_SUCCESS
-			; Special actions for 7zip extraction
-			If $arctype == $TYPE_7Z And ($fileext = "exe" Or StringInStr($sFileType, "SFX")) Then
-				; Check if sfx archive and extract sfx script using 7ZSplit if possible
-				_CreateTrayMessageBox(t('SCANNING_FILE', "7z SFX Archives splitter"))
-				Cout("Trying to extract sfx script")
-				Run(_MakeCommand($7zsplit & ' "' & $file & '"'), $outdir, @SW_HIDE)
-				WinWait("7z SFX Archives splitter")
-				ControlClick("7z SFX Archives splitter", "", "Button8")
-				ControlClick("7z SFX Archives splitter", "", "Button1")
-				$TimerStart = TimerInit()
-				Do
-					Sleep(100)
-					If WinExists("7z SFX Archives splitter warning") Then WinClose("7z SFX Archives splitter warning")
-					$TimerDiff = TimerDiff($TimerStart)
-					If $TimerDiff > $Timeout Then ExitLoop
-				Until FileExists($filedir & "\" & $filename & ".txt") Or WinExists("7z SFX Archives splitter error")
-				; Force close all messages
-				ProcessClose("7ZSplit.exe")
-
-				; Move sfx script to outdir
-				If FileExists($filedir & "\" & $filename & ".txt") Then _FileMove($filedir & "\" & $filename & ".txt", $outdir & "\sfx_script_" & $filename & ".txt")
-				_DeleteTrayMessageBox()
-			EndIf
 
 		Case $RESULT_NOFREESPACE
 			terminate($STATUS_NOFREESPACE)
@@ -3369,19 +3369,18 @@ Func BmsExtract($sName, $hDB = 0)
 	If $hDB Then
 		Local $aReturn[0], $iRows, $iColumns
 		_SQLite_GetTable($hDB, Cout("SELECT s.Script FROM Scripts s, Names n WHERE s.SID = n.NID AND Name = '" & $sName & "'"), $aReturn, $iRows, $iColumns)
-;~ 		_ArrayDisplay($aReturn)
 
 		; Write script to file and execute it
-		$bmsScript = FileOpen($bindir & $bms, $FO_OVERWRITE)
-		FileWrite($bmsScript, $aReturn[2])
-		FileClose($bmsScript)
-		$return = FetchStdout($quickbms & ' -l "' & $bindir & $bms & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
+		$hFile = FileOpen($bms, $FO_OVERWRITE)
+		FileWrite($hFile, $aReturn[2])
+		FileClose($hFile)
+		$return = FetchStdout($quickbms & ' -l "' & $bms & '" "' & $file & '"', $filedir, @SW_HIDE, -1)
 
 		If Not StringInStr($return, "0 files found") And Not StringInStr($return, "Error") And Not StringInStr($return, "invalid") _
 		And Not StringInStr($return, "expected: ") And $return <> "" Then
 			_SQLite_Close($hDB)
 			_SQLite_Shutdown()
-			extract($TYPE_QBMS, $sName & " " & t('TERM_PACKAGE'), $bms)
+			extract($TYPE_QBMS, $sName & " " & t('TERM_PACKAGE'))
 		EndIf
 	EndIf
 
@@ -3391,10 +3390,16 @@ EndFunc
 ; Start SQLite and open a database
 Func OpenDB($sName)
 	_SQLite_Startup()
-	If @error Then Return Cout("[ERROR] SQLite startup failed with code " & @error)
+	If @error Then
+		Cout("Error: SQLite startup failed with code " & @error)
+		Return False
+	EndIf
 
-	$hDB = _SQLite_Open($bindir & $sName, $SQLITE_OPEN_READONLY)
-	If @error Then Return Cout("[ERROR] Failed to open database " & $sName)
+	Local $hDB = _SQLite_Open($bindir & $sName, $SQLITE_OPEN_READONLY)
+	If @error Then
+		Cout("Error: Failed to open database " & $sName)
+		Return False
+	EndIf
 
 	Return $hDB
 EndFunc
