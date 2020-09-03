@@ -150,7 +150,7 @@ Global $addassocenabled = 0
 Global $addassocallusers = 0
 Global $addassoc = ""
 Global $sOptGuid = ""
-Global $FB_ask = 0
+Global $bOptAskForFeedback = 1
 Global $Log = 0
 Global $CheckGame = 1
 Global $bSendStats = 1
@@ -724,7 +724,7 @@ Func ReadPrefs()
 
 	LoadPref("keepoutputdir", $KeepOutdir)
 	LoadPref("keepopen", $KeepOpen)
-	LoadPref("feedbackprompt", $FB_ask)
+	LoadPref("feedbackprompt", $bOptAskForFeedback)
 	LoadPref("log", $Log)
 	LoadPref("checkgame", $CheckGame)
 	LoadPref("sendstats", $bSendStats)
@@ -782,7 +782,7 @@ Func WritePrefs()
 	SavePref('deletesourcefile', $iDeleteOrigFile)
 	SavePref('freespacecheck', $freeSpaceCheck)
 	SavePref('unicodecheck', $checkUnicode)
-	SavePref('feedbackprompt', $FB_ask)
+	SavePref('feedbackprompt', $bOptAskForFeedback)
 	SavePref('log', $Log)
 	SavePref('checkgame', $CheckGame)
 	SavePref('sendstats', $bSendStats)
@@ -1124,9 +1124,6 @@ Func FileScan_ExeInfo($bUseCmd = $extract)
 		Case StringInStr($sFileType, "RAR SFX")
 			extract($TYPE_RAR, t('TERM_SFX') & ' RAR ' & t('TERM_ARCHIVE'));
 
-		Case StringInStr($sFileType, "Reflexive Arcade Installer")
-			extract($TYPE_INNO, 'Reflexive Arcade ' & t('TERM_INSTALLER'))
-
 		Case StringInStr($sFileType, "RoboForm Installer")
 			extract($TYPE_ROBO, 'RoboForm ' & t('TERM_INSTALLER'))
 
@@ -1210,7 +1207,7 @@ Func FileScan_Peid($sType, $analyze = 1)
 	RegWrite($key, "StayOnTop", "REG_DWORD", 0)
 
 	; Analyze file
-	Run($peid & ' -' & $sType & ' "' & $f & '"', $bindir, @SW_HIDE)
+	Run($peid & ' -' & $sType & ' "' & $file & '"', $bindir, @SW_HIDE)
 	WinWait("PEiD v")
 	$TimerStart = TimerInit()
 	While ($sFileType = "") Or ($sFileType = "Scanning...")
@@ -1273,9 +1270,6 @@ Func FileScan_Peid($sType, $analyze = 1)
 
 		Case StringInStr($sFileType, "RAR SFX", 0)
 			extract($TYPE_RAR, t('TERM_SFX') & ' RAR ' & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "Reflexive Arcade Installer", 0)
-			extract($TYPE_INNO, 'Reflexive Arcade ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "RoboForm Installer", 0)
 			extract($TYPE_ROBO, 'RoboForm ' & t('TERM_INSTALLER'))
@@ -1486,9 +1480,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Reflexive Arcade Installer")
 			extract($TYPE_RAI, "Reflexive Arcade " & t('TERM_INSTALLER'))
-
-		Case StringInStr($sFileType, "Inno Setup installer")
-			checkInno()
 
 		Case StringInStr($sFileType, "InstallShield Z archive")
 			If Not ($fileext = "z") Then CreateRenamedCopy("z")
@@ -2840,7 +2831,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_QBMS
 			Local $sPlugin = $additionalParameters? $bindir & $additionalParameters: $bms
-			_Run($quickbms & ' "' & $sPlugin & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, True, False)
+			_Run($quickbms & ' -K "' & $sPlugin & '" "' & $file & '" "' & $outdir & '"', $outdir, @SW_MINIMIZE, True, False)
 			If FileExists($bms) Then FileDelete($bms)
 
 			If $additionalParameters == $ie Then
@@ -5889,9 +5880,9 @@ Func GUI_Prefs()
 	If $bOptNoStatusBox Then GUICtrlSetState($idOptNoStatusBox, $GUI_CHECKED)
 	If $bHideStatusBoxIfFullscreen Then GUICtrlSetState($idOptGameMode, $GUI_CHECKED)
 	If $bOptOpenOutDir Then GUICtrlSetState($idOptOpenOutDir, $GUI_CHECKED)
-	If $FB_ask == 1 Then
+	If $bOptAskForFeedback == 1 Then
 		GUICtrlSetState($idOptFeedbackPrompt, $GUI_CHECKED)
-	ElseIf $FB_ask == 2 Then
+	ElseIf $bOptAskForFeedback == 2 Then
 		GUICtrlSetState($idOptFeedbackPrompt, $GUI_INDETERMINATE)
 	EndIf
 	If $bOptRememberGuiSizePosition Then GUICtrlSetState($idOptRememberGuiSizePosition, $GUI_CHECKED)
@@ -5974,8 +5965,8 @@ Func GUI_Prefs_OK()
 	$appendext = Number(_IsChecked($appendextopt))
 	$bHideStatusBoxIfFullscreen = Number(_IsChecked($idOptGameMode))
 	$bOptOpenOutDir = Number(_IsChecked($idOptOpenOutDir))
-	$FB_ask = Number(GUICtrlRead($idOptFeedbackPrompt))
-	If $FB_ask > 2 Then $FB_ask = 0
+	$bOptAskForFeedback = Number(GUICtrlRead($idOptFeedbackPrompt))
+	If $bOptAskForFeedback > 2 Then $bOptAskForFeedback = 0
 	$Log = Number(_IsChecked($idOptCreateLog))
 	$bExtractVideo = Number(_IsChecked($idOptExtractVideo))
 	$bOptRememberGuiSizePosition = Number(_IsChecked($idOptRememberGuiSizePosition))
@@ -6212,7 +6203,7 @@ Func GUI_Feedback()
 								 @CRLF & _HexDump($file, 1024))
 		Cout("------------------------------------------------File metadata------------------------------------------------" & _
 			  @CRLF & _ArrayToString(_GetExtProperty($file), @CRLF))
-		Global $FB_ask = 0
+		Global $bOptAskForFeedback = 0
 	EndIf
 
 	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 402, 528 + GUI_GetFontScalingModifier(), -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
@@ -6388,8 +6379,8 @@ EndFunc
 
 ; Ask for feedback
 Func GUI_Feedback_Prompt()
-	If Not ($FB_ask And $extract) Or $silentmode Then Return
-	If $FB_ask == 2 Then Return GUI_Feedback()
+	If Not ($bOptAskForFeedback And $extract) Or $silentmode Then Return
+	If $bOptAskForFeedback == 2 Then Return GUI_Feedback()
 
 	Opt("GUIOnEventMode", 0)
 	Local $hGUI = GUICreate($name, 416, 176, -1, -1, $GUI_SS_DEFAULT_GUI)
@@ -6408,16 +6399,16 @@ Func GUI_Feedback_Prompt()
 				ExitLoop
 			Case $idYes
 				If _IsChecked($idRemember) Then
-					$FB_ask = 2
-					SavePref("feedbackprompt", $FB_ask)
+					$bOptAskForFeedback = 2
+					SavePref("feedbackprompt", $bOptAskForFeedback)
 				EndIf
 				GUIDelete($hGUI)
 				GUI_Feedback()
 				ExitLoop
 			Case $idNo
 				If _IsChecked($idRemember) Then
-					$FB_ask = 0
-					SavePref("feedbackprompt", $FB_ask)
+					$bOptAskForFeedback = 0
+					SavePref("feedbackprompt", $bOptAskForFeedback)
 				EndIf
 				ExitLoop
 		EndSwitch
@@ -7313,15 +7304,17 @@ EndFunc
 ; Option to delete all log files
 Func GUI_DeleteLogs()
 	Cout("Deleting log files")
-	Local $hSearch, $return, $i = 0
+	Local $hSearch, $sFile, $i = 0
+
+	FileDelete($logdir & "errorlog.txt")
 
 	$hSearch = FileFindFirstFile($logdir & "*.log")
 	If $hSearch == -1 Then Return
 
 	While 1
-		$return = FileFindNextFile($hSearch)
+		$sFile = FileFindNextFile($hSearch)
 		If @error Then ExitLoop
-		FileDelete($logdir & $return)
+		FileDelete($logdir & $sFile)
 		$i += 1
 	WEnd
 
