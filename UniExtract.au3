@@ -206,7 +206,8 @@ Const $fsb = "fsbext.exe"
 Const $garbro = Quote($bindir & "GARbro\GARbro.Console.exe", True)
 Const $gcf = $archdir & "GCFScape.exe"
 Const $hlp = "helpdeco.exe"
-Const $inno = "innounp.exe"
+Const $innoextract = "innoextract.exe"
+Const $innounp = "innounp.exe"
 Const $is6cab = "i6comp.exe"
 Const $isxunp = "IsXunpack.exe"
 Const $isz = "unisz.exe"
@@ -1983,13 +1984,12 @@ Func checkInno()
 	Cout("Testing Inno Setup")
 	_CreateTrayMessageBox(t('TERM_TESTING') & " Inno Setup " & t('TERM_INSTALLER'))
 
-	$return = FetchStdout($inno & ' "' & $file & '"', $filedir, @SW_HIDE)
+	Local $sReturn = FetchStdout($innoextract & ' -i "' & $file & '"', $filedir, @SW_HIDE)
 
 	_DeleteTrayMessageBox()
 
-	If (StringInStr($return, "Version detected:", 0) And Not (StringInStr($return, "error", 0))) _
-	Or (StringInStr($return, "Signature detected:", 0) And Not StringInStr($return, "not a supported version", 0)) Then _
-		extract($TYPE_INNO, "Inno Setup " & t('TERM_INSTALLER'))
+	If Not StringInStr($sReturn, "Not a supported Inno Setup installer!", 0) Then _
+		Return extract($TYPE_INNO, "Inno Setup " & t('TERM_INSTALLER'), StringInStr($sReturn, "GOG.com game ID is"))
 
 	$innofailed = True
 	checkIE()
@@ -2483,42 +2483,50 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				DirRemove($tempoutdir, 1)
 			EndIf
 
-		; Failsafe in case TrID misidentifies MS SFX hotfixes
 		Case $TYPE_HOTFIX ; Test
 			Cout("Executing: " & Warn_Execute(Quote($file & '" /q /x:"' & $outdir)))
 			ShellExecuteWait($file, '/q /x:' & Quote($outdir), $outdir)
 
 		Case $TYPE_INNO
-			_Run($inno & ' -x -m -a "' & $file & '"', $outdir)
+			If Not $additionalParameters Then
+				_Run($innounp & ' -x -m -a "' & $file & '"', $outdir)
 
-			; Inno setup files can contain multiple versions of files, they are named ',1', ',2',... after extraction
-			; rename the first file(s), so extracted programs do not fail with not found exceptions
-			; This is a convenience function, so the user does not have to rename them manually
-			$return = $outdir & "\{app}\"
-			$aReturn = _FileListToArrayRec($return, "*,1.*", 1, 1)
-			If Not @error Then
-				For $i = 1 To $aReturn[0]
-					$ret = StringReplace($aReturn[$i], ",1", "", -1)
-					Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
-					_FileMove($return & $aReturn[$i], $return & $ret)
-				Next
-			EndIf
+				; Inno setup files can contain multiple versions of files, they are named ',1', ',2',... after extraction
+				; rename the first file(s), so extracted programs do not fail with not found exceptions
+				; This is a convenience function, so the user does not have to rename them manually
+				$return = $outdir & "\{app}\"
+				$aReturn = _FileListToArrayRec($return, "*,1.*", 1, 1)
+				If Not @error Then
+					For $i = 1 To $aReturn[0]
+						$ret = StringReplace($aReturn[$i], ",1", "", -1)
+						Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
+						_FileMove($return & $aReturn[$i], $return & $ret)
+					Next
+				EndIf
 
-			; (Re)move ',2' files and install_script.iss
-			Local $aCleanup = _FileListToArrayRec($return, "*,2.*;*,3.*", 1, 1, 0, 2)
-			If Not @error And IsArray($aCleanup) Then
-				_ArrayDelete($aCleanup, 0)
+				; (Re)move ',2' files and install_script.iss
+				Local $aCleanup = _FileListToArrayRec($return, "*,2.*;*,3.*", 1, 1, 0, 2)
+				If Not @error And IsArray($aCleanup) Then
+					_ArrayDelete($aCleanup, 0)
+					Cleanup($aCleanup)
+				EndIf
+
+				; Change output directory structure
+				Local $aCleanup[] = ["embedded", "{tmp}", "{commonappdata}", "{cf}", "{cf32}", "{group}", "{{userappdata}}", "{{userdocs}}"]
+				Cleanup($aCleanup)
+				MoveFiles($outdir & "\{app}", $outdir, True, "", True)
+				; TODO: {syswow64}, {sys} - move files to outdir as dlls might be needed by the program?
+
+				Local $aCleanup[] = ["install_script.iss", "setup.iss"]
 				Cleanup($aCleanup)
 			EndIf
 
-			; Change output directory structure
-			Local $aCleanup[] = ["embedded", "{tmp}", "{commonappdata}", "{cf}", "{cf32}", "{group}", "{{userappdata}}", "{{userdocs}}"]
-			Cleanup($aCleanup)
-			MoveFiles($outdir & "\{app}", $outdir, True, '', True)
-			; TODO: {syswow64}, {sys} - move files to outdir as dlls might be needed by the program?
-
-			Local $aCleanup[] = ["install_script.iss", "setup.iss"]
-			Cleanup($aCleanup)
+			If $additionalParameters Or $success == $RESULT_FAILED Then
+				_Run($innoextract & ' -e --progress=1 --collisions rename -d "' & $outdir & '" "' & $file & '"', $filedir)
+				Local $aCleanup[] = ["embedded", "tmp", "commonappdata", "cf", "cf32", "group", "userappdata", "userdocs"]
+				Cleanup($aCleanup)
+				MoveFiles($outdir & "\app", $outdir, True, "", True)
+			EndIf
 
 		Case $TYPE_ISCAB
 			; Unshield only works with UNIX-style paths
@@ -2527,7 +2535,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If StringInStr($sReturn, "Try unshield_file_save_old()") Then $sReturn = _Run($unshield & ' -O -D 2 -d "' & $outdir & '" x "' & $sPath & '"', $outdir)
 			If StringInStr($sReturn, "Failed to extract file") Then
 
-			Local $aReturn = ['InstallShield Cabinet ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', 'is6comp'), t('METHOD_EXTRACTION_RADIO', 'is5comp'), t('METHOD_EXTRACTION_RADIO', 'iscab')]
+			Local $aReturn = ["InstallShield Cabinet " & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', "is6comp"), t('METHOD_EXTRACTION_RADIO', "is5comp"), t('METHOD_EXTRACTION_RADIO', "iscab")]
 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 			Switch $iChoice
@@ -2663,9 +2671,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				extract($TYPE_QBMS, $arcdisp, $observer)
 			EndIf
 
-;~ 			Local $aReturn = ['MHTML ' & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', '7zip'), t('METHOD_EXTRACTION_RADIO', 'TotalObserver')]
-;~ 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
-
 		Case $TYPE_MOLE
 			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
 
@@ -2705,7 +2710,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					If $success == $RESULT_SUCCESS Then FileRecycle($cabfiles[$i])
 				Next
 
-				MoveFiles($tempoutdir, $outdir, False, '', True, True)
+				MoveFiles($tempoutdir, $outdir, False, "", True, True)
 				Local $aCleanup[] = ["resource.dat", "cp*.bin", "*.cab"]
 				Cleanup($aCleanup)
 				$success = $RESULT_UNKNOWN
@@ -2718,7 +2723,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$ret = CheckLessmsi()
 			If $ret Then
 				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_HIDE, True, True, True)
-				MoveFiles($outdir & "\SourceDir", $outdir, False, '', True)
+				MoveFiles($outdir & "\SourceDir", $outdir, False, "", True)
 				If $success == $RESULT_UNKNOWN And DirGetSize($outdir) == $initdirsize Then $success = $RESULT_FAILED
 			EndIf
 
@@ -2749,10 +2754,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 							FileDelete($cabfiles[$i])
 						Next
 
-						; Append missing file extensions
 						If $appendext Then AppendExtensions($tempoutdir)
-
-						; Move files to output directory and remove tempdir
 						MoveFiles($tempoutdir, $outdir, False, "", True)
 
 					Case 4 ; Administrative install
@@ -2765,31 +2767,19 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendext? '/ext': '', $filedir)
 
 		Case $TYPE_MSP ; Test
-			Local $aReturn = ['MSP ' & t('TERM_PACKAGE'), t('METHOD_EXTRACTION_RADIO', 'MSI TC Packer'), t('METHOD_EXTRACTION_RADIO', 'MsiX'), t('METHOD_EXTRACTION_RADIO', '7-Zip')]
+			Local $aReturn = ["MSP " & t('TERM_PACKAGE'), t('METHOD_EXTRACTION_RADIO', "7-Zip"), t('METHOD_EXTRACTION_RADIO', "MSI TC Packer"), t('METHOD_EXTRACTION_RADIO', "MsiX")]
 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
 			DirCreate($tempoutdir)
 			Switch $iChoice
-				Case 1 ; TC MSI
+				Case 1 ; 7-Zip
+					_Run($7z & ' x "' & $file & '"', $tempoutdir)
+				Case 2 ; TC MSI
 					_Run($quickbms & ' "' & $bindir & $msi_plug & '" "' & $file & '" "' & $tempoutdir & '"', $tempoutdir, @SW_MINIMIZE, True, False)
 ;~ 					extract($TYPE_QBMS, $arcdisp, $msi_plug, True)
-				Case 2 ; MsiX
+				Case 3 ; MsiX
 					_Run($msi_msix & ' "' & $file & '" /out "' & $tempoutdir & '"', $filedir)
-				Case 3 ; 7-Zip
-					_Run($7z & ' x "' & $file & '"', $tempoutdir)
 			EndSwitch
-
-			; Regardless of method, extract files from extracted CABs
-			; TODO: This does not work with new filescan function.
-			; 		Basically we need to do: open dll, query each file, change extension if enabled, extract if cab, close DLL
-;~ 			$cabfiles = FileSearch($tempoutdir)
-;~ 			For $i = 1 To $cabfiles[0]
-;~ 				FileScan_Trid($cabfiles[$i], 0)
-;~ 				If StringInStr($sFileType, "Microsoft Cabinet Archive", 0) Then
-;~ 					_Run($7z & ' x "' & $cabfiles[$i] & '"', $outdir)
-;~ 					FileDelete($cabfiles[$i])
-;~ 				EndIf
-;~ 			Next
 
 			; Append missing file extensions
 			If $appendext Then AppendExtensions($tempoutdir)
@@ -2877,7 +2867,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			HasPlugin($extsis)
 			DirCreate($tempoutdir)
 			_Run($extsis & ' -x -xcsd "' & $file & '" -d "' & $tempoutdir & '"', $tempoutdir, @SW_MINIMIZE)
-			MoveFiles($tempoutdir & StringLower($filename), $outdir, False, '', True, True)
+			MoveFiles($tempoutdir & StringLower($filename), $outdir, False, "", True, True)
 			FileDelete($bindir & "extsis.ini")
 			DirRemove($bindir & "Shell\", 1)
 			DirRemove(@MyDocumentsDir & "\SISContents", 0)
@@ -2952,7 +2942,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_SWFEXE
 			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}") Then
-				MoveFiles($tempoutdir, $outdir, False, '', True, True)
+				MoveFiles($tempoutdir, $outdir, False, "", True, True)
 			Else
 				$success = $RESULT_FAILED
 			EndIf
@@ -3180,7 +3170,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						; Some Wise installers contain a msi installer, which is unpacked to CommonFilesDir & "\Wise Installation Wizard"
 						; when the main file is executed. Trying to find the correct file inside this directory is unreliable, so we simply
 						; search the msi inside the exe file.
-						If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}") Then MoveFiles($tempoutdir, $outdir, False, '', True, True)
+						If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}") Then MoveFiles($tempoutdir, $outdir, False, "", True, True)
 
 					; Extract using unzip, falling back to 7-Zip
 					Case 4
@@ -4518,7 +4508,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
 			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) _
 			   Or StringInStr($return, "Open ERROR: Can not open the file as") Or StringInStr($return, "Error: System.Exception:") _
-			   Or StringInStr($return, "unknown WISE-version -> contact author") Then
+			   Or StringInStr($return, "unknown WISE-version -> contact author") Or StringInStr($return, "Critical error:") Then
 			$success = $RESULT_FAILED
 			SetError(1)
 		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
@@ -4730,7 +4720,7 @@ EndFunc
 ; Move all files and subdirectories from one directory to another
 ; $force is an integer that specifies whether or not to replace existing files
 ; $omit is a string that includes files to be excluded from move
-Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = False, $bShowStatus = False)
+Func MoveFiles($source, $dest, $force = False, $omit = "", $removeSourceDir = False, $bShowStatus = False)
 	Local $hSearch, $fname, $iCount = 0, $iErrors = 0
 	Static $sTranslation = t('TERM_FILE') & " "
 
@@ -4740,6 +4730,7 @@ Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = Fa
 
 	$hSearch = FileFindFirstFile($source & "\*")
 	If @error Then Return SetError(1)
+
 	While 1
 		$fname = FileFindNextFile($hSearch)
 		If @error Then ExitLoop
@@ -4760,8 +4751,8 @@ Func MoveFiles($source, $dest, $force = False, $omit = '', $removeSourceDir = Fa
 			EndIf
 		EndIf
 	WEnd
-	FileClose($hSearch)
 
+	FileClose($hSearch)
 	If $iErrors > 0 Then Cout($iErrors & " files/folders could not be moved")
 	If $bShowStatus Then _DeleteTrayMessageBox()
 	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
@@ -5213,7 +5204,6 @@ Func _AfterUpdate()
 	FileDelete($licensedir & "flac_readme.txt")
 	FileDelete($licensedir & "Expander_license.txt")
 	FileDelete($licensedir & "flvextractcl_icons.txt")
-	FileDelete($licensedir & "bcm_readme.txt")
 	FileDelete($licensedir & "wixtoolset_source.nz")
 	FileDelete($licensedir & "disunity_license.md")
 	FileDelete($licensedir & "disunity_readme.md")
@@ -5264,11 +5254,11 @@ EndFunc
 ; Start updater to download FFmpeg
 Func GetFFmpeg()
 	; Use the updater to handle elevation and download.
-	$ret = ShellExecuteWait(CanAccess($bindir)? $sUpdaterNoAdmin: $sUpdater, "/ffmpeg")
-	If @error Or Not HasPlugin($ffmpeg, True) Then Return SetError(1, 0, 0)
+	ShellExecuteWait(CanAccess($bindir)? $sUpdaterNoAdmin: $sUpdater, "/ffmpeg")
+	If @error Or Not HasPlugin($ffmpeg, True) Then Return SetError(1, 0, False)
 
 	Cout("FFmpeg successfully downloaded")
-	Return 1
+	Return True
 EndFunc
 
 
