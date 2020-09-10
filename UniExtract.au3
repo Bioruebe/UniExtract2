@@ -169,13 +169,14 @@ Global $trayX = -1, $trayY = -1
 
 ; Global variables
 Global $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initoutdir, $outdir, $initdirsize
-Global $prompt, $return, $Output, $hMutex, $prefs = "", $sUpdateURL = $sDefaultUpdateURL, $eCustomPromptSetting = $PROMPT_ASK
+Global $hMutex, $hProgress, $hTridDll = 0
+Global $prompt, $return, $Output, $prefs = "", $sUpdateURL = $sDefaultUpdateURL, $eCustomPromptSetting = $PROMPT_ASK
 Global $Type, $win7, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Global $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
 Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Global $unpackfailed, $exefailed, $ttarchfailed
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
-Global $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $hProgress, $idProgress, $sComError = 0
+Global $guimain = False, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $idProgress, $sComError = 0
 Global $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aExeinfoDefinitions[0][0], $aGUIs[0]
 
@@ -884,28 +885,22 @@ Func FileScan_Trid($analyze = 1)
 	Cout("Starting file scan using TrID")
 
 	If $extract Then
-		$hDll = DllOpen($bindir & "TrIDLib.dll")
-		Local $aReturn = DllCall($hDll, "int", "TrID_LoadDefsPack", "str", $bindir)
-		If Not @error Then Cout($aReturn[0] & " definitions loaded")
-		DllCall($hDll, "int", "TrID_SubmitFileA", "str", $file)
-		DllCall($hDll, "int", "TrID_Analyze")
+		Local $iResults = TridLib_Analyse($file)
 
-		$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 1, "int", 0, "str", "")
-		If $aReturn[0] = 0 Then
+		If $iResults = 0 Then
 			Cout("Unknown filetype!")
 		Else
-			For $i = 1 To $aReturn[0]
-				$aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 2, "int", $i, "str", "")
-				_FiletypeAdd("TrID", $aReturn[3])
-				If $analyze And $i < 4 Then tridcompare($aReturn[3])
+			For $i = 1 To $iResults
+				Local $sType = TridLib_GetType($i)
+				_FiletypeAdd("TrID", $sType)
+				If $appendext And $i == 1 Then RenameWithTridExtension()
+				If $analyze And $i < 4 Then tridcompare($sType)
 			Next
-
-			RenameWithTridExtension($hDll)
 		EndIf
 
 	Else ; Run TrID and fetch output to include additional information about the file type
-		Local $aReturn = StringSplit(FetchStdout($trid & ' "' & $file & '"' & ($analyze ? "" : " -v"), $filedir, @SW_HIDE, 0, True, False), @CRLF)
-		If $appendext Then RenameWithTridExtension()
+		Local $aReturn = StringSplit(FetchStdout($trid & ' "' & $file & '"' & ($analyze? "": " -v"), $filedir, @SW_HIDE, 0, True, False), @CRLF)
+		If $appendext Then RenameWithTridExtension($file, True)
 
 		Local $sFileType = ""
 		For $i = 1 To UBound($aReturn) - 1
@@ -925,24 +920,73 @@ Func FileScan_Trid($analyze = 1)
 	$tridfailed = True
 EndFunc
 
+; Load TridLib DLL and definition file
+Func TridLib_Load()
+	If $hTridDll Then Return True
+	Cout("Loading TridLib")
+
+	$hTridDll = DllOpen($bindir & "TrIDLib.dll")
+	Local $aReturn = DllCall($hTridDll, "int", "TrID_LoadDefsPack", "str", $bindir)
+	If @error Or $aReturn[0] < 1 Then
+		Cout("Failed to load Trid definitions")
+		Return SetError(1, 0, False)
+	EndIf
+
+	Cout($aReturn[0] & " definitions loaded")
+	Return True
+EndFunc
+
+; Analyse file using TridLib and return the number of results
+Func TridLib_Analyse($sFile)
+	TridLib_Load()
+	If @error Then Return SetError(1, 0, 0)
+
+	DllCall($hTridDll, "int", "TrID_SubmitFileA", "str", $sFile)
+	DllCall($hTridDll, "int", "TrID_Analyze")
+
+	$aReturn = DllCall($hTridDll, "int", "TrID_GetInfo", "int", 1, "int", 0, "str", "")
+	Return $aReturn[0]
+EndFunc
+
+; Get the n-th file type result
+Func TridLib_GetType($iIndex = 1)
+	$aReturn = DllCall($hTridDll, "int", "TrID_GetInfo", "int", 2, "int", $iIndex, "str", "")
+	If @error Then Return SetError(1, 0, 0)
+	Return $aReturn[3]
+EndFunc
+
+; Get the n-th extension result
+Func TridLib_GetExtension($iIndex = 1)
+	$aReturn = DllCall($hTridDll, "int", "TrID_GetInfo", "int", 3, "int", $iIndex, "str", "")
+	If @error Then Return SetError(1, 0, 0)
+	Return StringLower($aReturn[3])
+EndFunc
+
+; Unload TridLib DLL
+Func TridLib_Close()
+	DllClose($hTridDll)
+	$hTridDll = 0
+EndFunc
+
 ; Change file extension to the one TrID suggests if enabled in options
-Func RenameWithTridExtension($hDll = 0)
-	If Not $appendext Or $fileext == "dll" Then Return False
+Func RenameWithTridExtension($sPath = $file, $bAnalyse = False)
+	Local $iPos = StringInStr($sPath, ".", 0, -1)
+	Local $sExtension = $iPos < 0? "": StringTrimLeft($sPath, $iPos)
+	If StringLen($sExtension) > 4 Then $sExtension = ""
+	If $sExtension == "dll" Then Return False
 
-	If Not $hDll Then $hDll = DllOpen($bindir & "TrIDLib.dll")
+	If $bAnalyse Then TridLib_Analyse($sPath)
 
-	Local $aReturn = DllCall($hDll, "int", "TrID_GetInfo", "int", 3, "int", 1, "str", "")
-	$aReturn[3] = StringLower($aReturn[3])
-	If $aReturn[3] == "" Then Return
+	Local $sNewExtension = TridLib_GetExtension()
+	If $sNewExtension == "" Then Return False
 
-	Local $sPath = $filedir & "\" & $filename & "." & $aReturn[3]
-	If StringLower($sPath) = StringLower($file) Then Return False
+	Local $sDestination = ($sExtension == ""? $sPath: StringLeft($sPath, $iPos - 1)) & "." & $sNewExtension
+	If StringLower($sDestination) = StringLower($sPath) Then Return False
 
-	Cout("Changing file extension from ." & $fileext & " to ." & $aReturn[3])
-	If Not _FileMove($file, $sPath) Then Return False
+	Cout($sExtension == ""? "Adding file extension ." & $sNewExtension: "Changing file extension from ." & $sExtension & " to ." & $sNewExtension)
+	If Not _FileMove($sPath, $sDestination) Then Return False
 
-	FilenameParse($sPath)
-	DllClose($hDll)
+	If $sPath == $file Then FilenameParse($sDestination)
 
 	Return True
 EndFunc
@@ -1674,7 +1718,7 @@ Func tridcompare($sFileType)
 			 StringInStr($sFileType, "ELF Executable and Linkable format") Or StringInStr($sFileType, "Generic XML") Or _
 			 StringInStr($sFileType, "Microsoft Program DataBase") Or StringInStr($sFileType, "Windows Minidump") Or _
 			 StringInStr($sFileType, "Windows Shortcut") Or StringInStr($sFileType, "JPEG bitmap") Or StringInStr($sFileType, "Windows Registry Data") Or _
-			 StringInStr($sFileType, "X509 Certificate")
+			 StringInStr($sFileType, "X509 Certificate") Or StringInStr($sFileType, "Linux/UNIX shell script")
 			terminate($STATUS_NOTPACKED, $file, $fileext, $sFileType)
 
 		; Not supported
@@ -2703,11 +2747,11 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Sleep(1000)
 
 			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}{DOWN}{DOWN}{DOWN}") Then
-				$cabfiles = FileSearch($tempoutdir & "\*.cab")
-				For $i = 1 To $cabfiles[0]
-					Cout("Extracting cab file " & $cabfiles[$i])
-					_Run($7z & ' x "' & $cabfiles[$i] & '"', $tempoutdir, @SW_HIDE, True, True, True, False)
-					If $success == $RESULT_SUCCESS Then FileRecycle($cabfiles[$i])
+				Local $aFiles = _FileListToArrayRec($tempoutdir, "*.cab", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+				For $i = 1 To $aFiles[0]
+					Cout("Extracting cab file " & $aFiles[$i])
+					_Run($7z & ' x "' & $aFiles[$i] & '"', $tempoutdir, @SW_HIDE, True, True, True, False)
+					If $success == $RESULT_SUCCESS Then Cleanup($aFiles[$i])
 				Next
 
 				MoveFiles($tempoutdir, $outdir, False, "", True, True)
@@ -2748,10 +2792,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						_Run($quickbms & ' "' & $bindir & $msi_plug & '" "' & $file & '" "' & $tempoutdir & '"', $outdir, @SW_MINIMIZE, True, False)
 
 						; Extract files from extracted CABs
-						$cabfiles = FileSearch($tempoutdir & "*.cab")
-						For $i = 1 To $cabfiles[0]
-							_Run($cmd & $7z & ' x "' & $cabfiles[$i] & '"', $outdir)
-							FileDelete($cabfiles[$i])
+						Local $aFiles = _FileListToArrayRec($tempoutdir, "*.cab", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+						For $i = 1 To $aFiles[0]
+							_Run($7z & ' x "' & $aFiles[$i] & '"', $outdir)
+							Cleanup($aFiles[$i])
 						Next
 
 						If $appendext Then AppendExtensions($tempoutdir)
@@ -2766,26 +2810,25 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Due to the appendext argument, a definition file cannot be used here
 			_Run($msi_msix & ' "' & $file & '" /out "' & $outdir & '" ' & $appendext? '/ext': '', $filedir)
 
-		Case $TYPE_MSP ; Test
+		Case $TYPE_MSP
 			Local $aReturn = ["MSP " & t('TERM_PACKAGE'), t('METHOD_EXTRACTION_RADIO', "7-Zip"), t('METHOD_EXTRACTION_RADIO', "MSI TC Packer"), t('METHOD_EXTRACTION_RADIO', "MsiX")]
 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
-			DirCreate($tempoutdir)
 			Switch $iChoice
 				Case 1 ; 7-Zip
+					DirCreate($tempoutdir)
+
 					_Run($7z & ' x "' & $file & '"', $tempoutdir)
+
+					AppendExtensions($tempoutdir)
+					MoveFiles($tempoutdir, $outdir, False, "", True)
+
 				Case 2 ; TC MSI
-					_Run($quickbms & ' "' & $bindir & $msi_plug & '" "' & $file & '" "' & $tempoutdir & '"', $tempoutdir, @SW_MINIMIZE, True, False)
-;~ 					extract($TYPE_QBMS, $arcdisp, $msi_plug, True)
+					extract($TYPE_QBMS, $arcdisp, $msi_plug)
+
 				Case 3 ; MsiX
-					_Run($msi_msix & ' "' & $file & '" /out "' & $tempoutdir & '"', $filedir)
+					_Run($msi_msix & ' "' & $file & '" /out "' & $outdir & '" /ext', $filedir)
 			EndSwitch
-
-			; Append missing file extensions
-			If $appendext Then AppendExtensions($tempoutdir)
-
-			; Move files to output directory and remove tempdir
-			MoveFiles($tempoutdir, $outdir, False, "", True)
 
 		Case $TYPE_NBH ; Test
 			RunWait(_MakeCommand($nbh, True) & ' "' & $file & '"', $outdir)
@@ -3726,17 +3769,18 @@ Func CreateRenamedCopy($sExtension)
 EndFunc
 
 ; Append missing file extensions using TrID
-Func AppendExtensions($dir)
-	Cout("Fixing file extensions")
+Func AppendExtensions($sPath)
+	Cout("Adding file extensions")
 
-	Local $files = FileSearch($dir)
-	If $files[1] = '' Then Return
-	For $i = 1 To $files[0]
-		_SetTrayMessageBoxText(t('RENAMING_FILES', CreateArray($i, $files[0])))
-		If _IsDirectory($files[$i]) Then ContinueLoop
-		$filename = StringTrimLeft($files[$i], StringInStr($files[$i], '\', 0, -1))
-		If StringInStr($filename, '.') And Not (StringLeft($filename, 7) = 'Binary.' Or StringRight($filename, 4) = '.bin') Then ContinueLoop
-		RunWait(Cout(_MakeCommand($trid & ' "' & $files[$i] & '" -ae')), $dir, @SW_HIDE)
+	Local $aFiles = _FileListToArrayRec($sPath, "*", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+	If @error Then Return False
+
+	For $i = 1 To $aFiles[0]
+		If _IsDirectory($aFiles[$i]) Then ContinueLoop
+
+		_SetTrayMessageBoxText(t('RENAMING_FILES', CreateArray($i, $aFiles[0])))
+
+		RenameWithTridExtension($aFiles[$i], True)
 	Next
 EndFunc
 
@@ -3818,6 +3862,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	EndIf
 
 	_DeleteTrayMessageBox()
+	TridLib_Close()
 	Cout("Terminating - Status: " & $status)
 
 	; When multiple files are selected and executed via command line, they are added to batch queue, but the working instance uses in-memory data.

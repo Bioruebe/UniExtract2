@@ -5,10 +5,12 @@
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
   Fixed 'File not found' errors after file got renamed by 'Fix file extensions' option, thanks to demberto
+  Fixed 'Fix file extensions' option not working correctly in some cases
   Fixed some game extractions failing if program directory cannot be written to
   Fixed several typos in English language file, thanks to Mr-Update
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
+  Improved .msp extraction
   Updated cicdec to 2.1.1
   Updated Exeinfo PE to 0.0.6.1
   Updated godotdec to 2.1.1
