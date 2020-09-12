@@ -106,10 +106,10 @@ EndFunc
 ; Example .......: Yes
 ; ===============================================================================================================================
 Func _Pie_Draw($aHandles, $aValues, $nAspect, $nRotation, $bPersistent = True)
-    Local $nCount, $nTotal = 0, $angleStart, $angleSweep, $X, $Y, $iSize = UBound($aValues)
+    Local $nCount, $angleStart, $angleSweep, $X, $Y, $iSize = UBound($aValues)
     Local $pieArea = $aHandles[7] < $aHandles[8]? $aHandles[7]: $aHandles[8], $pieDiameter = (20 * $pieArea) / 21
 	Local $pieLeft = $pieDiameter * 0.025, $pieTop = $pieArea / 2 - ($pieDiameter / 2) * $nAspect
-	Local $pieHeight = $pieDiameter * $nAspect, $hPath, $pieDepth = $pieDiameter * 0.2
+	Local $pieHeight = $pieDiameter * $nAspect, $pieDepth = $pieDiameter * 0.2
 
 	If $nRotation > 360 Then $nRotation = Mod($nRotation, 360)
 
@@ -199,7 +199,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _Pie_DrawPiece($hGraphics, $aValues, $iX, $iY, $iWidth, $iHeight, $iDepth, $nCount, $Angles)
-    Local $hPath, $cX = $iX + ($iWidth / 2), $cY = $iY + ($iHeight / 2), $fDrawn = False
+    Local $hPath, $fDrawn = False
     Local $iStart = Mod($Angles[$nCount], 360), $iSweep = Mod($Angles[$nCount + 1] - $Angles[$nCount] + 360, 360)
 
 	; Draw side
@@ -308,7 +308,7 @@ Func _Pie_CreateContext($idControl, $iSmoothing = 2)
 	_GDIPlus_Startup()
 
 	$hControl = GUICtrlGetHandle($idControl)
-	$aControlPos = WinGetPos($hControl)
+	Local $aControlPos = WinGetPos($hControl)
 
 	$aHandles[0] = _GDIPlus_GraphicsCreateFromHWND($hControl)
 	$aHandles[1] = _GDIPlus_BitmapCreateFromGraphics($aControlPos[2], $aControlPos[3], $aHandles[0])
@@ -349,7 +349,7 @@ Func _Pie_Draw_Legend($aHandles, $aValues, $iBulletWidth = 20, $iColumns = 3, $i
 	Local $hFormat = _GDIPlus_StringFormatCreate(0x0020)
     Local $hTextBrush = _GDIPlus_BrushCreateSolid(0xFF000000)
 
-	$i = 0
+	Local $i = 0, $iLabelOffsetY
 	For $k = 0 To $iRows
 		$iY = $iRowSpace * $k
 		For $j = 0 To $iColumns - 1
