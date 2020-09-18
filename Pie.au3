@@ -30,7 +30,7 @@ Const $NUM_VALUES = 8
 Local $aChartValues[$NUM_VALUES][2]
 For $i = 0 To $NUM_VALUES - 1
     $aChartValues[$i][0] = Random(5, 25, 1)
-	$aChartValues[$i][1] = "Caption " & $i + 1
+	$aChartValues[$i][1] = "Value: " & $aChartValues[$i][0]
 Next
 
 ; Create the GUI
@@ -39,11 +39,12 @@ $idPic = GUICtrlCreatePic("", 0, 0, $PIE_AREA, $PIE_AREA)
 $idLegend = GUICtrlCreatePic("", 0, $PIE_AREA, $PIE_AREA, 100)
 GUISetState()
 
+_ArraySort($aChartValues, 1)
+
 ; Prepare values for the pie chart and setup GDI+ for both picture controls
 $aHandles = _Pie_PrepareValues($aChartValues, $idPic)
 $aLegendHandles = _Pie_CreateContext($idLegend, 0)
 
-_ArraySort($aChartValues)
 ;~ _ArrayDisplay($aChartValues)
 
 ; Draw the initial pie chart and legend
@@ -63,30 +64,6 @@ _Pie_Shutdown($aHandles, $aChartValues, False)
 _Pie_Shutdown($aLegendHandles)
 #ce
 #EndRegion
-
-; #FUNCTION# ====================================================================================================================
-; Name ..........: _GetDarkerColour
-; Description ...: Get a darker version of a colour by extracting the RGB components
-; Syntax ........: _GetDarkerColour($Colour)
-; Parameters ....: $Colour              - the base color.
-; Return values .: The new color
-; Author ........: WideBoyDixon
-; Modified ......:
-; Remarks .......:
-; Related .......:
-; Link ..........: https://www.autoitscript.com/forum/topic/97241-3d-pie-chart/
-; Example .......: No
-; ===============================================================================================================================
-Func _GetDarkerColour($Colour)
-    Local $Red, $Green, $Blue
-    $Red = (BitAND($Colour, 0xff0000) / 0x10000) - 40
-    $Green = (BitAND($Colour, 0x00ff00) / 0x100) - 40
-    $Blue = (BitAND($Colour, 0x0000ff)) - 40
-    If $Red < 0 Then $Red = 0
-    If $Green < 0 Then $Green = 0
-    If $Blue < 0 Then $Blue = 0
-    Return ($Red * 0x10000) + ($Green * 0x100) + $Blue
-EndFunc
 
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _Pie_Draw
@@ -241,7 +218,7 @@ EndFunc
 ; Parameters ....: $aValues             - [in/out] the values to draw as a 2-dimensional array:
 ;											[$i][0] - absolute values
 ;											[$i][1] - captions
-;											[$i][2] - [optional] a third dimension might specify the colors to draw the pie pieces
+;											[$i][2] - [optional] a third dimension might specify the colors of the pie pieces
 ;                  $hControl            - [optional] the handle to the control. This is a convenience argument to call
 ;													_Pie_CreateContext and return it's result
 ; Return values .: Either the return of _Pie_CreateContext (if $hControl is specified) or 0
@@ -253,8 +230,7 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _Pie_PrepareValues(ByRef $aValues, $hControl = 0)
-	Local $iSize = UBound($aValues), $nTotal = 0, $bSetColors = False
-	If UBound($aValues, 2) < 3 Then $bSetColors = True
+	Local $iSize = UBound($aValues), $nTotal = 0, $bSetColors = UBound($aValues, 2) < 3
 	ReDim $aValues[$iSize][7]
 
 	; Calculate percentage values
@@ -268,9 +244,9 @@ Func _Pie_PrepareValues(ByRef $aValues, $hControl = 0)
 		; Set the fractional values
 		$aValues[$i][3] = $aValues[$i][0] / $nTotal
 
-		; Create the brushes and pens
-		If $bSetColors Then $aValues[$i][2] = (Random(0, 255, 1) * 0x10000) + (Random(0, 255, 1) * 0x100) + Random(0, 255, 1)
+		If $bSetColors Then $aValues[$i][2] = _GetDistinguishableColor($i, 20)
 
+		; Create the brushes and pens
 		$aValues[$i][4] = _GDIPlus_BrushCreateSolid(BitOR(0xff000000, $aValues[$i][2]))
 		$aValues[$i][5] = _GDIPlus_BrushCreateSolid(BitOR(0xff000000, _GetDarkerColour($aValues[$i][2])))
 		$aValues[$i][6] = _GDIPlus_PenCreate(BitOR(0xff000000, _GetDarkerColour(_GetDarkerColour($aValues[$i][2]))))
@@ -482,6 +458,51 @@ Func _MouseOverRotation(ByRef $rot, ByRef $asp, $aHandles, $aValues, $hWnd, $hCo
 
 ;~ 	ConsoleWrite("DRAW " & $hControlOrPosArray & " - " & $asp & @CRLF)
 	_Pie_Draw($aHandles, $aValues, $asp, $rot, False)
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _GetDarkerColour
+; Description ...: Get a darker version of a colour by extracting the RGB components
+; Syntax ........: _GetDarkerColour($Colour)
+; Parameters ....: $Colour              - the base color.
+; Return values .: The new color
+; Author ........: WideBoyDixon
+; Modified ......:
+; Remarks .......:
+; Related .......:
+; Link ..........: https://www.autoitscript.com/forum/topic/97241-3d-pie-chart/
+; Example .......: No
+; ===============================================================================================================================
+Func _GetDarkerColour($Colour)
+    Local $Red, $Green, $Blue
+    $Red = (BitAND($Colour, 0xff0000) / 0x10000) - 40
+    $Green = (BitAND($Colour, 0x00ff00) / 0x100) - 40
+    $Blue = (BitAND($Colour, 0x0000ff)) - 40
+    If $Red < 0 Then $Red = 0
+    If $Green < 0 Then $Green = 0
+    If $Blue < 0 Then $Blue = 0
+    Return ($Red * 0x10000) + ($Green * 0x100) + $Blue
+EndFunc
+
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _GetDistinguishableColor
+; Description ...: Return a color, which is visually different from the last color. This is a deterministic function: the colors
+;				   are calculated with the golden ratio along the hue circle and not randomly generated.
+; Syntax ........: _GetDistinguishableColor($iIndex)
+; Parameters ....: $iIndex              - the n-th color to get
+;                  $iStartHue           - [optional] The hue [0-240] of the first color; all other colors are affected by this
+; Return values .: A color in standard hex format
+; Author ........: Bioruebe
+; Modified ......:
+; Remarks .......:
+; Related .......:
+; Link ..........:
+; Example .......: No
+; ===============================================================================================================================
+Func _GetDistinguishableColor($iIndex, $iStartHue = 0)
+	If $iIndex < 0 Then Return SetError(1)
+
+	Return _WinAPI_ColorHLSToRGB(Mod($iStartHue + $iIndex * 91.67, 240), 120, 180)
 EndFunc
 
 ; #FUNCTION# ====================================================================================================================
