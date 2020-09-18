@@ -1,5 +1,5 @@
 # Universal Extractor 2 _(UniExtract2)_
-![https://github.com/Bioruebe/UniExtract2#download](https://img.shields.io/badge/download-success?style=for-the-badge)
+[![Download](https://img.shields.io/badge/download-success?style=for-the-badge)](https://github.com/Bioruebe/UniExtract2#download)
 
 Universal Extractor 2 is a tool designed to **extract files from any type of extractable file**.
 
