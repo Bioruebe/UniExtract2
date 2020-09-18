@@ -1,4 +1,6 @@
 # Universal Extractor 2 _(UniExtract2)_
+![https://github.com/Bioruebe/UniExtract2#download](https://img.shields.io/badge/download-success?style=for-the-badge)
+
 Universal Extractor 2 is a tool designed to **extract files from any type of extractable file**.
 
 Unlike most archiving programs, UniExtract is not limited to **standard archives** such as `.zip` and `.rar`. It can also deal with **application installers**, **disk images** and even **game archives** and other **multimedia files**. An overview of supported file types can be found [here](/docs/FORMATS.md)
@@ -21,7 +23,7 @@ This program is an unofficial updated and extended version of the [original UniE
 See the changelog for a complete log of all improvements.
 
 ## Download
-Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases)
+Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases/download/v2.0.0-rc.3/UniExtractRC3.zip)
 
 ###### Virus alert?
 Universal Extractor does not contain any malware. Some anti-virus programs occasionally misdetect files inside UniExtract's program directory. You can be sure that this is a so-called false positive, an error - if you downloaded UniExtract from the official source at `https://github.com/Bioruebe/UniExtract2`. If you encounter a false positive, please report it [here](https://github.com/Bioruebe/UniExtract2/issues/78).
@@ -39,6 +41,10 @@ However, outdated version of Windows only have limited support:
 - Windows XP: any online functionality, such as the updater or the feedback dialog, is disabled for security reasons. Also some extractors might not work.
 
 (Online functionality for these systems might be restored in a future version of Universal Extractor.)
+
+###### Older versions
+
+...can be found on the [Releases](https://github.com/Bioruebe/UniExtract2/releases) page
 
 ## FAQ
 
