@@ -27,7 +27,7 @@ cicdec										cicdec						2.1.1		x	-	x	BSD 3-clause			Bioruebe							https://g
 											ICSharpCode.SharpZipLib.dll	1.2.0		---------	MIT						SharpZipLib Contributors			https://github.com/icsharpcode/SharpZipLib
 ConvertLIT									clit.exe					1.8			-	-	-	GNU GPL v3				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	-	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
-demoleition									demoleition.exe				0.61		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
+demoleition									demoleition.exe				0.64		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.58		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
@@ -59,10 +59,10 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 											gcmt-dll.dll				-------		---------	-------					-------								-------
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
-PeaZip										pea.exe						0.72		-	-	-	GNU LGPL				Giorgio Tani						https://www.peazip.org/								
+PeaZip										pea.exe						0.74		-	-	-	GNU LGPL				Giorgio Tani						https://www.peazip.org/								
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
-Qt Linguist									lconvert.exe				5.13.2		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
+Qt Linguist									lconvert.exe				5.15.0		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
 QuickBMS									quickbms.exe				0.10.1		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
@@ -82,7 +82,7 @@ spoondec									spoondec.exe				1.0.0		x	-	-	BSD 3-clause			Bioruebe							http
 											neko runtime files			-------		---------	-------					-------								-------
 											regexp.ndll					-------		---------	-------					-------								-------
 											lime.ndll					-------		---------	-------					-------								-------
-SQLite										sqlite3.exe					3.31.1		-	-	-	Public Domain			SQLite developers					http://sqlite.org/
+SQLite										sqlite3.exe					3.33.0		-	-	-	Public Domain			SQLite developers					http://sqlite.org/
 											sqlite.dll					-------		---------	-------					-------								-------
 											sqlite_x64.dll				-------		---------	-------					-------								-------
 swfextract (part of swftools)				swfextract.exe				0.9.2			-		GNU GPL v3				Ricardo Pedroso?					http://www.swftools.org/										

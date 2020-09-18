@@ -8,12 +8,17 @@
   Fixed 'Fix file extensions' option not working correctly in some cases
   Fixed some game extractions failing if program directory cannot be written to
   Fixed several typos in English language file, thanks to Mr-Update
+  Fixed two possible crashes during .cab extraction, thanks to seadoggie01
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Improved .msp extraction
   Updated cicdec to 2.1.1
+  Updated demoleition to 0.64
   Updated Exeinfo PE to 0.0.6.1
   Updated godotdec to 2.1.1
+  Updated PeaZip to 0.74
+  Updated Qt Linguist to 5.15.0
+  Updated SQLite to 3.33.0
   Updated German translation, thanks to Mr-Update
   Updated Hungarian translation, thanks to hevesij
   Updated Japanese translation, thanks to maboroshin

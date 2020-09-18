@@ -8,6 +8,7 @@
 #AutoIt3Wrapper_Res_Field=Homepage|https://bioruebe.com/dev/uniextract/
 #AutoIt3Wrapper_Res_Field=Timestamp|%date%
 #AutoIt3Wrapper_Run_AU3Check=n
+#AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
 #AutoIt3Wrapper_Run_Au3Stripper=y
 #Au3Stripper_Parameters=/mo
@@ -18,7 +19,7 @@
 ; Universal Extractor v2.0.0
 ; Author:	Jared Breland <jbreland@legroom.net>, Version 2.0.0 by Bioruebe
 ; Homepage:	http://www.legroom.net/mysoft
-; Language:	AutoIt v3.3.10.2
+; Language:	AutoIt v3.3.14.2
 ; License:	GNU General Public License v2 (http://www.gnu.org/copyleft/gpl.html)
 ;
 ; Very Basic Script Function:
@@ -64,7 +65,7 @@
 Const $name = "Universal Extractor"
 Const $sVersion = "2.0.0 RC 4"
 Const $sVersionId = "2R4"
-Const $codename = '"in memoriam"'
+Const $sCodename = "in memoriam"
 Const $title = $name & " " & $sVersion
 Const $website = "https://www.legroom.net/software/uniextract"
 Const $website2 = "https://bioruebe.com/dev/uniextract"
@@ -176,15 +177,17 @@ Global $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverri
 Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Global $unpackfailed, $exefailed, $ttarchfailed
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
-Global $guiprefs, $TBgui = 0, $exStyle = -1, $FS_GUI = False, $idTrayStatusExt, $BatchBut, $idProgress, $sComError = 0
+Global $guiprefs, $TBgui = 0, $exStyle = -1, $idTrayStatusExt, $BatchBut, $idProgress, $sComError = 0
 Global $Tray_Statusbox, $Tray_Exit, $isexe = False, $Message, $run = 0, $runtitle, $DeleteOrigFileOpt[3]
 Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aExeinfoDefinitions[0][0], $aGUIs[0]
 Global $guimain = False, $keepopenitem, $topmostitem, $showitem, $clearitem, $logitem, $silentitem, $GUI_Main_Extract, $GUI_Main_Scan, $filecont
-Global $dircont, $GUI_Main_Lock, $GUI_Main_Ok, $BatchBut, $langselect, $IntervalCont, $idOptDeleteAdditionalFiles, $warnexecuteopt
-Global $freeSpaceCheckOpt, $unicodecheckopt, $appendextopt, $NoBoxOpt, $GameModeOpt, $OpenOutDirOpt, $FeedbackPromptOpt, $StoreGUIPositionOpt
-Global $UsageStatsOpt, $LogOpt, $VideoTrackOpt, $historyopt, $idOptBetaUpdates, $CM_Checkbox, $CM_GUI, $CM_Checkbox_enabled, $CM_Checkbox_allusers
-Global $CM_Simple_Radio, $CM_Cascading_Radio, $CM_Picture, $CM_Checkbox_add, $CM_Checkbox_allusers2, $CM_add_input
-Global $FS_Section, $FS_Text, $FS_Next, $FS_Prev, $FS_Button, $FS_Progress, $page, $FS_Sections, $FS_Texts
+Global $dircont, $GUI_Main_Lock, $GUI_Main_Ok, $BatchBut, $dirbut, $iGuiMainWidth, $iGuiMainHeight, $GUI_Main_Destination_Label
+Global $langselect, $IntervalCont, $idOptDeleteAdditionalFiles, $freeSpaceCheckOpt, $unicodecheckopt, $appendextopt, $NoBoxOpt, $GameModeOpt
+Global $OpenOutDirOpt, $FeedbackPromptOpt, $StoreGUIPositionOpt, $UsageStatsOpt, $LogOpt, $VideoTrackOpt, $historyopt, $idOptBetaUpdates
+Global $idOptOpenOutDir, $idOptRememberGuiSizePosition, $idOptNoStatusBox, $idOptGameMode, $idOptExtractVideo, $idOptWarnExecute, $idOptCreateLog
+Global $idOptFeedbackPrompt, $idOptSendStats, $CM_Checkbox, $CM_GUI, $CM_Checkbox_enabled, $CM_Checkbox_allusers, $CM_Simple_Radio
+Global $CM_Cascading_Radio, $CM_Picture, $CM_Checkbox_add, $CM_Checkbox_allusers2, $CM_add_input, $FB_GUI
+Global $FS_GUI = False, $FS_Section, $FS_Text, $FS_Next, $FS_Prev, $FS_Button, $FS_Progress, $page, $FS_Sections, $FS_Texts
 
 ; Check if OS is 64 bit version
 If @OSArch == "X64" Or @OSArch == "IA64" Then
@@ -530,12 +533,13 @@ Func FilenameParse($f)
 EndFunc
 
 ; Parse string for environmental variables and return expanded output
-Func EnvParse($string)
-	Local $arr = StringRegExp($string, "%.*%", 2)
-	For $i = 0 To UBound($arr) - 1
-		$string = StringReplace($string, $arr[$i], EnvGet(StringReplace($arr[$i], "%", "")))
+Func EnvParse($sString)
+	Local $aReturn = StringRegExp($sString, "%.*%", 2)
+	For $sPlaceholder In $aReturn
+		Local $sReplacement = EnvGet(StringReplace($sPlaceholder, "%", ""))
+		If $sReplacement Then $sString = StringReplace($sString, $sPlaceholder, $sReplacement)
 	Next
-	Return $string
+	Return $sString
 EndFunc
 
 ; Translate text
@@ -1645,7 +1649,6 @@ Func tridcompare($sFileType)
 			CheckGarbro()
 			extract($TYPE_ARC_CONV, "YU-RIS Script Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
-
 		Case StringInStr($sFileType, "RPM Package")
 			extract($TYPE_7Z, 'RPM ' & t('TERM_PACKAGE'))
 
@@ -1799,18 +1802,17 @@ Func OpenExeInfo($f = $file)
 EndFunc
 
 ; Use ExeInfo PE's rip feature
-Func RipExeInfo($f, $tempoutdir, $command)
+Func RipExeInfo($tempoutdir, $sCommand)
 	DirCreate($tempoutdir)
-	Local $tmp = $tempoutdir & $filenamefull
-	Cout("Moving file to " & $tmp)
-	_FileMove($file, $tmp)
+	$tempoutdir &= $filenamefull
+	_FileMove($file, $tempoutdir)
 
-	Local $aReturn = OpenExeInfo($tmp)
+	Local $aReturn = OpenExeInfo($tempoutdir)
 
 	WinWait($aReturn[0], "", $Timeout)
 	MouseMove(0, 0, 0)
 	ControlClick($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]")
-	ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]", $command & "{ENTER}")
+	ControlSend($aReturn[0], "", "[CLASS:TBitBtn; INSTANCE:16]", $sCommand & "{ENTER}")
 
 	Local $hWnd = WinWait("[CLASS:TSViewer]", "", $Timeout)
 	Local $hControl = ControlGetHandle($hWnd, "", "TListBox1")
@@ -1830,7 +1832,7 @@ Func RipExeInfo($f, $tempoutdir, $command)
 	CloseExeInfo($aReturn)
 
 	Cout("Moving file back")
-	_FileMove($tmp, $filedir & "\")
+	_FileMove($tempoutdir, $filedir & "\")
 
 	Return $success
 EndFunc
@@ -2753,7 +2755,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			DirRemove($tempoutdir, True)
 			Sleep(1000)
 
-			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}{DOWN}{DOWN}{DOWN}") Then
+			If RipExeInfo($tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}{DOWN}{DOWN}{DOWN}") Then
 				Local $aFiles = _FileListToArrayRec($tempoutdir, "*.cab", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
 				For $i = 1 To $aFiles[0]
 					Cout("Extracting cab file " & $aFiles[$i])
@@ -2992,7 +2994,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_SWFEXE
-			If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}") Then
+			If RipExeInfo($tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}") Then
 				MoveFiles($tempoutdir, $outdir, False, "", True, True)
 			Else
 				$success = $RESULT_FAILED
@@ -3155,7 +3157,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_VISIONAIRE3
 			Local $tmp = $outdir & "\names.txt"
-			Local $f = $file
 
 			If Not FileExists($tmp) Then
 				For $i = 0 To 2
@@ -3221,7 +3222,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						; Some Wise installers contain a msi installer, which is unpacked to CommonFilesDir & "\Wise Installation Wizard"
 						; when the main file is executed. Trying to find the correct file inside this directory is unreliable, so we simply
 						; search the msi inside the exe file.
-						If RipExeInfo($file, $tempoutdir, "{DOWN}{DOWN}{DOWN}") Then MoveFiles($tempoutdir, $outdir, False, "", True, True)
+						If RipExeInfo($tempoutdir, "{DOWN}{DOWN}{DOWN}") Then MoveFiles($tempoutdir, $outdir, False, "", True, True)
 
 					; Extract using unzip, falling back to 7-Zip
 					Case 4
@@ -4925,7 +4926,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 	EndIf
 
 	Cout("Checking for update")
-	Local $return = 0, $found = False
+	Local $found = False
 
 	; Get index
 	$aReturn = _UpdateGetIndex("", $silent == $UPDATEMSG_SILENT Or $silent == $UPDATEMSG_FOUND_ONLY)
@@ -5139,20 +5140,15 @@ Func _UpdateGetSize($sPath)
 	If Not _IsDirectory($sPath) Then Return FileGetSize($sPath)
 	$sPath = StringReplace($sPath, "/", "\")
 ;~ 	Cout("GetSize: " & $sPath)
-	Local $iSize = DirGetSize($sPath), $ret
+	Local $iSize = DirGetSize($sPath)
 
 	; Don't include plugins in calculations
-	If $sPath = @ScriptDir & "\docs\" Then
-		If FileExists($sPath & "FFmpeg") Then $iSize -= DirGetSize($sPath & "FFmpeg") ; FFmpeg does not exist on server
-	ElseIf $sPath = $bindir & "x86\" Or $sPath = $bindir & "x64\" Then
+	If $sPath = $bindir & "x86\" Or $sPath = $bindir & "x64\" Then
 		$iSize -= FileGetSize($sPath & "ffmpeg.exe")
 	ElseIf $sPath = $bindir Then
-		$ret = DirGetSize($bindir & "crass-0.4.14.0")
-		If $ret > 0 Then $iSize -= $ret
-
 		Local $aReturn[] = ["x86\ffmpeg.exe", "x64\ffmpeg.exe", "arc_conv.exe", "Extractor.exe", "iscab.exe", "ISTools.dll", _
 							"umodel.exe", "SDL2.dll", "dcp_unpacker.exe", "ci-extractor.exe", "gea.dll", "gentee.dll", _
-							"dgcac.exe", "bootimg.exe", "I5comp.exe", "ZD50149.DLL", "ZD51145.DLL", "sim_unpacker.exe"]
+							"dgcac.exe", "bootimg.exe", "I5comp.exe", "ZD50149.DLL", "ZD51145.DLL"]
 
 		For $i In $aReturn
 			$iSize -= FileGetSize($bindir & $i)
@@ -5251,6 +5247,7 @@ Func _AfterUpdate()
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
 	FileDelete($defdir & "bruns.ini")
+	FileDelete($docsdir & "FFmpeg_license.html")
 	FileDelete($licensedir & "flac_authors.txt")
 	FileDelete($licensedir & "flac_readme.txt")
 	FileDelete($licensedir & "Expander_license.txt")
@@ -5570,7 +5567,7 @@ EndFunc
 
 ; Test if any of the controls in an array is checked
 Func _IsAnyChecked($aControls)
-	If Not IsArray($aControls) Then $aControls = [$aControls]
+	If Not IsArray($aControls) Then Local $aControls = [$aControls]
 
 	For $idControlID In $aControls
 		If _IsChecked($idControlID) Then Return True
@@ -5581,7 +5578,7 @@ EndFunc
 
 ; Set checked tate of all controls in given array
 Func _SetState($aControls, $state)
-	If Not IsArray($aControls) Then $aControls = [$aControls]
+	If Not IsArray($aControls) Then Local $aControls = [$aControls]
 
 	For $idControlID In $aControls
 		GUICtrlSetState($idControlID, $state)
@@ -5676,6 +5673,7 @@ EndFunc
 ; Drag and drop handler for multiple file support
 ; http://www.autoitscript.com/forum/topic/28062-drop-multiple-files-on-any-control/page__view__findpost__p__635231
 Func WM_DROPFILES_UNICODE_FUNC($hWnd, $msgID, $wParam, $lParam)
+	#forceref $hWnd, $msgID, $wParam, $lParam
 	Local $nSize, $pFileName
 	Local $nAmt = DllCall("shell32.dll", "int", "DragQueryFileW", "hwnd", $wParam, "int", 0xFFFFFFFF, "ptr", 0, "int", 255)
 	For $i = 0 To $nAmt[0] - 1
@@ -5735,23 +5733,23 @@ EndFunc
 
 ; Prompt user for file
 Func GUI_File()
-	Local $files = StringSplit(FileOpenDialog(t('OPEN_FILE'), "", t('SELECT_FILE') & " (*.*)|" & t('TERM_INSTALLER') & " (*.exe)|" & t('TERM_COMPRESSED') & " (*.rar;*.zip;*.7z)", 4 + 1, "", $guimain), "|", 2)
-	If Not $files[0] = "" Then
-		;_ArrayDisplay($files)
-		$return = UBound($files)
-		If $return == 1 Then
-			Global $gaDropFiles = $files
-		Else
-			Global $gaDropFiles[$return]
-			For $i = 0 To UBound($files) - 2
-				$gaDropFiles[$i] = $files[0] & "\" & $files[$i + 1]
-			Next
-		EndIf
-		;_ArrayDisplay($gaDropFiles)
-		GUI_Drop()
+	Local $sReturn = FileOpenDialog(t('OPEN_FILE'), "", t('SELECT_FILE') & " (*.*)|" & t('TERM_INSTALLER') & " (*.exe)|" & t('TERM_COMPRESSED') & " (*.7z;*.rar;*.zip)", $FD_MULTISELECT + $FD_FILEMUSTEXIST, "", $guimain)
+	Local $aFiles = StringSplit($sReturn, "|", 2)
+	If $aFiles[0] = "" Then Return
 
-		GUICtrlSetState($GUI_Main_Ok, $GUI_FOCUS)
+	Local $iSize = UBound($aFiles)
+	If $iSize == 1 Then
+		Global $gaDropFiles = $aFiles
+	Else
+		Global $gaDropFiles[$iSize]
+		For $i = 0 To $iSize - 2
+			$gaDropFiles[$i] = $aFiles[0] & "\" & $aFiles[$i + 1]
+		Next
 	EndIf
+
+	GUI_Drop()
+
+	GUICtrlSetState($GUI_Main_Ok, $GUI_FOCUS)
 EndFunc
 
 ; Prompt user for directory
@@ -6154,8 +6152,7 @@ Func GUI_Batch_Show()
 					Local $iIndex = _GUICtrlListBox_ItemFromPoint($idList, $aCursorInfo[0] - $iListLeft, $aCursorInfo[1] - $iListTop)
 					If $iLastIndex == $iIndex Then ContinueLoop
 					$iLastIndex = $iIndex
-					Local $sText = _GUICtrlListBox_GetText($GUI_Batch_List, $iIndex)
-					$sText = _GUICtrlListBox_GetText($idList, $iIndex)
+					Local $sText = _GUICtrlListBox_GetText($idList, $iIndex)
 					If StringLen($sText) > 72 Then
 						ToolTip($sText)
 						$bTooltip = True
@@ -6258,15 +6255,15 @@ Func GUI_Feedback()
 	Local $FB_MessageCont = GUICtrlCreateEdit("", 8, 264, 385, 169, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
 
-	Local $FB_PrivacyPolicyCheckbox = GUICtrlCreateCheckbox(t('FEEDBACK_PRIVACY_ACCEPT_LABEL'), 8, 442, 217, 17)
-	Local $FB_PrivacyPolicyOpen = GUICtrlCreateLabel(t('FEEDBACK_PRIVACY_VIEW_LABEL'), 246, 444, 147, 17, $SS_RIGHT)
+	Local $idPrivacyPolicyCheckbox = GUICtrlCreateCheckbox(t('FEEDBACK_PRIVACY_ACCEPT_LABEL'), 8, 442, 217, 17)
+	Local $idPrivacyPolicyLink = GUICtrlCreateLabel(t('FEEDBACK_PRIVACY_VIEW_LABEL'), 246, 444, 147, 17, $SS_RIGHT)
 	_GuiCtrlLinkFormat()
 
-	Local $FB_Send = GUICtrlCreateButton(t('SEND_BUT'), 111, 470, 75, 25)
+	Local $idSend = GUICtrlCreateButton(t('SEND_BUT'), 111, 470, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 215, 470, 75, 25)
-	Local $hSelectAll = GUICtrlCreateDummy()
+	Local $idSelectAll = GUICtrlCreateDummy()
 
-	Local $accelKeys[1][2] = [["^a", $hSelectAll]]
+	Local $accelKeys[1][2] = [["^a", $idSelectAll]]
 	GUISetAccelerators($accelKeys)
 	GUICtrlSetState($FB_MessageCont, $GUI_FOCUS)
 
@@ -6275,27 +6272,27 @@ Func GUI_Feedback()
 	GUISetState(@SW_SHOW)
 
 	; Warn if UniExtract is outdated
-	GUICtrlSetState($FB_Send, $GUI_DISABLE)
+	GUICtrlSetState($idSend, $GUI_DISABLE)
 	Local $aReturn = _UpdateGetIndex("", True)
 	If IsArray($aReturn) And (($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2]) Then GUI_Feedback_Outdated()
-	GUICtrlSetState($FB_Send, $GUI_ENABLE)
+	GUICtrlSetState($idSend, $GUI_ENABLE)
 	Opt("GUIOnEventMode", 0)
 
 	While True
 		Switch GUIGetMsg()
-			Case $FB_Send
-				If _IsChecked($FB_PrivacyPolicyCheckbox) Then
-					GUICtrlSetState($FB_Send, $GUI_DISABLE)
+			Case $idSend
+				If _IsChecked($idPrivacyPolicyCheckbox) Then
+					GUICtrlSetState($idSend, $GUI_DISABLE)
 					If GUI_Feedback_Send(GUICtrlRead($FB_SysCont), $file, GUICtrlRead($FB_OutputCont), GUICtrlRead($FB_MessageCont)) Then ExitLoop
-					GUICtrlSetState($FB_Send, $GUI_ENABLE)
+					GUICtrlSetState($idSend, $GUI_ENABLE)
 				Else
 					MsgBox($iTopmost + 48, $name, t('FEEDBACK_PRIVACY_NOT_ACCETPED'))
 				EndIf
 			Case $GUI_EVENT_CLOSE, $idCancel
 				ExitLoop
-			Case $FB_PrivacyPolicyOpen
+			Case $idPrivacyPolicyLink
 				ShellExecute($sPrivacyPolicyURL)
-			Case $hSelectAll
+			Case $idSelectAll
 				GUI_Edit_SelectAll()
 		EndSwitch
 	WEnd
@@ -6370,7 +6367,7 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 		Return GUI_Feedback_Error("Failed to create winhttp object")
 	Else
 		Global $sComError = 0
-		Local $oErrorHandler = ObjEvent("AutoIt.Error", "_ComErrorHandler")
+		ObjEvent("AutoIt.Error", "_ComErrorHandler")
 
 		$http.Open("POST", $sSupportURL, False)
 		$http.SetRequestHeader("Content-Type", "multipart/form-data; boundary=" & StringTrimLeft($boundary, 2))
@@ -7049,7 +7046,7 @@ Func GUI_Error_WithFeedbackButton($sTitle, $sText)
 	Local $hGui = GUICreate($name, 436, 194)
 	_GuiSetColor()
 
-	Local $idImage = _GUICtrlCreatePic($sLogoFile, 10, 26, 73, 73)
+	_GUICtrlCreatePic($sLogoFile, 10, 26, 73, 73)
 	GUICtrlCreateLabel(t($sTitle), 102, 10, 308, 28)
 	GUICtrlSetFont(-1, 14, 400, 4, $FONT_ARIAL)
 	GUICtrlCreateLabel($sText, 102, 42, 301, 104)
@@ -7166,7 +7163,10 @@ EndFunc
 
 ; Create Plugin Manager GUI
 Func GUI_Plugins($hParent = 0, $sSelection = 0)
-	If @NumParams < 1 Then Local $hParent = $guimain, $sSelection = 0
+	If @NumParams < 1 Then
+		$hParent = $guimain
+		$sSelection = 0
+	EndIf
 
 	; Define plugins
 	; executable|name|description|filetypes|filemask|extractionfilter|outdir|password
@@ -7362,10 +7362,10 @@ EndFunc
 ; Display usage statistics
 Func GUI_Stats()
 	Local $aReturn = IniReadSection($prefs, "Statistics")
-	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + 48, $name, t('STATS_NO_DATA'))
+	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + $MB_ICONWARNING, $name, t('STATS_NO_DATA'))
 
 	Local $sTitle = StringReplace(t('MENU_HELP_STATS_LABEL'), "&", "")
-	Local $GUI_Stats = GUICreate($sTitle, 730, 434, 315, 209)
+	Local $GUI_Stats = GUICreate($sTitle, 730, 434, 315, 209, -1, -1, $guimain)
 	Local $GUI_Stats_Status_Pie = GUICtrlCreatePic("", 8, 72, 209, 209)
 	Local $GUI_Stats_Types_Pie = GUICtrlCreatePic("", 368, 72, 353, 353)
 	Local $GUI_Stats_Types_Legend = GUICtrlCreatePic("", 8, 312, 337, 113)
@@ -7463,7 +7463,7 @@ Func GUI_About()
 	Local Const $iWidth = 437, $iHeight = 285
 	Cout("Creating about GUI")
 
-	Local $hGUI = _GUICreate($title & " " & $codename, $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
+	_GUICreate($title & ' "' & $sCodename & '"', $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 	GUICtrlCreateLabel($name, 16, 16, $iWidth - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
@@ -7502,19 +7502,16 @@ EndFunc
 
 ; Launch Universal Extractor website if help menu item clicked
 Func GUI_Website()
-	Cout("Opening website")
 	OpenURL($website)
 EndFunc
 
 ; Launch Universal Extractor 2 website if help menu item clicked
 Func GUI_Website2()
-	Cout("Opening version 2 website")
 	OpenURL($website2)
 EndFunc
 
 ; Launch Universal Extractor 2 Github website if help menu item clicked
 Func GUI_Website_Github()
-	Cout("Opening Github website")
 	OpenURL($websiteGithub)
 EndFunc
 
