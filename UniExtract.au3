@@ -110,17 +110,18 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", _
 	  $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
 	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", _
-	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
-	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
-	  $TYPE_SGB = "sgb", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
-	  $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITY = "unity", _
-	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
-	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", _
+	  $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
+	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
+	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
+	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", _
+	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
+	  $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
-	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_NBH, _
-	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
+	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, _
+	  $TYPE_NBH, $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
 	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, _
 	  $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, _
 	  $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
@@ -210,6 +211,7 @@ Const $cic = "cicdec.exe"
 Const $daa = "daa2iso.exe"
 Const $enigma = "EnigmaVBUnpacker.exe"
 Const $exeinfope = Quote($bindir & "exeinfope.exe")
+Const $expand = Quote(@SystemDir & "\expand.exe", True)
 Const $filetool = Quote($bindir & "file\bin\file.exe", True)
 Const $freearc = "unarc.exe"
 Const $fsb = "fsbext.exe"
@@ -535,6 +537,8 @@ EndFunc
 ; Parse string for environmental variables and return expanded output
 Func EnvParse($sString)
 	Local $aReturn = StringRegExp($sString, "%.*%", 2)
+	If @error Then Return $sString
+
 	For $sPlaceholder In $aReturn
 		Local $sReplacement = EnvGet(StringReplace($sPlaceholder, "%", ""))
 		If $sReplacement Then $sString = StringReplace($sString, $sPlaceholder, $sReplacement)
@@ -606,7 +610,7 @@ Func ParseCommandLine()
 		CheckUpdate()
 		terminate($STATUS_SILENT)
 
-	ElseIf $cmdline[1] = "/updatehelper" Then
+	ElseIf $cmdline[1] = "/updatehelper" Or $cmdline[1] == "/updatehelpers" Then
 		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
 		$prompt = 1
 
@@ -1682,6 +1686,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Windows Imaging Format")
 			extract($TYPE_7Z, 'WIM ' & t('TERM_IMAGE'))
 
+		Case StringInStr($sFileType, "Windows Update Package")
+			extract($TYPE_MSU, 'Windows Update ' & t('TERM_PACKAGE'))
+
 		Case StringInStr($sFileType, "Wise Installer Executable")
 			extract($TYPE_WISE, 'Wise Installer ' & t('TERM_PACKAGE'))
 
@@ -2369,6 +2376,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				RunWait(Warn_Execute(Quote($file & '" /q /x:"' & $outdir)), $outdir)
 			Else
 				check7z()
+				HasPlugin($expand)
+				_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
+				_Run($cmd & $expand & ' -F:* "' & $file & '" "' & $outdir & '"', $filedir, @SW_HIDE, True, True, False)
 			EndIf
 
 		Case $TYPE_CHM
@@ -2839,6 +2849,44 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					_Run($msi_msix & ' "' & $file & '" /out "' & $outdir & '" /ext', $filedir)
 			EndSwitch
 
+		Case $TYPE_MSU
+			HasPlugin($expand)
+			DirCreate($tempoutdir)
+			$tempoutdir = StringTrimRight($tempoutdir, 1)
+
+			_Run($cmd & $expand & ' -F:* "' & $file & '" "' & $tempoutdir & '"', $filedir, @SW_HIDE, True, True, False)
+
+			Local $sPath = $outdir & "\Patch\"
+			MoveFiles($tempoutdir, $sPath)
+			Local $tmp = $sPath & $filename & ".cab"
+			$sPath = FileExists($tmp)? $tmp: _FileSearchFirst($sPath, "*.cab")
+			If @error Then
+				$success = $RESULT_FAILED
+			Else
+				Cout("Extracting contained cab " & $sPath)
+
+				_Run($cmd & $expand & ' -F:* "' & $sPath & '" "' & $tempoutdir & '"', $filedir, @SW_HIDE, True, True, False)
+
+				Local $aFiles = _FileListToArray($tempoutdir, "*", $FLTA_FOLDERS, False)
+				For $i = 1 To $aFiles[0]
+					Local $sFile = $aFiles[$i]
+					$sPath = $tempoutdir & "\" & $sFile
+					If StringInStr($sFile, ".resources_") Then
+						Cleanup($sPath)
+					ElseIf StringStartsWith($sFile, "x86_") Then
+						_PathMove($sPath, $outdir & "\x86", $FC_CREATEPATH)
+					ElseIf StringStartsWith($sFile, "amd64_") Then
+						_PathMove($sPath, $outdir & "\x64", $FC_CREATEPATH)
+					ElseIf StringStartsWith($sFile, "wow64_") Then
+						_PathMove($sPath, $outdir & "\WOW64", $FC_CREATEPATH)
+					ElseIf StringStartsWith($sFile, "msil_") Then
+						_PathMove($sPath, $outdir & "\MSIL", $FC_CREATEPATH)
+					EndIf
+				Next
+
+				Cleanup($tempoutdir & "\*")
+			EndIf
+
 		Case $TYPE_NBH ; Test
 			RunWait(_MakeCommand($nbh, True) & ' "' & $file & '"', $outdir)
 
@@ -3286,7 +3334,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 	; Exit if success returned by _Run function
 	Cout("Extraction finished, success: " & $success)
-	If FileExists($tempoutdir) Then DirRemove($tempoutdir, 1)
+	If FileExists($tempoutdir) Then DirRemove($tempoutdir)
 
 	Switch $success
 		Case $RESULT_SUCCESS
@@ -3497,7 +3545,7 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 			Return SetError(1, 0, 0)
 		EndIf
 		$return = $aFiles
-		Local $aFiles = [$return]
+		Dim $aFiles = [$return]
 	EndIf
 
 	If $iMode = $OPTION_MOVE And $sDestination == 0 Then $sDestination = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
@@ -3630,9 +3678,9 @@ Func HasFFMPEG()
 	Opt("GUIOnEventMode", 0)
 	Local $sTranslation = t('TERM_DOWNLOAD')
 
-	Local $hGUI = GUICreate($name, 416, 201, 438, 245, $GUI_SS_DEFAULT_GUI)
+	Local $hGUI = GUICreate($name, 416, 201, -1, -1, $GUI_SS_DEFAULT_GUI)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filenamefull, $sTranslation)), 72, 20, 330, 107)
+	GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filenamefull, Quote($sTranslation))), 72, 20, 330, 107)
 	Local $idDownload = GUICtrlCreateButton($sTranslation, 242, 166, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 332, 166, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
@@ -3811,6 +3859,21 @@ Func FileSearch($s_Mask = '', $i_Recurse = 1)
 	Return $s_Buf
 EndFunc
 
+; Search for a given pattern and return first result
+Func _FileSearchFirst($sPath, $sMask = "*")
+	Cout("Searching " & $sMask & " in " & $sPath)
+	Local $hSearch = FileFindFirstFile($sPath & "\" & $sMask)
+	If @error Or $hSearch == -1 Then Return SetError(1)
+
+	Local $sFile = FileFindNextFile($hSearch)
+	Local $iError = @error
+	FileClose($hSearch)
+
+	If $iError Then Return SetError(1)
+	Cout("-> " & $sFile)
+	Return $sPath & "\" & $sFile
+EndFunc
+
 ; Open file and return contents
 Func _FileRead($f, $bDelete = False, $iFlag = 0)
 	Cout("Reading file " & $f)
@@ -3838,6 +3901,7 @@ Func _FileDelete($sFile, $iSleep = 100)
 	Cout("Failed again, error " & _WinAPI_GetLastError() & ": " & _WinAPI_GetLastErrorMessage())
 EndFunc
 
+; Write a value to the reistry and handle errors
 Func _RegWrite($sKey, $sValueName, $sType = "REG_SZ", $sValue = "")
 	Cout("Creating registry key " & $sKey & "/" & $sValueName)
 	RegWrite($sKey, $sValueName, $sType, $sValue)
@@ -4282,6 +4346,11 @@ EndFunc
 Func RegExists($sKeyName, $sValueName)
 	RegRead($sKeyName, $sValueName)
 	Return Number(@error = 0)
+EndFunc
+
+; Determine if a string starts with a given substring
+Func StringStartsWith($sString, $sSubstring, $bCaseSense = 0)
+	Return StringInStr($sString, $sSubstring, $bCaseSense, 1, 1, StringLen($sSubstring))
 EndFunc
 
 ; Return a specific line of a multi line string
@@ -4745,9 +4814,33 @@ Func _FileMove($sFile, $sDestination, $iFlag = 0)
 	Return MovePath($sFile, $sDestination, $iFlag, False)
 EndFunc
 
+; Move a file or directory with error handling and auto-retry
+Func _PathMove($sPath, $sDestination, $iFlag = 0)
+	Local $bIsFolder = _IsDirectory($sPath)
+	Local $iPos = StringInStr($sPath, "\", 0, -1)
+	Local $sName = StringTrimLeft($sPath, $iPos)
+	$sDestination = _PathCombine($sDestination, $sName)
+
+	Local $sReturn = MovePath($sPath, $sDestination, $iFlag, $bIsFolder)
+	If @error Then SetError(@error)
+	Return $sReturn
+EndFunc
+
+; Combine a path and a file/directory name
+Func _PathCombine($sPath, $sString)
+	If StringRight($sPath, 1) <> "\" Then $sPath &= "\"
+
+	While StringLeft($sString, 1) == "\"
+		$sString = StringTrimLeft($sString, 1)
+	WEnd
+
+	Return $sPath & $sString
+EndFunc
+
 ; Move file/folder specified by path with error handling and auto-retry
 Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
-	Cout("Moving " & $sPath & " to " & $sDestination)
+	Local $sType = $bIsFolder? "directory": "file"
+	Cout("Moving " & $sType & " " & $sPath & " to " & $sDestination)
 
 	If Not FileExists($sPath) Then
 		Cout("Error: input file does not exist")
@@ -4760,7 +4853,7 @@ Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
 		If FileMove($sPath, $sDestination, $iFlag) Then Return True
 	EndIf
 
-	Cout("Failed to move " & ($bIsFolder? "directory": "file") & ", retrying")
+	Cout("Failed to move " & $sType & ", retrying")
 	Sleep($bIsFolder? 100: 50)
 	If _WinAPI_MoveFileEx($sPath, $sDestination, BitOR($MOVE_FILE_COPY_ALLOWED, $iFlag)) Then Return True
 
@@ -5024,10 +5117,11 @@ EndFunc
 
 ; Download updated program files and display status
 Func _UpdateHelpers($aFiles)
-	Local $sText = t('TERM_DOWNLOADING', 0, $language, "Downloading") & "... "
+	Local $sStatusDownloading = t('TERM_DOWNLOADING', 0, $language, "Downloading") & "... "
+	Local $sStatusSearching = t('UPDATE_STATUS_SEARCHING', 0, $language, "Searching for updates...")
 
 	Local $hGUI = GUICreate($title, 434, 130, -1, -1, $WS_POPUPWINDOW, -1, $guimain)
-	Local $idLabel = GUICtrlCreateLabel($sText, 16, 16, 408, 17)
+	Local $idLabel = GUICtrlCreateLabel($sStatusDownloading, 16, 16, 408, 17)
 	GUICtrlCreateLabel(t('TERM_OVERALL_PROGRESS', 0, $language, "Overall progress") & ":", 16, 72, 80, 17)
 	Local $idProgressCurrent = GUICtrlCreateProgress(16, 32, 408, 25)
 	Local $idProgressTotal = GUICtrlCreateProgress(16, 88, 406, 25)
@@ -5052,7 +5146,7 @@ Func _UpdateHelpers($aFiles)
 		GUICtrlSetData($idProgressCurrent, 0)
 		If StringRight($a[0], 1) = "/" Then ; Directory
 			If Not FileExists($sPath) Then DirCreate($sPath)
-			GUICtrlSetData($idLabel, t('UPDATE_STATUS_SEARCHING', 0, $language, "Searching for updates..."))
+			GUICtrlSetData($idLabel, $sStatusSearching)
 			Local $aReturn = _UpdateGetIndex($a[0])
 			If Not IsArray($aReturn) Then
 				$success = False
@@ -5061,7 +5155,7 @@ Func _UpdateHelpers($aFiles)
 			_ArrayAdd($aFiles, $aReturn)
 			$iSize = UBound($aFiles)
 		Else
-			GUICtrlSetData($idLabel, $sText & $a[0] & " (" & $a[1] & " bytes" & ")")
+			GUICtrlSetData($idLabel, $sStatusDownloading & $a[0] & " (" & $a[1] & " bytes" & ")")
 
 			; Failsafe. Overwriting existing files fails under certain (unknown) conditions. Deleting the old file beforehand helps.
 			_FileDelete($sPath)
@@ -5081,7 +5175,9 @@ Func _UpdateHelpers($aFiles)
 				$iBytesReceived = InetGetInfo($hDownload, $INET_DOWNLOADREAD)
 				GUICtrlSetData($idProgressCurrent, Int($iBytesReceived / $a[1] * 100))
 			WEnd
+
 			GUICtrlSetData($idProgressCurrent, 100)
+			GUICtrlSetData($idLabel, $sStatusSearching)
 		EndIf
 	WEnd
 
@@ -5109,7 +5205,7 @@ Func _UpdateFFmpeg($bShowProgress = True)
 
 	; Download new
 	If $return > $sVersion Then
-		Cout("Found an update for FFmpeg")
+		Cout("FFmpeg update found")
 		If Prompt(48 + 4, 'UPDATE_PROMPT', CreateArray("FFmpeg", $sVersion, $return)) Then Return GetFFmpeg()
 	EndIf
 

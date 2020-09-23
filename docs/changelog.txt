@@ -1,6 +1,7 @@
 2.0.0 RC 4 (2020):
   Added better support for Smart Install Maker installers using simdec
   Added support for more Inno Setup installers using innoextract, thanks to hgdagon
+  Added support for MSU update packages, thanks to Elad Karako
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
@@ -11,7 +12,7 @@
   Fixed two possible crashes during .cab extraction, thanks to seadoggie01
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
-  Improved .msp extraction
+  Improved .cab and .msp extraction
   Updated cicdec to 2.1.1
   Updated demoleition to 0.64
   Updated Exeinfo PE to 0.0.6.1
