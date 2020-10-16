@@ -615,7 +615,7 @@ Func ParseCommandLine()
 
 	ElseIf $cmdline[1] = "/remove" Or $cmdline[1] = "/uninstall" Then
 		; Completely delete registry entries, used by uninstaller
-		_IsWin7()
+		_IsWin7OrNewer()
 		GUI_ContextMenu_remove()
 		GUI_ContextMenu_fileassoc(0)
 		terminate($STATUS_SILENT)
@@ -688,7 +688,7 @@ Func ReadPrefs()
 	If IsAdmin() Then Cout("Warning: running as admin")
 
 	; Select ini file
-	Local Const $settingsdir = @AppDataDir & "\Bioruebe\UniExtract"
+	Local $settingsdir = @AppDataDir & "\Bioruebe\UniExtract"
 	Local Const $globalIni = @ScriptDir & "\UniExtract.ini"
 	Local Const $userIni = $settingsdir & "\UniExtract.ini"
 
@@ -6662,7 +6662,7 @@ Func GUI_ContextMenu()
 	Next
 
 	; Disable Cascading context menu for non Win 7+ users as it is not supported
-	If _IsWin7() Then
+	If _IsWin7OrNewer() Then
 		; Check if Cascading context menu entries are enabled
 		For $i = 0 To $iSize
 			If _RegExists($regall & "\Uniextract\Shell\" & $CM_Shells[$i][0], "") Then
