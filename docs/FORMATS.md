@@ -39,33 +39,33 @@
 
 ### Installers
 
-| Installer type                | Common file extension(s)           |
-| ----------------------------- | ---------------------------------- |
-| **Actual Installer**¹         | .exe                               |
-| **Advanced Installer**        | .exe                               |
-| **Clickteam Install Creator** | .exe                               |
-| **Create Install**            | .exe                               |
-| **Excelsior Installer**       | .exe                               |
-| Gentee                        | .exe                               |
-| **Ghost Installer**           | .exe                               |
-| Inno Setup                    | .exe                               |
-| **Install4j**                 | .exe                               |
-| **InstallAware**              | .exe                               |
-| Installer VISE                | .exe                               |
-| **InstallScript**             | .exe                               |
-| InstallShield                 | .cab, .exe                         |
-| **MSCF**                      | .exe                               |
-| **Netopsystems FEAD**         | .exe                               |
-| NSIS                          | .exe                               |
-| Self-Extracting Zip           | .exe                               |
-| SetupFactory¹                 | .exe                               |
-| **Smart Install Maker**       | .exe                               |
-| **Spoon Installer**           | .exe                               |
-| **SuperDAT Updater**          | .exe                               |
-| **SymbianOS/EPOC Installer**  | .sis, sisx                         |
-| Windows Installer             | .cab, .exe, .msm, .msi, .msp, .msu |
-| Wise                          | .exe                               |
-| WiX                           | .exe                               |
+| Installer type                 | Common file extension(s)               |
+| ------------------------------ | -------------------------------------- |
+| **Actual Installer**¹          | .exe                                   |
+| **Advanced Installer**         | .exe                                   |
+| **Clickteam Install Creator**  | .exe                                   |
+| **Create Install**             | .exe                                   |
+| **Excelsior Installer**        | .exe                                   |
+| Gentee                         | .exe                                   |
+| **Ghost Installer**            | .exe                                   |
+| Inno Setup, **GOG installers** | .exe                                   |
+| **Install4j**                  | .exe                                   |
+| **InstallAware**               | .exe                                   |
+| Installer VISE                 | .exe                                   |
+| **InstallScript**              | .exe                                   |
+| InstallShield                  | .cab, .exe                             |
+| **MSCF**                       | .exe                                   |
+| **Netopsystems FEAD**          | .exe                                   |
+| NSIS                           | .exe                                   |
+| Self-Extracting Zip            | .exe                                   |
+| SetupFactory¹                  | .exe                                   |
+| **Smart Install Maker**        | .exe                                   |
+| **Spoon Installer**            | .exe                                   |
+| **SuperDAT Updater**           | .exe                                   |
+| **SymbianOS/EPOC Installer**   | .sis, sisx                             |
+| Windows Installer              | .cab, .exe, .msm, .msi, .msp, **.msu** |
+| Wise                           | .exe                                   |
+| WiX                            | .exe                                   |
 
 ### Disk images
 
@@ -115,7 +115,7 @@
 | **RPG Maker**                  | .rgssad, .rgss2a, .rgss3a, .rpgmvp, .rpgmvo, rpgmvm |         |
 | **Smile Game builder**¹        | .sgbpack                                            |         |
 | **Telltale archive**           | .ttarch                                             |         |
-| **Unity**¹                     | .assets, .unity3d, .resource                        |         |
+| **Unity**¹                     | .assets, .unity3d, .resource, .unitypackage         |         |
 | **Unreal Engine**¹             | ...                                                 |         |
 | **UTAGE**                      | .utage                                              |         |
 | **Visionaire Engine**          | .vis, .vc001, .vv001                                |         |

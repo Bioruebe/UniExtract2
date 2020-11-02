@@ -2,6 +2,7 @@
   Added better support for Smart Install Maker installers using simdec
   Added support for more Inno Setup installers using innoextract, thanks to hgdagon
   Added support for MSU update packages, thanks to Elad Karako
+  Added support for .unitypackage files
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto

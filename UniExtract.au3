@@ -111,18 +111,18 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", _
 	  $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
 	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
-	  $TYPE_SWFEXE = "swfexe", $TYPE_TAR = "tar", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
-	  $TYPE_UNITY = "unity", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", _
-	  $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
-	  $TYPE_ZPAQ = "zpaq"
+	  $TYPE_SWFEXE = "swfexe", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
+	  $TYPE_UNITYPACKAGE = "unitypackage", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", _
+	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
+	  $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
 	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, _
 	  $TYPE_NBH, $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
-	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_TAR, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, _
-	  $TYPE_UNITY, $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, _
-	  $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, _
+	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_ZIP, _
+	  $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -955,6 +955,24 @@ Func TridLib_Analyse($sFile)
 	Return $aReturn[0]
 EndFunc
 
+; Analyse file using TridLib and return the results as a pipe-delimited string
+Func TridLib_Analyse_Simple($sFile)
+	Cout("Analysing file " & $sFile)
+	Local $iResults = TridLib_Analyse($sFile)
+
+	If $iResults < 1 Then Return ""
+
+	Local $aReturn[0]
+
+	For $i = 1 To $iResults
+		Local $sType = TridLib_GetType($i)
+		Cout("--> " & $sType)
+		_ArrayAdd($aReturn, $sType)
+	Next
+
+	Return _ArrayToString($aReturn, @CRLF, -1, -1, "|")
+EndFunc
+
 ; Get the n-th file type result
 Func TridLib_GetType($iIndex = 1)
 	$aReturn = DllCall($hTridDll, "int", "TrID_GetInfo", "int", 2, "int", $iIndex, "str", "")
@@ -1385,7 +1403,7 @@ Func filecompare($sFileType)
 		Case StringInStr($sFileType, "ARJ archive", 0)
 			extract($TYPE_7Z, 'ARJ ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "POSIX tar archive", 0)
-			extract($TYPE_TAR, 'Tar ' & t('TERM_ARCHIVE'))
+			extract($TYPE_7Z, 'Tar ' & t('TERM_ARCHIVE'), "tar")
 		Case StringInStr($sFileType, "LHa", 0) And StringInStr($sFileType, "archive data", 0)
 			extract($TYPE_7Z, 'LZH ' & t('TERM_COMPRESSED'))
 		Case StringInStr($sFileType, "Macromedia Flash data", 0)
@@ -1659,7 +1677,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_SWF, 'Shockwave Flash ' & t('TERM_CONTAINER'))
 
 		Case StringInStr($sFileType, "TAR - Tape ARchive")
-			extract($TYPE_TAR, 'Tar ' & t('TERM_ARCHIVE'))
+			extract($TYPE_7Z, 'Tar ' & t('TERM_ARCHIVE'), "tar")
 
 		Case StringInStr($sFileType, "UHARC compressed archive")
 			extract($TYPE_UHA, 'UHARC ' & t('TERM_ARCHIVE'))
@@ -2142,6 +2160,8 @@ Func InitialCheckExt()
 		Case "iso", "nrg"
 			check7z()
 			CheckIso()
+		Case "unitypackage"
+			extract($TYPE_UNITYPACKAGE, "Unity Engine Asset Package")
 	EndSwitch
 EndFunc
 
@@ -2206,7 +2226,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	If $arcdisp <> -1 Then _CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 
 	; Create subdirectory
-	If StringRight($outdir, 1) = '\' Then $outdir = StringTrimRight($outdir, 1)
+	If StringRight($outdir, 1) = "\" Then $outdir = StringTrimRight($outdir, 1)
 	If FileExists($outdir) Then
 		If Not _IsDirectory($outdir) Then terminate($STATUS_INVALIDDIR, $outdir, "")
 		$dirmtime = FileGetTime($outdir, 0, 1)
@@ -2231,30 +2251,32 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If @error = 3 Then terminate($STATUS_MISSINGPART)
 			If @extended Then terminate($STATUS_PASSWORD, $file, $arctype, $arcdisp)
 
-			If FileExists($outdir & '\.text') Then
+			If FileExists($outdir & "\.text") Then
 				; Generic .exe extraction should not be considered successful
 				$success = $RESULT_FAILED
-			ElseIf StringInStr($sFileType, 'RPM Linux Package', 0) Then
+			ElseIf StringInStr($sFileType, "RPM Linux Package", 0) Then
 				; Extract inner CPIO for RPMs
-				If FileExists($outdir & '\' & $filename & '.cpio') Then
-					_Run($7z & ' x "' & $outdir & '\' & $filename & '.cpio"', $outdir)
-					FileDelete($outdir & '\' & $filename & '.cpio')
+				Local $sPath = $outdir & "\" & $filename & ".cpio"
+				If FileExists($sPath) Then
+					_Run($7z & ' x "' & $sPath & '"', $outdir)
+					FileDelete($sPath)
 				EndIf
-			ElseIf StringInStr($sFileType, 'Debian Linux Package', 0) Then
+			ElseIf StringInStr($sFileType, "Debian Linux Package", 0) Then
 				; Extract inner tarball for DEBs
-				If FileExists($outdir & '\data.tar') Then
-					_Run($7z & ' x "' & $outdir & '\data.tar"', $outdir)
-					FileDelete($outdir & '\data.tar')
+				Local $sPath = $outdir & "\data.tar"
+				If FileExists($sPath) Then
+					_Run($7z & ' x "' & $sPath & '"', $outdir)
+					FileDelete($sPath)
 				EndIf
-			ElseIf $additionalParameters == "xz" Or $additionalParameters == "gz" Or $additionalParameters == "Z" Then
-				If FileExists($outdir & '\' & $filename) And StringTrimLeft($filename, StringInStr($filename, '.', 0, -1)) = "tar" Then
-					_Run($7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
-					FileDelete($outdir & '\' & $filename)
-				EndIf
-			ElseIf $additionalParameters == "bz2" Then
-				If FileExists($outdir & '\' & $filename) Then
-					_Run($7z & ' x "' & $outdir & '\' & $filename & '"', $outdir)
-					FileDelete($outdir & '\' & $filename)
+			ElseIf $additionalParameters == "bz2" Or $additionalParameters == "gz" Or $additionalParameters == "xz" Or $additionalParameters == "Z" Then
+				; Extract inner tarball for GZipped files
+				Local $sPath = $outdir & "\" & $filename
+				If FileExists($sPath) Then
+					Local $sReturn = TridLib_Analyse_Simple($sPath)
+					If StringInStr($sReturn, "Tape ARchive") Or StringRight($sPath, 3) = "tar" Then
+						_Run($7z & ' x "' & $sPath & '"', $outdir)
+						FileDelete($sPath)
+					EndIf
 				EndIf
 			ElseIf StringInStr($sFileType, "SFX") Then
 				Cout("Trying to extract sfx script")
@@ -3041,14 +3063,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$success = $RESULT_FAILED
 			EndIf
 
-		Case $TYPE_TAR
-			_Run($7z & ' x "' & $file & '"', $outdir)
-
-			If $fileext <> "tar" Then
-				_Run($7z & ' x "' & $outdir & '\' & $filename & '.tar"', $outdir)
-				FileDelete($outdir & '\' & $filename & '.tar')
-			EndIf
-
 		Case $TYPE_THINSTALL ; Test
 			HasPlugin($thinstall)
 
@@ -3116,6 +3130,49 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 ;~ 		Case $TYPE_UNITY
 ;~ 			_Run($unity & ' extract "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, True, False)
+
+		Case $TYPE_UNITYPACKAGE
+			; Unitypackages are tar.gz files with a specific internal structure. First, extract them normally.
+			Local $oldoutdir = $outdir
+			$outdir = $tempoutdir
+
+			extract($TYPE_7Z, -1, "gz", True, False)
+
+			; Newer files contain 'archtemp.tar', old version are standard tar.gz archives
+			Local $sFile = $tempoutdir & "archtemp.tar"
+			If FileExists($sFile) Then
+				_Run($7z & ' x "' & $sFile & '"', $tempoutdir)
+				FileDelete($sFile)
+			EndIf
+
+			$outdir = $oldoutdir
+
+			; Rename files, create directory structure
+			Local $aDirs = _FileListToArray($tempoutdir, "*", $FLTA_FOLDERS, True)
+			If @error Then
+				$success = $RESULT_FAILED
+			Else
+				Local $sDir = $outdir & "\Previews"
+				For $i = 1 To $aDirs[0]
+					Local $sPath = $aDirs[$i] & "\pathname"
+					Local $sName = FileReadLine($sPath)
+					If @error Then ContinueLoop
+					_FileDelete($sPath)
+
+					$sPath = $aDirs[$i] & "\asset"
+					Local $sDestination = _PathFull($sName, $outdir)
+					If Not FileExists($sPath) Or Not StringInStr($sDestination, $outdir) Then ContinueLoop
+
+					_FileMove($sPath, $sDestination, $FC_CREATEPATH)
+					_FileMove($sPath & ".meta", $sDestination & ".meta", $FC_CREATEPATH)
+
+					$sPath = $aDirs[$i] & "\preview.png"
+					If FileExists($sPath) Then _FileMove($sPath, _PathFull($sName, $sDir), $FC_CREATEPATH)
+				Next
+
+				DirRemove($tempoutdir, 1)
+				Cleanup($sDir)
+			EndIf
 
 		Case $TYPE_UNREAL ; Test
 			HasPlugin($unreal)
@@ -3547,11 +3604,16 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 	For $sFile In $aFiles
 		If Not StringInStr($sFile, $outdir) Then $sFile = $outdir & "\" & $sFile
 		If Not FileExists($sFile) Then ContinueLoop
+
 		Local $bIsFolder = _IsDirectory($sFile)
+		Local $bIsWildcard = StringRight($sFile, 2) == "\*"
+
 		If $iMode = $OPTION_DELETE Then
 			Cout("Cleanup: Deleting " & $sFile)
 			If $bIsFolder Then
 				DirRemove($sFile, 1)
+			ElseIf $bIsWildcard Then
+				DirRemove(StringTrimRight($sFile, 1), 1)
 			Else
 				FileDelete($sFile)
 			EndIf
@@ -3560,6 +3622,8 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 			Cout("Cleanup: Moving " & $sFile & " to " & $sDestination)
 			If $bIsFolder Then
 				_DirMove($sFile, $sDestination, 1)
+			ElseIf $bIsWildcard Then
+				MoveFiles(StringTrimRight($sFile, 1), $sDestination, True, "", True, True)
 			Else
 				_FileMove($sFile, $sDestination, 1)
 			EndIf
