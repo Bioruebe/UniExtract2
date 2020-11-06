@@ -260,6 +260,7 @@ Const $zpaq = Quote($archdir & "zpaq.exe", True)
 Const $zoo = "unzoo.exe"
 
 ; Exractor plugins
+Const $bitrock = "bitrock-unpacker.exe"
 Const $bms = @TempDir & "\BMS.bms"
 Const $dbx = "dbxplug.wcx"
 Const $gaup = "gaup_pro.wcx"
@@ -1233,8 +1234,7 @@ Func FileScan_ExeInfo($bUseCmd = $extract)
 
 		; Not supported
 		Case StringInStr($sFileType, "Astrum InstallWizard") Or StringInStr($sFileType, "clickteam") Or _
-			 StringInStr($sFileType, "BitRock InstallBuilder") Or StringInStr($sFileType, "NE <- Windows 16bit") Or _
-			 StringInStr($sFileType, "Enigma Protector")
+			 StringInStr($sFileType, "NE <- Windows 16bit") Or StringInStr($sFileType, "Enigma Protector")
 			terminate($STATUS_NOTSUPPORTED, $file, $sFileType, $sFileType)
 
 		; Terminate if file cannot be unpacked
@@ -1247,7 +1247,7 @@ Func FileScan_ExeInfo($bUseCmd = $extract)
 			terminate($STATUS_NOTPACKED, $file, $sFileType, $sFileType)
 
 		; Needs to be at the end, otherwise files might not be recognized
-		Case StringInStr($sFileType, "upx")
+		Case StringInStr($sFileType, "upx") And Not StringInStr($sFileType, "sign like")
 			unpack($PACKER_UPX)
 
 		Case Else
@@ -4408,6 +4408,18 @@ Func _RegExists($sKeyName, $sValueName)
 	Return Number(@error = 0)
 EndFunc
 
+; Create a 1D array from a given 2D array
+Func _Array2DTo1D($aArray)
+	Local $iSize = UBound($aArray)
+	Local $aReturn[$iSize]
+
+	For $i = 0 To $iSize - 1
+		$aReturn[$i] = $aArray[$i][0]
+	Next
+
+	Return $aReturn
+EndFunc
+
 ; Determine if a string starts with a given substring
 Func _StringStartsWith($sString, $sSubstring, $bCaseSense = 0)
 	Return StringInStr($sString, $sSubstring, $bCaseSense, 1, 1, StringLen($sSubstring))
@@ -7328,22 +7340,23 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 	EndIf
 
 	; Define plugins
-	; executable|name|description|filetypes|filemask|extractionfilter|outdir|password
-	Local $aPluginInfo[10][8] = [ _
-		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', 'I Agree'], _
-		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', 'h4sh3m'], _
-		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', 0], _
-		[$unreal, 'Unreal Engine Resource Viewer', t('PLUGIN_UNREAL'), 'pak, u, uax, upk', 'umodel_win32.zip', 'umodel.exe|SDL2.dll', '', 0], _
-		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', $dcp, '', '', 0], _
-		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', 0], _
-		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'dgca_v*.zip', 'dgcac.exe', '', 0], _
-		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', 0], _
-		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', 0], _
-		[$extsis, 'ExtSIS', t('PLUGIN_EXTSIS'), 'sis, sisx', 'siscontents*.zip', $extsis, '', 0] _
+	; executable|name|description|filetypes|filemask|extractionfilter|outdir|newfilename|password
+	Local $aPluginInfo[11][9] = [ _
+		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', '', 'I Agree'], _
+		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', '', 'h4sh3m'], _
+		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', '', 0], _
+		[$unreal, 'Unreal Engine Resource Viewer', t('PLUGIN_UNREAL'), 'pak, u, uax, upk', 'umodel_win32.zip', 'umodel.exe|SDL2.dll', '', '', 0], _
+		[$dcp, 'WinterMute Engine Unpacker', t('PLUGIN_WINTERMUTE'), 'dcp', $dcp, '', '', '', 0], _
+		[$ci, 'CreateInstall Extractor', t('PLUGIN_CI', CreateArray("ci-extractor.exe", "gea.dll", "gentee.dll")), 'exe (CreateInstall)', 'ci-extractor.exe;gea.dll;gentee.dll', '', '', '', 0], _
+		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'dgca_v*.zip', $dgca, '', '', 0], _
+		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', '', 0], _
+		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', '', 0], _
+		[$extsis, 'ExtSIS', t('PLUGIN_EXTSIS'), 'sis, sisx', 'siscontents*.zip', $extsis, '', '', 0], _
+		[$bitrock, 'Bitrock Unpacker', t('PLUGIN_BITROCK'), 'exe (Bitrock)', "bitrock-unpacker*.exe", '', '', $bitrock, 0] _
 	]
 
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
-	Local $current = -1, $sWorkingDir = @WorkingDir, $aReturn[0], $iIndex = -1
+	Local $current = -1, $sWorkingDir = @WorkingDir, $aReturn[0], $iIndex = -1, $sWorkingDir = @WorkingDir
 	If $sSelection Then $iIndex = _ArraySearch($aPluginInfo, $sSelection, 0, 0, 0, 0, 1, 0)
 	FileChangeDir(@UserProfileDir)
 
@@ -7369,74 +7382,24 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 			Case $GUI_Plugins_List
 				$current = GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_Description, $GUI_Plugins_Download, $GUI_Plugins_SelectClose, $sSupportedFileTypes, $aPluginInfo)
 			Case $GUI_Plugins_SelectClose
-				If $current = -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ExitLoop
+				If $current == -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ContinueLoop
 
-				Cout("Adding plugin " & $aPluginInfo[$current][1])
-				$return = FileOpenDialog(t('OPEN_FILE'), _GetFileOpenDialogInitDir(), $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][4] & ")", 4+1, "", $GUI_Plugins)
-				If @error Then ContinueLoop
 				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_DISABLE)
-				Cout("Plugin file selected: " & $return)
-				If $aPluginInfo[$current][6] = "" Then $aPluginInfo[$current][6] = $bindir
-
-				; Check permissions
-				If Not CanAccess($aPluginInfo[$current][6]) Then
-					If IsAdmin() Then MsgBox($iTopmost + 64, $title, t('ACCESS_DENIED'))
-					MsgBox($iTopmost + 64, $title, t('ELEVATION_REQUIRED'))
-					ShellExecute($sUpdater, "/pluginst")
-					terminate($STATUS_SILENT)
+				Local $sPath = FileOpenDialog(t('OPEN_FILE'), _GetFileOpenDialogInitDir(), $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][4] & ")", $FD_MULTISELECT + $FD_FILEMUSTEXIST, "", $GUI_Plugins)
+				If Not @error Then
+					FileChangeDir($sWorkingDir)
+					GUI_Plugins_Install(_ArrayExtract($aPluginInfo, $current, $current), $sPath)
 				EndIf
-
-				; Determine filetype
-				Local $ret = StringRight($return, 3)
-				If $ret = ".7z" Or $ret = "rar" Or $ret = "zip" Then ; Unpack archive
-					Local $command = $cmd & $7z & ($aPluginInfo[$current][5] == ''? ' x': ' e') & ($aPluginInfo[$current][7] == 0? '': ' -p"' & $aPluginInfo[$current][7] & '"')
-					If $aPluginInfo[$current][5] <> "" Then ; Build include command for each file needed
-						$aReturn = StringSplit($aPluginInfo[$current][5], "|", 2)
-						For $sFile In $aReturn
-							$command &= " -ir!" & $sFile
-						Next
-					EndIf
-					$command &= ' -o"' & $aPluginInfo[$current][6] & '" "' & $return & '"'
-					Cout("Plugin extraction command: " & $command)
-					_Run($command, $aPluginInfo[$current][6], @SW_MINIMIZE)
-				Else ; Copy files
-					Local $aVars = StringSplit($aPluginInfo[$current][4], ";", 2), $success = True
-					$aReturn = StringSplit($return, "|", 2)
-
-					; Check if all files have been selected
-					For $sFile In $aVars
-						If _ArraySearch($aReturn, $sFile, 0, 0, 0, 1) < 0 Then
-							MsgBox($iTopmost + 16, $title, t('PLUGIN_IMPORT_MISSINGFILES', CreateArray($aPluginInfo[$current][1], StringReplace($aPluginInfo[$current][4], ";", @CRLF))))
-							$success = False
-							ExitLoop
-						EndIf
-					Next
-
-					; Copy files to \bin\
-					If $success Then
-						Local $size = UBound($aReturn)
-						If $size = 1 Then ; Move single file directly
-							Cout("Copying plugin file " & $aReturn[0] & " to " & $aPluginInfo[$current][6])
-							FileCopy($aReturn[0], $aPluginInfo[$current][6], 1)
-						Else ; Multiple files are returned as path|file1|fileN
-							For $i = 1 To $size - 1
-								$aReturn[$i] = $aReturn[0] & "\" & $aReturn[$i]
-								Cout("Copying plugin file " & $aReturn[$i] & " to " & $aPluginInfo[$current][6])
-								FileCopy($aReturn[$i], $aPluginInfo[$current][6], 1)
-							Next
-						EndIf
-					EndIf
-				EndIf
+				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_ENABLE)
 
 				; Refresh GUI
-				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_ENABLE)
 				Local $aReturn = ["{UP}", "{DOWN}"]
 				If $current = _GUICtrlListBox_GetTopIndex($GUI_Plugins_List) Then _ArrayReverse($aReturn)
 				For $i = 0 To 1
 					ControlSend($GUI_Plugins, "", $GUI_Plugins_List, $aReturn[$i])
 				Next
 			Case $GUI_Plugins_Download
-				If $current = -1 Then ContinueLoop
+				If $current == -1 Then ContinueLoop
 				GUICtrlSetState($GUI_Plugins_Download, $GUI_DISABLE)
 				Cout("Download clicked for plugin " & $aPluginInfo[$current][1])
 				OpenURL($sUrlGetUrl & $aPluginInfo[$current][1])
@@ -7447,6 +7410,63 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 	FileChangeDir($sWorkingDir)	; Reset working dir in case it was changed by FileOpenDialog
 	GUIDelete($GUI_Plugins)
 	Opt("GUIOnEventMode", 1)
+EndFunc
+
+Func GUI_Plugins_Install($aPluginInfo, $sPath)
+	_ArrayTranspose($aPluginInfo)
+	$aPluginInfo = _Array2DTo1D($aPluginInfo)
+
+	Cout("Adding plugin " & $aPluginInfo[1])
+	Cout("Plugin file selected: " & $sPath)
+	If $aPluginInfo[6] = "" Then $aPluginInfo[6] = $bindir
+
+	; Check permissions
+	If Not CanAccess($aPluginInfo[6]) Then
+		If IsAdmin() Then Return MsgBox($iTopmost + $MB_ICONERROR, $title, t('ACCESS_DENIED'))
+
+		MsgBox($iTopmost + $MB_ICONERROR, $title, t('ELEVATION_REQUIRED'))
+		ShellExecute($sUpdater, "/pluginst")
+		terminate($STATUS_SILENT)
+	EndIf
+
+	; Determine filetype
+	Local $sExtension = StringRight($sPath, 3)
+	If $sExtension = ".7z" Or $sExtension = "rar" Or $sExtension = "zip" Then ; Unpack archive
+		Local $command = $cmd & $7z & ($aPluginInfo[5] == ''? ' x': ' e') & ($aPluginInfo[8] == 0? '': ' -p"' & $aPluginInfo[8] & '"')
+		If $aPluginInfo[5] <> "" Then ; Build include command for each file needed
+			For $sFile In StringSplit($aPluginInfo[5], "|", 2)
+				$command &= " -ir!" & $sFile
+			Next
+		EndIf
+		$command &= ' -o"' & $aPluginInfo[6] & '" "' & $sPath & '"'
+		Cout("Plugin extraction command: " & $command)
+		_Run($command, $aPluginInfo[6], @SW_MINIMIZE)
+	Else ; Copy files
+		Local $aFiles = StringSplit($sPath, "|", $STR_NOCOUNT)
+
+		; Check if all files have been selected
+		Local $aReturn = StringSplit($aPluginInfo[4], ";", 2)
+		For $sFile In $aReturn
+			If _ArraySearch($aFiles, $sFile, 0, 0, 0, 1) > -1 Then ContinueLoop
+			If StringInStr($sFile, "*") Then ContinueLoop ; Workround: wildcards are not matched by ArraySearch; just skip them for now
+
+			Return MsgBox($iTopmost + $MB_ICONERROR, $title, t('PLUGIN_IMPORT_MISSINGFILES', CreateArray($aPluginInfo[1], StringReplace($aPluginInfo[4], ";", @CRLF))))
+		Next
+
+		; Copy files to \bin\
+		Local $iSize = UBound($aFiles)
+		If $iSize = 1 Then ; Move single file directly
+			Local $sDestination = $aPluginInfo[6] & $aPluginInfo[7]
+			Cout("Copying plugin file " & $aFiles[0] & " to " & $sDestination)
+			FileCopy($aFiles[0], $sDestination, 1)
+		Else ; Multiple files are returned as path|file1|fileN
+			For $i = 1 To $iSize - 1
+				$aFiles[$i] = $aFiles[0] & "\" & $aFiles[$i]
+				Cout("Copying plugin file " & $aFiles[$i] & " to " & $aPluginInfo[6])
+				FileCopy($aFiles[$i], $aPluginInfo[6], 1)
+			Next
+		EndIf
+	EndIf
 EndFunc
 
 ; Update Plugin Manager after list selecton has changed

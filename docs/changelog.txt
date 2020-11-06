@@ -3,6 +3,7 @@
   Added support for more Inno Setup installers using innoextract, thanks to hgdagon
   Added support for MSU update packages, thanks to Elad Karako
   Added support for .unitypackage files
+  Added support for BitRock InstallBuilder installers (plugin), thanks to PhlegethonAcheron
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
@@ -21,6 +22,7 @@
   Updated PeaZip to 0.74
   Updated Qt Linguist to 5.15.0
   Updated SQLite to 3.33.0
+  Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated German translation, thanks to Mr-Update
   Updated Hungarian translation, thanks to hevesij
   Updated Japanese translation, thanks to maboroshin

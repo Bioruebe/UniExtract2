@@ -43,6 +43,7 @@
 | ------------------------------ | -------------------------------------- |
 | **Actual Installer**¹          | .exe                                   |
 | **Advanced Installer**         | .exe                                   |
+| **Bitrock Install Builder**¹   | .exe                                   |
 | **Clickteam Install Creator**  | .exe                                   |
 | **Create Install**             | .exe                                   |
 | **Excelsior Installer**        | .exe                                   |
