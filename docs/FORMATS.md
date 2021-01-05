@@ -20,6 +20,7 @@
 | gzip archive   | .gz, .tgz, .tar.gz, .ipk                                     |
 | KGB            | .kgb, kge, .exe                                              |
 | Linux packages | .deb, .rpm                                                   |
+| **LBR**        | .lbr, .lzr, .lqr                                             |
 | **LZIP**       | .lz                                                          |
 | LZH            | .lzh, .lha                                                   |
 | LZMA           | .lzma                                                        |

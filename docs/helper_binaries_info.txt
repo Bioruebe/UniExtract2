@@ -31,7 +31,7 @@ demoleition									demoleition.exe				0.64		x	-	-	Freeware*				kao									http
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.58		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.1		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.3		---------	Freeware				A.S.L.								http://www.exeinfo.xn.pl/				
 											Ext_Detector.dll			0.5.6.2		---------	-------					-------								-------
 FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
@@ -44,14 +44,16 @@ godotdec									godotdec.exe				2.1.1		x	-	x	BSD 3-clause			Bioruebe							http
 HelpDeco									helpdeco.exe				2.1				-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
 i6comp										i6comp.exe					0.2				-		Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
 innoextract									innoextract.exe				1.9			x	x	x	zlib/libpng	license		Daniel Scharrer						https://constexpr.org/innoextract/
-innounp, the Inno Setup Unpacker			innounp.exe					0.49			-	o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
+innounp, the Inno Setup Unpacker			innounp.exe					0.50			-	o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
 IsXunpack									IsXunpack.exe				0.99			-		Freeware				Pit0n and SkYuS//vN					http://forum.exetools.com/showthread.php?t=3619					
 jsMSIx										jsMSIx.exe					1.11.0704		-		Freeware				JSWare								http://www.jsware.net/jsware/msicode.php5#unpackx				
 KGB Archiver								\kgb directory				2 (beta 2)		-	-	GNU GPL v2				Thomasz Pawlak						http://kgbarchiver.sourceforge.net/								
+lbrate										lbrate.exe					1.1			-	x	-	GNU GPL v2				Russell Marks						http://www.svgalib.org/rus/lbrate.html
+											---------					-------		---------	-------					Petr Rehák (Windows build)			http://peersoft.braillnet.cz/soft/lbrate-1.1-win32.zip
 lessmsi										\lessmsi directory			1.6.1 mod	-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
 lzip										lzip.exe					1.20		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
 lzop										lzop.exe					1.04			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
-MediaInfo 									MediaInfo.dll				20.03		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
+MediaInfo 									MediaInfo.dll				20.09		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0				-		Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
 mtee										mtee.exe					2.21		---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
 NBHextract									NBHextract.exe				1.0				-		Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
@@ -62,7 +64,7 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 PeaZip										pea.exe						0.74		-	-	-	GNU LGPL				Giorgio Tani						https://www.peazip.org/								
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
-Qt Linguist									lconvert.exe				5.15.0		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
+Qt Linguist									lconvert.exe				5.15.2		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
 QuickBMS									quickbms.exe				0.10.1		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
@@ -99,8 +101,8 @@ FreeArc unpacker							unarc.exe					0.666		x	-	-	GNU GPL v2				Bulat Ziganshin	
 unecm										unecm.exe					1.0			x	-	x	GNU GPL v2				Neill Corlett						http://www.neillcorlett.com/ecm
 Unisz										unisz.exe					?			o	-	-	Unisz license			EZB Systems, Inc.					http://www.ezbsystems.com/isz/unisz.zip
 UnLZX										unlzx.exe					1.21?		-	-	-	Open Source				Oliver Gantert						http://xavprods.free.fr/lzx/									
-UnRAR										UnRAR.exe					5.90		x	-	x	Freeware				Eugene and Alexander Roshal			http://www.rarlab.com/rar_add.htm								
-unrpa										unrpa.exe					2.3.0 mod	x	-	x	GNU GPL v3				Gareth Latty						http://www.lattyware.co.uk/projects/unrpa/
+UnRAR										UnRAR.exe					6.00		x	-	x	Freeware				Eugene and Alexander Roshal			https://www.rarlab.com/download.htm							
+unrpa										unrpa.exe					2.3.0 mod	x	-	x	GNU GPL v3				Gareth Latty						https://www.lattyware.co.uk/projects/unrpa/
 Unshield									unshield.exe				1.4.d14d2e2	-	-	-	MIT						David Eriksson						http://github.com/twogood/unshield/					
 UnUHARC										UHARC02.EXE					0.2			?	-	?	Freeware				Uwe Herklotz						http://en.wikipedia.org/wiki/UHarc								
 											UHARC04.EXE					0.4			?	-	?	-------					-------								http://www.klaimsoft.com/forum/index.php?showtopic=25			

@@ -4,6 +4,7 @@
   Added support for MSU update packages, thanks to Elad Karako
   Added support for .unitypackage files
   Added support for BitRock InstallBuilder installers (plugin), thanks to PhlegethonAcheron
+  Added support for CP/M LBR archives, thanks to Petr Řehák
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
@@ -17,11 +18,14 @@
   Improved .cab and .msp extraction
   Updated cicdec to 2.1.1
   Updated demoleition to 0.64
-  Updated Exeinfo PE to 0.0.6.1
+  Updated Exeinfo PE to 0.0.6.3
   Updated godotdec to 2.1.1
-  Updated PeaZip to 0.74
-  Updated Qt Linguist to 5.15.0
+  Updated innounp to 0.50
+  Updated MediaInfo to 20.09
+  Updated PeaZip to 0.75
+  Updated Qt Linguist to 5.15.2
   Updated SQLite to 3.33.0
+  Updated UnRAR to 6.00
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated German translation, thanks to Mr-Update
   Updated Hungarian translation, thanks to hevesij
