@@ -30,6 +30,7 @@
   Updated German translation, thanks to Mr-Update
   Updated Hungarian translation, thanks to hevesij
   Updated Japanese translation, thanks to maboroshin
+  Updated Polish translation, thanks to Barnaba
   Updated Russian translation, thanks to wvxwxvw
   Removed Smart Install Maker Unpacker, replaced with simdec
   Removed WolfDec plugin, replaced with GARbro
