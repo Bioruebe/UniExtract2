@@ -46,6 +46,12 @@ However, outdated version of Windows only have limited support:
 
 ...can be found on the [Releases](https://github.com/Bioruebe/UniExtract2/releases) page
 
+###### Uninstalling
+
+- If you enabled **context menu entries**, open Universal Extractor and select `Edit` > `Context Menu Entries`. Uncheck both `enabled` checkboxes and click `OK`.
+- If you saved the program to a directory without write access (e.g. C:\Program Files) and want to remove all settings, remove the directory `%APPDATA%\Bioruebe\UniExtract`. Simply open the file explorer and enter `%APPDATA%\Bioruebe` into the path input, then delete the directory `UniExtract`.
+- Finally, delete the program directory.
+
 ## FAQ
 
 #### Is there a portable version?
