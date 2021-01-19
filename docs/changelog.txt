@@ -1,4 +1,4 @@
-2.0.0 RC 4 (2020):
+2.0.0 RC 4 (2021):
   Added better support for Smart Install Maker installers using simdec
   Added support for more Inno Setup installers using innoextract, thanks to hgdagon
   Added support for MSU update packages, thanks to Elad Karako
@@ -15,8 +15,9 @@
   Fixed two possible crashes during .cab extraction, thanks to seadoggie01
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
+  Changed design/usability of command line help dialog
   Improved .cab and .msp extraction
-  Updated cicdec to 2.1.1
+  Updated cicdec to 2.1.2
   Updated demoleition to 0.64
   Updated Exeinfo PE to 0.0.6.3
   Updated godotdec to 2.1.1
@@ -34,6 +35,7 @@
   Updated Russian translation, thanks to wvxwxvw
   Removed Smart Install Maker Unpacker, replaced with simdec
   Removed WolfDec plugin, replaced with GARbro
+  Removed /prefs command line parameter
 
 2.0.0 RC 3 (24/08/2020):
   Added support for MSCF installers

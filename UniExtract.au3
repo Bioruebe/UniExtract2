@@ -75,6 +75,7 @@ Const $sUrlGetUrl = "https://update.bioruebe.com/uniextract/geturl.php?q="
 Const $sUrlFeedback = "https://support.bioruebe.com/uniextract/upload.php"
 Const $sUrlStats = "https://stat.bioruebe.com/uniextract/stats.php?a="
 Const $sUrlPrivacyPolicy = "https://bioruebe.com/dev/uniextract/privacypolicy"
+Const $sUrlCommandLineHelp = "https://github.com/Bioruebe/UniExtract2/blob/master/docs/COMMAND-LINE.md"
 Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
@@ -479,7 +480,6 @@ Func IsExe()
 	$isexe = True
 	Cout("File seems to be executable")
 
-	; Just for fun
 	If $file = @ScriptFullPath Or $file = $sUpdater Or $file = $sUpdaterNoAdmin Then
 		_FiletypeAdd($name, $name)
 		terminate($STATUS_NOTPACKED, $file, $name, $name)
@@ -577,7 +577,7 @@ Func ParseCommandLine()
 	Local $iArgs = $cmdline[0]
 
 	If $iArgs = 0 Then
-		$prompt = 1
+		$prompt = True
 		Return
 	EndIf
 
@@ -589,15 +589,8 @@ Func ParseCommandLine()
 	If _ArraySearch($cmdline, "/nolog") > -1 Then $Log = False
 	If _ArraySearch($cmdline, "/nostats") > -1 Then $bOptSendStats = False
 
-	If $cmdline[1] = "/prefs" Then
-		GUI_Prefs()
-		While $guiprefs
-			Sleep(250)
-		WEnd
-		terminate($STATUS_SILENT)
-
-	ElseIf $cmdline[1] = "/help" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "/h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
-		terminate($STATUS_SYNTAX, "", $iArgs > 1)
+	If $cmdline[1] = "/help" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "/h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
+		terminate($STATUS_SYNTAX)
 
 	ElseIf $cmdline[1] = "/afterupdate" Then
 		_AfterUpdate()
@@ -608,17 +601,17 @@ Func ParseCommandLine()
 
 	ElseIf $cmdline[1] = "/updatehelper" Or $cmdline[1] == "/updatehelpers" Then
 		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
-		$prompt = 1
+		$prompt = True
 
 	ElseIf $cmdline[1] = "/plugins" Then
-		$prompt = 1
+		$prompt = True
 		GUI_Plugins()
 
 	ElseIf $cmdline[1] = "/remove" Or $cmdline[1] = "/uninstall" Then
-		; Completely delete registry entries, used by uninstaller
 		_IsWin7OrNewer()
 		GUI_ContextMenu_remove()
 		GUI_ContextMenu_fileassoc(0)
+		SendStats("uninstall")
 		terminate($STATUS_SILENT)
 
 	ElseIf $cmdline[1] = "/batchclear" Then
@@ -668,11 +661,12 @@ Func ParseCommandLine()
 					$sArcTypeOverride = GUI_MethodSelectList($aReturn, StringReplace(t('SCAN_FILE'), "&", ""), 'METHOD_EXTRACTOR_SELECT_LABEL')
 					If $sArcTypeOverride < 0 Then terminate($STATUS_SILENT)
 				EndIf
+
 				Cout("Arctype override: " & $sArcTypeOverride)
 				Cout("Method select override: " & $sMethodSelectOverride)
 			EndIf
 		Else
-			$prompt = 1
+			$prompt = True
 		EndIf
 
 		If _ArraySearch($cmdline, "/batch") > -1 Then
@@ -4012,26 +4006,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	Switch $status
 		; Display usage information and exit
 		Case $STATUS_SYNTAX
-			Local $syntax = t('HELP_SUMMARY')
-			$syntax &= t('HELP_SYNTAX', @ScriptName)
-			$syntax &= t('HELP_ARGUMENTS')
-			$syntax &= t('HELP_HELP', "/help")
-			$syntax &= t('HELP_PREFS', "/prefs")
-			$syntax &= t('HELP_REMOVE', "/remove")
-			$syntax &= t('HELP_CLEAR', "/batchclear")
-			$syntax &= t('HELP_UPDATE', "/update")
-			$syntax &= t('HELP_FILENAME')
-			$syntax &= t('HELP_DESTINATION')
-			$syntax &= t('HELP_SCAN', "/scan")
-			$syntax &= t('HELP_SILENT', "/silent")
-			$syntax &= t('HELP_BATCH', "/batch")
-			$syntax &= t('HELP_SUB', "/sub")
-			$syntax &= t('HELP_LAST', "/last")
-			$syntax &= t('HELP_EXAMPLE1')
-			$syntax &= t('HELP_EXAMPLE2', @ScriptName)
-			$syntax &= t('HELP_NOARGS')
-			; If UniExtract was started with invalid parameters, a timeout is set to keep batch processing alive
-			MsgBox($iTopmost + 32, $title, $syntax, $arctype? 15: 0)
+			GUI_CommandLineHelp()
 
 		; Display file type information and exit
 		Case $STATUS_FILEINFO
@@ -5725,12 +5700,6 @@ Func GetPos($hGUI, $hControl, $iOffset = 0, $bX = True)
 	Return $aReturn[1] + $aReturn[3] + $iOffset
 EndFunc
 
-; Return number of times a character appears in a string
-Func CharCount($string, $char)
-	Local $return = StringSplit($string, $char, 1)
-	Return $return[0]
-EndFunc   ;==>CharCount
-
 ; Return the checked state of a checkbox
 Func _IsChecked($idControlID)
     Return BitAND(GUICtrlRead($idControlID), $GUI_CHECKED) = $GUI_CHECKED
@@ -5776,23 +5745,18 @@ Func _GuiRoundCorners($h_win, $i_x1, $i_y1, $i_x3, $i_y3)
 	Local $pos, $ret, $ret2
 	$pos = WinGetPos($h_win)
 	$ret = DllCall("gdi32.dll", "long", "CreateRoundRectRgn", "long", $i_x1, "long", $i_y1, "long", $pos[2], "long", $pos[3], "long", $i_x3, "long", $i_y3)
+
 	If $ret[0] Then
 		$ret2 = DllCall("user32.dll", "long", "SetWindowRgn", "hwnd", $h_win, "long", $ret[0], "int", 1)
-		If $ret2[0] Then
-			Return 1
-		Else
-			Return 0
-		EndIf
-	Else
-		Return 0
+		If $ret2[0] Then Return 1
 	EndIf
-EndFunc   ;==>_GuiRoundCorners
+
+	Return 0
+EndFunc
 
 ; Drop-in replacement for GUICtrlCreatePic with PNG support
 Func _GUICtrlCreatePic($sPath, $left, $top, $iWidth, $iHeight)
-	Local Const $sPlaceholder = @ScriptDir & "\support\Icons\uniextract_inno.bmp"
-
-	Local $idImage = GUICtrlCreatePic($sPlaceholder, $left, $top, $iWidth, $iHeight)
+	Local $idImage = GUICtrlCreatePic("", $left, $top, $iWidth, $iHeight)
 	_GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
 
 	Return $idImage
@@ -5809,7 +5773,11 @@ Func _GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
 	Local $hResized = _GDIPlus_ImageResize($hImage, $iWidth, $iHeight)
 	Local $hBitmap = _GDIPlus_BitmapCreateHBITMAPFromBitmap($hResized)
 
-	If Not @error Then GUICtrlSendMsg($idImage, $STM_SETIMAGE, 0, $hBitmap)
+	If @error Then
+		Cout("Failed to load image " & $sPath)
+	Else
+		GUICtrlSendMsg($idImage, $STM_SETIMAGE, 0, $hBitmap)
+	EndIf
 
 	_GDIPlus_BitmapDispose($hResized)
 	_GDIPlus_ImageDispose($hImage)
@@ -5824,8 +5792,8 @@ Func _GuiSetColor()
 EndFunc
 
 ; Format a label to look like a link
-Func _GuiCtrlLinkFormat($idControlID = -1)
-	GUICtrlSetFont($idControlID, 8, 800, 4, $FONT_ARIAL)
+Func _GuiCtrlLinkFormat($iFontSize = 8, $idControlID = -1)
+	GUICtrlSetFont($idControlID, $iFontSize, 800, 4, $FONT_ARIAL)
 	GUICtrlSetColor($idControlID, $COLOR_LINK)
 	GUICtrlSetCursor($idControlID, 0)
 EndFunc
@@ -6349,7 +6317,7 @@ EndFunc
 Func GUI_Batch_Clear()
 	Cout("Batch queue cleared, batch mode disabled")
 	EnableBatchMode(False)
-EndFunc   ;==>GUI_Batch_Clear
+EndFunc
 
 ; Process dropped files
 Func GUI_Drop()
@@ -6943,7 +6911,7 @@ Func _ShellFile_Uninstall($sFileType, $sRegistryKey)
 
 	RegDelete($sRegistryKey & "." & $sFileType)
 	Return RegDelete($sRegistryKey & $sName)
-EndFunc   ;==>_ShellFile_Uninstall
+EndFunc
 
 ; Remove Universal Extractor entries from registry
 Func GUI_ContextMenu_remove()
@@ -7061,7 +7029,43 @@ Func GUI_FirstStart_Exit()
 	$FS_GUI = False
 	GUISetState(@SW_SHOW, $guimain)
 	Cout("First start configuration finished")
-EndFunc   ;==>GUI_FirstStart_Exit
+EndFunc
+
+; Display command line help
+Func GUI_CommandLineHelp()
+	Opt("GUIOnEventMode", 0)
+
+	Local $sText = t('HELP_FILENAME') & t('HELP_DESTINATION') & t('HELP_SCAN', "/scan") & t('HELP_SILENT', "/silent") & t('HELP_BATCH', "/batch") & _
+				   t('HELP_TYPE', "/type=") & t('HELP_SUB', "/sub") & t('HELP_LAST', "/last") & t('HELP_NOARGS') & t('HELP_MORE')
+
+	Local $hGUI = GUICreate($title, 560, 428)
+	_GuiSetColor()
+	Local $idClose = GUICtrlCreateButton(t('CLOSE_BUT'), 466, 390, 75, 25)
+	GUICtrlCreateLabel(t('HELP_TITLE'), 18, 12, 440, 28)
+	GUICtrlSetFont(-1, 16, 400, 0, "Arial")
+	GUICtrlCreateLabel(t('HELP_USAGE_TITLE'), 18, 54, 200, 17)
+	GUICtrlCreateInput(t('HELP_USAGE', @ScriptName), 18, 72, 523, 21, BitOR($GUI_SS_DEFAULT_INPUT,$ES_READONLY))
+	GUICtrlCreateLabel(t('HELP_ARGUMENTS'), 18, 108, 200, 17)
+	GUICtrlCreateEdit($sText, 18, 126, 523, 199, BitOR($ES_AUTOVSCROLL, $ES_READONLY, $ES_WANTRETURN, $WS_VSCROLL))
+	GUICtrlCreateLabel(t('HELP_EXAMPLE_TITLE'), 18, 336, 200, 17)
+	GUICtrlCreateInput(t('HELP_EXAMPLE', @ScriptName), 18, 354, 523, 21, BitOR($GUI_SS_DEFAULT_INPUT,$ES_READONLY))
+	Local $idLink = GUICtrlCreateLabel(t('HELP_DOCS_LINK'), 18, 396, 250, 17)
+	_GuiCtrlLinkFormat(8)
+	GUISetState(@SW_SHOW)
+
+	While 1
+		Local $nMsg = GUIGetMsg()
+		Switch $nMsg
+			Case $GUI_EVENT_CLOSE, $idClose
+				ExitLoop
+			Case $idLink
+				ShellExecute($sUrlCommandLineHelp)
+		EndSwitch
+	WEnd
+
+	GUIDelete($hGui)
+	Opt("GUIOnEventMode", 1)
+EndFunc
 
 ; Display UI for extraction method selection (compact)
 Func GUI_MethodSelect($aData, $arcdisp)
@@ -7533,6 +7537,7 @@ EndFunc
 
 ; Update log directory size in menu entry after deleting log files
 Func GUI_UpdateLogItem()
+	If Not $guimain Then Return
 	If Not FileExists($logdir) Then DirCreate($logdir)
 	Local $size = Round(DirGetSize($logdir) / 1024 / 1024, 2) & " MB"
 	GUICtrlSetData($logitem, t('MENU_FILE_LOG_LABEL', $size))
@@ -7709,7 +7714,7 @@ Func Tray_ShowHide()
 		WinSetState($runtitle, "", @SW_SHOW)
 		WinActivate($runtitle)
 	EndIf
-EndFunc   ;==>Tray_ShowHide
+EndFunc
 
 ; Change show statusbox option via tray
 Func Tray_Statusbox()
