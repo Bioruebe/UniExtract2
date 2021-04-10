@@ -57,6 +57,7 @@
 #include <WinAPIFiles.au3>
 #include <WinAPIShellEx.au3>
 #include <WinAPIShPath.au3>
+#include <WinAPIsysinfoConstants.au3>
 #include <WindowsConstants.au3>
 #include "HexDump.au3"
 #include "Pie.au3"
@@ -318,6 +319,8 @@ EndIf
 ReadPrefs()
 
 Cout("Starting " & $name & " " & $sVersion)
+
+Global $bHighContrastMode = _IsHighContrastMode()
 
 ParseCommandLine()
 
@@ -4677,7 +4680,8 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
 			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) _
 			   Or StringInStr($return, "Open ERROR: Can not open the file as") Or StringInStr($return, "Error: System.Exception:") _
-			   Or StringInStr($return, "unknown WISE-version -> contact author") Or StringInStr($return, "Critical error:") Then
+			   Or StringInStr($return, "unknown WISE-version -> contact author") Or StringInStr($return, "Critical error:") _
+			   Or StringInStr($return, "[ERROR] ") Then
 			$success = $RESULT_FAILED
 			SetError(1)
 		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
@@ -5413,6 +5417,7 @@ Func _AfterUpdate()
 	FileDelete(@ScriptDir & "\todo.txt")
 	FileDelete(@ScriptDir & "\useful_software.txt")
 	FileDelete(@ScriptDir & "\support\Icons\Bioruebe.jpg")
+	FileDelete(@ScriptDir & "\support\Icons\uniextract_inno.bmp")
 	FileDelete(@ScriptDir & "\helper_binaries_info.txt")
 	FileDelete(@ScriptDir & "\changelog_minor.txt")
 	FileDelete(@ScriptDir & "\changelog.txt")
@@ -5716,13 +5721,42 @@ Func _IsAnyChecked($aControls)
 	Return False
 EndFunc
 
-; Set checked tate of all controls in given array
+; Set checked state of all controls in given array
 Func _SetState($aControls, $state)
 	If Not IsArray($aControls) Then Local $aControls = [$aControls]
 
 	For $idControlID In $aControls
 		GUICtrlSetState($idControlID, $state)
 	Next
+EndFunc
+
+; Determine whether Windows high contrast mode is enabled or not
+Func _IsHighContrastMode()
+	Local Const $HCF_HIGHCONTRASTON = 0x00000001
+
+	$tResult = DllStructCreate("struct; uint cbSize; dword dwFlags; ptr lpszDefaultScheme; endstruct")
+	If @error Then
+		Cout("Failed to create result structure")
+		Return SetError(1, 0, 0)
+	EndIf
+
+	DllStructSetData($tResult, "cbSize", DllStructGetSize($tResult))
+
+	If Not _WinAPI_SystemParametersInfo($SPI_GETHIGHCONTRAST, 0, $tResult) Then
+		Cout("Failed to get high contrast mode state. Error was: " & _WinAPI_GetLastErrorMessage())
+		Return SetError(2, 0, 0)
+	EndIf
+
+	Local $iFlag = DllStructGetData($tResult, "dwFlags")
+	If @error Then
+		Cout("Failed to read high contrast mode flag")
+		Return SetError(3, 0, 0)
+	EndIf
+
+	Local $bEnabled = BitAND($iFlag, $HCF_HIGHCONTRASTON)
+	Cout("High contrast mode: " & $bEnabled)
+
+	Return $bEnabled
 EndFunc
 
 ; Get title of a window by PID as returned by Run()
@@ -5786,7 +5820,8 @@ EndFunc
 
 ; Set GUI color to white when using Windows 10
 Func _GuiSetColor()
-	If @OSVersion <> "WIN_10" Then Return
+	If @OSVersion <> "WIN_10" Or $bHighContrastMode Then Return
+
 	GUISetBkColor($COLOR_WHITE)
 	GUICtrlSetDefBkColor($COLOR_WHITE)
 EndFunc
@@ -7555,13 +7590,12 @@ Func GUI_Stats()
 	Local $GUI_Stats_Types_Legend = GUICtrlCreatePic("", 8, 312, 337, 113)
 	Local $GUI_Stats_Status_Legend = GUICtrlCreatePic("", 232, 72, 113, 209)
 	GUICtrlCreateLabel($sTitle, 8, 8, 715, 33, $SS_CENTER)
-	GUICtrlSetFont(-1, 18, 500, 0, $FONT_ARIAL)
+	GUICtrlSetFont(-1, 18, $FW_MEDIUM, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 212, 24, $SS_CENTER)
-	GUICtrlSetFont(-1, 12, 300, 0, $FONT_ARIAL)
+	GUICtrlSetFont(-1, 12, $FW_LIGHT, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('STATS_HEADER_TYPE'), 368, 48, 354, 24, $SS_CENTER)
-	GUICtrlSetFont(-1, 12, 300, 0, $FONT_ARIAL)
-	GUISetBkColor(0xFFFFFF)
-	GUICtrlSetDefBkColor(0xFFFFFF)
+	GUICtrlSetFont(-1, 12, $FW_LIGHT, 0, $FONT_ARIAL)
+	GUISetBkColor($COLOR_WHITE)
 	GUISetState(@SW_SHOW)
 
 	Local $GUI_Stats_Types[0], $GUI_Stats_Status = [[0, t('STATS_STATUS_SUCCESS'), $COLOR_GREEN], [0, t('STATS_STATUS_FAILED'), $COLOR_RED], [0, t('STATS_STATUS_FILEINFO'), $COLOR_PURPLE], [0, t('STATS_STATUS_UNKNOWN'), $COLOR_GRAY]]
@@ -7655,7 +7689,8 @@ Func GUI_About()
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($sOptGuid, 5, $iHeight - 15, 275, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
-	_GUICtrlCreatePic(@ScriptDir & "\support\Icons\Bioruebe.png", $iWidth - 100 - 10, $iHeight - 48 - 10, 100, 48)
+	Local $sPath = @ScriptDir & "\support\Icons\Bioruebe" & ($bHighContrastMode? "White": "") & ".png"
+	_GUICtrlCreatePic($sPath , $iWidth - 100 - 10, $iHeight - 48 - 10, 100, 48)
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $iWidth / 2 - 45, $iHeight - 50, 90, 25)
 	GUISetState(@SW_SHOW)
 

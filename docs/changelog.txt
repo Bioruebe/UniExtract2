@@ -13,6 +13,7 @@
   Fixed some game extractions failing if program directory cannot be written to
   Fixed several typos in English language file, thanks to Mr-Update
   Fixed two possible crashes during .cab extraction, thanks to seadoggie01
+  Fixed wrong colors, text not being readable if Windows is in high contrast mode, thanks to k-kolev1985
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed design/usability of command line help dialog
