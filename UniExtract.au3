@@ -81,11 +81,12 @@ Const $bindir = @ScriptDir & "\bin\"
 Const $langdir = @ScriptDir & "\lang\"
 Const $defdir = @ScriptDir & "\def\"
 Const $docsdir = @ScriptDir & "\docs\"
+Const $iconsdir = @ScriptDir & "\support\Icons\"
 Const $licensedir = $docsdir & "third-party\"
 Const $sUpdater = @ScriptDir & "\UniExtractUpdater.exe"
 Const $sUpdaterNoAdmin = @ScriptDir & "\UniExtractUpdater_NoAdmin.exe"
 Const $sEnglishLangFile = @ScriptDir & "\English.ini"
-Const $sLogoFile = @ScriptDir & "\support\Icons\uniextract.png"
+Const $sLogoFile = $iconsdir & "uniextract.png"
 Const $sUniExtract = @Compiled? @ScriptFullPath: StringReplace(@ScriptFullPath, "au3", "exe")
 Const $sRegExAscii = "(?i)(?m)^[\w\Q @!§$%&/\()=?,.-:+~'²³{[]}*#ß°^âëöäüîêôûïáéíóúàèìòù\E]+$"
 ;~ Const $cmd = @ComSpec & ' /d /k ' ; Keep command prompt open for debugging
@@ -5249,9 +5250,10 @@ Func _UpdateFFmpeg($bShowProgress = True)
 	Local $return = FetchStdout($ffmpeg, @ScriptDir, @SW_HIDE, 0, False)
 	If $bShowProgress Then _ProgressSet(50)
 	Local $aReturn = _StringBetween($return, "ffmpeg version ", " Copyright")
-	Local $sVersion = @error? 0: $aReturn[0] ; In case ffmpeg exists but crashes, redownload it
+	Local $sVersion = @error? 0: $aReturn[0] ; In case FFmpeg exists but crashes, redownload it
 
-	$return = _INetGetSource($sUpdateURL & "ffmpeg" & _IsWinXP()? "-xp": "")
+	Local $sSuffix = _IsWinXP()? "-xp": $iOsArch == 32? "-32": ""
+	$return = _INetGetSource(Cout($sUpdateURL & "ffmpeg" & $sSuffix))
 	Cout("FFmpeg: " & $sVersion & " <--> " & $return)
 	If $bShowProgress Then _ProgressSet(100)
 	Sleep(300)
@@ -5413,12 +5415,14 @@ Func _AfterUpdate()
 	FileDelete($licensedir & "Arc-reader_readme.txt")
 	FileDelete($licensedir & "libpng_license.txt")
 
+	FileDelete($iconsdir & "Bioruebe.jpg")
+	FileDelete($iconsdir & "uniextract_inno.bmp")
+	FileDelete($iconsdir & "simple.jpg")
+	FileDelete($iconsdir & "cascading.jpg")
 	FileDelete($langdir & "Chinese.ini")
 	FileDelete($langdir & "changes.txt")
 	FileDelete(@ScriptDir & "\todo.txt")
 	FileDelete(@ScriptDir & "\useful_software.txt")
-	FileDelete(@ScriptDir & "\support\Icons\Bioruebe.jpg")
-	FileDelete(@ScriptDir & "\support\Icons\uniextract_inno.bmp")
 	FileDelete(@ScriptDir & "\helper_binaries_info.txt")
 	FileDelete(@ScriptDir & "\changelog_minor.txt")
 	FileDelete(@ScriptDir & "\changelog.txt")
@@ -5792,17 +5796,20 @@ EndFunc
 ; Drop-in replacement for GUICtrlCreatePic with PNG support
 Func _GUICtrlCreatePic($sPath, $left, $top, $iWidth, $iHeight)
 	Local $idImage = GUICtrlCreatePic("", $left, $top, $iWidth, $iHeight)
-	_GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
+	_GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
 
 	Return $idImage
 EndFunc
 
-; Load an image into a picture GUI control, used for PNG support
-Func _GDIPlus_LoadImage($sPath, $idImage, $iWidth, $iHeight)
+; Set the image of a picture GUI control via GDI+ to support PNG files
+Func _GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
 	If Not _GDIPlus_Startup() Then
 		Cout("Failed to start GDI+")
 		Return SetError(1)
 	EndIf
+
+	; Clear to prevent issues with transparency
+	GUICtrlSetImage($idImage, "")
 
 	Local $hImage = _GDIPlus_ImageLoadFromFile($sPath)
 	Local $hResized = _GDIPlus_ImageResize($hImage, $iWidth, $iHeight)
@@ -6786,8 +6793,8 @@ EndFunc
 
 ; Change picture according to selected context menu type
 Func GUI_ContextMenu_ChangePic()
-	Local $sPath = @ScriptDir & "\support\Icons\" & (_IsChecked($CM_Cascading_Radio)? "cascading.jpg": "simple.jpg")
-	GUICtrlSetImage($CM_Picture, $sPath)
+	Local $sPath = $iconsdir & "ContextMenu_" & (_IsChecked($CM_Cascading_Radio)? "Cascading": "Simple") & ".png"
+	_GDIPlus_LoadImage($CM_Picture, $sPath, 350, 340)
 EndFunc
 
 ; Close GUI and create context menu entries
@@ -7422,7 +7429,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 			Case $GUI_Plugins_List
 				$current = GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_Description, $GUI_Plugins_Download, $GUI_Plugins_SelectClose, $sSupportedFileTypes, $aPluginInfo)
 			Case $GUI_Plugins_SelectClose
-				If $current == -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ContinueLoop
+				If $current == -1 Or HasPlugin($aPluginInfo[$current][0], True) Then ExitLoop
 
 				GUICtrlSetState($GUI_Plugins_SelectClose, $GUI_DISABLE)
 				Local $sPath = FileOpenDialog(t('OPEN_FILE'), _GetFileOpenDialogInitDir(), $aPluginInfo[$current][1] & " (" & $aPluginInfo[$current][4] & ")", $FD_MULTISELECT + $FD_FILEMUSTEXIST, "", $GUI_Plugins)
@@ -7690,7 +7697,7 @@ Func GUI_About()
 	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, -1, $SS_CENTER)
 	GUICtrlCreateLabel($sOptGuid, 5, $iHeight - 15, 275, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
-	Local $sPath = @ScriptDir & "\support\Icons\Bioruebe" & ($bHighContrastMode? "White": "") & ".png"
+	Local $sPath = $iconsdir & "Bioruebe" & ($bHighContrastMode? "White": "") & ".png"
 	_GUICtrlCreatePic($sPath , $iWidth - 100 - 10, $iHeight - 48 - 10, 100, 48)
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $iWidth / 2 - 45, $iHeight - 50, 90, 25)
 	GUISetState(@SW_SHOW)
