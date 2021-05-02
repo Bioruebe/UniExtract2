@@ -19,10 +19,10 @@ AspackDie									AspackDie.exe				1.41			-		Open Source				yoda								http://s
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
 BCM											x86\bcm.exe					1.30		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
 											x64\bcm.exe					-------		---------	-------					-------								-------
-BioLib										Bio.cs.dll					2.1.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
+BioLib										Bio.cs.dll					2.2.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
 BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
-cicdec										cicdec						2.1.2		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
+cicdec										cicdec						2.2.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
 											BioLib						-------		---------	-------					-------								-------
 											ICSharpCode.SharpZipLib.dll	1.2.0		---------	MIT						SharpZipLib Contributors			https://github.com/icsharpcode/SharpZipLib
 ConvertLIT									clit.exe					1.8			-	-	-	GNU GPL v3				Dan A. Jackson						http://www.convertlit.com/										

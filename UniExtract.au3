@@ -3716,10 +3716,10 @@ Func HasFreeSpace($sPath = $outdir, $fModifier = 2)
 		Local $sMsg = t('NO_FREE_SPACE', CreateArray(StringLeft($sPath, 1), $freeSpace, $fileSize, $iDifference))
 		If $silentmode Then terminate($STATUS_FAILED, $filenamefull, $STATUS_NOFREESPACE, $sMsg)
 
-		Switch MsgBox($iTopmost + 48 + 2, $name, $sMsg)
+		Switch MsgBox($iTopmost + $MB_ICONWARNING + $MB_ABORTRETRYIGNORE, $name, $sMsg)
 			Case $IDRETRY
 				Return HasFreeSpace($sPath, $fModifier)
-			Case $IDCANCEL
+			Case $IDABORT
 				If $createdir Then DirRemove($outdir, 0)
 				terminate($STATUS_SILENT)
 		EndSwitch
@@ -4618,7 +4618,8 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 				; Automatically show cmd window when user input needed
 				If StringInStr($return, "already exist") Or StringInStr($return, "overwrite") Or StringInStr($return, " replace") _
 				Or StringInStr($return, "password") Or StringInStr($return, "Not enough free space available") _
-				Or StringInStr($return, "you must choose a new filename") Or StringInStr($return, "Insert disk with") Then
+				Or StringInStr($return, "you must choose a new filename") Or StringInStr($return, "Insert disk with") _
+				Or StringInStr($return, "[R]etry") Then
 					Cout("User input needed")
 					WinSetState($runtitle, "", @SW_SHOW)
 					GUICtrlSetFont($idTrayStatusExt, 8.5, 900)
