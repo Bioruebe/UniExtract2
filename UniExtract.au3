@@ -109,10 +109,10 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
 	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
 	  $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", _
-	  $TYPE_HOTFIX = "hotfix", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
-	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", _
-	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", _
-	  $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
+	  $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", _
+	  $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", _
+	  $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
+	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
 	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
 	  $TYPE_SWFEXE = "swfexe", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
 	  $TYPE_UNITYPACKAGE = "unitypackage", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", _
@@ -120,10 +120,10 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
-	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_HOTFIX, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, _
-	  $TYPE_ISZ, $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, _
-	  $TYPE_NBH, $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, _
-	  $TYPE_SIS, $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, _
+	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
+	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, _
+	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIS, _
+	  $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, _
 	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_ZIP, _
 	  $TYPE_ZOO, $TYPE_ZPAQ]
 
@@ -178,7 +178,7 @@ Global $unpackfailed, $exefailed, $ttarchfailed
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Global $guiprefs, $TBgui = 0, $exStyle = -1, $idTrayStatusExt, $BatchBut, $idProgress, $sComError = 0
 Global $Tray_Statusbox, $Tray_Exit, $isexe = False, $Message, $run = 0, $runtitle, $idOptDeleteSourceFile[3]
-Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aExeinfoDefinitions[0][0], $aGUIs[0]
+Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aExeinfoDefinitions[0][0], $aGUIs[0], $aWarnings[0]
 Global $guimain = False, $keepopenitem, $topmostitem, $showitem, $clearitem, $logitem, $silentitem, $GUI_Main_Extract, $GUI_Main_Scan, $filecont
 Global $dircont, $GUI_Main_Lock, $GUI_Main_Ok, $BatchBut, $dirbut, $iGuiMainWidth, $iGuiMainHeight, $GUI_Main_Destination_Label
 Global $langselect, $IntervalCont, $idOptDeleteAdditionalFiles, $idOptCheckFreeSpace, $unicodecheckopt, $appendextopt, $NoBoxOpt, $GameModeOpt
@@ -1880,13 +1880,7 @@ Func check7z()
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' 7-Zip')
 	Local $return = FetchStdout($7z & ' l "' & $file & '"', $filedir, @SW_HIDE)
 
-	If StringInStr($return, "Listing archive:") And Not (StringInStr($return, "Can not open the file as ") Or _
-	StringInStr($return, "There are data after the end of archive")) Then
-		; Failsafe in case TrID misidentifies MS SFX
-		If StringInStr($return, "_sfx_manifest_") Then
-			_DeleteTrayMessageBox()
-			extract($TYPE_HOTFIX, 'Microsoft ' & t('TERM_HOTFIX'))
-		EndIf
+	If StringInStr($return, "Listing archive:") And Not StringInStr($return, "Can not open the file as ") Then
 		_DeleteTrayMessageBox()
 		If $fileext = "exe" Then
 			extract($TYPE_7Z, '7-Zip ' & t('TERM_INSTALLER') & ' ' & t('TERM_PACKAGE'))
@@ -2155,9 +2149,12 @@ Func InitialCheckExt()
 			CheckIso()
 		Case "dmg"
 			extract($TYPE_7Z, 'DMG ' & t('TERM_IMAGE'))
-		Case "iso", "nrg"
+		Case "iso"
 			check7z()
 			CheckIso()
+		Case "nrg"
+			CheckIso()
+			check7z()
 		Case "unitypackage"
 			extract($TYPE_UNITYPACKAGE, "Unity Engine Asset Package")
 	EndSwitch
@@ -2276,7 +2273,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						FileDelete($sPath)
 					EndIf
 				EndIf
-			ElseIf StringInStr($sFileType, "SFX") Then
+			ElseIf StringInStr($sFileType, "SFX") And Not StringInStr($sFileType, "CAB") Then
 				Cout("Trying to extract sfx script")
 				_CreateTrayMessageBox(t('SCANNING_FILE', "7z SFX Archives splitter"))
 
@@ -2559,10 +2556,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				DirRemove($tempoutdir, 1)
 			EndIf
 
-		Case $TYPE_HOTFIX ; Test
-			Cout("Executing: " & Warn_Execute(Quote($file & '" /q /x:"' & $outdir)))
-			ShellExecuteWait($file, '/q /x:' & Quote($outdir), $outdir)
-
 		Case $TYPE_INNO
 			If Not $additionalParameters Then
 				_Run($innounp & ' -x -m -a "' & $file & '"', $outdir)
@@ -2780,11 +2773,13 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 			If RipExeInfo($tempoutdir, "{DOWN}{DOWN}{DOWN}{DOWN}{DOWN}{RIGHT}{DOWN}{DOWN}{DOWN}") Then
 				Local $aFiles = _FileListToArrayRec($tempoutdir, "*.cab", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
-				For $i = 1 To $aFiles[0]
-					Cout("Extracting cab file " & $aFiles[$i])
-					_Run($7z & ' x "' & $aFiles[$i] & '"', $tempoutdir, @SW_HIDE, True, True, True, False)
-					If $success == $RESULT_SUCCESS Then Cleanup($aFiles[$i])
-				Next
+				If Not @error Then
+					For $i = 1 To $aFiles[0]
+						Cout("Extracting cab file " & $aFiles[$i])
+						_Run($7z & ' x "' & $aFiles[$i] & '"', $tempoutdir, @SW_HIDE, True, True, True, False)
+						If $success == $RESULT_SUCCESS Then Cleanup($aFiles[$i])
+					Next
+				EndIf
 
 				MoveFiles($tempoutdir, $outdir, False, "", True, True)
 				Local $aCleanup[] = ["resource.dat", "cp*.bin", "*.cab"]
@@ -2825,10 +2820,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 						; Extract files from extracted CABs
 						Local $aFiles = _FileListToArrayRec($tempoutdir, "*.cab", $FLTAR_FILES, $FLTAR_RECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
-						For $i = 1 To $aFiles[0]
-							_Run($7z & ' x "' & $aFiles[$i] & '"', $outdir)
-							Cleanup($aFiles[$i])
-						Next
+						If Not @error Then
+							For $i = 1 To $aFiles[0]
+								_Run($7z & ' x "' & $aFiles[$i] & '"', $outdir)
+								Cleanup($aFiles[$i])
+							Next
+						EndIf
 
 						If $appendext Then AppendExtensions($tempoutdir)
 						MoveFiles($tempoutdir, $outdir, False, "", True)
@@ -3266,7 +3263,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Local $sChoice = $aReturn[0]
 					If UBound($aReturn) > 1 Then
 						Local $sChoice = GUI_MethodSelectList($aReturn, t('METHOD_NOT_IN_LIST'), 'METHOD_FILE_SELECT_LABEL')
-						If $sChoice < 1 Then ContinueLoop
+						If $sChoice == 0 Then ContinueLoop
 					EndIf
 
 					$sPath &= $sChoice
@@ -3280,6 +3277,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Cout("Names generated successfully. Extracting...")
 				_Run($visionaire3 & ' "' & $file & '" /force /names="' & $tmp & '"', $outdir, @SW_HIDE, True, True, False, False)
 			Else
+				_ArrayAdd($aWarnings, "Failed to extract file names. Please make sure the correct data.vis file was selected.")
 				Cout("Failed to extract names. Some files may not be usable.")
 				_Run($visionaire3 & ' "' & $file & '" /force', $outdir, @SW_HIDE, True, True, False, False)
 			EndIf
@@ -3992,6 +3990,8 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	TridLib_Close()
 	Cout("Terminating - Status: " & $status)
 
+	If UBound($aWarnings) > 0 Then Cout("Warnings:" & @CRLF & _ArrayToString($aWarnings))
+
 	; When multiple files are selected and executed via command line, they are added to batch queue, but the working instance uses in-memory data.
 	; So we need to look for changes in the batch queue file, so batch mode could be enabled if necessary.
 	If Not $silentmode And GetBatchQueue() Then $silentmode = True
@@ -4414,6 +4414,17 @@ Func _StringGetLine($sString, $iLine, $bCountBlank = False)
 	Return StringRegExpReplace($sString, "((." & $sChar & "\n){" & $iLine - 1 & "})(." & $sChar & "\n)((." & $sChar & "\n?)+)", "\2")
 EndFunc
 
+; Extract the line after a given search string from a string
+Func _StringExtractLineAfter($sString, $sSubstring)
+	Local $iStart = StringInStr($sString, $sSubstring)
+	If $iStart < 1 Then Return SetError(1, 0, "")
+	$iStart += StringLen($sSubstring)
+
+	Local $iEnd = StringInStr($sString, @CRLF, 0, 1, $iStart)
+	If $iEnd < 1 Then Return SetError(2, 0, "")
+	Return StringMid($sString, $iStart, $iEnd - $iStart)
+EndFunc
+
 ; Return file metadata
 ; (Source: http://www.autoitscript.com/forum/topic/40684-querying-a-files-metadata/)
 ;===============================================================================
@@ -4534,6 +4545,54 @@ Func CreateLog($status)
 	Return $sName
 EndFunc
 
+; Check for success or failure indicator in log
+Func EvaluateLog($sLog)
+	Cout("Reading log file")
+
+	If StringInStr($sLog, "Wrong password?", 0) Or StringInStr($sLog, "The specified password is incorrect.", 0) Or _
+	   StringInStr($sLog, "Archive encrypted.", 0) Or StringInStr($sLog, "Corrupt file or wrong password", 0) Or _
+	   StringInStr(_StringGetLine($sLog, -1), "Enter password") Then
+		$success = $RESULT_FAILED
+		SetError(1, 1)
+	ElseIf StringInStr($sLog, "Break signaled") Or StringInStr($sLog, "Program aborted") Or StringInStr($sLog, "User break") Then
+		Cout("Cancelled by user")
+		$success = $RESULT_CANCELED
+	ElseIf StringInStr($sLog, "There is not enough space on the disk") Then
+		$success = $RESULT_NOFREESPACE
+		SetError(2)
+	ElseIf StringInStr($sLog, "You need to start extraction from a previous volume") Or _
+		   StringInStr($sLog, "Unavailable start of archive") Or StringInStr($sLog, "Missing volume") Then
+		$success = $RESULT_FAILED
+		SetError(3)
+	ElseIf StringInStr($sLog, "Everything is Ok") Or _
+		   StringInStr($sLog, "0 failed") Or StringInStr($sLog, "All files OK") Or _
+		   StringInStr($sLog, "All OK") Or StringInStr($sLog, "done.") Or _
+		   StringInStr($sLog, "Done ...") Or StringInStr($sLog, ": done") Or _
+		   StringInStr($sLog, "Result:	Successful, errorcode 0") Or StringInStr($sLog, "... Successful") Or _
+		   StringInStr($sLog, "Extract files [ ") Or StringInStr($sLog, "Done; file is OK") Or _
+		   StringInStr($sLog, "Successfully extracted to") Then
+		Cout("Success evaluation passed")
+		$success = $RESULT_SUCCESS
+	ElseIf StringInStr($sLog, "err code(", 1) Or StringInStr($sLog, "stacktrace", 1) _
+		   Or StringInStr($sLog, "Write error: ", 1) Or (StringInStr($sLog, "Cannot create", 1) _
+		   And StringInStr($sLog, "No files to extract", 1)) Or StringInStr($sLog, "Archives with Errors: 1") _
+		   Or StringInStr($sLog, "ERROR: Wrong tag in package", 1) Or StringInStr($sLog, "unzip:  cannot find", 1) _
+		   Or StringInStr($sLog, "Open ERROR: Can not open the file as") Or StringInStr($sLog, "Error: System.Exception:") _
+		   Or StringInStr($sLog, "unknown WISE-version -> contact author") Or StringInStr($sLog, "Critical error:") _
+		   Or StringInStr($sLog, "[ERROR] ") Then
+		$success = $RESULT_FAILED
+		SetError(1)
+	ElseIf StringInStr($sLog, "already exists.") Or StringInStr($sLog, "Overwrite") Then
+		Cout("At least one output file already existed")
+		; Folder size will most likely stay the same if files are overwritten,
+		; so let's disable the check to avoid 'failed' message
+		$success = $RESULT_SUCCESS
+	EndIf
+
+	Local $sReturn = _StringExtractLineAfter($sLog, "WARNINGS:" & @CRLF)
+	If Not @error Then _ArrayAdd($aWarnings, $sReturn)
+EndFunc
+
 ; Determine whether the archive is password protected or not and try passwords from list if necessary
 Func _FindArchivePassword($sIsProtectedCmd, $sTestCmd, $sIsProtectedText = "encrypted", $sIsProtectedText2 = 0, $iLine = -3, $sTestText = "All OK")
 	; Is archive encrypted?
@@ -4607,13 +4666,13 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 			Sleep(10)
 			If TimerDiff($TimerStart) > 5000 Then ExitLoop
 		Until FileExists($LogFile)
+
 		Local $hFile = FileOpen($LogFile)
 		Local $state = ""
 
 		; Show progress (percentage) in status box
 		While ProcessExists($run)
 			$return = FileRead($hFile)
-;~ 			Cout($return)
 			If $return <> $state Then
 				$state = $return
 				; Automatically show cmd window when user input needed
@@ -4632,6 +4691,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 				; Percentage indicator
 				If $bPatternSearch And _PatternSearch($return) Then $size = -1
 			EndIf
+
 			; Size of extracted file(s) as fallback
 			If $size > -1 And $bPatternSearch > -1 Then
 				$size = Round((_DirGetSize($outdir) - $initdirsize) / 1024 / 1024, 3)
@@ -4645,6 +4705,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 			EndIf
 			Sleep(100)
 		WEnd
+
 		; Write tee log to UniExtract log file
 		FileSetPos($hFile, 0, $FILE_BEGIN)
 		$return = FileRead($hFile)
@@ -4652,46 +4713,8 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 		FileClose($hFile)
 		FileDelete($LogFile)
 
-		; Check for success or failure indicator in log
-		If StringInStr($return, "Wrong password?", 0) Or StringInStr($return, "The specified password is incorrect.", 0) Or _
-		   StringInStr($return, "Archive encrypted.", 0) Or StringInStr($return, "Corrupt file or wrong password", 0) Or _
-		   StringInStr(_StringGetLine($return, -1), "Enter password") Then
-			$success = $RESULT_FAILED
-			SetError(1, 1)
-		ElseIf StringInStr($return, "Break signaled") Or StringInStr($return, "Program aborted") Or StringInStr($return, "User break") Then
-			Cout("Cancelled by user")
-			$success = $RESULT_CANCELED
-		ElseIf StringInStr($return, "There is not enough space on the disk") Then
-			$success = $RESULT_NOFREESPACE
-			SetError(2)
-		ElseIf StringInStr($return, "You need to start extraction from a previous volume") Or _
-			   StringInStr($return, "Unavailable start of archive") Or StringInStr($return, "Missing volume") Then
-			$success = $RESULT_FAILED
-			SetError(3)
-		ElseIf StringInStr($return, "Everything is Ok") Or _
-			   StringInStr($return, "0 failed") Or StringInStr($return, "All files OK") Or _
-			   StringInStr($return, "All OK") Or StringInStr($return, "done.") Or _
-			   StringInStr($return, "Done ...") Or StringInStr($return, ": done") Or _
-			   StringInStr($return, "Result:	Successful, errorcode 0") Or StringInStr($return, "... Successful") Or _
-			   StringInStr($return, "Extract files [ ") Or StringInStr($return, "Done; file is OK") Or _
-			   StringInStr($return, "Successfully extracted to") Then
-			Cout("Success evaluation passed")
-			$success = $RESULT_SUCCESS
-		ElseIf StringInStr($return, "err code(", 1) Or StringInStr($return, "stacktrace", 1) _
-			   Or StringInStr($return, "Write error: ", 1) Or (StringInStr($return, "Cannot create", 1) _
-			   And StringInStr($return, "No files to extract", 1)) Or StringInStr($return, "Archives with Errors: 1") _
-			   Or StringInStr($return, "ERROR: Wrong tag in package", 1) Or StringInStr($return, "unzip:  cannot find", 1) _
-			   Or StringInStr($return, "Open ERROR: Can not open the file as") Or StringInStr($return, "Error: System.Exception:") _
-			   Or StringInStr($return, "unknown WISE-version -> contact author") Or StringInStr($return, "Critical error:") _
-			   Or StringInStr($return, "[ERROR] ") Then
-			$success = $RESULT_FAILED
-			SetError(1)
-		ElseIf StringInStr($return, "already exists.") Or StringInStr($return, "Overwrite") Then
-			Cout("At least one output file already existed")
-			; Folder size will most likely stay the same if files are overwritten,
-			; so let's disable the check to avoid 'failed' message
-			$success = $RESULT_SUCCESS
-		EndIf
+		EvaluateLog($return)
+		SetError(@error, @extended)
 
 	; Do not create log
 	Else

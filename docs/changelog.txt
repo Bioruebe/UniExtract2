@@ -13,18 +13,21 @@
   Fixed some game extractions failing if program directory cannot be written to
   Fixed several typos in English language file, thanks to Mr-Update
   Fixed two possible crashes during .cab extraction, thanks to seadoggie01
+  Fixed possible crashes during MSCF and MSI extraction
   Fixed wrong colors, text not being readable if Windows is in high contrast mode, thanks to k-kolev1985
   Fixed 'not enough free disk space' error message: 'Abort' button not working
   Fixed plugin manager: 'Finish' button not closing window
   Fixed FFmpeg update check not working correctly
+  Fixed 7zip warnings detected as failed extractions
+  Fixed Visionaire extraction: data file selection not working as intended
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed design/usability of command line help dialog
-  Improved .cab and .msp extraction
+  Improved .cab, .nrg and .msp extraction
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
   Updated cicdec to 2.2.0
   Updated demoleition to 0.64
-  Updated Exeinfo PE to 0.0.6.3
+  Updated Exeinfo PE to 0.0.6.5
   Updated godotdec to 2.1.1
   Updated innounp to 0.50
   Updated MediaInfo to 20.09
