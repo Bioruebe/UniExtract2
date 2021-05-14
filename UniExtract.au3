@@ -216,7 +216,7 @@ Const $fsb = "fsbext.exe"
 Const $garbro = Quote($bindir & "GARbro\GARbro.Console.exe", True)
 Const $gcf = $archdir & "GCFScape.exe"
 Const $hlp = "helpdeco.exe"
-Const $innoextract = "innoextract.exe"
+Const $innoextract = Quote($bindir & "innoextract.exe", True)
 Const $innounp = "innounp.exe"
 Const $is6cab = "i6comp.exe"
 Const $isxunp = "IsXunpack.exe"
@@ -4981,6 +4981,14 @@ Func MoveFiles($source, $dest, $force = False, $omit = "", $removeSourceDir = Fa
 	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
 EndFunc
 
+; Calculate MD5 hash for a given file
+Func FileGetMD5($sPath)
+	Local $sHash = _Crypt_HashFile($sPath, $CALG_MD5)
+	If @error Then Return SetError(1)
+
+	Return StringLower(StringTrimLeft($sHash, 2))
+EndFunc
+
 ; Return the path to the download directory
 Func _GetFileOpenDialogInitDir()
 	Local $sDir = _WinAPI_ShellGetKnownFolderPath($FOLDERID_Downloads)
@@ -5110,7 +5118,7 @@ Func CheckUpdate($silent = $UPDATEMSG_PROMPT, $bCheckInterval = False, $iMode = 
 
 	; UniExtract main executable - calling the updater is always necessary, because an executable file cannot overwrite itself while running
 	If $iMode <> $UPDATE_HELPER Then
-		If ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2] Then
+		If ($aReturn[0])[1] <> FileGetSize($sUniExtract) Or FileGetMD5($sUniExtract) <> ($aReturn[0])[2] Then
 			Cout("Update available")
 			$found = True
 			If GUI_UpdatePrompt() Then
@@ -5341,8 +5349,7 @@ Func _UpdateFileCompare($sPath, $a)
 		If $iSize == $a[1] Then Return False
 
 	ElseIf $iSize == $a[1] Then
-		Local $sHash = _Crypt_HashFile($sPath, $CALG_MD5)
-		If $sHash <> -1 Then $sHash = StringLower(StringTrimLeft($sHash, 2))
+		Local $sHash = FileGetMD5($sPath)
 		If $sHash == $a[2] Then Return False
 		Cout($a[0] & ": " & $sHash & " - " & $a[2])
 		Return True
@@ -6479,7 +6486,7 @@ Func GUI_Feedback()
 	; Warn if UniExtract is outdated
 	GUICtrlSetState($idSend, $GUI_DISABLE)
 	Local $aReturn = _UpdateGetIndex("", True)
-	If IsArray($aReturn) And (($aReturn[0])[1] <> FileGetSize($sUniExtract) Or StringTrimLeft(_Crypt_HashFile($sUniExtract, $CALG_MD5), 2) <> ($aReturn[0])[2]) Then GUI_Feedback_Outdated()
+	If IsArray($aReturn) And (($aReturn[0])[1] <> FileGetSize($sUniExtract) Or FileGetMD5($sUniExtract) <> ($aReturn[0])[2]) Then GUI_Feedback_Outdated()
 	GUICtrlSetState($idSend, $GUI_ENABLE)
 	Opt("GUIOnEventMode", 0)
 
@@ -6543,10 +6550,10 @@ Func GUI_Feedback_Send($FB_Sys, $FB_File, $FB_Output, $FB_Message)
 	_CreateTrayMessageBox(t('SENDING_FEEDBACK'))
 
 	Local $FB_Text = $name & " Feedback v" & $sVersion & " (" & FileGetVersion($sUniExtract, "Timestamp") & ")" & @CRLF & _
-			"----------------------------------------------------------------------------------------------------" _
-			 & @CRLF & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample file: " & _
-			 $FB_File & @CRLF & "File size: " & $sFileSize & @CRLF & "File type: " & _FiletypeGet(False) & @CRLF _
-			 & @CRLF & "Message: " & $FB_Message & @CRLF & @CRLF & _
+			"----------------------------------------------------------------------------------------------------" & _
+			 @CRLF & @CRLF & "System Information: " & $title & ", " & $FB_Sys & @CRLF & @CRLF & "Sample file: " & _
+			 $FB_File & @CRLF & "File size: " & $sFileSize & @CRLF & "File hash: " & FileGetMD5($file) & @CRLF & _
+			 @CRLF & "File type: " & _FiletypeGet(False) & @CRLF & @CRLF & "Message: " & $FB_Message & @CRLF & @CRLF & _
 			"----------------------------------------------------------------------------------------------------" _
 			 & @CRLF & @CRLF & "Output:" & @CRLF & $FB_Output & @CRLF & @CRLF & _
 			"----------------------------------------------------------------------------------------------------" _

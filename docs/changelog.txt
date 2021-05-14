@@ -20,6 +20,7 @@
   Fixed FFmpeg update check not working correctly
   Fixed 7zip warnings detected as failed extractions
   Fixed Visionaire extraction: data file selection not working as intended
+  Fixed some files being misdetected as inno, thanks to GaneJ
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed design/usability of command line help dialog
