@@ -104,7 +104,7 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 	  $STATUS_INVALIDFILE = "invalidfile", $STATUS_INVALIDDIR = "invaliddir", $STATUS_NOTPACKED = "notpacked", $STATUS_BATCH = "batch", _
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
 	  $STATUS_MISSINGDEF = "missingdef", $STATUS_MOVEFAILED = "movefailed", $STATUS_NOFREESPACE = "nofreespace", $STATUS_MISSINGPART = "missingpart", _
-	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent"
+	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent", $STATUS_TRAYEXIT = "trayexit"
 Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
 	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
 	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
@@ -386,25 +386,12 @@ Func StartExtraction()
 	EndIf
 
 	FilenameParse($file)
+	ValidateOutputDirectory()
 
-	; Collect file information, for log/feedback only
+	; Collect file information (for log/feedback only)
 	Local $iSize = Round(FileGetSize($file) / 1048576, 2)
 	Global $sFileSize = $iSize < 1? Round(FileGetSize($file) / 1024, 2) & " KB": $iSize & " MB"
 	Cout("File size: " & $sFileSize)
-
-	; Set full output directory
-	If $outdir = '/sub' Then
-		$outdir = $initoutdir
-	ElseIf $outdir = '/last' Then
-		$outdir = GetLastOutdir()
-	ElseIf StringMid($outdir, 2, 1) <> ":" Then
-		If StringLeft($outdir, 1) == '\' And StringMid($outdir, 2, 1) <> '\' Then
-			$outdir = StringLeft($filedir, 2) & $outdir
-		ElseIf StringLeft($outdir, 2) <> '\\' Then
-			$outdir = _PathFull($filedir & '\' & $outdir)
-		EndIf
-	EndIf
-	Cout("Output directory: " & $outdir)
 
 	; Update history
 	If $history Then
@@ -514,6 +501,8 @@ EndFunc
 
 ; Parse filename
 Func FilenameParse($f)
+	If StringIsSpace($f) Then Return SetError(1)
+
 	$file = _PathFull($f)
 	$filedir = StringLeft($f, StringInStr($f, "\", 0, -1) - 1)
 	$filename = StringTrimLeft($f, StringInStr($f, "\", 0, -1))
@@ -531,7 +520,30 @@ Func FilenameParse($f)
 		$filenamefull = $filename
 	EndIf
 
+	If Not FileExists($file) Then Return SetError(2)
+
 ;~ 	Cout("FilenameParse: " & @CRLF & "Raw input: " & $f & @CRLF & "FileName: " & $filename & @CRLF & "FileExt: " & $fileext & @CRLF & "FileDir: " & $filedir & @CRLF & "InitOutDir: " & $initoutdir)
+EndFunc
+
+; Parse and validate the output diretory path
+Func ValidateOutputDirectory()
+	If $outdir = "/sub" Then
+		$outdir = $initoutdir
+	ElseIf $outdir = "/last" Then
+		$outdir = GetLastOutdir()
+	ElseIf StringMid($outdir, 2, 1) <> ":" Then
+		If StringLeft($outdir, 1) == '\' And StringMid($outdir, 2, 1) <> '\' Then
+			$outdir = StringLeft($filedir, 2) & $outdir
+		ElseIf StringLeft($outdir, 2) <> '\\' Then
+			$outdir = _PathFull($filedir & '\' & $outdir)
+		EndIf
+	EndIf
+
+	If StringRight($outdir, 1) == "/" Then $outdir = StringTrimRight($outdir, 1)
+	If StringRight($outdir, 1) <> "\" Then $outdir &= "\"
+
+	Cout("Output directory: " & $outdir)
+	FileExists($outdir)
 EndFunc
 
 ; Parse string for environmental variables and return expanded output
@@ -587,7 +599,7 @@ Func ParseCommandLine()
 
 	$extract = True
 
-	Cout("Command line parameters: " & _ArrayToString($cmdline, " ", 1))
+	Cout("Command line parameters: " & $CmdLineRaw)
 
 	If _ArraySearch($cmdline, "/silent") > -1 Then $silentmode = True
 	If _ArraySearch($cmdline, "/nolog") > -1 Then $Log = False
@@ -623,7 +635,7 @@ Func ParseCommandLine()
 		terminate($STATUS_SILENT)
 
 	Else
-		$file = $cmdline[1]
+		$file = _PathFull($cmdline[1])
 		If Not FileExists($file) Then terminate($STATUS_INVALIDFILE, $file)
 
 		If $iArgs > 1 Then
@@ -633,6 +645,8 @@ Func ParseCommandLine()
 				$Log = False
 			Else ; Outdir specified
 				$outdir = $cmdline[2]
+				If $outdir <> "/sub" And $outdir <> "/last" Then $outdir = _PathFull($outdir)
+
 				; When executed from context menu, opening the outdir is not wanted
 				$bOptOpenOutDir = 0
 			EndIf
@@ -774,6 +788,7 @@ Func ReadPrefs()
 	EndIf
 
 	Cout("Program directory: " & @ScriptDir)
+	Cout("Working directory: " & @WorkingDir)
 	Cout("Finished loading preferences from file " & $prefs)
 EndFunc
 
@@ -1487,7 +1502,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_7Z, 'ARJ ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "asar Electron Archive")
-			HasPlugin($archdir & "\Formats\Asar." & $iOsArch & ".dll")
+			HasPlugin($archdir & "Formats\Asar." & $iOsArch & ".dll")
 			extract($TYPE_7Z, 'ASAR ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "BCM compressed")
@@ -1577,7 +1592,7 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Microsoft Windows Installer merge module")
 			extract($TYPE_MSM, 'Windows Installer (MSM) ' & t('TERM_MERGE_MODULE'))
 
-		Case StringInStr($sFileType, "Microsoft Windows Installer") Or StringInStr($sFileType, "Generic OLE2 / Multistream Compound File")
+		Case StringInStr($sFileType, "Microsoft Windows Installer") Or StringInStr($sFileType, "Generic OLE2 / Multistream Compound")
 			extract($TYPE_MSI, 'Windows Installer (MSI) ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Windows Installer Patch")
@@ -2602,34 +2617,34 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Local $sPath = StringReplace($file, "\", "/")
 			Local $sReturn = _Run($unshield & ' -D 2 -d "' & $outdir & '" x "' & $sPath & '"', $outdir)
 			If StringInStr($sReturn, "Try unshield_file_save_old()") Then $sReturn = _Run($unshield & ' -O -D 2 -d "' & $outdir & '" x "' & $sPath & '"', $outdir)
-			If StringInStr($sReturn, "Failed to extract file") Then
 
-			Local $aReturn = ["InstallShield Cabinet " & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', "is6comp"), t('METHOD_EXTRACTION_RADIO', "is5comp"), t('METHOD_EXTRACTION_RADIO', "iscab")]
-			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
+			If StringInStr($sReturn, "Failed to extract file") Or StringInStr($sReturn, "Failed to read header files") Then
+				Local $aReturn = ["InstallShield Cabinet " & t('TERM_ARCHIVE'), t('METHOD_EXTRACTION_RADIO', "is6comp"), t('METHOD_EXTRACTION_RADIO', "is5comp"), t('METHOD_EXTRACTION_RADIO', "iscab")]
+				$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
 
-			Switch $iChoice
-				Case 1
-					; List contents of archive
-					$return = FetchStdout($is6cab & ' l "' & $file & '"', $filedir, @SW_HIDE)
-					$return = _StringBetween(StringRight($return, 22), " ", " file(s) total")
-					If Not @error Then $return = Number(StringStripWS($return[0], 8))
+				Switch $iChoice
+					Case 1
+						; List contents of archive
+						$return = FetchStdout($is6cab & ' l "' & $file & '"', $filedir, @SW_HIDE)
+						$return = _StringBetween(StringRight($return, 22), " ", " file(s) total")
+						If Not @error Then $return = Number(StringStripWS($return[0], 8))
 
-					; If successful, extract contents of InstallShield cabs file-by-file
-					If $return > 0 Then
-						RunWait(_MakeCommand($is6cab & ' x "' & $file & '"', True), $outdir, @SW_MINIMIZE)
-					Else
-						; Otherwise, attempt to extract with unshield
-						_Run($unshield & ' -d "' & $outdir & '" x "' & $file & '"', $outdir)
-					EndIf
-				Case 2
-					HasPlugin($is5cab)
-					RunWait($is5cab & ' x "' & $file & '"', $outdir, @SW_MINIMIZE)
-				Case 3
-					HasPlugin($iscab)
-					RunWait($iscab & ' "' & $file & '" -i"files.ini" -lx', $outdir, @SW_HIDE)
-					RunWait($iscab & ' "' & $file & '" -i"files.ini" -x', $outdir, @SW_MINIMIZE)
-					FileDelete($outdir & "\files.ini")
-			EndSwitch
+						; If successful, extract contents of InstallShield cabs file-by-file
+						If $return > 0 Then
+							RunWait(_MakeCommand($is6cab & ' x "' & $file & '"', True), $outdir, @SW_MINIMIZE)
+						Else
+							; Otherwise, attempt to extract with unshield
+							_Run($unshield & ' -d "' & $outdir & '" x "' & $file & '"', $outdir)
+						EndIf
+					Case 2
+						HasPlugin($is5cab)
+						RunWait($is5cab & ' x "' & $file & '"', $outdir, @SW_MINIMIZE)
+					Case 3
+						HasPlugin($iscab)
+						RunWait($iscab & ' "' & $file & '" -i"files.ini" -lx', $outdir, @SW_HIDE)
+						RunWait($iscab & ' "' & $file & '" -i"files.ini" -x', $outdir, @SW_MINIMIZE)
+						FileDelete($outdir & "\files.ini")
+				EndSwitch
 			EndIf
 
 		Case $TYPE_ISCRIPT
@@ -2734,7 +2749,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($lzx & ' -x "' & $file & '"', $outdir)
 
 		Case $TYPE_MHT
-			If HasPlugin($archdir & "\Formats\eDecoder." & $iOsArch & ".dll", True) Then
+			If HasPlugin($archdir & "Formats\eDecoder." & $iOsArch & ".dll", True) Then
 				extract($TYPE_7Z, $arcdisp)
 			Else
 				extract($TYPE_QBMS, $arcdisp, $observer)
@@ -3378,9 +3393,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 	; -----Success evaluation----- ;
 
-	; Exit if success returned by _Run function
 	Cout("Extraction finished, success: " & $success)
 	If FileExists($tempoutdir) Then DirRemove($tempoutdir)
+	$outdir &= "\"
 
 	Switch $success
 		Case $RESULT_SUCCESS
@@ -3840,13 +3855,15 @@ EndFunc
 ; Create a temporary directory which did not exist before
 Func TempDir($sDir, $iLen)
 	Do
-		Local $return = ""
-		While StringLen($return) < $iLen
-			$return &= Chr(Random(97, 122, 1))
+		Local $sPath = ""
+		While StringLen($sPath) < $iLen
+			$sPath &= Chr(Random(97, 122, 1))
 		WEnd
-		$return = $sDir & "\" & $return & "\"
-	Until Not FileExists($return)
-	Return $return
+		$sPath = $sDir & "\" & $sPath & "\"
+	Until Not FileExists($sPath)
+
+	Cout("Using temporary directory " & $sPath)
+	Return $sPath
 EndFunc
 
 ; Return list of files and directories in directory as a pipe-delimited string
@@ -3969,7 +3986,7 @@ EndFunc
 
 ; Handle program termination with appropriate error message
 Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
-	Local $LogFile = 0, $exitcode = 0, $sFileType = _FiletypeGet(False), $shortStatus = ($status = $STATUS_SUCCESS)? $arctype: $status
+	Local $bLogSaved = False, $exitcode = 0, $sFileType = _FiletypeGet(False), $shortStatus = ($status = $STATUS_SUCCESS)? $arctype: $status
 
 	; Rename unicode file
 	If $iUnicodeMode Then
@@ -3988,17 +4005,12 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 
 	_DeleteTrayMessageBox()
 	TridLib_Close()
-	Cout("Terminating - Status: " & $status)
 
 	If UBound($aWarnings) > 0 Then Cout("Warnings:" & @CRLF & _ArrayToString($aWarnings))
 
 	; When multiple files are selected and executed via command line, they are added to batch queue, but the working instance uses in-memory data.
 	; So we need to look for changes in the batch queue file, so batch mode could be enabled if necessary.
 	If Not $silentmode And GetBatchQueue() Then $silentmode = True
-
-	; Create log file if enabled in options
-	If $Log And Not ($status = $STATUS_SILENT Or $status = $STATUS_SYNTAX Or $status = $STATUS_FILEINFO Or $status = $STATUS_NOTPACKED Or $status = $STATUS_BATCH) Or ($status = $STATUS_FILEINFO And $silentmode) Then _
-		$LogFile = CreateLog($shortStatus)
 
 	; Save local statistics
 	IniWrite($prefs, "Statistics", $status, Number(IniRead($prefs, "Statistics", $status, 0)) + 1)
@@ -4070,7 +4082,11 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 
 			; Display failed attempt information and exit
 		Case $STATUS_FAILED
-			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($filenamefull, $arcdisp)) Then ShellExecute($LogFile? $LogFile: CreateLog($status))
+			If Not $silentmode And Prompt(256 + 16 + 4, 'EXTRACT_FAILED', CreateArray($filenamefull, $arcdisp)) Then
+				ShellExecute(SaveLog($status))
+				$bLogSaved = True
+			EndIf
+
 			$exitcode = 1
 
 			; Exit successfully
@@ -4079,7 +4095,11 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 				Cout("Deleting source file " & $file)
 				FileDelete($file)
 			EndIf
-			If $bOptOpenOutDir And Not $silentmode Then ShellExecute($outdir)
+
+			If $bOptOpenOutDir And Not $silentmode Then
+				Cout("Opening explorer at " & $outdir)
+				ShellExecute($outdir)
+			EndIf
 	EndSwitch
 
 	; Write error log if in batchmode
@@ -4094,6 +4114,13 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	If $createdir And $status <> $STATUS_SUCCESS And DirGetSize($outdir) = 0 Then DirRemove($outdir, 1)
 
 	If ($exitcode == 1 Or $exitcode == 3 Or $exitcode == 4 Or $exitcode == 12) And $fileext <> "dll" Then GUI_Feedback_Prompt()
+
+	Cout("Terminating - Status: " & $status)
+
+	; Create log file if enabled in options
+	If $Log And Not $bLogSaved And Not ($status = $STATUS_SILENT Or $status = $STATUS_SYNTAX Or $status = $STATUS_FILEINFO Or _
+	   $status = $STATUS_NOTPACKED Or $status = $STATUS_BATCH) Or ($status = $STATUS_FILEINFO And $silentmode) Then _
+		SaveLog($shortStatus)
 
 	If $batchEnabled = 1 And $status <> $STATUS_SILENT Then ; Don't start batch if gui is closed
 		; Start next extraction
@@ -4531,8 +4558,8 @@ Func _ComErrorHandler($oError)
 	Global $sComError = $oError.description & "(0x" & Hex($oError.number) & ") in " & $oError.source
 EndFunc
 
-; Dump complete debug content to log file
-Func CreateLog($status)
+; Write full debug output to log file
+Func SaveLog($status)
 	Local $sName = $logdir & @YEAR & "-" & @MON & "-" & @MDAY & "_" & @HOUR & "-" & @MIN & "-" & @SEC & "_"
 	If $status <> $STATUS_SUCCESS Then $sName &= StringUpper($status)
 	If $file <> "" Then $sName &= "_" & GetFileName() & "." & $fileext
@@ -4552,6 +4579,7 @@ Func EvaluateLog($sLog)
 	If StringInStr($sLog, "Wrong password?", 0) Or StringInStr($sLog, "The specified password is incorrect.", 0) Or _
 	   StringInStr($sLog, "Archive encrypted.", 0) Or StringInStr($sLog, "Corrupt file or wrong password", 0) Or _
 	   StringInStr(_StringGetLine($sLog, -1), "Enter password") Then
+	    Cout("Invalid password")
 		$success = $RESULT_FAILED
 		SetError(1, 1)
 	ElseIf StringInStr($sLog, "Break signaled") Or StringInStr($sLog, "Program aborted") Or StringInStr($sLog, "User break") Then
@@ -4562,6 +4590,7 @@ Func EvaluateLog($sLog)
 		SetError(2)
 	ElseIf StringInStr($sLog, "You need to start extraction from a previous volume") Or _
 		   StringInStr($sLog, "Unavailable start of archive") Or StringInStr($sLog, "Missing volume") Then
+		Cout("Missing part")
 		$success = $RESULT_FAILED
 		SetError(3)
 	ElseIf StringInStr($sLog, "Everything is Ok") Or _
@@ -4976,7 +5005,7 @@ Func MoveFiles($source, $dest, $force = False, $omit = "", $removeSourceDir = Fa
 	WEnd
 
 	FileClose($hSearch)
-	If $iErrors > 0 Then Cout($iErrors & " files/folders could not be moved")
+	If $iErrors > 0 Then _ArrayAdd($aWarnings, Cout($iErrors & " files/folders could not be moved"))
 	If $bShowStatus Then _DeleteTrayMessageBox()
 	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
 EndFunc
@@ -6257,8 +6286,8 @@ EndFunc
 
 ; Set file to extract and target directory
 Func GUI_OK_Set($bShowError = False)
-	$file = EnvParse(GUICtrlRead($filecont))
-	If Not FileExists($file) Then
+	FilenameParse(EnvParse(GUICtrlRead($filecont)))
+	If @error Then
 		If $bShowError Then MsgBox($iTopmost + 48, $title, t('INVALID_FILE', $file))
 		Return 0
 	EndIf
@@ -7810,7 +7839,7 @@ Func Tray_Exit()
 	KillHelper()
 	GUI_SavePosition()
 
-	If Not $guimain Then CreateLog("trayexit")
+	If Not $guimain Then SaveLog($STATUS_TRAYEXIT)
 
 	terminate($STATUS_SILENT)
 EndFunc

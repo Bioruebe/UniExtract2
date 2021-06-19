@@ -21,6 +21,8 @@
   Fixed 7zip warnings detected as failed extractions
   Fixed Visionaire extraction: data file selection not working as intended
   Fixed some files being misdetected as inno, thanks to GaneJ
+  Fixed several issues when relative paths are used, thanks to r3sus
+  Fixed setup file being executed if 'Open folder after extraction' is enabled, thanks to r3sus
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed design/usability of command line help dialog
@@ -32,10 +34,11 @@
   Updated godotdec to 2.1.1
   Updated innounp to 0.50
   Updated MediaInfo to 20.09
-  Updated PeaZip to 0.75
+  Updated PeaZip to 1.00
   Updated Qt Linguist to 5.15.2
-  Updated SQLite to 3.33.0
-  Updated UnRAR to 6.00
+  Updated QuickBMS to 0.11
+  Updated SQLite to 3.35.5
+  Updated UnRAR to 6.02
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated German translation, thanks to Mr-Update
   Updated Greek translation, thanks to gvp9000
