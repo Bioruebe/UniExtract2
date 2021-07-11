@@ -5885,12 +5885,29 @@ Func _GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
 	_GDIPlus_Shutdown()
 EndFunc
 
-; Set GUI color to white when using Windows 10
+; Determine whether Windows theme mode is light or dark
+; Code by colombeen (https://www.autoitscript.com/forum/topic/202296-supporting-dark-mode-for-apps-in-windows)
+Func _AppsUseLightMode()
+	Local $LightMode
+
+	$LightMode = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme")
+	If @error Then $LightMode = 1
+
+	If $LightMode = True Then
+		Return True
+	Else
+		Return False
+	EndIf
+EndFunc
+
+; Set GUI color to white when using Windows 10 ligth
 Func _GuiSetColor()
 	If @OSVersion <> "WIN_10" Or $bHighContrastMode Then Return
 
-	GUISetBkColor($COLOR_WHITE)
-	GUICtrlSetDefBkColor($COLOR_WHITE)
+	If _AppsUseLightMode() Then
+		GUISetBkColor($COLOR_WHITE)
+		GUICtrlSetDefBkColor($COLOR_WHITE)
+	EndIf
 EndFunc
 
 ; Format a label to look like a link
