@@ -5,6 +5,7 @@
   Added support for .unitypackage files
   Added support for BitRock InstallBuilder installers (plugin), thanks to PhlegethonAcheron
   Added support for CP/M LBR archives, thanks to Petr Řehák
+  Added support for newer .sgbpack files using sgbdec
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
@@ -15,6 +16,7 @@
   Fixed two possible crashes during .cab extraction, thanks to seadoggie01
   Fixed possible crashes during MSCF and MSI extraction
   Fixed wrong colors, text not being readable if Windows is in high contrast mode, thanks to k-kolev1985
+  Fixed custom themes being ignored
   Fixed 'not enough free disk space' error message: 'Abort' button not working
   Fixed plugin manager: 'Finish' button not closing window
   Fixed FFmpeg update check not working correctly
@@ -28,7 +30,7 @@
   Changed design/usability of command line help dialog
   Improved .cab, .nrg and .msp extraction
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
-  Updated cicdec to 2.2.0
+  Updated cicdec to 2.3.0
   Updated demoleition to 0.64
   Updated Exeinfo PE to 0.0.6.5
   Updated godotdec to 2.1.1

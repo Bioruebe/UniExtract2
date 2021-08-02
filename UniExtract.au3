@@ -113,16 +113,15 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", _
 	  $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
 	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
-	  $TYPE_SFARK = "sfark", $TYPE_SGB = "sgb", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", _
-	  $TYPE_SWFEXE = "swfexe", $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", _
-	  $TYPE_UNITYPACKAGE = "unitypackage", $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", _
-	  $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", _
-	  $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_SFARK = "sfark", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
+	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITYPACKAGE = "unitypackage", _
+	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
+	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
 	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, _
-	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SGB, $TYPE_SIS, _
+	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, _
 	  $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, _
 	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_ZIP, _
 	  $TYPE_ZOO, $TYPE_ZPAQ]
@@ -322,6 +321,7 @@ ReadPrefs()
 Cout("Starting " & $name & " " & $sVersion)
 
 Global $bHighContrastMode = _IsHighContrastMode()
+Global $bLightTheme = _AppsUseLightTheme()
 
 ParseCommandLine()
 
@@ -1617,12 +1617,11 @@ Func tridcompare($sFileType)
 			extract($TYPE_RAR, 'RAR ' & t('TERM_ARCHIVE'))
 
 		; Game Archives
-
 		Case StringInStr($sFileType, "BGI (Buriko General Interpreter) engine")
 			CheckGarbro()
 
 		Case StringInStr($sFileType, "Broken Age package")
-			CheckGame(False)
+			CheckGame(False, False)
 
 		Case StringInStr($sFileType, "Bruns Engine encrypted") Or StringInStr($sFileType, "Ultramarine 3 encrypted audio file")
 			CheckGarbro()
@@ -1646,9 +1645,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "RPG Maker") And Not StringInStr($sFileType, "MV encrypted")
 			extract($TYPE_RGSS, "RPG Maker " & t('TERM_GAME') & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "Smile Game Builder")
-			extract($TYPE_SGB, "Smile Game Builder " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Telltale Games ressource archive")
 			extract($TYPE_TTARCH, "Telltale " & t('TERM_GAME') & t('TERM_ARCHIVE'))
@@ -1968,14 +1964,13 @@ Func CheckBin()
 EndFunc
 
 ; Determine if file is supported game archive
-Func CheckGame($bUseGaup = True)
+Func CheckGame($bUseGaup = True, $bUseGarbro = True)
 	If $gamefailed Then Return
 
+	If $bUseGarbro Then CheckGarbro()
+
 	Cout("Testing Game archive")
-
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' ' & t('TERM_GAME') & t('TERM_PACKAGE'))
-
-	CheckGarbro()
 
 	If $bUseGaup Then
 		; Check GAUP first
@@ -2981,11 +2976,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_SFARK
 			_Run($sfark & ' "' & $file & '" "' & $outdir & '\' & $filename & '.sf2"', $filedir, @SW_SHOW)
-
-		Case $TYPE_SGB ; Test
-			$return = _Run($7z & ' x "' & $file & '"', $outdir, @SW_HIDE)
-			; Effect.sgr cannot be extracted by 7zip, that should not be considered failed extraction as all other files are OK
-			If StringInStr($return, "Headers Error : Effect.sgr") And StringInStr($return, "Sub items Errors: 1") Then $success = $RESULT_SUCCESS
 
 		Case $TYPE_SIS
 			extract($TYPE_QBMS, -1, $sis, False, True)
@@ -4710,7 +4700,7 @@ Func _Run($f, $sWorkingDir = $outdir, $show_flag = @SW_MINIMIZE, $bUseCmd = True
 				Or StringInStr($return, "you must choose a new filename") Or StringInStr($return, "Insert disk with") _
 				Or StringInStr($return, "[R]etry") Then
 					Cout("User input needed")
-					WinSetState($runtitle, "", @SW_SHOW)
+					WinSetState($run, "", @SW_SHOW)
 					GUICtrlSetFont($idTrayStatusExt, 8.5, 900)
 					_SetTrayMessageBoxText(t('INPUT_NEEDED'))
 					WinActivate($runtitle)
@@ -5794,35 +5784,6 @@ Func _SetState($aControls, $state)
 	Next
 EndFunc
 
-; Determine whether Windows high contrast mode is enabled or not
-Func _IsHighContrastMode()
-	Local Const $HCF_HIGHCONTRASTON = 0x00000001
-
-	$tResult = DllStructCreate("struct; uint cbSize; dword dwFlags; ptr lpszDefaultScheme; endstruct")
-	If @error Then
-		Cout("Failed to create result structure")
-		Return SetError(1, 0, 0)
-	EndIf
-
-	DllStructSetData($tResult, "cbSize", DllStructGetSize($tResult))
-
-	If Not _WinAPI_SystemParametersInfo($SPI_GETHIGHCONTRAST, 0, $tResult) Then
-		Cout("Failed to get high contrast mode state. Error was: " & _WinAPI_GetLastErrorMessage())
-		Return SetError(2, 0, 0)
-	EndIf
-
-	Local $iFlag = DllStructGetData($tResult, "dwFlags")
-	If @error Then
-		Cout("Failed to read high contrast mode flag")
-		Return SetError(3, 0, 0)
-	EndIf
-
-	Local $bEnabled = BitAND($iFlag, $HCF_HIGHCONTRASTON)
-	Cout("High contrast mode: " & $bEnabled)
-
-	Return $bEnabled
-EndFunc
-
 ; Get title of a window by PID as returned by Run()
 ; Based on code by SmOke_N (http://www.autoitscript.com/forum/topic/136271-solved-wingethandle-from-wingetprocess/#entry952135)
 Func _WinGetByPID($iPID)
@@ -5885,29 +5846,50 @@ Func _GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
 	_GDIPlus_Shutdown()
 EndFunc
 
-; Determine whether Windows theme mode is light or dark
-; Code by colombeen (https://www.autoitscript.com/forum/topic/202296-supporting-dark-mode-for-apps-in-windows)
-Func _AppsUseLightMode()
-	Local $LightMode
+; Determine whether Windows high contrast mode is enabled or not
+Func _IsHighContrastMode()
+	Local Const $HCF_HIGHCONTRASTON = 0x00000001
 
-	$LightMode = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme")
-	If @error Then $LightMode = 1
-
-	If $LightMode = True Then
-		Return True
-	Else
-		Return False
+	$tResult = DllStructCreate("struct; uint cbSize; dword dwFlags; ptr lpszDefaultScheme; endstruct")
+	If @error Then
+		Cout("Failed to create result structure")
+		Return SetError(1, 0, 0)
 	EndIf
+
+	DllStructSetData($tResult, "cbSize", DllStructGetSize($tResult))
+
+	If Not _WinAPI_SystemParametersInfo($SPI_GETHIGHCONTRAST, 0, $tResult) Then
+		Cout("Failed to get high contrast mode state. Error was: " & _WinAPI_GetLastErrorMessage())
+		Return SetError(2, 0, 0)
+	EndIf
+
+	Local $iFlag = DllStructGetData($tResult, "dwFlags")
+	If @error Then
+		Cout("Failed to read high contrast mode flag")
+		Return SetError(3, 0, 0)
+	EndIf
+
+	Local $bEnabled = BitAND($iFlag, $HCF_HIGHCONTRASTON)
+	Cout("High contrast mode: " & $bEnabled)
+
+	Return $bEnabled
 EndFunc
 
-; Set GUI color to white when using Windows 10 ligth
-Func _GuiSetColor()
-	If @OSVersion <> "WIN_10" Or $bHighContrastMode Then Return
+; Determine whether Windows theme is light or dark
+; Based on code by colombeen (https://www.autoitscript.com/forum/topic/202296-supporting-dark-mode-for-apps-in-windows)
+Func _AppsUseLightTheme()
+	Local $bEnabled = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme")
+	If @error Then Return True
 
-	If _AppsUseLightMode() Then
-		GUISetBkColor($COLOR_WHITE)
-		GUICtrlSetDefBkColor($COLOR_WHITE)
-	EndIf
+	Return $bEnabled
+EndFunc
+
+; Set GUI color to white when using Windows 10 light theme
+Func _GuiSetColor()
+	If @OSVersion <> "WIN_10" Or $bHighContrastMode Or Not $bLightTheme Then Return
+
+	GUISetBkColor($COLOR_WHITE)
+	GUICtrlSetDefBkColor($COLOR_WHITE)
 EndFunc
 
 ; Format a label to look like a link
