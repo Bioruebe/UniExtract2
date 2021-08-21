@@ -1894,6 +1894,8 @@ Func check7z()
 	If StringInStr($return, "Listing archive:") And Not StringInStr($return, "Can not open the file as ") Then
 		_DeleteTrayMessageBox()
 		If $fileext = "exe" Then
+			If StringInStr($return, "InstallShield") Then CheckInstallShieldCab()
+
 			extract($TYPE_7Z, '7-Zip ' & t('TERM_INSTALLER') & ' ' & t('TERM_PACKAGE'))
 		ElseIf $fileext = "iso" Then
 			extract($TYPE_7Z, 'Iso ' & t('TERM_IMAGE'))
@@ -2068,22 +2070,15 @@ Func checkInno()
 	Return False
 EndFunc
 
-; Determine if file can be extracted by TotalObserver
-Func CheckTotalObserver($arcdisp = 0)
-	If $observerfailed Then Return False
-	Cout("Testing TotalObserver")
-	_CreateTrayMessageBox(t('TERM_TESTING') & ' TotalObserver ' & t('TERM_ARCHIVE'))
+; Search for data*.cab file in file directory and extract it if found
+Func CheckInstallShieldCab()
+	Cout("Testing InstallShield CAB")
 
-	Local $return = FetchStdout($quickbms & ' -l "' & $bindir & $observer & '" "' & $file & '"', $filedir, @SW_HIDE)
+	Local $sFile = _FileSearchFirst($filedir, "data*.cab")
+	If @error Then Return False
 
-	_DeleteTrayMessageBox()
-	If StringInStr($return, "not supported by this WCX plugin") Or StringInStr($return, "0 files found") Or _
-	   StringInStr($return, "exception occured") Or StringInStr($return, "EXCEPTION HANDLER") Then
-	   $observerfailed = True
-	   Return False
-	EndIf
-
-	extract($TYPE_QBMS, $arcdisp, $observer)
+	$file = $sFile
+	extract($TYPE_ISCAB, "InstallShield CAB " & t('TERM_ARCHIVE'))
 EndFunc
 
 ; Determine if file is CD/DVD image
@@ -2125,6 +2120,24 @@ Func checkNSIS()
 	_DeleteTrayMessageBox()
 	checkIE()
 	Return False
+EndFunc
+
+; Determine if file can be extracted by TotalObserver
+Func CheckTotalObserver($arcdisp = 0)
+	If $observerfailed Then Return False
+	Cout("Testing TotalObserver")
+	_CreateTrayMessageBox(t('TERM_TESTING') & ' TotalObserver ' & t('TERM_ARCHIVE'))
+
+	Local $return = FetchStdout($quickbms & ' -l "' & $bindir & $observer & '" "' & $file & '"', $filedir, @SW_HIDE)
+
+	_DeleteTrayMessageBox()
+	If StringInStr($return, "not supported by this WCX plugin") Or StringInStr($return, "0 files found") Or _
+	   StringInStr($return, "exception occured") Or StringInStr($return, "EXCEPTION HANDLER") Then
+	   $observerfailed = True
+	   Return False
+	EndIf
+
+	extract($TYPE_QBMS, $arcdisp, $observer)
 EndFunc
 
 ; If detection fails, try to determine file type by extension
@@ -2418,15 +2431,15 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_CI
 			HasPlugin($ci)
-			$return = @TempDir & "\ci.txt"
-			$ret = FileOpen($return, $FO_CREATEPATH + $FO_OVERWRITE)
-			FileWrite($ret, "1" & @LF & $file & @LF & $outdir & @LF & "3" & @LF & "1")
-			FileClose($ret)
-			$run = Run(_MakeCommand($ci & ' ' & $return, False), $outdir, @SW_SHOW)
+			Local $sTempFile = @TempDir & "\ci.txt"
+			Local $hFile = FileOpen($sTempFile, $FO_CREATEPATH + $FO_OVERWRITE)
+			FileWrite($hFile, "1" & @LF & $file & @LF & $outdir & @LF & "3" & @LF & "1")
+			FileClose($hFile)
+			$run = Run(_MakeCommand($ci & ' ' & $sTempFile, False), $outdir, @SW_SHOW)
 			WinWait("CreateInstall Setup Extractor", "Click Finish to close the program", $Timeout)
 			ControlClick("CreateInstall Setup Extractor", "", "Button1")
 			ProcessClose($run)
-			FileDelete($return)
+			FileDelete($sTempFile)
 			terminate($STATUS_SILENT)
 
 		Case $TYPE_CIC
@@ -2441,22 +2454,20 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($7z & ' x "' & $file & '"', $outdir)
 
 			; Check for new files
-			$hSearch = FileFindFirstFile($outdir & "\*")
-			If Not @error Then
-				While 1
-					$fname = FileFindNextFile($hSearch)
-					If @error Then ExitLoop
-					If Not StringInStr($oldfiles, $fname) Then
-						; Check for supported archive format
-						$return = FetchStdout($7z & ' l "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
-						If StringInStr($return, "Listing archive:", 0) Then
-							_Run($7z & ' x "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
-							FileDelete($outdir & '\' & $fname)
-						EndIf
-					EndIf
-				WEnd
-			EndIf
-			FileClose($hSearch)
+			Local $aFiles = _FileListToArray($outdir, "*", $FLTA_FILES)
+			If @error Then Local $aFiles[1]
+
+			For $i = 1 To $aFiles[0]
+				Local $fname = $aFiles[$i]
+				If StringInStr($oldfiles, $fname) Then ContinueLoop
+
+				; Check for supported archive format
+				$return = FetchStdout($7z & ' l "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
+				If Not StringInStr($return, "Listing archive:", 0) Then ContinueLoop
+
+				_Run($7z & ' x "' & $outdir & '\' & $fname & '"', $outdir, @SW_HIDE)
+				FileDelete($outdir & '\' & $fname)
+			Next
 
 		Case $TYPE_DGCA
 			HasPlugin($dgca)
@@ -2640,6 +2651,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 						RunWait($iscab & ' "' & $file & '" -i"files.ini" -x', $outdir, @SW_MINIMIZE)
 						FileDelete($outdir & "\files.ini")
 				EndSwitch
+			Else
+				Local $aCleanup[] = ["_Engine_*", "_Support_*"]
+				Cleanup($aCleanup)
 			EndIf
 
 		Case $TYPE_ISCRIPT
@@ -2651,6 +2665,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_ISEXE
 			CheckTotalObserver($arcdisp)
+			CheckInstallShieldCab()
 
 			Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
 			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
@@ -2685,7 +2700,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 								While 1
 									Local $msiname = FileFindNextFile($msihandle)
 									If @error Then ExitLoop
-									Local $tsearch = FileSearch(@TempDir & "\" & $msiname)
+									Local $tsearch = _FileSearchFirst(@TempDir, $msiname)
 									If @error Then ContinueLoop
 
 									Local $isdir = StringLeft($tsearch[1], StringInStr($tsearch[1], '\', 0, -1) - 1)
@@ -2888,21 +2903,24 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				_Run($cmd & $expand & ' -F:* "' & $sPath & '" "' & $tempoutdir & '"', $filedir, @SW_HIDE, True, True, False)
 
 				Local $aFiles = _FileListToArray($tempoutdir, "*", $FLTA_FOLDERS, False)
-				For $i = 1 To $aFiles[0]
-					Local $sFile = $aFiles[$i]
-					$sPath = $tempoutdir & "\" & $sFile
-					If StringInStr($sFile, ".resources_") Then
-						Cleanup($sPath)
-					ElseIf _StringStartsWith($sFile, "x86_") Then
-						_PathMove($sPath, $outdir & "\x86", $FC_CREATEPATH)
-					ElseIf _StringStartsWith($sFile, "amd64_") Then
-						_PathMove($sPath, $outdir & "\x64", $FC_CREATEPATH)
-					ElseIf _StringStartsWith($sFile, "wow64_") Then
-						_PathMove($sPath, $outdir & "\WOW64", $FC_CREATEPATH)
-					ElseIf _StringStartsWith($sFile, "msil_") Then
-						_PathMove($sPath, $outdir & "\MSIL", $FC_CREATEPATH)
-					EndIf
-				Next
+
+				If Not @error Then
+					For $i = 1 To $aFiles[0]
+						Local $sFile = $aFiles[$i]
+						$sPath = $tempoutdir & "\" & $sFile
+						If StringInStr($sFile, ".resources_") Then
+							Cleanup($sPath)
+						ElseIf _StringStartsWith($sFile, "x86_") Then
+							_PathMove($sPath, $outdir & "\x86", $FC_CREATEPATH)
+						ElseIf _StringStartsWith($sFile, "amd64_") Then
+							_PathMove($sPath, $outdir & "\x64", $FC_CREATEPATH)
+						ElseIf _StringStartsWith($sFile, "wow64_") Then
+							_PathMove($sPath, $outdir & "\WOW64", $FC_CREATEPATH)
+						ElseIf _StringStartsWith($sFile, "msil_") Then
+							_PathMove($sPath, $outdir & "\MSIL", $FC_CREATEPATH)
+						EndIf
+					Next
+				EndIf
 
 				Cleanup($tempoutdir & "\*")
 			EndIf
@@ -3124,9 +3142,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Begin conversion, format selected by uif2iso
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'UIF ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
 			_Run($uif & ' "' & $file & '" "' & $outdir & "\" & $filename & '"', $filedir, True, True, True)
-			$hSearch = FileFindFirstFile($outdir & "\" & $filename & ".*")
-			$isofile = $outdir & "\" & FileFindNextFile($hSearch)
-			FileClose($hSearch)
+
+			; TODO: the converted image can be a different format than ISO
+			$isofile = _FileSearchFirst($outdir, $filename & ".*")
 
 ;~ 		Case $TYPE_UNITY
 ;~ 			_Run($unity & ' extract "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, True, False)
@@ -3363,8 +3381,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 
 	If $isofile And FileExists($isofile) And Not ($returnSuccess Or $returnFail) Then
-		; Extract converted iso file
 		If FileGetSize($isofile) > 0 Then
+			Cout("Extracting converted ISO file " & $isofile)
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & StringUpper($arctype) & ' ' & t('TERM_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
 			$file = $isofile
 			If Not CheckIso() Then _Run($7z & ' x "' & $isofile & '"', $outdir)
@@ -3373,6 +3391,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				FileDelete($isofile)
 			EndIf
 		Else
+			Cout("Failed to convert to ISO " & $isofile)
 			Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED')
 			If FileExists($isofile) Then FileDelete($isofile)
 			check7z()
@@ -3602,13 +3621,33 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 	If $iMode = $OPTION_MOVE And $sDestination == 0 Then $sDestination = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
 ;~ 	Cout("Cleanup - " & _ArrayToString($aFiles))
 
-	For $sFile In $aFiles
+	; The array can get modified from within the loop
+	Local $i = 0
+	While $i < UBound($aFiles)
+		$sFile = $aFiles[$i]
+		$i += 1
+
 		If Not StringInStr($sFile, $outdir) Then $sFile = $outdir & "\" & $sFile
 		If Not FileExists($sFile) Then ContinueLoop
 
-		Local $bIsFolder = _IsDirectory($sFile)
-		Local $bIsWildcard = StringRight($sFile, 2) == "\*"
+		Local $bIsFolderWildcard = StringRight($sFile, 2) == "\*" ; All files within a folder
+		Local $bIsWildcard = $bIsFolderWildcard == False And StringInStr($sFile, "*") > 0
 
+		; In case of wildcards search for all matching file and append to the array
+		If $bIsWildcard Then
+			Local $iPos = StringInStr($sFile, "\", 0, -1)
+			If $iPos > 1 Then
+				Local $sDir = StringLeft($sFile, $iPos)
+				$sFile = StringTrimLeft($sFile, $iPos)
+				$aReturn = _FileListToArray($sDir, $sFile, $FLTA_FILESFOLDERS, True)
+				_ArrayDelete($aReturn, 0)
+				_ArrayAdd($aFiles, $aReturn)
+			EndIf
+
+			ContinueLoop
+		EndIf
+
+		Local $bIsFolder = _IsDirectory($sFile)
 		If $iMode = $OPTION_DELETE Then
 			Cout("Cleanup: Deleting " & $sFile)
 			If $bIsFolder Then
@@ -3629,7 +3668,7 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 				_FileMove($sFile, $sDestination, 1)
 			EndIf
 		EndIf
-	Next
+	WEnd
 EndFunc
 
 ; Check write permissions for specified file or folder
@@ -3898,27 +3937,6 @@ Func AppendExtensions($sPath)
 
 		RenameWithTridExtension($aFiles[$i], True)
 	Next
-EndFunc
-
-; Recursively search for given pattern
-; code by w0uter (http://www.autoitscript.com/forum/index.php?showtopic=16421)
-Func FileSearch($s_Mask = '', $i_Recurse = 1)
-	Local $s_Buf = ''
-	Local $s_Command = Cout(@ComSpec & ' /c dir /B ' & ($i_Recurse? '/S ': '') & Quote($s_Mask))
-	Local $i_Pid = Run($s_Command, @WorkingDir, @SW_HIDE, 2 + 4)
-	While Not @error
-		$s_Buf &= StdoutRead($i_Pid)
-	WEnd
-	$s_Buf = StringSplit(StringTrimRight($s_Buf, 2), @CRLF, 1)
-	ProcessClose($i_Pid)
-
-	If UBound($s_Buf) == 2 And $s_Buf[1] = '' Then
-		ReDim $s_Buf[1]
-		$s_Buf[0] = 0
-		SetError(1)
-	EndIf
-
-	Return $s_Buf
 EndFunc
 
 ; Search for a given pattern and return first result
@@ -7616,24 +7634,18 @@ EndFunc
 ; Option to delete all log files
 Func GUI_DeleteLogs()
 	Cout("Deleting log files")
-	Local $hSearch, $sFile, $i = 0
 
 	FileDelete($logdir & "errorlog.txt")
 
-	$hSearch = FileFindFirstFile($logdir & "*.log")
-	If $hSearch == -1 Then Return
+	Local $aFiles = _FileListToArray($logdir, "*.log", $FLTA_FILES, True)
+	If @error Then Return
 
-	While 1
-		$sFile = FileFindNextFile($hSearch)
-		If @error Then ExitLoop
-		FileDelete($logdir & $sFile)
-		$i += 1
-	WEnd
+	For $i = 1 To $aFiles[0]
+		FileDelete($aFiles[$i])
+	Next
 
-	FileClose($hSearch)
 	GUI_UpdateLogItem()
-
-	Cout("Deleted a total of " & $i & " files")
+	Cout("Deleted a total of " & $aFiles[0] & " files")
 EndFunc
 
 ; Update log directory size in menu entry after deleting log files

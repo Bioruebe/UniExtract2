@@ -28,7 +28,7 @@
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed design/usability of command line help dialog
-  Improved .cab, .nrg and .msp extraction
+  Improved .cab, InstallShield, .nrg and .msp extraction
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
   Updated cicdec to 2.3.0
   Updated demoleition to 0.64
@@ -50,6 +50,7 @@
   Updated Polish translation, thanks to Barnaba and Mirosław Żylewicz
   Updated Russian translation, thanks to wvxwxvw
   Updated Spanish translation, thanks to GGobbi
+  Updated Swedish translation, thanks to Sopor
   Removed Smart Install Maker Unpacker, replaced with simdec
   Removed WolfDec plugin, replaced with GARbro
   Removed /prefs command line parameter
