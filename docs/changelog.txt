@@ -25,6 +25,7 @@
   Fixed some files being misdetected as inno, thanks to GaneJ
   Fixed several issues when relative paths are used, thanks to r3sus
   Fixed setup file being executed if 'Open folder after extraction' is enabled, thanks to r3sus
+  Fixed language being set to Chinese on Danish systems, thanks to madsholme
   Changed design/usability of 'Execution warning' dialog
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed design/usability of command line help dialog

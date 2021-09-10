@@ -4375,24 +4375,27 @@ EndFunc
 ; Detect language of user's operating system
 ; Based on work by guinness (http://www.autoitscript.com/forum/topic/131832-getoslanguage-retrieve-the-language-of-the-os/)
 Func _GetOSLanguage()
-	Local $aString[36] = [35, "0409 0809 0c09 1009 1409 1809 1c09 2009 2409 2809 2c09 3009 3409", "0804 0c04 1004 0406", "0406", _
+	Local Const $iSize = 35
+
+	Local $aString[35] = ["0409 0809 0c09 1009 1409 1809 1c09 2009 2409 2809 2c09 3009 3409", "0804 0c04 1004", "0406", _
 			"0413 0813", "0425", "040b", "040c 080c 0c0c 100c 140c 180c", "0407 0807 0c07 1007 1407", "040e", "0410 0810", _
 			"0411", "0414 0814", "0415", "0816", "0418", "0419", "081a 0c1a", _
 			"040a 080a 0c0a 100a 140a 180a 1c0a 200a 240a 280a 2c0a 300a 340a 380a 3c0a 400a 440a 480a 4c0a 500a", "041d 081d", _
-			"0401 0801 0c01 1001 1401 1801 1c01 2001 2401 2801 2801 3001 3401 3801 3c01 4001", "042b", "0402", "041a", "0405", "0408", _
+			"0401 0801 0c01 1001 1401 1801 1c01 2001 2401 2801 3001 3401 3801 3c01 4001", "042b", "0402", "041a", "0405", "0408", _
 			"0412", "0429", "0416", "041b", "0404", "041e", "041f", "0422", "0403", "042a"]
 
-	Local $aLanguage[36] = [35, "English", "Chinese (Simplified)", "Danish", "Dutch", "Estonian", "Finnish", "French", "German", "Hungarian", "Italian", _
+	Local $aLanguage[35] = ["English", "Chinese (Simplified)", "Danish", "Dutch", "Estonian", "Finnish", "French", "German", "Hungarian", "Italian", _
 			"Japanese", "Norwegian", "Polish", "Portuguese", "Romanian", "Russian", "Serbian", "Spanish", "Swedish", "Arabic", "Armenian", _
 			"Bulgarian", "Croatian", "Czech", "Greek", "Korean", "Farsi", "Portuguese (Brazilian)", "Slovak", "Taiwanese", "Thai", "Turkish", _
 			"Ukrainian", "Catalan", "Vietnamese"]
 
-	For $i = 1 To $aString[0]
+	For $i = 0 To $iSize - 1
 		If StringInStr($aString[$i], @OSLang) Then
 			Cout("Selecting language based on OS language: " & $aLanguage[$i])
 			Return $aLanguage[$i]
 		EndIf
 	Next
+
 	Return $aLanguage[1]
 EndFunc
 
