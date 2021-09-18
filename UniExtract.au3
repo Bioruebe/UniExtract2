@@ -296,6 +296,9 @@ Global Const $regcurrent = "HKCU" & $reg64 & "\Software\Classes\*\shell\"
 Global Const $regall = "HKCR" & $reg64 & "\*\shell\"
 Global $reguser = $regcurrent
 
+Global $bHighContrastMode = _IsHighContrastMode()
+Global $bLightTheme = _AppsUseLightTheme()
+
 ; Define context menu commands
 ; On top to make remove via command line parameter possible
 ; Shell	| Commandline Parameter | Translation | MultiSelectModel
@@ -319,9 +322,6 @@ EndIf
 ReadPrefs()
 
 Cout("Starting " & $name & " " & $sVersion)
-
-Global $bHighContrastMode = _IsHighContrastMode()
-Global $bLightTheme = _AppsUseLightTheme()
 
 ParseCommandLine()
 
@@ -3610,12 +3610,8 @@ EndFunc
 Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 	If Not $iMode Then Return
 	If Not IsArray($aFiles) Then
-		If $aFiles == "" Or (Not FileExists($aFiles) And Not FileExists($outdir & "\" & $aFiles)) Then
-			Cout("Cleanup: Invalid path: " & $aFiles)
-			Return SetError(1, 0, 0)
-		EndIf
-		$return = $aFiles
-		Dim $aFiles = [$return]
+		Local $tmp = $aFiles
+		Dim $aFiles = [$tmp]
 	EndIf
 
 	If $iMode = $OPTION_MOVE And $sDestination == 0 Then $sDestination = $outdir & "\" & t('DIR_ADDITIONAL_FILES')
@@ -6506,15 +6502,11 @@ Func GUI_Feedback()
 	Local $FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 8, 24, 385, 21, $ES_READONLY)
 
 	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 56, 384, 17)
-	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
 	Local $FB_OutputCont = GUICtrlCreateEdit("", 8, 72, 385, 161, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
 	GUICtrlSetData(-1, $sFullLog)
-	GUICtrlSetTip(-1, t('FEEDBACK_OUTPUT_TOOLTIP'), "", 0, 1)
 
 	GUICtrlCreateLabel(t('FEEDBACK_MESSAGE_LABEL'), 8, 248, 384, 17)
-	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
 	Local $FB_MessageCont = GUICtrlCreateEdit("", 8, 264, 385, 169, BitOR($ES_AUTOVSCROLL, $ES_AUTOHSCROLL, $ES_WANTRETURN, $WS_VSCROLL))
-	GUICtrlSetTip(-1, t('FEEDBACK_MESSAGE_TOOLTIP'), "", 0, 1)
 
 	Local $idPrivacyPolicyCheckbox = GUICtrlCreateCheckbox(t('FEEDBACK_PRIVACY_ACCEPT_LABEL'), 8, 442, 217, 17)
 	Local $idPrivacyPolicyLink = GUICtrlCreateLabel(t('FEEDBACK_PRIVACY_VIEW_LABEL'), 246, 444, 147, 17, $SS_RIGHT)

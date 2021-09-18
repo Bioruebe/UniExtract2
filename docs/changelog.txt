@@ -31,17 +31,23 @@
   Changed design/usability of command line help dialog
   Improved .cab, InstallShield, .nrg and .msp extraction
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
+  Updated BCM to 1.65
   Updated cicdec to 2.3.0
+  Updated dark to 3.14.0.4118
   Updated demoleition to 0.64
   Updated Exeinfo PE to 0.0.6.5
+  Updated GNU gettext to 0.21
   Updated godotdec to 2.1.1
   Updated innounp to 0.50
+  Updated lzip to 1.22
   Updated MediaInfo to 20.09
-  Updated PeaZip to 1.00
+  Updated PeaZip to 1.02
   Updated Qt Linguist to 5.15.2
   Updated QuickBMS to 0.11
   Updated SQLite to 3.35.5
+  Updated ttarchext to 0.3.2
   Updated UnRAR to 6.02
+  Updated Xpdf command line tools to 4.03
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated German translation, thanks to Mr-Update
   Updated Greek translation, thanks to gvp9000

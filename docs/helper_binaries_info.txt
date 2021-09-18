@@ -17,7 +17,7 @@ ARC - Archive utility						arc.exe						5.21i		-	-	-	GNU GPL v2				Howard Chu			
 ARJ32										arj.exe						3.10		!	-	!	GNU GPL v2				Andrew Belov						http://arj.sourceforge.net/										
 AspackDie									AspackDie.exe				1.41			-		Open Source				yoda								http://scifi.pages.at/yoda9k/									
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
-BCM											x86\bcm.exe					1.30		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
+BCM											x86\bcm.exe					1.65		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
 											x64\bcm.exe					-------		---------	-------					-------								-------
 BioLib										Bio.cs.dll					2.3.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
 BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
@@ -38,7 +38,7 @@ FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project			
 File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
 FSB files extractor							fsbext.exe					0.3.8		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
 GARbro										\GARbro directory			1.5.44		x	-	x	MIT						mørkt								https://github.com/morkt/GARbro
-GNU gettext									msgunfmt.exe				0.19.8.1	-	-	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
+GNU gettext									msgunfmt.exe				0.21		-	-	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
 godotdec									godotdec.exe				2.1.1		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/godotdec
 											BioLib						-------		---------	-------					-------								-------
 HelpDeco									helpdeco.exe				2.1				-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
@@ -51,7 +51,7 @@ KGB Archiver								\kgb directory				2 (beta 2)		-	-	GNU GPL v2				Thomasz Pawl
 lbrate										lbrate.exe					1.1			-	x	-	GNU GPL v2				Russell Marks						http://www.svgalib.org/rus/lbrate.html
 											---------					-------		---------	-------					Petr Rehák (Windows build)			http://peersoft.braillnet.cz/soft/lbrate-1.1-win32.zip
 lessmsi										\lessmsi directory			1.6.1 mod	-	-	x	MIT						Scott Willeke						https://github.com/activescott/lessmsi
-lzip										lzip.exe					1.20		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
+lzip										lzip.exe					1.22		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http://www.nongnu.org/lzip/lzip.html
 lzop										lzop.exe					1.04			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
 MediaInfo 									MediaInfo.dll				20.09		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0				-		Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
@@ -61,7 +61,7 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 											gcmt-dll.dll				-------		---------	-------					-------								-------
 											neko.dll					-------		---------	-------					-------								-------
 											std.ndll					-------		---------	-------					-------								-------
-PeaZip										pea.exe						1.00		-	-	-	GNU LGPL				Giorgio Tani						https://www.peazip.org/								
+PeaZip										pea.exe						1.02		-	-	-	GNU LGPL				Giorgio Tani						https://peazip.github.io/
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
 Qt Linguist									lconvert.exe				5.15.2		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
@@ -94,7 +94,7 @@ swfextract (part of swftools)				swfextract.exe				0.9.2			-		GNU GPL v3				Rica
 TrID										trid.exe					2.24		---------	Freeware				Marco Pontello						http://mark0.net/soft-trid-e.html								
 TrIDLib - Free version						TrIDLib.dll					1.02		---------	TrIDLib license			Marco Pontello						http://mark0.net/soft-trid-e.html
 TrID definations							TrIDDefs.TRD				2020/09/19	---------	-------					-------								-------															
-Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.3.1a		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
+Telltale TTARCH files extractor/rebuilder	ttarchext.exe				0.3.2		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#ttarchext
 unADF										unadf.exe					1.0			-	-	-	GNU GPL v3				Laurent Clevy						http://lclevy.free.fr/adflib/unadf.html
 unalz										unalz.exe					0.64		x	-	-	Open Source, zlib		kippler@gmail.com					http://www.kippler.com/win/unalz/
 unar										unar.exe					1.8.1		x	-	-	GNU LGPL v2				Dag Ågren							https://theunarchiver.com/command-line
@@ -119,9 +119,9 @@ utagedec									utagedec.exe				1.0.0		x	-	x	BSD 3-clause			Bioruebe							http
 UUDeview									uudeview.exe				0.5pl20			-		GNU GPL v2+				Frank Pilhofer						http://www.fpx.de/fp/Software/UUDeview/		
 VISExt										VIS3Ext						2.2.6777.0	-	-	-	BSD 3-clause			Deniz Özmen							https://oezmen.eu/gameresources/
 											vis.key						-------		---------	-------					-------								-------
-Windows Installer XML Toolset Decompiler	/dark directory				3.11.2		-	-	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
+Windows Installer XML Toolset Decompiler	/dark directory				3.14.0.4118	-	-	-	MS-RL					.NET Foundation and contributors	http://wixtoolset.org/
 Wise UNpacker								WUN.EXE						0.9a			-		Open Source				Jägermeister Markus, Icebird		http://www.911cd.net/forums//index.php?showtopic=14906	[Offline]
-Xpdf command line tools						pdfdetach.exe				4.01.01		-	-	-	GNU GPL v2/v3			Glyph & Cog, LLC					http://www.xpdfreader.com/index.html
+Xpdf command line tools						pdfdetach.exe				4.03		-	-	-	GNU GPL v2/v3			Glyph & Cog, LLC					http://www.xpdfreader.com/index.html
 											pdftohtml.exe				-------		---------	-------					-------								-------
 											pdftopng.exe				-------		---------	-------					-------								-------
 											pdftotext.exe				-------		---------	-------					-------								-------
