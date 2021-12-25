@@ -149,5 +149,6 @@
 | ---------------------- | ------------------------ |
 | **Enigma Virtual Box** | .exe                     |
 | **MoleBox**            | .exe                     |
+| **Split files**        | .001, .002,...           |
 
 **¹** Partly supported, some files cannot be extracted properly

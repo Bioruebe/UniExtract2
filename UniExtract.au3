@@ -209,7 +209,7 @@ Const $daa = "daa2iso.exe"
 Const $enigma = "EnigmaVBUnpacker.exe"
 Const $exeinfope = Quote($bindir & "exeinfope.exe")
 Const $expand = Quote(@SystemDir & "\expand.exe", True)
-Const $filetool = Quote($bindir & "file\bin\file.exe", True)
+Const $filetool = Quote($bindir & "file.exe", True)
 Const $freearc = "unarc.exe"
 Const $fsb = "fsbext.exe"
 Const $garbro = Quote($bindir & "GARbro\GARbro.Console.exe", True)
@@ -1032,12 +1032,12 @@ EndFunc
 
 ; Scan file with unix file tool
 Func FileScan_UnixFile()
-	Local $sFileType = ""
-
 	_CreateTrayMessageBox(t('SCANNING_FILE', "Unix File Tool"))
 
 	Cout("Start file scan using unix file tool")
-	$sFileType = StringReplace(StringReplace(FetchStdout($filetool & ' "' & $file & '"', $filedir, @SW_HIDE), $file & "; ", ""), @CRLF, "")
+	Local $sFileType = FetchStdout($filetool & ' "' & $file & '"', $filedir, @SW_HIDE)
+	$sFileType = StringReplace(StringReplace($sFileType, $file & ": ", ""), @CRLF, "")
+
 	If $sFileType And $sFileType <> "data" Then _FiletypeAdd("Unix File Tool", $sFileType)
 
 	_DeleteTrayMessageBox()
@@ -1431,7 +1431,7 @@ Func filecompare($sFileType)
 			extract($TYPE_7Z, 'XZ ' & t('TERM_COMPRESSED'), "xz")
 		Case StringInStr($sFileType, "MS Windows HtmlHelp Data")
 			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
-		Case StringInStr($sFileType, "MIME entity text")
+		Case StringInStr($sFileType, "MIME entity text") Or StringInStr($sFileType, "mhtml")
 			extract($TYPE_MHT, 'MHTML ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "MoPaQ", 0)
 			CheckTotalObserver('MPQ ' & t('TERM_ARCHIVE'))
@@ -1891,7 +1891,7 @@ Func check7z()
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' 7-Zip')
 	Local $return = FetchStdout($7z & ' l "' & $file & '"', $filedir, @SW_HIDE)
 
-	If StringInStr($return, "Listing archive:") And Not StringInStr($return, "Can not open the file as ") Then
+	If StringInStr($return, "Listing archive:") And Not (StringInStr($return, "Errors: ") And StringInStr($return, "Can not open the file as ")) Then
 		_DeleteTrayMessageBox()
 		If $fileext = "exe" Then
 			If StringInStr($return, "InstallShield") Then CheckInstallShieldCab()
@@ -2025,6 +2025,8 @@ Func CheckGarbro()
 	Local $return = FetchStdout($garbro & ' l "' & $file & '"', $filedir, @SW_HIDE)
 	If Not @error And Not StringInStr($return, "Error: Input file has an unknown format") And Not StringInStr($return, "Error: Archive is empty") Then
 		$return = StringStripWS(StringStripCR(FetchStdout($garbro & ' i "' & $file & '"', $filedir, @SW_HIDE, -1)), 8)
+		If $return == "ZIP" Then check7z()
+
 		extract($TYPE_GARBRO, $return & ' ' & t('TERM_GAME') & t('TERM_FILE'))
 	EndIf
 
@@ -2164,6 +2166,9 @@ Func InitialCheckExt()
 	If Not $extract Then Return
 
 	Switch $fileext
+		; Split files have no additional file magic and will be misdetected
+		Case "001"
+			If FileExists($filedir & "\" & $filename & ".002") Then check7z()
 		; Compound compressed files that require multiple actions
 		Case "ipk", "tbz2", "tgz", "tz", "tlz", "txz"
 			extract($TYPE_CTAR, 'Compressed Tar ' & t('TERM_ARCHIVE'))
@@ -2240,6 +2245,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	$success = $RESULT_UNKNOWN
 
 	Cout("Starting " & $arctype & " extraction")
+	If $arcdisp <> 0 Then Cout("File type is: " & $arcdisp)
+
 	If $arcdisp == 0 Then $arcdisp = "." & $fileext & " " & t('TERM_FILE')
 	If $arcdisp <> -1 Then _CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 
@@ -4449,12 +4456,12 @@ Func _StringGetLine($sString, $iLine, $bCountBlank = False)
 EndFunc
 
 ; Extract the line after a given search string from a string
-Func _StringExtractLineAfter($sString, $sSubstring)
+Func _StringExtractAfter($sString, $sSubstring, $sEnd = @CRLF)
 	Local $iStart = StringInStr($sString, $sSubstring)
 	If $iStart < 1 Then Return SetError(1, 0, "")
 	$iStart += StringLen($sSubstring)
 
-	Local $iEnd = StringInStr($sString, @CRLF, 0, 1, $iStart)
+	Local $iEnd = StringInStr($sString, $sEnd, 0, 1, $iStart)
 	If $iEnd < 1 Then Return SetError(2, 0, "")
 	Return StringMid($sString, $iStart, $iEnd - $iStart)
 EndFunc
@@ -4625,7 +4632,15 @@ Func EvaluateLog($sLog)
 		$success = $RESULT_SUCCESS
 	EndIf
 
-	Local $sReturn = _StringExtractLineAfter($sLog, "WARNINGS:" & @CRLF)
+	ParseWarnings($sLog)
+EndFunc
+
+Func ParseWarnings($sLog)
+	; 7-zip
+	Local $sReturn = _StringExtractAfter($sLog, "WARNINGS:" & @CRLF)
+	If Not @error Then _ArrayAdd($aWarnings, $sReturn)
+
+	$sReturn = _StringExtractAfter($sLog, "Open WARNING: ")
 	If Not @error Then _ArrayAdd($aWarnings, $sReturn)
 EndFunc
 
@@ -5504,8 +5519,7 @@ Func _AfterUpdate()
 	DirRemove($bindir & "plugins", 1)
 	DirRemove($bindir & "crass-0.4.14.0", 1)
 	DirRemove($bindir & "lib", 1)
-	DirRemove($bindir & "file\contrib\file\5.03\file-5.03", 1)
-	DirRemove($bindir & "file\contrib\file\5.03\file-5.03-src", 1)
+	DirRemove($bindir & "file", 1)
 
 	; Ini changes
 	IniDelete($prefs, "UniExtract Preferences", "removetemp")
@@ -7302,7 +7316,7 @@ Func _GUI_FileScan()
 	_GuiSetColor()
 	GUICtrlCreateLabel(t('FILESCAN_TITLE'), 80, 10, 368, 17)
 	GUICtrlSetFont(-1, 9, 600, 4)
-	Local $idEdit = GUICtrlCreateEdit($sFileType, 81, 26, 367, 181, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 14? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
+	Local $idEdit = GUICtrlCreateEdit($sFileType, 81, 26, 367, 181, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 13? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
 	GUICtrlSetFont(-1, 8.5, 0, 0, "Courier New")
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 362, 214, 81, 25)
 	_GUICtrlCreatePic($sLogoFile, 4, 12, 73, 73)

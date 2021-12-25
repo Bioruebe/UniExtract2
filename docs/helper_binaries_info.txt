@@ -17,9 +17,9 @@ ARC - Archive utility						arc.exe						5.21i		-	-	-	GNU GPL v2				Howard Chu			
 ARJ32										arj.exe						3.10		!	-	!	GNU GPL v2				Andrew Belov						http://arj.sourceforge.net/										
 AspackDie									AspackDie.exe				1.41			-		Open Source				yoda								http://scifi.pages.at/yoda9k/									
 											ForceLibrary.dll			-------		---------	-------					-------								-------															
-BCM											x86\bcm.exe					1.65		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
+BCM											x86\bcm.exe					1.30		-	-	-	MIT						Ilya Muravyov						https://github.com/encode84/bcm
 											x64\bcm.exe					-------		---------	-------					-------								-------
-BioLib										Bio.cs.dll					2.3.0		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
+BioLib										Bio.cs.dll					2.3.1		---------	MIT						Bioruebe							https://github.com/Bioruebe/Bio.cs
 BSA Browser									bsab.exe					1.6.5		-	-	x	GNU GPL v3				Alexander Ellingsen					https://github.com/AlexxEG/BSA_Browser
 Champollion decompiler						Champollion.exe				1.0.6		-	-	-	GNU LGPL v3				Orvid King, Paul-Henry Perrin		https://github.com/Orvid/Champollion
 cicdec										cicdec						2.3.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/cicdec
@@ -31,17 +31,17 @@ demoleition									demoleition.exe				0.64		x	-	-	Freeware*				kao									http
 Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.58		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
-Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.5		---------	Freeware				A.S.L.								http://www.exeinfo.o7.pl/
+Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.6		---------	Freeware				A.S.L.								http://www.exeinfo.o7.pl/
 											Ext_Detector.dll			0.5.6.2		---------	-------					-------								-------
 FFmpeg										x86\ffmpeg.exe				newest		-	-	-	LGPL/GPL v2+			FFmpeg project						http://ffmpeg.zeranoe.com/builds/								
 											x64\ffmpeg.exe				-------		---------	-------					-------								-------
-File for Windows							\file directory				5.03		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
+File for Windows							\file directory				5.40		---------	Open Source				Ian F. Darwin, GnuWin project		http://gnuwin32.sourceforge.net/packages/file.htm		
 FSB files extractor							fsbext.exe					0.3.8		-	-	-	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/papers.htm#fsbext					
 GARbro										\GARbro directory			1.5.44		x	-	x	MIT						mørkt								https://github.com/morkt/GARbro
 GNU gettext									msgunfmt.exe				0.21		-	-	-	GNU GPL v3				GNU gettext team					https://mlocati.github.io/articles/gettext-iconv-windows.html
 godotdec									godotdec.exe				2.1.1		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/godotdec
 											BioLib						-------		---------	-------					-------								-------
-HelpDeco									helpdeco.exe				2.1				-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
+HelpDeco									helpdeco.exe				2.1.4			-		Freeware				Manfred Winterhoff					https://sourceforge.net/projects/helpdeco/
 i6comp										i6comp.exe					0.2				-		Open Source				fOSSiL, Morlac						ftp://ftp.elf.stuba.sk/pub/pc/pack/								
 innoextract									innoextract.exe				1.9			x	x	x	zlib/libpng	license		Daniel Scharrer						https://constexpr.org/innoextract/
 innounp, the Inno Setup Unpacker			innounp.exe					0.50			-	o	GNU GPL	v2				QuickeneR, Ariman					http://innounp.sourceforge.net/									
@@ -55,7 +55,7 @@ lzip										lzip.exe					1.22		-	-	-	GNU GPL v2+				Antonio Diaz Diaz					http
 lzop										lzop.exe					1.04			-		GNU GPL v2+				Markus F.X.J. Oberhumer				http://www.lzop.org/											
 MediaInfo 									MediaInfo.dll				20.09		---------	MediaInfo(Lib) License	MediaArea.net SARL					http://mediaarea.net/MediaInfo/
 MsiX										MsiX.exe					1.0				-		Open Source				Heath Stewart						http://blogs.msdn.com/heaths/archive/2006/04/07/571138.aspx				
-mtee										mtee.exe					2.21		---------	MIT						Ritchie Lawrence					http://ritchielawrence.github.io/mtee/
+mtee										mtee.exe					2.7			---------	MIT						Ritchie Lawrence					https://github.com/isanych/mtee
 NBHextract									NBHextract.exe				1.0				-		Freeware				pof and TheBlasphemer				http://forum.xda-developers.com/showthread.php?t=289830				
 Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation						https://github.com/HaxeFoundation/neko
 											gcmt-dll.dll				-------		---------	-------					-------								-------
@@ -64,7 +64,7 @@ Neko runtime								gc.dll						2.1			---------	MIT, others				Haxe Foundation		
 PeaZip										pea.exe						1.02		-	-	-	GNU LGPL				Giorgio Tani						https://peazip.github.io/
 Portable Executable File Identifier	(PEiD)	PEiD.exe					0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt					2012/04/24	---------	-------					-------								-------															
-Qt Linguist									lconvert.exe				5.15.2		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
+Qt Linguist									lconvert.exe				6.2.2		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
 QuickBMS									quickbms.exe				0.11		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db						-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					
