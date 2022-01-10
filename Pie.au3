@@ -176,6 +176,8 @@ EndFunc
 ; Example .......: No
 ; ===============================================================================================================================
 Func _Pie_DrawPiece($hGraphics, $aValues, $iX, $iY, $iWidth, $iHeight, $iDepth, $nCount, $Angles)
+	If $nCount < 0 Then Return
+
     Local $hPath, $fDrawn = False
     Local $iStart = Mod($Angles[$nCount], 360), $iSweep = Mod($Angles[$nCount + 1] - $Angles[$nCount] + 360, 360)
 
