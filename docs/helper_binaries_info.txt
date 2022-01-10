@@ -27,8 +27,8 @@ cicdec										cicdec						2.3.0		x	-	x	BSD 3-clause			Bioruebe							https://g
 											ICSharpCode.SharpZipLib.dll	1.3.2		---------	MIT						SharpZipLib Contributors			https://github.com/icsharpcode/SharpZipLib
 ConvertLIT									clit.exe					1.8			-	-	-	GNU GPL v3				Dan A. Jackson						http://www.convertlit.com/										
 daa2iso										daa2iso.exe					0.1.7e		o	-	o	GNU GPL v2				Luigi Auriemma						http://aluigi.altervista.org/mytoolz.htm#daa2iso				
-demoleition									demoleition.exe				0.64		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
-Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.58		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
+demoleition									demoleition.exe				0.65		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
+Enigma VirtualBox unpacker					EnigmaVBUnpacker.exe		0.59		x	-	-	Freeware*				kao									https://lifeinhex.com/category/tools/
 E_WISE - WISE SETUP unpacker				E_WISE_W.exe				2002/07/01		-		Open Source				Veit Kannegieser					http://kannegieser.net/~veit/programm/index_e.htm				
 											E_WISE.INI					-------		---------	-------					-------								-------															
 Exeinfo for Win32 (Exeinfo PE)				exeinfope.exe				0.0.6.6		---------	Freeware				A.S.L.								http://www.exeinfo.o7.pl/

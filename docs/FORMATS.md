@@ -54,6 +54,7 @@
 | **Install4j**                  | .exe                                   |
 | **InstallAware**               | .exe                                   |
 | Installer VISE                 | .exe                                   |
+| **InstallForge**               | .exe                                   |
 | **InstallScript**              | .exe                                   |
 | InstallShield                  | .cab, .exe                             |
 | **MSCF**                       | .exe                                   |

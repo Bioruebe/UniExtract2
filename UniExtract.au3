@@ -108,17 +108,17 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
 	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
 	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
-	  $TYPE_FEAD = "fead", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", $TYPE_HLP = "hlp", _
-	  $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", $TYPE_KGB = "kgb", _
-	  $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", _
-	  $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
-	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
+	  $TYPE_FEAD = "fead", $TYPE_FORGE = "installforge", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", _
+	  $TYPE_HLP = "hlp", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
+	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", _
+	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", _
+	  $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
 	  $TYPE_SFARK = "sfark", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
 	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITYPACKAGE = "unitypackage", _
 	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
 	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
-	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
+	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, $TYPE_FORGE, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
 	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, _
 	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, _
@@ -1480,21 +1480,6 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "7-Zip compressed archive")
 			extract($TYPE_7Z, '7-Zip ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "ACE compressed archive") Or StringInStr($sFileType, "ACE Self-Extracting Archive")
-			extract($TYPE_ACE, 'ACE ' & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "Android boot image")
-			extract($TYPE_BOOTIMG, ' Android boot ' & t('TERM_IMAGE'))
-
-		Case StringInStr($sFileType, "ALZip compressed archive")
-			CheckAlz()
-
-		Case StringInStr($sFileType, "LZIP compressed archive")
-			extract($TYPE_LZ, "LZIP " & t('TERM_COMPRESSED'))
-
-		Case StringInStr($sFileType, "FreeArc compressed archive")
-			extract($TYPE_FREEARC, 'FreeArc ' & t('TERM_ARCHIVE'))
-
 		Case StringInStr($sFileType, "Android Package")
 			extract($TYPE_7Z, "Android " & t('TERM_PACKAGE'))
 
@@ -1505,14 +1490,60 @@ Func tridcompare($sFileType)
 			HasPlugin($archdir & "Formats\Asar." & $iOsArch & ".dll")
 			extract($TYPE_7Z, 'ASAR ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "BCM compressed")
-			extract($TYPE_BCM, 'BCM ' & t('TERM_COMPRESSED'))
-
 		Case StringInStr($sFileType, "BZA compressed") Or StringInStr($sFileType, "GZA compressed")
 			extract($TYPE_7Z, 'BGA ' & t('TERM_COMPRESSED'))
 
 		Case StringInStr($sFileType, "bzip2 compressed archive")
 			extract($TYPE_7Z, 'bzip2 ' & t('TERM_COMPRESSED'), "bz2")
+
+		Case StringInStr($sFileType, "CPIO Archive")
+			extract($TYPE_7Z, 'CPIO ' & t('TERM_ARCHIVE'))
+
+		Case StringInStr($sFileType, "Debian Linux Package")
+			extract($TYPE_7Z, 'Debian ' & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "Disk Image (Macintosh)")
+			extract($TYPE_7Z, 'Macintosh ' & t('TERM_DISK') & ' ' & t('TERM_IMAGE'))
+
+		Case StringInStr($sFileType, "GZipped")
+			extract($TYPE_7Z, 'gzip ' & t('TERM_COMPRESSED'), "gz")
+
+		Case StringInStr($sFileType, "LHARC/LZARK compressed archive")
+			extract($TYPE_7Z, 'LZH ' & t('TERM_COMPRESSED'))
+
+		Case StringInStr($sFileType, "UNIX Compressed")
+			extract($TYPE_7Z, 'LZW ' & t('TERM_COMPRESSED'), "Z")
+
+		Case StringInStr($sFileType, "RPM Package")
+			extract($TYPE_7Z, 'RPM ' & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "TAR - Tape ARchive")
+			extract($TYPE_7Z, 'Tar ' & t('TERM_ARCHIVE'), "tar")
+
+		Case StringInStr($sFileType, "VirtualBox Disk Image") Or StringInStr($sFileType, "Virtual HD image") Or _
+			 StringInStr($sFileType, "VMware 4 Virtual Disk")
+			extract($TYPE_7Z, t('TERM_DISK') & " " & t('TERM_IMAGE'))
+
+		Case StringInStr($sFileType, "Windows Imaging Format")
+			extract($TYPE_7Z, 'WIM ' & t('TERM_IMAGE'))
+
+		Case StringInStr($sFileType, "xz compressed container")
+			extract($TYPE_7Z, 'XZ ' & t('TERM_COMPRESSED'), "xz")
+
+		Case StringInStr($sFileType, "ACE compressed archive") Or StringInStr($sFileType, "ACE Self-Extracting Archive")
+			extract($TYPE_ACE, 'ACE ' & t('TERM_ARCHIVE'))
+
+		Case StringInStr($sFileType, "ALZip compressed archive")
+			CheckAlz()
+
+		Case StringInStr($sFileType, "BCM compressed")
+			extract($TYPE_BCM, 'BCM ' & t('TERM_COMPRESSED'))
+
+		Case StringInStr($sFileType, "Android boot image")
+			extract($TYPE_BOOTIMG, ' Android boot ' & t('TERM_IMAGE'))
+
+		Case StringInStr($sFileType, "LZIP compressed archive")
+			extract($TYPE_LZ, "LZIP " & t('TERM_COMPRESSED'))
 
 		Case StringInStr($sFileType, "Microsoft Cabinet Archive") Or StringInStr($sFileType, "IncrediMail letter/ecard")
 			extract($TYPE_CAB, 'Microsoft CAB ' & t('TERM_ARCHIVE'))
@@ -1524,20 +1555,11 @@ Func tridcompare($sFileType)
 			CheckIso()
 			check7z()
 
-		Case StringInStr($sFileType, "CPIO Archive")
-			extract($TYPE_7Z, 'CPIO ' & t('TERM_ARCHIVE'))
-
 		Case StringInStr($sFileType, "PowerISO Direct-Access-Archive") Or StringInStr($sFileType, "gBurner Image")
 			extract($TYPE_DAA, 'DAA/GBI ' & t('TERM_IMAGE'))
 
-		Case StringInStr($sFileType, "Debian Linux Package")
-			extract($TYPE_7Z, 'Debian ' & t('TERM_PACKAGE'))
-
 		Case StringInStr($sFileType, "DGCA Digital G Codec Archiver")
 			extract($TYPE_DGCA, 'DGCA ' & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "Disk Image (Macintosh)")
-			extract($TYPE_7Z, 'Macintosh ' & t('TERM_DISK') & ' ' & t('TERM_IMAGE'))
 
 		Case StringInStr($sFileType, "FMOD Sample Bank Format")
 			extract($TYPE_FSB, 'FMOD ' & t('TERM_CONTAINER'))
@@ -1546,16 +1568,9 @@ Func tridcompare($sFileType)
 			 StringInStr($sFileType, "Setup Factory")
 			checkIE()
 
-		Case StringInStr($sFileType, "GZipped")
-			extract($TYPE_7Z, 'gzip ' & t('TERM_COMPRESSED'), "gz")
-
 		Case StringInStr($sFileType, "Windows Help File")
 			extract($TYPE_HLP, 'Windows ' & t('TERM_HELP'), "", False, True)
 			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
-
-		Case StringInStr($sFileType, "VirtualBox Disk Image") Or StringInStr($sFileType, "Virtual HD image") Or _
-			 StringInStr($sFileType, "VMware 4 Virtual Disk")
-			extract($TYPE_7Z, t('TERM_DISK') & " " & t('TERM_IMAGE'))
 
 		Case StringInStr($sFileType, "Generic PC disk image") Or StringInStr($sFileType, "WinImage compressed disk image")
 			CheckIso()
@@ -1563,6 +1578,9 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Reflexive Arcade Installer")
 			extract($TYPE_RAI, "Reflexive Arcade " & t('TERM_INSTALLER'))
+
+		Case StringInStr($sFileType, "InstallForge Installer")
+			extract($TYPE_FORGE, "InstallForge " & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "InstallShield Z archive")
 			If Not ($fileext = "z") Then CreateRenamedCopy("z")
@@ -1576,9 +1594,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "KGB archive")
 			extract($TYPE_KGB, 'KGB ' & t('TERM_ARCHIVE'))
-
-		Case StringInStr($sFileType, "LHARC/LZARK compressed archive")
-			extract($TYPE_7Z, 'LZH ' & t('TERM_COMPRESSED'))
 
 		Case StringInStr($sFileType, "lzop compressed")
 			extract($TYPE_LZO, 'LZO ' & t('TERM_COMPRESSED'))
@@ -1673,9 +1688,6 @@ Func tridcompare($sFileType)
 			CheckGarbro()
 			extract($TYPE_ARC_CONV, "YU-RIS Script Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "RPM Package")
-			extract($TYPE_7Z, 'RPM ' & t('TERM_PACKAGE'))
-
 		Case StringInStr($sFileType, "sfArk compressed SoundFont")
 			extract($TYPE_SFARK, 'sfArk ' & t('TERM_COMPRESSED'))
 
@@ -1684,9 +1696,6 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Macromedia Flash Player")
 			extract($TYPE_SWF, 'Shockwave Flash ' & t('TERM_CONTAINER'))
-
-		Case StringInStr($sFileType, "TAR - Tape ARchive")
-			extract($TYPE_7Z, 'Tar ' & t('TERM_ARCHIVE'), "tar")
 
 		Case StringInStr($sFileType, "UHARC compressed archive")
 			extract($TYPE_UHA, 'UHARC ' & t('TERM_ARCHIVE'))
@@ -1703,20 +1712,11 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "yEnc Encoded file")
 			extract("uu", 'yEnc ' & t('TERM_ENCODED'))
 
-		Case StringInStr($sFileType, "Windows Imaging Format")
-			extract($TYPE_7Z, 'WIM ' & t('TERM_IMAGE'))
-
 		Case StringInStr($sFileType, "Windows Update Package")
 			extract($TYPE_MSU, 'Windows Update ' & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Wise Installer Executable")
 			extract($TYPE_WISE, 'Wise Installer ' & t('TERM_PACKAGE'))
-
-		Case StringInStr($sFileType, "UNIX Compressed")
-			extract($TYPE_7Z, 'LZW ' & t('TERM_COMPRESSED'), "Z")
-
-		Case StringInStr($sFileType, "xz compressed container")
-			extract($TYPE_7Z, 'XZ ' & t('TERM_COMPRESSED'), "xz")
 
 		Case StringInStr($sFileType, "ZIP compressed archive") Or StringInStr($sFileType, "Winzip Win32 self-extracting archive")
 			extract($TYPE_ZIP, 'ZIP ' & t('TERM_ARCHIVE'))
@@ -1733,6 +1733,9 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Enigma Virtual Box virtualized executable")
 			extract($TYPE_ENIGMA, 'Enigma Virtual Box ' & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "FreeArc compressed archive")
+			extract($TYPE_FREEARC, 'FreeArc ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "InstallShield setup")
 			extract($TYPE_ISEXE, 'InstallShield ' & t('TERM_INSTALLER'))
@@ -2092,8 +2095,8 @@ Func CheckIso()
 
 	Local $return = FetchStdout($quickbms & ' -l "' & $bindir & $iso & '" "' & $file & '"', $filedir, @SW_HIDE)
 	_DeleteTrayMessageBox()
-	If StringInStr($return, "Target directory:") Or StringInStr($return, "0 files found") Or StringInStr($return, "Error") _
-	Or StringInStr($return, "exception occured") Or StringInStr($return, "not supported") Or $return == "" Then
+	If StringInStr($return, "Target directory:") Or StringInStr($return, "0 files found")  Or $return == "" _
+	Or StringInStr($return, "exception occured") Or StringInStr($return, "not supported by this WCX plugin") Then
 		$isofailed = True
 		Return False
 	EndIf
@@ -2526,6 +2529,24 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			MoveFiles($tempoutdir, $outdir, False, "", True, True)
 			DirRemove($tempoutdir)
 
+		Case $TYPE_FORGE
+			DirCreate($tempoutdir)
+			$oldoutdir = $outdir
+			$outdir = $tempoutdir
+
+			extract($TYPE_7Z, -1, "", True, False)
+			Local $tmp = $tempoutdir & $filename
+			If FileExists($tmp) Then
+				Cout("Installer uses gz compression. Unpacking inner archive.")
+				_Run($7z & ' x "' & $tmp & '"', $tempoutdir, @SW_HIDE, True, True, True, False)
+				_FileDelete($tmp)
+			EndIf
+
+			$outdir = $oldoutdir
+			_CreateTrayMessageBox(t('RENAMING_FILES'))
+			RenameBase64PathNames($tempoutdir)
+			MoveFiles($tempoutdir, $outdir, False, "", True, True)
+
 		Case $TYPE_FREEARC
 			_Run($freearc & ' x -dp"' & $outdir & '" "' & $file & '"', $filedir, @SW_HIDE, True, True, False, False)
 
@@ -2674,8 +2695,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			CheckTotalObserver($arcdisp)
 			CheckInstallShieldCab()
 
-			Local $aReturn = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOTIS_RADIO')]
-			$iChoice = GUI_MethodSelect($aReturn, $arcdisp)
+			Local $aOptions = ["InstallShield " & t('TERM_INSTALLER'), t('METHOD_EXTRACTION_RADIO', 'isxunpack'), t('METHOD_SWITCH_RADIO', 'InstallShield /b'), t('METHOD_NOT_INSTALLER_RADIO', "InstallShield")]
+			$iChoice = GUI_MethodSelect($aOptions, $arcdisp)
 
 			Switch $iChoice
 				; Extract using isxunpack
@@ -3324,7 +3345,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			_Run($wise_ewise & ' "' & $file & '" "' & $outdir & '"', $filedir)
 			If $success == $RESULT_FAILED Then
 				$success = $RESULT_UNKNOWN
-				Local $aOptions = ['Wise ' & t('TERM_INSTALLER'), t('METHOD_UNPACKER_RADIO', 'Wise UNpacker'), t('METHOD_SWITCH_RADIO', 'Wise Installer /x'), t('METHOD_EXTRACTION_RADIO', 'Wise MSI'), t('METHOD_EXTRACTION_RADIO', 'Unzip')]
+				Local $aOptions = ['Wise ' & t('TERM_INSTALLER'), t('METHOD_UNPACKER_RADIO', 'Wise UNpacker'), t('METHOD_SWITCH_RADIO', 'Wise Installer /x'), t('METHOD_EXTRACTION_RADIO', 'Wise MSI'), t('METHOD_EXTRACTION_RADIO', 'Unzip'), t('METHOD_NOT_INSTALLER_RADIO', "Wise")]
 				$iChoice = GUI_MethodSelect($aOptions, $arcdisp)
 
 				Switch $iChoice
@@ -3352,6 +3373,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 					Case 4
 						_Run($zip & ' -x "' & $file & '"', $outdir)
 						If $success == $RESULT_FAILED Then _Run($7z & ' x "' & $file & '"', $outdir)
+					; Not a Wise installer
+					Case 5
+						Return False
 				EndSwitch
 			Else
 				RunWait($cmd & '00000000.BAT', $outdir, @SW_HIDE)
@@ -3936,10 +3960,39 @@ Func AppendExtensions($sPath)
 	For $i = 1 To $aFiles[0]
 		If _IsDirectory($aFiles[$i]) Then ContinueLoop
 
-		_SetTrayMessageBoxText(t('RENAMING_FILES', CreateArray($i, $aFiles[0])))
+		_SetTrayMessageBoxText(t('RENAMING_FILES_PROGRESS', CreateArray($i, $aFiles[0])))
 
 		RenameWithTridExtension($aFiles[$i], True)
 	Next
+EndFunc
+
+; Decode Base64 file and directory names
+Func RenameBase64PathNames($sPath, $hDll = 0)
+	Cout("Renaming files in directory " & $sPath)
+
+	Sleep(200)
+	$aFiles = _FileListToArray($sPath)
+	If @error Then Return SetError(1)
+	If $aFiles[0] < 1 Then Return SetError(2)
+
+	If $hDll == 0 Then $hDll = DllOpen("Crypt32.dll")
+	For $i = 1 To $aFiles[0]
+		Local $sName = $aFiles[$i]
+		If $sName == "empty.empty" Then
+			_FileDelete($sPath & $sName)
+			ContinueLoop
+		EndIf
+
+		Local $sNewName = _Base64Decode($sName)
+		If @error Then ContinueLoop
+
+		Local $bIsFolder = _IsDirectory($sPath & $sName)
+
+		MovePath($sPath & $sName, $sPath & $sNewName, 0, $bIsFolder)
+		If $bIsFolder Then RenameBase64PathNames($sPath & $sNewName & "\", $hDll)
+	Next
+
+	DllClose($hDll)
 EndFunc
 
 ; Search for a given pattern and return first result
@@ -3976,6 +4029,7 @@ Func _FileDelete($sFile, $iSleep = 100)
 	If Not FileExists($sFile) Then Return SetError(1, 0, False)
 	If _IsDirectory($sFile) Then Return SetError(2, 0, False)
 
+	Cout("Deleting file " & $sFile)
 	If FileDelete($sFile) Then Return True
 
 	Cout('Failed to delete file "' & $sFile & '", retrying')
@@ -4567,6 +4621,52 @@ Func _Zlib_Compress($Data)
 	Return $ret2
 EndFunc
 
+; Decode Base64
+; #FUNCTION# ====================================================================================================================
+; Name ..........: _Base64Decode
+; Description ...: Decodes a Base64 string
+; Syntax ........: _Base64Decode($sInput)
+; Parameters ....: $sInput              - a string value.
+; Return values .: The decoded string.
+; 				   Error codes: 1 - Failed to calculate buffer length
+; 								2 - Failed to decode Base 64
+; Author ........: trancexx, Bioruebe
+; Modified ......: 2022
+; Remarks .......:
+; Related .......:
+; Link ..........: https://www.autoitscript.com/forum/topic/81332-_base64encode-_base64decode/
+; Example .......: No
+; ===============================================================================================================================
+Func _Base64Decode($sInput, $hDll = 0, $eEncoding = $SB_UTF16LE)
+	If $sInput == "" Then Return ""
+
+	Local $bCloseDll = False
+	Local $tBuffer = DllStructCreate("int")
+
+	If $hDll == 0 Then
+		$hDll = DllOpen("Crypt32.dll")
+		$bCloseDll = True
+	EndIf
+
+	; Calculate buffer length
+    Local $aReturn = DllCall($hDll, "int", "CryptStringToBinary", "str", $sInput, "int", 0, "int", 1, "ptr", 0, "ptr", _
+							  DllStructGetPtr($tBuffer, 1), "ptr", 0, "ptr", 0)
+
+    If @error Or Not $aReturn[0] Then Return SetError(1, 0, "")
+
+	; Decode into buffer
+    Local $tOutput = DllStructCreate("byte[" & DllStructGetData($tBuffer, 1) & "]")
+    $aReturn = DllCall($hDll, "int", "CryptStringToBinary", "str", $sInput, "int", 0, "int", 1, "ptr", DllStructGetPtr($tOutput), _
+					   "ptr", DllStructGetPtr($tBuffer, 1), "ptr", 0, "ptr", 0)
+
+    If @error Or Not $aReturn[0] Then Return SetError(2, 0, "")
+
+	Local $bData = DllStructGetData($tOutput, 1)
+	If $bCloseDll Then DllClose($hDll)
+
+    Return BinaryToString($bData, $eEncoding)
+EndFunc
+
 ; Error handler for COM objects, currently used for sending feedback
 Func _ComErrorHandler($oError)
 	Global $sComError = $oError.description & "(0x" & Hex($oError.number) & ") in " & $oError.source
@@ -4943,6 +5043,22 @@ Func _FileMove($sFile, $sDestination, $iFlag = 0)
 	Return MovePath($sFile, $sDestination, $iFlag, False)
 EndFunc
 
+; Add a trailing backslash to a path if necessary
+Func _PathAppendSeparator($sPath)
+	If StringRight($sPath, 1) == "\" Then Return $sPath
+
+	Return $sPath & "\"
+EndFunc
+
+; Remove all trailing backslashes from a path
+Func _PathRemoveTrailingSeparator($sPath)
+	While StringRight($sPath, 1) == "\"
+		$sPath = StringTrimRight($sPath, 1)
+	WEnd
+
+	Return $sPath
+EndFunc
+
 ; Move a file or directory with error handling and auto-retry
 Func _PathMove($sPath, $sDestination, $iFlag = 0)
 	Local $bIsFolder = _IsDirectory($sPath)
@@ -4957,7 +5073,7 @@ EndFunc
 
 ; Combine a path and a file/directory name
 Func _PathCombine($sPath, $sString)
-	If StringRight($sPath, 1) <> "\" Then $sPath &= "\"
+	$sPath = _PathAppendSeparator($sPath)
 
 	While StringLeft($sString, 1) == "\"
 		$sString = StringTrimLeft($sString, 1)
@@ -4968,6 +5084,7 @@ EndFunc
 
 ; Move file/folder specified by path with error handling and auto-retry
 Func MovePath($sPath, $sDestination, $iFlag = 0, $bIsFolder = False)
+	$sPath = _PathRemoveTrailingSeparator($sPath)
 	Local $sType = $bIsFolder? "directory": "file"
 	Cout("Moving " & $sType & " " & $sPath & " to " & $sDestination)
 
