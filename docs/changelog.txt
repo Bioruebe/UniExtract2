@@ -8,6 +8,7 @@
   Added support for newer .sgbpack files using sgbdec
   Added support for split files (.001, .002,...)
   Added support for InstallForge installers
+  Added option to disable tray icon
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
   Fixed DLLs being renamed to .exe if 'Fix file extensions' is enabled, thanks to demberto
@@ -28,9 +29,8 @@
   Fixed several issues when relative paths are used, thanks to r3sus
   Fixed setup file being executed if 'Open folder after extraction' is enabled, thanks to r3sus
   Fixed language being set to Chinese on Danish systems, thanks to madsholme
-  Changed design/usability of 'Execution warning' dialog
+  Changed design/usability of 'Execution warning' and 'Command line help' dialogs
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
-  Changed design/usability of command line help dialog
   Improved .cab, InstallShield, .iso, .nrg, .msp and ZIP extraction
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
   Updated BioLib to 2.3.1
@@ -50,6 +50,7 @@
   Updated PeaZip to 1.02
   Updated Qt Linguist to 6.2.2
   Updated QuickBMS to 0.11
+  Updated rmvdec to 2.2.0
   Updated SQLite to 3.35.5
   Updated ttarchext to 0.3.2
   Updated UnRAR to 6.02

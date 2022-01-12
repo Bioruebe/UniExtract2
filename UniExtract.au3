@@ -139,6 +139,7 @@ Global $history = 1
 Global $appendext = 0
 Global $bOptWarnExecute = 1
 Global $bOptCheckFreeSpace = 1
+Global $bOptNoTrayIcon = 0
 Global $bOptNoStatusBox = 0
 Global $bOptHideStatusBoxIfFullscreen = 1
 Global $bOptOpenOutDir = 0
@@ -151,12 +152,12 @@ Global $addassocallusers = 0
 Global $addassoc = ""
 Global $sOptGuid = ""
 Global $bOptAskForFeedback = 1
-Global $Log = 0
+Global $bOptCreateLog = 0
 Global $bOptSendStats = 1
 Global $bOptNightlyUpdates = 0
 Global $iCleanup = $OPTION_MOVE
 Global $bOptLockOutputDirectory = 0
-Global $KeepOpen = 0
+Global $bOptKeepOpen = 0
 Global $silentmode = 0
 Global $extract = 1
 Global $checkUnicode = 1
@@ -176,14 +177,14 @@ Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $t
 Global $unpackfailed, $exefailed, $ttarchfailed
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Global $guiprefs, $TBgui = 0, $exStyle = -1, $idTrayStatusExt, $BatchBut, $idProgress, $sComError = 0
-Global $Tray_Statusbox, $Tray_Exit, $isexe = False, $Message, $run = 0, $runtitle, $idOptDeleteSourceFile[3]
+Global $Tray_Statusbox, $isexe = False, $Message, $run = 0, $runtitle, $idOptDeleteSourceFile[3]
 Global $gaDropFiles[1], $aFiletype[0][2], $queueArray[0], $aTridDefinitions[0][0], $aFileDefinitions[0][0], $aExeinfoDefinitions[0][0], $aGUIs[0], $aWarnings[0]
 Global $guimain = False, $keepopenitem, $topmostitem, $showitem, $clearitem, $logitem, $silentitem, $GUI_Main_Extract, $GUI_Main_Scan, $filecont
 Global $dircont, $GUI_Main_Lock, $GUI_Main_Ok, $BatchBut, $dirbut, $iGuiMainWidth, $iGuiMainHeight, $GUI_Main_Destination_Label
 Global $langselect, $IntervalCont, $idOptDeleteAdditionalFiles, $idOptCheckFreeSpace, $unicodecheckopt, $appendextopt, $NoBoxOpt, $GameModeOpt
 Global $OpenOutDirOpt, $FeedbackPromptOpt, $StoreGUIPositionOpt, $UsageStatsOpt, $LogOpt, $VideoTrackOpt, $historyopt, $idOptBetaUpdates
 Global $idOptOpenOutDir, $idOptRememberGuiSizePosition, $idOptNoStatusBox, $idOptGameMode, $idOptExtractVideo, $idOptWarnExecute, $idOptCreateLog
-Global $idOptFeedbackPrompt, $idOptSendStats, $CM_Checkbox, $CM_GUI, $CM_Checkbox_enabled, $CM_Checkbox_allusers, $CM_Simple_Radio
+Global $idOptFeedbackPrompt, $idOptSendStats, $idOptNoTrayIcon, $CM_Checkbox, $CM_GUI, $CM_Checkbox_enabled, $CM_Checkbox_allusers, $CM_Simple_Radio
 Global $CM_Cascading_Radio, $CM_Picture, $CM_Checkbox_add, $CM_Checkbox_allusers2, $CM_add_input, $FB_GUI
 Global $FS_GUI = False, $FS_Section, $FS_Text, $FS_Next, $FS_Prev, $FS_Button, $FS_Progress, $page, $FS_Sections, $FS_Texts
 
@@ -325,16 +326,7 @@ Cout("Starting " & $name & " " & $sVersion)
 
 ParseCommandLine()
 
-; Create tray menu items
-$Tray_Statusbox = TrayCreateItem(t('PREFS_HIDE_STATUS_LABEL'))
-If $bOptNoStatusBox Then TrayItemSetState(-1, $TRAY_CHECKED)
-TrayCreateItem("")
-$Tray_Exit = TrayCreateItem(t('MENU_FILE_QUIT_LABEL'))
-
-TrayItemSetOnEvent($Tray_Statusbox, "Tray_Statusbox")
-TrayItemSetOnEvent($Tray_Exit, "Tray_Exit")
-TraySetToolTip($name)
-TraySetClick(8)
+Tray_Create()
 
 ; Check if Universal Extractor is started the first time
 If $sOptGuid = "" Or StringIsSpace($sOptGuid) Then
@@ -602,7 +594,7 @@ Func ParseCommandLine()
 	Cout("Command line parameters: " & $CmdLineRaw)
 
 	If _ArraySearch($cmdline, "/silent") > -1 Then $silentmode = True
-	If _ArraySearch($cmdline, "/nolog") > -1 Then $Log = False
+	If _ArraySearch($cmdline, "/nolog") > -1 Then $bOptCreateLog = False
 	If _ArraySearch($cmdline, "/nostats") > -1 Then $bOptSendStats = False
 
 	If $cmdline[1] = "/help" Or $cmdline[1] = "/?" Or $cmdline[1] = "-h" Or $cmdline[1] = "/h" Or $cmdline[1] = "-?" Or $cmdline[1] = "--help" Then
@@ -642,7 +634,7 @@ Func ParseCommandLine()
 			; Scan only
 			If $cmdline[2] = "/scan" Then
 				$extract = False
-				$Log = False
+				$bOptCreateLog = False
 			Else ; Outdir specified
 				$outdir = $cmdline[2]
 				If $outdir <> "/sub" And $outdir <> "/last" Then $outdir = _PathFull($outdir)
@@ -737,6 +729,7 @@ Func ReadPrefs()
 	LoadPref("history", $history)
 	LoadPref("appendext", $appendext)
 	LoadPref("warnexecute", $bOptWarnExecute)
+	LoadPref("notrayicon", $bOptNoTrayIcon)
 	LoadPref("nostatusbox", $bOptNoStatusBox)
 	If Not $bOptNoStatusBox Then LoadPref("hidestatusboxiffullscreen", $bOptHideStatusBoxIfFullscreen)
 	LoadPref("openfolderafterextr", $bOptOpenOutDir)
@@ -748,9 +741,9 @@ Func ReadPrefs()
 	If $Timeout < 10000 Then $Timeout = 60000
 
 	LoadPref("keepoutputdir", $bOptLockOutputDirectory)
-	LoadPref("keepopen", $KeepOpen)
+	LoadPref("keepopen", $bOptKeepOpen)
 	LoadPref("feedbackprompt", $bOptAskForFeedback)
-	LoadPref("log", $Log)
+	LoadPref("log", $bOptCreateLog)
 	LoadPref("sendstats", $bOptSendStats)
 	LoadPref("extract", $extract)
 	LoadPref("unicodecheck", $checkUnicode)
@@ -799,6 +792,7 @@ Func WritePrefs()
 	SavePref('language', $language)
 	SavePref('appendext', $appendext)
 	SavePref('warnexecute', $bOptWarnExecute)
+	SavePref('notrayicon', $bOptNoTrayIcon)
 	SavePref('nostatusbox', $bOptNoStatusBox)
 	SavePref("hidestatusboxiffullscreen", $bOptHideStatusBoxIfFullscreen)
 	SavePref('openfolderafterextr', $bOptOpenOutDir)
@@ -806,7 +800,7 @@ Func WritePrefs()
 	SavePref('freespacecheck', $bOptCheckFreeSpace)
 	SavePref('unicodecheck', $checkUnicode)
 	SavePref('feedbackprompt', $bOptAskForFeedback)
-	SavePref('log', $Log)
+	SavePref('log', $bOptCreateLog)
 	SavePref('sendstats', $bOptSendStats)
 	SavePref("extractvideotrack", $bOptExtractVideo)
 	SavePref('storeguiposition', $bOptRememberGuiSizePosition)
@@ -4183,14 +4177,14 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 	Cout("Terminating - Status: " & $status)
 
 	; Create log file if enabled in options
-	If $Log And Not $bLogSaved And Not ($status = $STATUS_SILENT Or $status = $STATUS_SYNTAX Or $status = $STATUS_FILEINFO Or _
+	If $bOptCreateLog And Not $bLogSaved And Not ($status = $STATUS_SILENT Or $status = $STATUS_SYNTAX Or $status = $STATUS_FILEINFO Or _
 	   $status = $STATUS_NOTPACKED Or $status = $STATUS_BATCH) Or ($status = $STATUS_FILEINFO And $silentmode) Then _
 		SaveLog($shortStatus)
 
 	If $batchEnabled = 1 And $status <> $STATUS_SILENT Then ; Don't start batch if gui is closed
 		; Start next extraction
 		BatchQueuePop()
-	ElseIf $KeepOpen And $cmdline[0] = 0 And $status <> $STATUS_SILENT Then
+	ElseIf $bOptKeepOpen And $cmdline[0] = 0 And $status <> $STATUS_SILENT Then
 		Run(@ScriptFullPath)
 	EndIf
 
@@ -4392,7 +4386,7 @@ Func BatchQueuePop()
 		If FileExists($fileScanLogFile) Then ShellExecute($fileScanLogFile)
 		Local $return = _FileRead($logdir & "errorlog.txt", True)
 		If $return <> "" Then MsgBox($iTopmost + 48, $name, t('BATCH_FINISH', $return))
-		If $KeepOpen Then Run(@ScriptFullPath)
+		If $bOptKeepOpen Then Run(@ScriptFullPath)
 	Else ; Get next command and execute it
 		Local $element = $queueArray[0]
 		_ArrayDelete($queueArray, 0)
@@ -5761,7 +5755,7 @@ Func CreateGUI()
 	GUICtrlSetState($filecont, $GUI_FOCUS)
 	GUICtrlSetState($GUI_Main_Ok, $GUI_DEFBUTTON)
 	GUICtrlSetState($GUI_Main_Lock, $bOptLockOutputDirectory? $GUI_CHECKED: $GUI_UNCHECKED)
-	GUICtrlSetState($keepopenitem, $KeepOpen? $GUI_CHECKED: $GUI_UNCHECKED)
+	GUICtrlSetState($keepopenitem, $bOptKeepOpen? $GUI_CHECKED: $GUI_UNCHECKED)
 	GUICtrlSetState($topmostitem, $iTopmost? $GUI_CHECKED: $GUI_UNCHECKED)
 	GUICtrlSetState($silentitem, $silentmode? $GUI_CHECKED: $GUI_UNCHECKED)
 
@@ -5959,6 +5953,15 @@ Func _GuiRoundCorners($h_win, $i_x1, $i_y1, $i_x3, $i_y3)
 	EndIf
 
 	Return 0
+EndFunc
+
+; Create a checkbox control, set its checked state and advance the y position
+Func _GUICtrlCreateCheckbox($sTranslation, $bChecked, $iPosX, ByRef $iPosY, $iWidth, $iHeight = 20, $iStyle = -1)
+	$idControlID = GUICtrlCreateCheckbox(t($sTranslation), $iPosX, $iPosY, $iWidth, $iHeight, $iStyle)
+	If $bChecked Then GUICtrlSetState($idControlID, $GUI_CHECKED)
+	$iPosY += $iHeight
+
+	Return $idControlID
 EndFunc
 
 ; Drop-in replacement for GUICtrlCreatePic with PNG support
@@ -6202,13 +6205,13 @@ EndFunc
 Func GUI_KeepOpen()
 	If _IsChecked($keepopenitem) Then
 		GUICtrlSetState($keepopenitem, $GUI_UNCHECKED)
-		$KeepOpen = 0
+		$bOptKeepOpen = 0
 	Else
 		GUICtrlSetState($keepopenitem, $GUI_CHECKED)
-		$KeepOpen = 1
+		$bOptKeepOpen = 1
 	EndIf
 
-	SavePref('keepopen', $KeepOpen)
+	SavePref('keepopen', $bOptKeepOpen)
 EndFunc
 
 ; Option to keep Universal Extractor on top
@@ -6229,11 +6232,11 @@ EndFunc
 
 ; Build and display preferences GUI
 Func GUI_Prefs()
-	Local $iPosX, $iWidth = 230
+	Local $iPosX, $iPosY, $iWidth
 	Cout("Creating preferences GUI")
 
 	; Create GUI
-	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), 466, 330, -1, -1, -1, $exStyle, $guimain)
+	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), 466, 350, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
 	; General options
@@ -6257,29 +6260,34 @@ Func GUI_Prefs()
 
 	; Format-specific preferences
 	$iPosX = 14
-	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 8, 116, 448, 168)
-	Global $historyopt = GUICtrlCreateCheckbox(t('PREFS_HISTORY_LABEL'), $iPosX, 136, $iWidth, 20)
-	Global $idOptOpenOutDir = GUICtrlCreateCheckbox(t('PREFS_OPEN_FOLDER_LABEL'), $iPosX, 156, $iWidth, 20)
-	Global $idOptCheckFreeSpace = GUICtrlCreateCheckbox(t('PREFS_CHECK_FREE_SPACE_LABEL'), $iPosX, 176, $iWidth, 20)
-	Global $idOptRememberGuiSizePosition = GUICtrlCreateCheckbox(t('PREFS_WINDOW_POSITION_LABEL'), $iPosX, 196, $iWidth, 20)
-	Global $idOptNoStatusBox = GUICtrlCreateCheckbox(t('PREFS_HIDE_STATUS_LABEL'), $iPosX, 216, $iWidth, 20)
-	Global $idOptGameMode = GUICtrlCreateCheckbox(t('PREFS_HIDE_STATUS_FULLSCREEN_LABEL'), $iPosX, 236, $iWidth, 20)
-	Global $idOptExtractVideo = GUICtrlCreateCheckbox(t('PREFS_VIDEOTRACK_LABEL'), $iPosX, 256, $iWidth, 20)
+	$iPosY = 136
+	$iWidth = 230
+	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 8, 116, 448, 188)
+	Global $historyopt = _GUICtrlCreateCheckbox('PREFS_HISTORY_LABEL', $history, $iPosX, $iPosY, $iWidth)
+	Global $idOptOpenOutDir = _GUICtrlCreateCheckbox('PREFS_OPEN_FOLDER_LABEL', $bOptOpenOutDir, $iPosX, $iPosY, $iWidth)
+	Global $idOptCheckFreeSpace = _GUICtrlCreateCheckbox('PREFS_CHECK_FREE_SPACE_LABEL', $bOptCheckFreeSpace, $iPosX, $iPosY, $iWidth)
+	Global $idOptRememberGuiSizePosition = _GUICtrlCreateCheckbox('PREFS_WINDOW_POSITION_LABEL', $bOptRememberGuiSizePosition, $iPosX, $iPosY, $iWidth)
+	Global $idOptNoTrayIcon = _GUICtrlCreateCheckbox('PREFS_HIDE_TRAY_LABEL', $bOptNoTrayIcon, $iPosX, $iPosY, $iWidth)
+	Global $idOptNoStatusBox = _GUICtrlCreateCheckbox('PREFS_HIDE_STATUS_LABEL', $bOptNoStatusBox, $iPosX, $iPosY, $iWidth)
+	Global $idOptGameMode = _GUICtrlCreateCheckbox('PREFS_HIDE_STATUS_FULLSCREEN_LABEL', $bOptHideStatusBoxIfFullscreen, $iPosX, $iPosY, $iWidth)
+	Global $idOptExtractVideo = _GUICtrlCreateCheckbox('PREFS_VIDEOTRACK_LABEL', $bOptExtractVideo, $iPosX, $iPosY, $iWidth)
 
 	$iPosX += 236
+	$iPosY = 136
 	$iWidth = 204
-	Global $idOptWarnExecute = GUICtrlCreateCheckbox(t('PREFS_WARN_EXECUTE_LABEL'), $iPosX, 136, $iWidth, 20)
-	Global $unicodecheckopt = GUICtrlCreateCheckbox(t('PREFS_CHECK_UNICODE_LABEL'), $iPosX, 156, $iWidth, 20)
-	Global $appendextopt = GUICtrlCreateCheckbox(t('PREFS_APPEND_EXT_LABEL'), $iPosX, 176, $iWidth, 20)
-	Global $idOptCreateLog = GUICtrlCreateCheckbox(t('PREFS_LOG_LABEL'), $iPosX, 196, $iWidth, 20)
-	Global $idOptFeedbackPrompt = GUICtrlCreateCheckbox(t('PREFS_FEEDBACK_PROMPT_LABEL'), $iPosX, 216, $iWidth, 20, $BS_AUTO3STATE)
-	Global $idOptSendStats = GUICtrlCreateCheckbox(t('PREFS_SEND_STATS_LABEL'), $iPosX, 236, $iWidth, 20)
-	Global $idOptBetaUpdates = GUICtrlCreateCheckbox(t('PREFS_BETA_UPDATES_LABEL'), $iPosX, 256, $iWidth, 20)
+	Global $idOptWarnExecute = _GUICtrlCreateCheckbox('PREFS_WARN_EXECUTE_LABEL', $bOptWarnExecute, $iPosX, $iPosY, $iWidth)
+	Global $unicodecheckopt = _GUICtrlCreateCheckbox('PREFS_CHECK_UNICODE_LABEL', $checkUnicode, $iPosX, $iPosY, $iWidth)
+	Global $appendextopt = _GUICtrlCreateCheckbox('PREFS_APPEND_EXT_LABEL', $appendext, $iPosX, $iPosY, $iWidth)
+	Global $idOptCreateLog = _GUICtrlCreateCheckbox('PREFS_LOG_LABEL', $bOptCreateLog, $iPosX, $iPosY, $iWidth)
+	Global $idOptFeedbackPrompt = _GUICtrlCreateCheckbox('PREFS_FEEDBACK_PROMPT_LABEL', $bOptAskForFeedback == 1, $iPosX, $iPosY, $iWidth, 20, $BS_AUTO3STATE)
+	Global $idOptSendStats = _GUICtrlCreateCheckbox('PREFS_SEND_STATS_LABEL', $bOptSendStats, $iPosX, $iPosY, $iWidth)
+	Global $idOptBetaUpdates = _GUICtrlCreateCheckbox('PREFS_BETA_UPDATES_LABEL', $bOptNightlyUpdates, $iPosX, $iPosY, $iWidth)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Buttons
-	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 132, 296, 80, 24)
-	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 248, 296, 80, 24)
+	$iPosY = 314
+	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 132, $iPosY, 80, 24)
+	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 248, $iPosY, 80, 24)
 
 	; Tooltips
 	GUICtrlSetTip($idOptWarnExecute, t('PREFS_WARN_EXECUTE_TOOLTIP'))
@@ -6295,25 +6303,8 @@ Func GUI_Prefs()
 
 	; Set properties
 	GUICtrlSetState($idOk, $GUI_DEFBUTTON)
-	If $history Then GUICtrlSetState($historyopt, $GUI_CHECKED)
-	If $bOptWarnExecute Then GUICtrlSetState($idOptWarnExecute, $GUI_CHECKED)
-	If $bOptCheckFreeSpace Then GUICtrlSetState($idOptCheckFreeSpace, $GUI_CHECKED)
-	If $checkUnicode Then GUICtrlSetState($unicodecheckopt, $GUI_CHECKED)
-	If $appendext Then GUICtrlSetState($appendextopt, $GUI_CHECKED)
-	If $bOptNoStatusBox Then GUICtrlSetState($idOptNoStatusBox, $GUI_CHECKED)
-	If $bOptHideStatusBoxIfFullscreen Then GUICtrlSetState($idOptGameMode, $GUI_CHECKED)
-	If $bOptOpenOutDir Then GUICtrlSetState($idOptOpenOutDir, $GUI_CHECKED)
-	If $bOptAskForFeedback == 1 Then
-		GUICtrlSetState($idOptFeedbackPrompt, $GUI_CHECKED)
-	ElseIf $bOptAskForFeedback == 2 Then
-		GUICtrlSetState($idOptFeedbackPrompt, $GUI_INDETERMINATE)
-	EndIf
-	If $bOptRememberGuiSizePosition Then GUICtrlSetState($idOptRememberGuiSizePosition, $GUI_CHECKED)
-	If $bOptSendStats Then GUICtrlSetState($idOptSendStats, $GUI_CHECKED)
-	If $Log Then GUICtrlSetState($idOptCreateLog, $GUI_CHECKED)
-	If $bOptExtractVideo Then GUICtrlSetState($idOptExtractVideo, $GUI_CHECKED)
+	If $bOptAskForFeedback == 2 Then GUICtrlSetState($idOptFeedbackPrompt, $GUI_INDETERMINATE)
 	If $iCleanup == $OPTION_DELETE Then GUICtrlSetState($idOptDeleteAdditionalFiles, $GUI_CHECKED)
-	If $bOptNightlyUpdates Then GUICtrlSetState($idOptBetaUpdates, $GUI_CHECKED)
 
 	; Update interval
 	; For convenience we use presets instead of numeral values, so we need to convert them here
@@ -6379,6 +6370,8 @@ Func GUI_Prefs_OK()
 	Local $aReturn = [1, 7, 30, 365, 999999, $iOptUpdateInterval]
 	$iOptUpdateInterval = $aReturn[$tmp]
 
+	$bOptNoTrayIcon = Number(_IsChecked($idOptNoTrayIcon))
+	Opt("TrayIconHide", $bOptNoTrayIcon)
 	$bOptNoStatusBox = Number(_IsChecked($idOptNoStatusBox))
 	TrayItemSetState($Tray_Statusbox, $bOptNoStatusBox? $TRAY_CHECKED: $TRAY_UNCHECKED)
 
@@ -6390,7 +6383,7 @@ Func GUI_Prefs_OK()
 	$bOptOpenOutDir = Number(_IsChecked($idOptOpenOutDir))
 	$bOptAskForFeedback = Number(GUICtrlRead($idOptFeedbackPrompt))
 	If $bOptAskForFeedback > 2 Then $bOptAskForFeedback = 0
-	$Log = Number(_IsChecked($idOptCreateLog))
+	$bOptCreateLog = Number(_IsChecked($idOptCreateLog))
 	$bOptExtractVideo = Number(_IsChecked($idOptExtractVideo))
 	$bOptRememberGuiSizePosition = Number(_IsChecked($idOptRememberGuiSizePosition))
 	$bOptSendStats = Number(_IsChecked($idOptSendStats))
@@ -7944,6 +7937,21 @@ Func GUI_Exit()
 	terminate($STATUS_SILENT)
 EndFunc
 
+; Create tray menu items
+Func Tray_Create()
+	Global $Tray_Statusbox = TrayCreateItem(t('PREFS_HIDE_STATUS_LABEL'))
+	If $bOptNoStatusBox Then TrayItemSetState(-1, $TRAY_CHECKED)
+	TrayCreateItem("")
+	Local $idExit = TrayCreateItem(t('MENU_FILE_QUIT_LABEL'))
+
+	TrayItemSetOnEvent($Tray_Statusbox, "Tray_Statusbox")
+	TrayItemSetOnEvent($idExit, "Tray_Exit")
+	TraySetToolTip($name)
+	TraySetClick(8)
+
+	If $bOptNoTrayIcon Then Return Opt("TrayIconHide", 1)
+EndFunc
+
 ; Shows/hides cmd window when clicked on tray icon
 Func Tray_ShowHide()
 	If Not ProcessExists($run) Then Return
@@ -7957,7 +7965,7 @@ EndFunc
 
 ; Change show statusbox option via tray
 Func Tray_Statusbox()
-	If TrayItemGetState($Tray_Statusbox) == 65 Then
+	If BitAND(TrayItemGetState($Tray_Statusbox), $TRAY_CHECKED) = $TRAY_CHECKED Then
 		$bOptNoStatusBox = 0
 		If $TBgui Then GUISetState(@SW_SHOW, $TBgui)
 		TrayItemSetState($Tray_Statusbox, $TRAY_UNCHECKED)

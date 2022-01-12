@@ -71,8 +71,9 @@ QuickBMS scripts (157-322, Game Extractor)	BMS.db						2.01		---------	GNU GPL	v
 RA Installer Unwrapper						RAIU.exe					0.1a		-	-	-	Open Source				Icebird								http://legroom.net/node/539										
 RGSS Decryptor CLI							RgssDecrypter.exe			1.0.0.1 mod -	-	x	MIT						usagirei							https://github.com/usagirei/RGSS-Decryptor
 											RgssDecrypter.Lib.dll		-------		---------	-------					-------								-------
-rmvdec										rmvdec.exe					1.1.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/rmvdec
-											neko runtime files			-------		---------	-------					-------								-------
+rmvdec										rmvdec.exe					2.2.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/rmvdec
+											BioLib						-------		---------	-------					-------								-------
+											Newtonsoft.Json.dll			-------		---------	-------					-------								-------
 sgbdec										sgbdec.exe					2.0.0		x	-	x	BSD 3-clause			Bioruebe							https://github.com/Bioruebe/sgbdec
 											BioLib						-------		---------	-------					-------								-------
 sfarkxtc									sfarkxtc.exe				3.0 mod		x	-	x	GNU GPL v3				Arnout Engelen						https://github.com/raboof/sfarkxtc
