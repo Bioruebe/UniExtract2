@@ -33,7 +33,7 @@
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Improved .cab, InstallShield, .iso, .nrg, .msp and ZIP extraction
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
-  Updated BioLib to 2.3.1
+  Updated BioLib to 2.4.0
   Updated cicdec to 2.3.0
   Updated dark to 3.14.0.4118
   Updated demoleition to 0.65
@@ -51,6 +51,7 @@
   Updated Qt Linguist to 6.2.2
   Updated QuickBMS to 0.11
   Updated rmvdec to 2.2.0
+  Updated spoondec to 2.0.0
   Updated SQLite to 3.35.5
   Updated ttarchext to 0.3.2
   Updated UnRAR to 6.02

@@ -5587,6 +5587,8 @@ Func _AfterUpdate()
 	FileDelete($bindir & "brunsdec.exe")
 	FileDelete($bindir & "WolfDec.exe")
 	FileDelete($bindir & "sim_unpacker.exe")
+	FileDelete($bindir & "regexp.ndll")
+	FileDelete($bindir & "lime.ndll")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
