@@ -13,112 +13,154 @@
 #include <Array.au3>
 #include <File.au3>
 
-Dim $arr_new, $file_old, $version
+Global $aEnglish, $sVersion, $sContent, $sHeader = ""
 
-Dim $exclude[1] = ["German.ini"]
-$ini_new = "..\English.ini"
-$sLanguageDir = "..\lang\"
+Global $aExcludes[1] = ["German.ini"]
+Const $sEnglishLanguageFile = "..\English.ini"
+Const $sLanguageDir = "..\lang\"
 
-$timestamp = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & "-" & @MIN & "-" & @SEC
+Global Const $sTimestamp = @YEAR & "-" & @MON & "-" & @MDAY & " " & @HOUR & "-" & @MIN & "-" & @SEC
 
-$ini_old = _FileListToArray($sLanguageDir, "*.ini", 1)
-;_ArrayDisplay($ini_old)
+_ReadTemplate()
+_ProcessFiles()
+
 
 ; Read template file, build array with key names only to be inserted into new files
-_FileReadToArray($ini_new, $arr_new)
-If @error Then Exit ConsoleWrite("Error opening file: " & @error & @CRLF)
+Func _ReadTemplate()
+	_FileReadToArray($sEnglishLanguageFile, $aEnglish)
+	If @error Then Exit ConsoleWrite("Error opening file: " & @error & @CRLF)
 
-; Copy header template from English.ini
-$sHeader = ""
-Local $i = 8
-While StringLeft($arr_new[$i], 1) == ";"
-	$sHeader &= $arr_new[$i] & @CRLF
-	$i += 1
-WEnd
-$sHeader &= @CRLF
+	; Copy header (translation instructions) from English.ini
+	Local $i = 8
+	While StringLeft($aEnglish[$i], 1) == ";"
+		$sHeader &= $aEnglish[$i] & @CRLF
+		$i += 1
+	WEnd
 
-_Strip($arr_new)
-;~ _ArrayDisplay($arr_new)
-
-
-For $i=1 To $ini_old[0]
-	Local $sFile = $ini_old[$i]
-
-	If _ArraySearch($exclude, $sFile) < 0 Then
-		_Start($sLanguageDir & $sFile)
-	Else
-		ConsoleWrite("Skipping file " & $sFile)
-	EndIf
-
-	ConsoleWrite(" (" & $i & "/" & $ini_old[0] & ")" & @CRLF)
-Next
-
-Func _Start($file)
-	ConsoleWrite("Processing file " & $file)
-
-	$hFile = FileOpen($file, 16384)
-	$file_old = FileReadToArray($hFile)
-	If @error Then ConsoleWrite(@CRLF & "Error opening file: " & @error & @CRLF)
-	FileClose($hFile)
-	_ArrayInsert($file_old, 0, UBound($file_old))
-
-;~ 	_ArrayDisplay($file_old)
-
-	Global $handle = FileOpen("new.ini", 32+2)
-
-	_Update()
-
-	FileClose($handle)
-
-	$ret = FileMove($file, "..\backup\lang\" & $version & "_" & $timestamp & "\", 8+1)
-	If $ret <> 1 Then ConsoleWrite(@CRLF & "Error moving file (1)" & @CRLF)
-	$ret = FileMove("new.ini", $file, 1)
-	If $ret <> 1 Then ConsoleWrite(@CRLF & "Error moving file (2)" & @CRLF)
+	_Strip($aEnglish)
+	;~ _ArrayDisplay($aEnglish)
 EndFunc
 
-Func _Update()
+; Read all language files and update them
+Func _ProcessFiles()
+	$aLanguageFiles = _FileListToArray($sLanguageDir, "*.ini", 1)
+	;~ _ArrayDisplay($aLanguageFiles)
+
+	For $i = 1 To $aLanguageFiles[0]
+		Local $sFile = $aLanguageFiles[$i]
+
+		If _ArraySearch($aExcludes, $sFile) < 0 Then
+			_ProcessFile($sLanguageDir & $sFile)
+		Else
+			ConsoleWrite("Skipping file " & $sFile)
+		EndIf
+
+		ConsoleWrite(" (" & $i & "/" & $aLanguageFiles[0] & ")" & @CRLF)
+	Next
+EndFunc
+
+; Read and preprocess a language file
+Func _ReadFile($sFile)
+	Local $hFile = FileOpen($sFile, 16384)
+	Local $aReturn = FileReadToArray($hFile)
+	If @error Then ConsoleWrite(@CRLF & "Error opening file: " & @error & @CRLF)
+	FileClose($hFile)
+
+	Local $iSize = UBound($aReturn)
+	Local $aFile[$iSize][2], $aSplit
+
+	For $i = 0 To $iSize - 1
+		If StringLeft($aReturn[$i], 1) == ";" Then
+			$aFile[$i][0] = StringStripWS($aReturn[$i], $STR_STRIPLEADING + $STR_STRIPTRAILING)
+			ContinueLoop
+		EndIf
+
+		$aSplit = StringSplit($aReturn[$i], "=")
+		$aFile[$i][0] = StringStripWS($aSplit[1], $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		If $aSplit[0] > 2 Then $aSplit[2] = _ArrayToString($aSplit, "=", 2, -1, "")
+		If $aSplit[0] > 1 Then $aFile[$i][1] = StringStripWS($aSplit[2], $STR_STRIPLEADING + $STR_STRIPTRAILING)
+	Next
+
+;~ 	_ArrayDisplay($aFile)
+	Return $aFile
+EndFunc
+
+; Process a single language file
+Func _ProcessFile($sFile)
+	ConsoleWrite("Processing file " & $sFile)
+
+	Local $aTranslation = _ReadFile($sFile)
+
+	_Update($aTranslation)
+
+	Local $iReturn = FileMove($sFile, "..\backup\lang\" & $sVersion & "_" & $sTimestamp & "\", 8+1)
+	If $iReturn <> 1 Then ConsoleWrite(@CRLF & "Error moving file" & @CRLF)
+
+	$hFile = FileOpen($sFile, 32+2)
+	FileWrite($hFile, $sContent)
+	FileClose($hFile)
+EndFunc
+
+; Update a single language file
+Func _Update(ByRef $aTranslation)
+	Global $sContent = ""
+	Local $iSize = UBound($aTranslation) - 1
+
 	; Copy header from old file
-	For $i = 1 To $file_old[0]
-		If StringInStr($file_old[$i], "Written for Universal Extractor") Then
-			FileWriteLine($handle, "; Written for Universal Extractor " & $version)
-		ElseIf $i > 3 And (StringStripWS($file_old[$i], 2) == ";" Or StringIsSpace($file_old[$i])) Then
-			FileWriteLine($handle, $file_old[$i])
+	For $i = 0 To $iSize
+		$sLine = $aTranslation[$i][0]
+		If StringInStr($sLine, "Written for Universal Extractor") Then
+			_AddLine("; Written for Universal Extractor " & $sVersion)
+		ElseIf $i > 3 And ($sLine == ";" Or StringIsSpace($sLine)) Then
+			_AddLine($sLine)
 			ExitLoop
-		ElseIf StringLeft($file_old[$i], 1) = ";" Then
-			FileWriteLine($handle, $file_old[$i])
+		ElseIf StringLeft($sLine, 1) = ";" Then
+			_AddLine($sLine)
 		EndIf
 	Next
 
-	FileWriteLine($handle, $sHeader)
-	Local $bIsHeader = True
-	For $i = 1 To $arr_new[0]
-		$pos = -1
-;~ 		ConsoleWrite("Searching " & $arr_new[$i] & " | Position " & $pos & " (Error: " & @error & ")" & @CRLF)
+	_AddLine($sHeader)
+	_ArraySort($aTranslation)
+	Local $bIsHeader = True, $aSplit, $sLine
+	For $i = 1 To $aEnglish[0]
+		$iPos = -1
 
 		; Skip header as it can have different lengths
-		If $bIsHeader And (StringLeft($arr_new[$i], 1) = ";" Or StringIsSpace($arr_new[$i])) Then
+		If $bIsHeader And (StringLeft($aEnglish[$i], 1) = ";" Or StringIsSpace($aEnglish[$i])) Then
 			ContinueLoop
 		Else
 			$bIsHeader = False
-			$pos = _ArraySearch($file_old, $arr_new[$i], 1, 0, 0, 1)
-			If $pos = -1 Then
-				If StringInStr($arr_new[$i], "=") Then
-					FileWriteLine($handle, $arr_new[$i] & ' ""')
+			$iPos = _ArrayBinarySearch($aTranslation, $aEnglish[$i])
+;~ 			ConsoleWrite(@CRLF & "Searching '" & $aEnglish[$i] & "' -> position " & $iPos)
+
+			If $iPos = -1 Then
+				If StringLeft($aEnglish[$i], 1) == ";" Or StringIsSpace($aEnglish[$i]) Then
+					; Comments etc.
+					_AddLine($aEnglish[$i])
 				Else
-					FileWriteLine($handle, $arr_new[$i])
+					; New content, no translation in old file
+					_AddLine($aEnglish[$i] & ' = ""')
 				EndIf
 			Else
-				FileWriteLine($handle, $file_old[$pos])
+				; Write old content to file
+				$sLine = $aTranslation[$iPos][0]
+				If $aTranslation[$iPos][1] Then $sLine &= " = " & $aTranslation[$iPos][1]
+				_AddLine($sLine)
 			EndIf
 		EndIf
 	Next
 EndFunc
 
+; Add a line to the file content
+Func _AddLine($sLine)
+	$sContent &= $sLine & @CRLF
+EndFunc
+
 ; Strip values
-Func _Strip(ByRef $arr)
-	For $i=1 To $arr[0]
-		Local $pos = StringInStr($arr[$i], "=")
-		If $pos Then $arr[$i] = StringLeft($arr[$i], $pos)
-		If StringInStr($arr[$i], "Written for") Then $version = StringReplace($arr[$i], "; Written for Universal Extractor ", "")
+Func _Strip(ByRef $aArray)
+	For $i = 1 To $aArray[0]
+		Local $iPos = StringInStr($aArray[$i], "=")
+		If $iPos Then $aArray[$i] = StringStripWS(StringLeft($aArray[$i], $iPos - 2), $STR_STRIPLEADING + $STR_STRIPTRAILING)
+		If StringInStr($aArray[$i], "Written for") Then $sVersion = StringReplace($aArray[$i], "; Written for Universal Extractor ", "")
 	Next
 EndFunc
