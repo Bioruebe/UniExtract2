@@ -57,12 +57,14 @@
   Updated UnRAR to 6.02
   Updated Xpdf command line tools to 4.03
   Updated Chinese (Simplified) translation, thanks to SeaHOH
+  Updated French translation, thanks to Pierre le Lidgeu
   Updated German translation, thanks to Mr-Update
   Updated Greek translation, thanks to gvp9000
   Updated Hungarian translation, thanks to hevesij
   Updated Italian translation, thanks to bovirus
   Updated Japanese translation, thanks to maboroshin
   Updated Polish translation, thanks to Barnaba and Mirosław Żylewicz
+  Updated Portuguese (Brazilian) translation, thanks to igorruckert
   Updated Russian translation, thanks to wvxwxvw
   Updated Spanish translation, thanks to GGobbi
   Updated Swedish translation, thanks to Sopor
