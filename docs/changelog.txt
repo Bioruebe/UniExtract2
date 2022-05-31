@@ -29,6 +29,8 @@
   Fixed several issues when relative paths are used, thanks to r3sus
   Fixed setup file being executed if 'Open folder after extraction' is enabled, thanks to r3sus
   Fixed language being set to Chinese on Danish systems, thanks to madsholme
+  Fixed Aspack unpacking not working
+  Fixed Aspack/UPX unpacking overwriting existing file
   Changed design/usability of 'Execution warning' and 'Command line help' dialogs
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Improved .cab, InstallShield, .iso, .nrg, .msp and ZIP extraction
@@ -38,23 +40,23 @@
   Updated dark to 3.14.0.4118
   Updated demoleition to 0.65
   Updated EnigmaVB unpacker to 0.59
-  Updated Exeinfo PE to 0.0.6.6
+  Updated Exeinfo PE to 0.0.6.7
   Updated file to 5.40
   Updated GNU gettext to 0.21
   Updated godotdec to 2.1.1
   Updated helpdeco to 2.1.4
   Updated innounp to 0.50
   Updated lzip to 1.22
-  Updated MediaInfo to 20.09
+  Updated MediaInfo to 21.03
   Updated mtee to 2.7
-  Updated PeaZip to 1.02
-  Updated Qt Linguist to 6.2.2
+  Updated PeaZip to 1.07
+  Updated Qt Linguist to 6.3.0
   Updated QuickBMS to 0.11
   Updated rmvdec to 2.2.0
   Updated spoondec to 2.0.0
   Updated SQLite to 3.35.5
   Updated ttarchext to 0.3.2
-  Updated UnRAR to 6.02
+  Updated UnRAR to 6.11
   Updated Xpdf command line tools to 4.03
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated French translation, thanks to Pierre le Lidgeu

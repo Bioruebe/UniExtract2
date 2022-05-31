@@ -203,7 +203,7 @@ Const $7zsplit = "7ZSplit.exe"
 Const $ace = "acefile.exe"
 Const $alz = "unalz.exe"
 Const $arj = "arj.exe"
-Const $aspack = "AspackDie.exe"
+Const $aspack = Quote($bindir & "AspackDie.exe", True)
 Const $bcm = Quote($archdir & "bcm.exe", True)
 Const $cic = "cicdec.exe"
 Const $daa = "daa2iso.exe"
@@ -2604,20 +2604,20 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				_Run($innounp & ' -x -m -a "' & $file & '"', $outdir)
 
 				; Inno setup files can contain multiple versions of files, they are named ',1', ',2',... after extraction
-				; rename the first file(s), so extracted programs do not fail with not found exceptions
+				; rename the first file(s), so extracted programs do not fail with 'not found' exceptions
 				; This is a convenience function, so the user does not have to rename them manually
-				$return = $outdir & "\{app}\"
-				$aReturn = _FileListToArrayRec($return, "*,1.*", 1, 1)
+				Local $sPath = $outdir & "\{app}\"
+				Local $aFiles = _FileListToArrayRec($sPath, "*,1.*", 1, 1)
 				If Not @error Then
-					For $i = 1 To $aReturn[0]
-						$ret = StringReplace($aReturn[$i], ",1", "", -1)
-						Cout("Renaming " & $return & $aReturn[$i] & " to " & $return & $ret)
-						_FileMove($return & $aReturn[$i], $return & $ret)
+					For $i = 1 To $aFiles[0]
+						$ret = StringReplace($aFiles[$i], ",1", "", -1)
+						Cout("Renaming " & $sPath & $aFiles[$i] & " to " & $sPath & $ret)
+						_FileMove($sPath & $aFiles[$i], $sPath & $ret)
 					Next
 				EndIf
 
 				; (Re)move ',2' files and install_script.iss
-				Local $aCleanup = _FileListToArrayRec($return, "*,2.*;*,3.*", 1, 1, 0, 2)
+				Local $aCleanup = _FileListToArrayRec($sPath, "*,2.*;*,3.*", 1, 1, 0, 2)
 				If Not @error And IsArray($aCleanup) Then
 					_ArrayDelete($aCleanup, 0)
 					Cleanup($aCleanup)
@@ -3598,9 +3598,12 @@ EndFunc
 Func unpack($packer)
 	If $unpackfailed Then Return
 	$unpackfailed = True ; Don't display the prompt multiple times
-	Local $ret = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "." & $fileext
-	; Prompt to continue
-	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, $ret)) Then Return
+
+	Local $sName = $filename & "_" & t('TERM_UNPACKED')
+	Local $sPath = $filedir & "\" & $sName & "." & $fileext
+	If FileExists($sPath) Then $sPath = _TempFile($filedir, $sName & "_", $fileext)
+
+	If Not Prompt(32 + 4, 'UNPACK_PROMPT', CreateArray($packer, PathGetFileName($sPath))) Then Return
 
 	; Unpack file
 	Switch $packer
@@ -3608,26 +3611,25 @@ Func unpack($packer)
 			_Run($upx & ' -d -k "' & $file & '"', $filedir)
 			Local $tempext = StringTrimRight($fileext, 1) & '~'
 			If FileExists($filedir & "\" & $filename & "." & $tempext) Then
-				_FileMove($file, $ret)
+				_FileMove($file, $sPath)
 				_FileMove($filedir & "\" & $filename & "." & $tempext, $file)
 			EndIf
 		Case $PACKER_ASPACK
-			RunWait($aspack & ' "' & $file & '" "' & $filedir & '\' & $filename & '_' & t('TERM_UNPACKED') & _
-					$fileext & '" /NO_PROMPT', $filedir)
+			_Run($aspack & ' "' & $file & '" "' & $sPath & '" /NO_PROMPT', $filedir)
 	EndSwitch
 
 	; Success evaluation
-	If FileExists($ret) Then
+	If FileExists($sPath) Then
 		; Prompt if unpacked file should be scanned
-		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($file, $filename & '_' & t('TERM_UNPACKED') & "." & $fileext)) Then
-			$file = $ret
+		If Prompt(32 + 4, 'UNPACK_AGAIN', CreateArray($filenamefull, PathGetFileName($sPath))) Then
+			$file = $sPath
 			$outdir = $filedir & "\" & $filename & "_" & t('TERM_UNPACKED') & "\"
 			StartExtraction()
 		Else
 			terminate($STATUS_SUCCESS, $filenamefull, $packer, $packer)
 		EndIf
 	Else
-		Prompt(16, 'UNPACK_FAILED', $file)
+		Prompt(16, 'UNPACK_FAILED', $filenamefull)
 	EndIf
 EndFunc
 
@@ -4682,12 +4684,13 @@ EndFunc
 
 ; Check for success or failure indicator in log
 Func EvaluateLog($sLog)
-	Cout("Reading log file")
+	ParseWarnings($sLog)
 
-	If StringInStr($sLog, "Wrong password?", 0) Or StringInStr($sLog, "The specified password is incorrect.", 0) Or _
-	   StringInStr($sLog, "Archive encrypted.", 0) Or StringInStr($sLog, "Corrupt file or wrong password", 0) Or _
-	   StringInStr(_StringGetLine($sLog, -1), "Enter password") Then
-	    Cout("Invalid password")
+	Cout("Reading log file")
+	If StringInStr($sLog, "Wrong password?") Or StringInStr($sLog, "The specified password is incorrect.") Or _
+	   StringInStr($sLog, "Archive encrypted.") Or StringInStr($sLog, "Corrupt file or wrong password") Or _
+	   StringInStr($sLog, "ERROR: Wrong password") Or StringInStr(_StringGetLine($sLog, -1), "Enter password") Then
+		Cout("Invalid password")
 		$success = $RESULT_FAILED
 		SetError(1, 1)
 	ElseIf StringInStr($sLog, "Break signaled") Or StringInStr($sLog, "Program aborted") Or StringInStr($sLog, "User break") Then
@@ -4725,11 +4728,11 @@ Func EvaluateLog($sLog)
 		; so let's disable the check to avoid 'failed' message
 		$success = $RESULT_SUCCESS
 	EndIf
-
-	ParseWarnings($sLog)
 EndFunc
 
 Func ParseWarnings($sLog)
+	Cout("Searching for warnings")
+
 	; 7-zip
 	Local $sReturn = _StringExtractAfter($sLog, "WARNINGS:" & @CRLF)
 	If Not @error Then _ArrayAdd($aWarnings, $sReturn)
@@ -5074,6 +5077,13 @@ Func _PathCombine($sPath, $sString)
 	WEnd
 
 	Return $sPath & $sString
+EndFunc
+
+; Return the file name from a given path string
+Func PathGetFileName($sPath)
+	Local $iPos = StringInStr($sPath, "\", 0, -1)
+
+	Return $iPos < 0? $sPath: StringTrimLeft($sPath, $iPos)
 EndFunc
 
 ; Move file/folder specified by path with error handling and auto-retry
