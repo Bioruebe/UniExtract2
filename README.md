@@ -42,9 +42,18 @@ However, outdated version of Windows only have limited support:
 
 (Online functionality for these systems might be restored in a future version of Universal Extractor.)
 
+###### Updating
+Universal Extractor 2 comes with a built-in updater. You will receive a notification when a new version is released. Alternatively, you can search for updates manually from the `Help` menu.
+
+At the moment, UniExtract is still in beta and updates are rare. If you want to keep up-to-date with the development, you can [opt-in to more frequent updates](#nightly-builds).
+
+**Do not replace any files in UniExtract's program directory yourself. This will break things!**
+More details can be found [here](https://github.com/Bioruebe/UniExtract2/issues/293#issuecomment-1142877436).
+
 ###### Older versions
 
-...can be found on the [Releases](https://github.com/Bioruebe/UniExtract2/releases) page
+...can be found on the [Releases](https://github.com/Bioruebe/UniExtract2/releases) page.
+However, this is for historical reasons ony. Please consider using the newest version instead.
 
 ###### Uninstalling
 
