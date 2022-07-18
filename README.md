@@ -20,7 +20,7 @@ This program is an unofficial updated and extended version of the [original UniE
 - Many interface improvements and redesigned dialogs
 - Resource usage/speed improvements, lots of bug fixes
 
-See the changelog for a complete log of all improvements.
+See the [changelog](docs/changelog.txt) for a complete log of all improvements.
 
 ## Download
 Get the latest version [here](https://github.com/Bioruebe/UniExtract2/releases/download/v2.0.0-rc.3/UniExtractRC3.zip)
