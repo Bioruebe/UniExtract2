@@ -110,21 +110,20 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
 	  $TYPE_FEAD = "fead", $TYPE_FORGE = "installforge", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", _
 	  $TYPE_HLP = "hlp", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
-	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MHT = "mht", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", _
-	  $TYPE_MSI = "msi", $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", _
-	  $TYPE_PEA = "pea", $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", _
-	  $TYPE_SFARK = "sfark", $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
+	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", _
+	  $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
+	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
+	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
 	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITYPACKAGE = "unitypackage", _
 	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
 	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, $TYPE_FORGE, _
 	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
-	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MHT, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, _
-	  $TYPE_NSIS, $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, _
-	  $TYPE_SQLITE, $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, _
-	  $TYPE_UNREAL, $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_ZIP, _
-	  $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, $TYPE_NSIS, _
+	  $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, $TYPE_SQLITE, _
+	  $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, $TYPE_UNREAL, _
+	  $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -1428,7 +1427,7 @@ Func filecompare($sFileType)
 		Case StringInStr($sFileType, "MS Windows HtmlHelp Data")
 			extract($TYPE_CHM, 'Compiled HTML ' & t('TERM_HELP'))
 		Case StringInStr($sFileType, "MIME entity text") Or StringInStr($sFileType, "mhtml")
-			extract($TYPE_MHT, 'MHTML ' & t('TERM_ARCHIVE'))
+			extract($TYPE_7Z, 'MHTML ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "MoPaQ", 0)
 			CheckTotalObserver('MPQ ' & t('TERM_ARCHIVE'))
 		Case (StringInStr($sFileType, "RIFF", 0) And Not StringInStr($sFileType, "WAVE audio", 0)) Or _
@@ -1594,7 +1593,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_LZX, 'LZX ' & t('TERM_COMPRESSED'))
 
 		Case StringInStr($sFileType, "MIME HTML archive format") Or StringInStr($sFileType, "E-Mail message")
-			extract($TYPE_MHT, 'MHTML ' & t('TERM_ARCHIVE'))
+			extract($TYPE_7Z, 'MHTML ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Microsoft Windows Installer merge module")
 			extract($TYPE_MSM, 'Windows Installer (MSM) ' & t('TERM_MERGE_MODULE'))
@@ -2768,13 +2767,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_LZX
 			_Run($lzx & ' -x "' & $file & '"', $outdir)
-
-		Case $TYPE_MHT
-			If HasPlugin($archdir & "Formats\eDecoder." & $iOsArch & ".dll", True) Then
-				extract($TYPE_7Z, $arcdisp)
-			Else
-				extract($TYPE_QBMS, $arcdisp, $observer)
-			EndIf
 
 		Case $TYPE_MOLE
 			_RunInTempOutdir($tempoutdir, $mole & ' /nogui "' & $file & '"', $outdir, @SW_HIDE, True, False, False)
