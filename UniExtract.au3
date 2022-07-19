@@ -1237,6 +1237,9 @@ Func FileScan_ExeInfo($bUseCmd = $extract)
 		Case StringInStr($sFileType, ".pak  Chromium format")
 			extract($TYPE_7Z, "Chromium Pak " & t('TERM_ARCHIVE'))
 
+		Case StringInStr($sFileType, "Explorer cache file")
+			extract($TYPE_7Z, "Explorer Thumbnail " & t('TERM_DATABASE'))
+
 		Case StringInStr($sFileType, "MSCF Cab file detected") Or StringInStr($sFileType, "VirtualBox Installer")
 			extract($TYPE_MSCF, "MSCF " & t('TERM_INSTALLER'))
 
