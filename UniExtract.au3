@@ -1234,6 +1234,9 @@ Func FileScan_ExeInfo($bUseCmd = $extract)
 		Case StringInStr($sFileType, ".dmg  Mac OS")
 			extract($TYPE_7Z, "DMG " & t('TERM_IMAGE'))
 
+		Case StringInStr($sFileType, ".pak  Chromium format")
+			extract($TYPE_7Z, "Chromium Pak " & t('TERM_ARCHIVE'))
+
 		Case StringInStr($sFileType, "MSCF Cab file detected") Or StringInStr($sFileType, "VirtualBox Installer")
 			extract($TYPE_MSCF, "MSCF " & t('TERM_INSTALLER'))
 
@@ -1489,6 +1492,9 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "bzip2 compressed archive")
 			extract($TYPE_7Z, 'bzip2 ' & t('TERM_COMPRESSED'), "bz2")
+
+		Case StringInStr($sFileType, "HBuilder language package")
+			extract($TYPE_7Z, "Chromium Pak " & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "CPIO Archive")
 			extract($TYPE_7Z, 'CPIO ' & t('TERM_ARCHIVE'))
