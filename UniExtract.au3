@@ -1483,7 +1483,6 @@ Func tridcompare($sFileType)
 			extract($TYPE_7Z, 'ARJ ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "asar Electron Archive")
-			HasPlugin($archdir & "Formats\Asar." & $iOsArch & ".dll")
 			extract($TYPE_7Z, 'ASAR ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "BZA compressed") Or StringInStr($sFileType, "GZA compressed")
