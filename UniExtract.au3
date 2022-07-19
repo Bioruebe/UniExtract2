@@ -1685,6 +1685,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "EPOC Installation package")
 			extract($TYPE_SIS, 'SymbianOS ' & t('TERM_INSTALLER'))
 
+		Case StringInStr($sFileType, "MacBinary")
+			extract($TYPE_7Z, "MacBinary" & t('TERM_ENCODED'))
+
 		Case StringInStr($sFileType, "Macromedia Flash Player")
 			extract($TYPE_SWF, 'Shockwave Flash ' & t('TERM_CONTAINER'))
 
