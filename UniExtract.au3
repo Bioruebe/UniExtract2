@@ -1691,20 +1691,8 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "UHARC compressed archive")
 			extract($TYPE_UHA, 'UHARC ' & t('TERM_ARCHIVE'))
 
-		Case StringInStr($sFileType, "Base64 Encoded file")
-			extract("uu", "Base64 " & t('TERM_ENCODED'))
-
 		Case StringInStr($sFileType, "BinHex encoded")
 			extract($TYPE_7Z, "BinHex  " & t('TERM_ENCODED'))
-
-		Case StringInStr($sFileType, "Quoted-Printable Encoded file")
-			extract("uu", "Quoted-Printable " & t('TERM_ENCODED'))
-
-		Case StringInStr($sFileType, "UUencoded file") Or StringInStr($sFileType, "XXencoded file")
-			extract("uu", "UUencoded " & t('TERM_ENCODED'))
-
-		Case StringInStr($sFileType, "yEnc Encoded file")
-			extract("uu", "yEnc " & t('TERM_ENCODED'))
 
 		Case StringInStr($sFileType, "Windows Update Package")
 			extract($TYPE_MSU, 'Windows Update ' & t('TERM_PACKAGE'))
