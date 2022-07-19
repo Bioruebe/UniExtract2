@@ -1695,6 +1695,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Base64 Encoded file")
 			extract("uu", "Base64 " & t('TERM_ENCODED'))
 
+		Case StringInStr($sFileType, "BinHex encoded")
+			extract($TYPE_7Z, "BinHex  " & t('TERM_ENCODED'))
+
 		Case StringInStr($sFileType, "Quoted-Printable Encoded file")
 			extract("uu", "Quoted-Printable " & t('TERM_ENCODED'))
 
