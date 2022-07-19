@@ -30,7 +30,7 @@
   Fixed setup file being executed if 'Open folder after extraction' is enabled, thanks to r3sus
   Fixed language being set to Chinese on Danish systems, thanks to madsholme
   Fixed Aspack unpacking not working
-  Fixed Aspack/UPX unpacking overwriting existing file
+  Fixed Aspack/UPX unpacking: files not being created in output directory; existing file being overwritten
   Changed design/usability of 'Execution warning' and 'Command line help' dialogs
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Improved .cab, InstallShield, .iso, .nrg, .msp and ZIP extraction
@@ -57,6 +57,7 @@
   Updated SQLite to 3.35.5
   Updated ttarchext to 0.3.2
   Updated UnRAR to 6.11
+  Updated WiX to 3.14.0.6526
   Updated Xpdf command line tools to 4.03
   Updated Chinese (Simplified) translation, thanks to SeaHOH
   Updated French translation, thanks to Pierre le Lidgeu
