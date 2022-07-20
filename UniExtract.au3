@@ -1434,6 +1434,8 @@ Func filecompare($sFileType)
 			extract($TYPE_7Z, 'MHTML ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "MoPaQ", 0)
 			CheckTotalObserver('MPQ ' & t('TERM_ARCHIVE'))
+		Case StringInStr($sFileType, "MIME entity")
+			check7z("Base 64" & t('TERM_ENCODED'))
 		Case (StringInStr($sFileType, "RIFF", 0) And Not StringInStr($sFileType, "WAVE audio", 0)) Or _
 			 StringInStr($sFileType, "MPEG v", 0) Or StringInStr($sFileType, "MPEG sequence") Or _
 			 StringInStr($sFileType, "Microsoft ASF") Or StringInStr($sFileType, "GIF image") Or _
