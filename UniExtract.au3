@@ -264,7 +264,6 @@ Const $zoo = "unzoo.exe"
 ; Exractor plugins
 Const $bitrock = "bitrock-unpacker.exe"
 Const $bms = @TempDir & "\BMS.bms"
-Const $dbx = "dbxplug.wcx"
 Const $gaup = "gaup_pro.wcx"
 Const $ie = "InstExpl.wcx"
 Const $iso = "Iso.wcx"
@@ -1402,7 +1401,7 @@ Func filecompare($sFileType)
 		Case StringInStr($sFileType, "Zoo archive data", 0)
 			extract($TYPE_ZOO, 'ZOO ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "MS Outlook Express DBX file", 0)
-			extract($TYPE_QBMS, 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
+			check7z("Outlook Express " & t('TERM_DATABASE'))
 		Case StringInStr($sFileType, "bzip2 compressed data", 0)
 			extract($TYPE_7Z, 'bzip2 ' & t('TERM_COMPRESSED'), "bz2")
 		Case StringInStr($sFileType, "ASCII cpio archive", 0)
@@ -1618,8 +1617,8 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "HTC NBH ROM Image")
 			extract($TYPE_NBH, 'NBH ' & t('TERM_IMAGE'))
 
-		Case StringInStr($sFileType, "Outlook Express E-mail folder")
-			extract($TYPE_QBMS, 'Outlook Express ' & t('TERM_ARCHIVE'), $dbx)
+		Case StringInStr($sFileType, "Outlook Express Database")
+			check7z("Outlook Express " & t('TERM_DATABASE'))
 
 		Case StringInStr($sFileType, "Portable Document Format")
 			extract($TYPE_PDF, 'PDF ' & t('TERM_FILE'))
@@ -5594,6 +5593,7 @@ Func _AfterUpdate()
 	FileDelete($bindir & "sim_unpacker.exe")
 	FileDelete($bindir & "regexp.ndll")
 	FileDelete($bindir & "lime.ndll")
+	FileDelete($bindir & "dbxplug.wcx")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
