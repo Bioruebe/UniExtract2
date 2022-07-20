@@ -1401,7 +1401,7 @@ Func filecompare($sFileType)
 		Case StringInStr($sFileType, "Zoo archive data", 0)
 			extract($TYPE_ZOO, 'ZOO ' & t('TERM_ARCHIVE'))
 		Case StringInStr($sFileType, "MS Outlook Express DBX file", 0)
-			check7z("Outlook Express " & t('TERM_DATABASE'))
+			extract($TYPE_7Z, "Outlook Express " & t('TERM_DATABASE'))
 		Case StringInStr($sFileType, "bzip2 compressed data", 0)
 			extract($TYPE_7Z, 'bzip2 ' & t('TERM_COMPRESSED'), "bz2")
 		Case StringInStr($sFileType, "ASCII cpio archive", 0)
@@ -1618,7 +1618,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_NBH, 'NBH ' & t('TERM_IMAGE'))
 
 		Case StringInStr($sFileType, "Outlook Express Database")
-			check7z("Outlook Express " & t('TERM_DATABASE'))
+			extract($TYPE_7Z, "Outlook Express " & t('TERM_DATABASE'))
 
 		Case StringInStr($sFileType, "Portable Document Format")
 			extract($TYPE_PDF, 'PDF ' & t('TERM_FILE'))
@@ -1703,6 +1703,9 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "BinHex encoded")
 			extract($TYPE_7Z, "BinHex  " & t('TERM_ENCODED'))
+
+		Case StringInStr($sFileType, "Web ARChive")
+			extract($TYPE_7Z, "Web " & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Windows Update Package")
 			extract($TYPE_MSU, 'Windows Update ' & t('TERM_PACKAGE'))
