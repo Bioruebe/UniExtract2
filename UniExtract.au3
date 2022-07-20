@@ -1706,6 +1706,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "BinHex encoded")
 			extract($TYPE_7Z, "BinHex  " & t('TERM_ENCODED'))
 
+		Case StringInStr($sFileType, "PHP source")
+			check7z("Phar  " & t('TERM_ARCHIVE'))
+
 		Case StringInStr($sFileType, "Web ARChive")
 			extract($TYPE_7Z, "Web " & t('TERM_ARCHIVE'))
 
@@ -1889,7 +1892,7 @@ Func check7z($arcdisp = 0)
 	If $7zfailed Then Return
 
 	Cout("Testing 7zip")
-	_CreateTrayMessageBox(t('TERM_TESTING') & " 7-Zip")
+	_CreateTrayMessageBox(t('TERM_TESTING') & " " & ($arcdisp == 0? "7-Zip": $arcdisp))
 	Local $return = FetchStdout($7z & ' l "' & $file & '"', $filedir, @SW_HIDE)
 
 	If StringInStr($return, "Listing archive:") And Not (StringInStr($return, "Errors: ") And StringInStr($return, "Can not open the file as ")) Then
