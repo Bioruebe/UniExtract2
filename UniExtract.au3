@@ -312,10 +312,7 @@ Global $CM_Shells[5][4] = [ _
 
 ; Make sure a language file exists
 If Not FileExists($sEnglishLangFile) And Not FileExists($langdir) Then
-	If MsgBox($MB_ICONWARNING + $MB_YESNO, $title, "No language file found." & @CRLF & @CRLF & "Do you want Universal Extractor to download all missing files?") == $IDYES Then
-		CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
-		Run($sUniExtract, @ScriptDir)
-	EndIf
+	RepairProgramFiles("No language file found." & @CRLF & @CRLF & "Do you want " & $name & " to download all missing files?")
 	Exit 99
 EndIf
 
@@ -341,6 +338,8 @@ If $sOptGuid = "" Or StringIsSpace($sOptGuid) Then
 		Sleep(250)
 	WEnd
 EndIf
+
+If Not FileExists($bindir) And RepairProgramFiles(t('PROGRAM_FILES_MISSING')) Then Exit 99
 
 ; If no file passed, display GUI to select file and set options
 If $prompt Then
@@ -5664,6 +5663,14 @@ Func GetFFmpeg()
 	Return True
 EndFunc
 
+; Notify about missing program files and redownload them
+Func RepairProgramFiles($sMsg)
+	If MsgBox($MB_ICONWARNING + $MB_YESNO, $title, $sMsg) <> $IDYES Then Return False
+
+	CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
+	Run($sUniExtract, @ScriptDir)
+	Return True
+EndFunc
 
 ; ------------------------ Begin GUI Control Functions ------------------------
 
