@@ -124,7 +124,7 @@ Feel free to submit bug reports or feature requests using the issues tab or the 
 Universal Extractor is licensed under **GPLv2**. See LICENSE for the full legal text.
 Code (functions, UDFs, etc.) written from scratch by me (which are not under copyleft) can also be used in your own projects under the terms of a BSD 3-clause license.
 
-Universal Extractor uses [TrIDLib by Marco Pontello](http://mark0.net/code-tridlib-e.html) and many other great tools and libraries to support as many file formats as possible.
+Universal Extractor uses [TrIDLib by Marco Pontello](http://mark0.net/code-tridlib-e.html), several [7zip plugins by Dec Software](https://www.tc4shell.com/en/7zip/) and many other great tools and libraries to support as many file formats as possible. Please consider supporting the authors of the software [mentioned here](/docs/helper_binaries_info.txt).
 
 Please note that Universal Extractor includes third-party software, which uses different licenses than the main program. Specifically, **some extractors do not allow commercial use**. If you intend to use the software for commercial purposes, please check the individual license files in the `/docs` subdirectory and the [helper binary info file](https://github.com/Bioruebe/UniExtract2/blob/master/helper_binaries_info.txt) first.
 Feel free to delete files, whose license does not fit your use case, from the `/bin` subdirectory.
