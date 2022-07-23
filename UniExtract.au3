@@ -171,7 +171,7 @@ Global $hMutex, $hProgress, $hTridDll = 0
 Global $prompt, $prefs, $sUpdateURL = $sUrlUpdateStable, $eCustomPromptSetting = $PROMPT_ASK
 Global $Type, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
 Global $logdir, $archdir, $userDefDir, $batchQueue, $fileScanLogFile, $sPasswordFile, $aDefDirs[0]
-Global $sFullLog = "", $success = $RESULT_UNKNOWN, $isofile = 0, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
+Global $sFullLog = "", $success = $RESULT_UNKNOWN, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
 Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Global $unpackfailed, $exefailed, $ttarchfailed
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
@@ -1421,7 +1421,7 @@ Func filecompare($sFileType)
 		Case StringInStr($sFileType, "Macromedia Flash data", 0)
 			extract($TYPE_SWF, 'Shockwave Flash ' & t('TERM_CONTAINER'))
 		Case StringInStr($sFileType, "PowerISO Direct-Access-Archive", 0)
-			extract($TYPE_DAA, 'DAA/GBI ' & t('TERM_DISK_IMAGE'))
+			extractDiskImage($TYPE_DAA, 'DAA/GBI ' & t('TERM_DISK_IMAGE'))
 		Case StringInStr($sFileType, "sfArk compressed Soundfont")
 			extract($TYPE_SFARK, 'sfArk ' & t('TERM_COMPRESSED'))
 		Case StringInStr($sFileType, "SQLite", 0)
@@ -1463,7 +1463,7 @@ Func filecompare($sFileType)
 	  StringInStr($sFileType, "batch file") Or StringInStr($sFileType, "XML") Or _
 	  StringInStr($sFileType, "HTML") Or StringInStr($sFileType, "source") Or _
 	  StringInStr($sFileType, "Rich ")) Or _
-	  StringInStr($sFileType, "image") Or StringInStr($sFileType, "icon resource") Or _
+	  StringInStr($sFileType, "icon resource") Or _
 	 (StringInStr($sFileType, "bitmap") And Not StringInStr($sFileType, "MGR bitmap")) Or _
 	  StringInStr($sFileType, "WAVE audio") Or StringInStr($sFileType, "boot sector;") Or _
 	  StringInStr($sFileType, "shortcut") Or StringInStr($sFileType, "empty") Or _
@@ -1552,15 +1552,16 @@ Func tridcompare($sFileType)
 			extract($TYPE_CAB, 'Microsoft CAB ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Magic ISO Universal Image Format")
-			extract($TYPE_UIF, 'UIF ' & t('TERM_DISK_IMAGE'))
+			extractDiskImage($TYPE_UIF, 'UIF ' & t('TERM_DISK_IMAGE'))
 
 		Case StringInStr($sFileType, "Generic PC disk image") Or StringInStr($sFileType, "WinImage compressed disk image") Or _
-			 StringInStr($sFileType, "CDImage") Or StringInStr($sFileType, "null bytes")
+			 StringInStr($sFileType, "CDImage") Or StringInStr($sFileType, "CD image") Or _
+			 StringInStr($sFileType, "Nero Burning ROM") Or StringInStr($sFileType, "null bytes")
 			CheckIso()
-			check7z(t('TERM_DISK_IMAGE'))
+			check7z(t('TERM_DISK_IMAGE'), True)
 
 		Case StringInStr($sFileType, "PowerISO Direct-Access-Archive") Or StringInStr($sFileType, "gBurner Image")
-			extract($TYPE_DAA, 'DAA/GBI ' & t('TERM_DISK_IMAGE'))
+			extractDiskImage($TYPE_DAA, 'DAA/GBI ' & t('TERM_DISK_IMAGE'))
 
 		Case StringInStr($sFileType, "DGCA Digital G Codec Archiver")
 			extract($TYPE_DGCA, 'DGCA ' & t('TERM_ARCHIVE'))
@@ -1590,7 +1591,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_ISCAB, 'InstallShield CAB ' & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "ISo Zipped format")
-			extract($TYPE_ISZ, 'Zipped ISO ' & t('TERM_DISK_IMAGE'))
+			extractDiskImage($TYPE_ISZ, "Zipped ISO " & t('TERM_DISK_IMAGE'))
 
 		Case StringInStr($sFileType, "KGB archive")
 			extract($TYPE_KGB, 'KGB ' & t('TERM_ARCHIVE'))
@@ -1888,7 +1889,7 @@ Func CloseExeInfo($aReturn)
 EndFunc
 
 ; Determine if 7-zip can extract the file
-Func check7z($arcdisp = 0)
+Func check7z($arcdisp = 0, $bIsDiskImage = False, $returnSuccess = False, $returnFail = False)
 	If $7zfailed Then Return
 
 	Cout("Testing 7zip")
@@ -1897,14 +1898,16 @@ Func check7z($arcdisp = 0)
 
 	If StringInStr($return, "Listing archive:") And Not (StringInStr($return, "Errors: ") And StringInStr($return, "Can not open the file as ")) Then
 		_DeleteTrayMessageBox()
-		If $arcdisp Then
-			extract($TYPE_7Z, $arcdisp)
+		If $bIsDiskImage Then
+			Return extractDiskImage($TYPE_7Z, $arcdisp)
+		ElseIf $arcdisp Then
+			Return extract($TYPE_7Z, $arcdisp, "", $returnSuccess, $returnFail)
 		ElseIf $fileext = "exe" Then
 			If StringInStr($return, "InstallShield") Then CheckInstallShieldCab()
 
-			extract($TYPE_7Z, "7-Zip " & t('TERM_INSTALLER') & " " & t('TERM_PACKAGE'))
+			Return extract($TYPE_7Z, "7-Zip " & t('TERM_INSTALLER') & " " & t('TERM_PACKAGE'), "", $returnSuccess, $returnFail)
 		Else
-			extract($TYPE_7Z, "7-Zip " & t('TERM_ARCHIVE'))
+			Return extract($TYPE_7Z, "7-Zip " & t('TERM_ARCHIVE'), "", $returnSuccess, $returnFail)
 		EndIf
 	EndIf
 
@@ -2084,11 +2087,10 @@ Func CheckInstallShieldCab()
 EndFunc
 
 ; Determine if file is CD/DVD image
-Func CheckIso()
+Func CheckIso($returnSuccess = False, $returnFail = False)
 	If $isofailed Then Return False
 	Cout("Testing image file")
 	_CreateTrayMessageBox(t('TERM_TESTING') & " " & t('TERM_DISK_IMAGE'))
-	If $fileext = "cue" And FileExists(StringTrimRight($file, 3) & "bin") Then $file = StringTrimRight($file, 3) & "bin"
 
 	Local $return = FetchStdout($quickbms & ' -l "' & $bindir & $iso & '" "' & $file & '"', $filedir, @SW_HIDE)
 	_DeleteTrayMessageBox()
@@ -2097,7 +2099,8 @@ Func CheckIso()
 		$isofailed = True
 		Return False
 	EndIf
-	Return extract($TYPE_QBMS, t('TERM_DISK_IMAGE'), $iso, $isofile, $isofile)
+
+	Return extract($TYPE_QBMS, t('TERM_DISK_IMAGE'), $iso, $returnSuccess, $returnFail)
 EndFunc
 
 ; Try listing msi contents with lessmsi
@@ -2173,16 +2176,14 @@ Func InitialCheckExt()
 		Case "ipk", "tbz2", "tgz", "tz", "tlz", "txz"
 			extract($TYPE_CTAR, 'Compressed Tar ' & t('TERM_ARCHIVE'))
 		; Disk images - file type identification is not always reliable
-		Case "bin", "cue", "cdi", "mdf"
+		Case "bin", "cdi", "mdf"
 			CheckIso()
+			check7z(t('TERM_DISK_IMAGE'), True)
 		Case "dmg"
 			extract($TYPE_7Z, 'DMG ' & t('TERM_IMAGE'))
-		Case "iso"
-			check7z("Iso " & t('TERM_DISK_IMAGE'))
+		Case "cue", "iso"
+			check7z(t('TERM_DISK_IMAGE'), True)
 			CheckIso()
-		Case "nrg"
-			CheckIso()
-			check7z("Nero Burning ROM " & t('TERM_DISK_IMAGE'))
 		Case "unitypackage"
 			extract($TYPE_UNITYPACKAGE, "Unity Engine Asset Package")
 	EndSwitch
@@ -2474,14 +2475,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			If @extended Then terminate($STATUS_PASSWORD, $file, $arctype, $arcdisp)
 
 		Case $TYPE_DAA
-			; Prompt user to continue
-			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', 'DAA/GBI', True)
-
-			; Begin conversion to .iso format
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & "DAA " & t('TERM_DISK_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
-			$isofile = $filedir & '\' & $filename & '.iso'
-			_Run($daa & ' "' & $file & '" "' & $isofile & '"', $filedir)
+			Local $sFile = $outdir & "\" & $filename & ".iso"
+			_Run($daa & ' "' & $file & '" "' & $sFile & '"', $outdir)
 
 		Case $TYPE_DCP
 			HasPlugin($dcp)
@@ -2755,12 +2751,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndSwitch
 
 		Case $TYPE_ISZ
-			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', 'ISZ', True)
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & 'ISZ ' & t('TERM_DISK_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
 
 			_RunInTempOutdir($tempoutdir, $isz & ' "' & $file & '"', $tempoutdir, True, True)
-			$isofile = $outdir & "\" & $filename & '.iso'
 
 		Case $TYPE_KGB
 			_Run($kgb & ' "' & $file & '"', $outdir, @SW_MINIMIZE, True, False, False)
@@ -3144,15 +3137,8 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			EndIf
 
 		Case $TYPE_UIF
-			_DeleteTrayMessageBox()
-			Prompt(32 + 4, 'CONVERT_CDROM', 'UIF', True)
-
-			; Begin conversion, format selected by uif2iso
 			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & "UIF " & t('TERM_DISK_IMAGE') & ' (' & t('TERM_STAGE') & ' 1)')
 			_Run($uif & ' "' & $file & '" "' & $outdir & "\" & $filename & '"', $filedir, True, True, True)
-
-			; TODO: the converted image can be a different format than ISO
-			$isofile = _FileSearchFirst($outdir, $filename & ".*")
 
 ;~ 		Case $TYPE_UNITY
 ;~ 			_Run($unity & ' extract "' & $file & '"', $filedir, @SW_MINIMIZE, True, True, True, False)
@@ -3308,7 +3294,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Cout("Names generated successfully. Extracting...")
 				_Run($visionaire3 & ' "' & $file & '" /force /names="' & $tmp & '"', $outdir, @SW_HIDE, True, True, False, False)
 			Else
-				_ArrayAdd($aWarnings, "Failed to extract file names. Please make sure the correct data.vis file was selected.")
+				AddWarning("Failed to extract file names. Please make sure the correct data.vis file was selected.")
 				Cout("Failed to extract names. Some files may not be usable.")
 				_Run($visionaire3 & ' "' & $file & '" /force', $outdir, @SW_HIDE, True, True, False, False)
 			EndIf
@@ -3391,26 +3377,6 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	If Not $returnFail Then _DeleteTrayMessageBox()
 
 
-	If $isofile And FileExists($isofile) And Not ($returnSuccess Or $returnFail) Then
-		If FileGetSize($isofile) > 0 Then
-			Cout("Extracting converted ISO file " & $isofile)
-			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & StringUpper($arctype) & " " & t('TERM_DISK_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
-			$file = $isofile
-			If Not CheckIso() Then _Run($7z & ' x "' & $isofile & '"', $outdir)
-			If $success <> $RESULT_FAILED Or Prompt(16 + 4, 'CONVERT_CDROM_STAGE2_FAILED') = 0 Then
-				$initdirsize -= FileGetSize($isofile)
-				FileDelete($isofile)
-			EndIf
-		Else
-			Cout("Failed to convert to ISO " & $isofile)
-			Prompt(16, 'CONVERT_CDROM_STAGE1_FAILED')
-			If FileExists($isofile) Then FileDelete($isofile)
-			check7z()
-			$success = $RESULT_FAILED
-		EndIf
-	EndIf
-
-
 	; -----Success evaluation----- ;
 
 	Cout("Extraction finished, success: " & $success)
@@ -3443,6 +3409,30 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 	If Not $returnSuccess Then terminate($STATUS_SUCCESS, $filenamefull, $arctype, $arcdisp)
 	$success = $RESULT_UNKNOWN
 	Return 1
+EndFunc
+
+; Extract disk images and convert then if necessary
+Func extractDiskImage($arctype, $arcdisp = 0, $additionalParameters = "")
+	Cout("Extracting disk image")
+	extract($arctype, $arcdisp, $additionalParameters, True)
+
+	Local $sFile = _FileSearchFirstMultiExtension($outdir, $filename, "iso;cue;bin;mdf;mds;ccd;nrg")
+	If @error Then
+		Cout("The disk image was extracted directly, no conversion necessary")
+		terminate($STATUS_SUCCESS, $filenamefull, $arctype, $arcdisp)
+	EndIf
+
+	Cout("Extracting converted disk image " & $sFile)
+	_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & StringUpper($arctype) & " " & t('TERM_DISK_IMAGE') & ' (' & t('TERM_STAGE') & ' 2)')
+	$file = $sFile
+
+	If CheckIso(True, True) Or check7z(t('TERM_DISK_IMAGE'), False, True, True) Then
+		_FileDelete($sFile)
+	Else
+		AddWarning(t('WARN_CONVERSION_FAILED'))
+	EndIf
+
+	terminate($STATUS_SUCCESS, $filenamefull, $arctype, $arcdisp)
 EndFunc
 
 ; Extract via definition files
@@ -3993,7 +3983,7 @@ Func RenameBase64PathNames($sPath, $hDll = 0)
 	DllClose($hDll)
 EndFunc
 
-; Search for a given pattern and return first result
+; Search for a given file pattern and return first result
 Func _FileSearchFirst($sPath, $sMask = "*")
 	Cout("Searching " & $sMask & " in " & $sPath)
 	Local $hSearch = FileFindFirstFile($sPath & "\" & $sMask)
@@ -4003,9 +3993,27 @@ Func _FileSearchFirst($sPath, $sMask = "*")
 	Local $iError = @error
 	FileClose($hSearch)
 
-	If $iError Then Return SetError(1)
+	If $iError Then Return SetError(1, 0, 0)
 	Cout("-> " & $sFile)
 	Return $sPath & "\" & $sFile
+EndFunc
+
+; Search for a given file pattern with multiple allowed extensions and return first result
+Func _FileSearchFirstMultiExtension($sPath, $sMask = "*", $sExtensions = "*")
+	Local $aExtensions = StringSplit($sExtensions, ";", $STR_NOCOUNT)
+	For $i = 0 To UBound($aExtensions) - 1
+		$aExtensions[$i] = $sMask & "." & $aExtensions[$i]
+	Next
+
+	$sMask = _ArrayToString($aExtensions, ";")
+	Cout("Searching " & $sMask & " in " & $sPath)
+
+	Local $aReturn = _FileListToArrayRec($sPath, $sMask, $FLTAR_FILES, $FLTAR_NORECUR, $FLTAR_NOSORT, $FLTAR_FULLPATH)
+	If @error Or $aReturn[0] < 1 Then Return SetError(1, 0, 0)
+
+	Local $sFile = $aReturn[1]
+	Cout("-> " & $sFile)
+	Return $sFile
 EndFunc
 
 ; Open file and return contents
@@ -4732,15 +4740,20 @@ Func EvaluateLog($sLog)
 	EndIf
 EndFunc
 
+; Add a warning message to the global array
+Func AddWarning($sWarning)
+	_ArrayAdd($aWarnings, $sWarning)
+EndFunc
+
 Func ParseWarnings($sLog)
 	Cout("Searching for warnings")
 
 	; 7-zip
 	Local $sReturn = _StringExtractAfter($sLog, "WARNINGS:" & @CRLF)
-	If Not @error Then _ArrayAdd($aWarnings, $sReturn)
+	If Not @error Then AddWarning($sReturn)
 
 	$sReturn = _StringExtractAfter($sLog, "Open WARNING: ")
-	If Not @error Then _ArrayAdd($aWarnings, $sReturn)
+	If Not @error Then AddWarning($sReturn)
 EndFunc
 
 ; Determine whether the archive is password protected or not and try passwords from list if necessary
@@ -5150,7 +5163,7 @@ Func MoveFiles($source, $dest, $force = False, $omit = "", $removeSourceDir = Fa
 	WEnd
 
 	FileClose($hSearch)
-	If $iErrors > 0 Then _ArrayAdd($aWarnings, Cout($iErrors & " files/folders could not be moved"))
+	If $iErrors > 0 Then AddWarning(t('WARN_MOVE_FAILED', $iErrors))
 	If $bShowStatus Then _DeleteTrayMessageBox()
 	If $removeSourceDir Then Return DirRemove($source, ($omit = "" And $iErrors < 1? 1: 0))
 EndFunc
