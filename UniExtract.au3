@@ -2181,7 +2181,7 @@ Func InitialCheckExt()
 			check7z(t('TERM_DISK_IMAGE'), True)
 		Case "dmg"
 			extract($TYPE_7Z, 'DMG ' & t('TERM_IMAGE'))
-		Case "cue", "iso"
+		Case "cue", "gdi", "iso"
 			check7z(t('TERM_DISK_IMAGE'), True)
 			CheckIso()
 		Case "unitypackage"
