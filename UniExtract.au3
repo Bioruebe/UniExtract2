@@ -106,7 +106,7 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 	  $STATUS_MISSINGDEF = "missingdef", $STATUS_MOVEFAILED = "movefailed", $STATUS_NOFREESPACE = "nofreespace", $STATUS_MISSINGPART = "missingpart", _
 	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent", $STATUS_TRAYEXIT = "trayexit"
 Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
-	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
+	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHD = "chd", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
 	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
 	  $TYPE_FEAD = "fead", $TYPE_FORGE = "installforge", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", _
 	  $TYPE_HLP = "hlp", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
@@ -118,8 +118,8 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
 	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
-	  $TYPE_CAB, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, $TYPE_FORGE, _
-	  $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
+	  $TYPE_CAB, $TYPE_CHD, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
+	  $TYPE_FORGE, $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
 	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, $TYPE_NSIS, _
 	  $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, $TYPE_SQLITE, _
 	  $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, $TYPE_UNREAL, _
@@ -204,6 +204,7 @@ Const $alz = "unalz.exe"
 Const $arj = "arj.exe"
 Const $aspack = Quote($bindir & "AspackDie.exe", True)
 Const $bcm = Quote($archdir & "bcm.exe", True)
+Const $chd = $archdir & "chdman.exe"
 Const $cic = "cicdec.exe"
 Const $daa = "daa2iso.exe"
 Const $enigma = "EnigmaVBUnpacker.exe"
@@ -1554,6 +1555,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "Magic ISO Universal Image Format")
 			extractDiskImage($TYPE_UIF, 'UIF ' & t('TERM_DISK_IMAGE'))
 
+		Case StringInStr($sFileType, "MAME Compressed Hard Disk image")
+			extractDiskImage($TYPE_CHD, "MAME " & t('TERM_DISK_IMAGE'))
+
 		Case StringInStr($sFileType, "Generic PC disk image") Or StringInStr($sFileType, "WinImage compressed disk image") Or _
 			 StringInStr($sFileType, "CDImage") Or StringInStr($sFileType, "CD image") Or StringInStr($sFileType, "null bytes") Or _
 			 StringInStr($sFileType, "Nero Burning ROM") Or StringInStr($sFileType, "Error Code Modeler")
@@ -1696,7 +1700,7 @@ Func tridcompare($sFileType)
 			extract($TYPE_SIS, 'SymbianOS ' & t('TERM_INSTALLER'))
 
 		Case StringInStr($sFileType, "MacBinary")
-			extract($TYPE_7Z, "MacBinary" & t('TERM_ENCODED'))
+			extract($TYPE_7Z, "MacBinary " & t('TERM_ENCODED'))
 
 		Case StringInStr($sFileType, "Macromedia Flash Player")
 			extract($TYPE_SWF, 'Shockwave Flash ' & t('TERM_CONTAINER'))
@@ -2412,6 +2416,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 				_Run($cmd & $expand & ' -F:* "' & $file & '" "' & $outdir & '"', $filedir, @SW_HIDE, True, True, False)
 			EndIf
+
+		Case $TYPE_CHD
+			_Run($chd & ' extracthd -i "' & $file & '" -o "' & $outdir & '\' & $filename & '.img"', $outdir)
 
 		Case $TYPE_CHM
 			_Run($7z & ' x "' & $file & '"', $outdir)
@@ -3416,7 +3423,7 @@ Func extractDiskImage($arctype, $arcdisp = 0, $additionalParameters = "")
 	Cout("Extracting disk image")
 	extract($arctype, $arcdisp, $additionalParameters, True)
 
-	Local $sFile = _FileSearchFirstMultiExtension($outdir, $filename, "iso;cue;bin;mdf;mds;ccd;nrg")
+	Local $sFile = _FileSearchFirstMultiExtension($outdir, $filename, "iso;cue;bin;mdf;mds;ccd;nrg;img")
 	If @error Then
 		Cout("The disk image was extracted directly, no conversion necessary")
 		terminate($STATUS_SUCCESS, $filenamefull, $arctype, $arcdisp)
