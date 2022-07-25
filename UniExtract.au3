@@ -1555,8 +1555,8 @@ Func tridcompare($sFileType)
 			extractDiskImage($TYPE_UIF, 'UIF ' & t('TERM_DISK_IMAGE'))
 
 		Case StringInStr($sFileType, "Generic PC disk image") Or StringInStr($sFileType, "WinImage compressed disk image") Or _
-			 StringInStr($sFileType, "CDImage") Or StringInStr($sFileType, "CD image") Or _
-			 StringInStr($sFileType, "Nero Burning ROM") Or StringInStr($sFileType, "null bytes")
+			 StringInStr($sFileType, "CDImage") Or StringInStr($sFileType, "CD image") Or StringInStr($sFileType, "null bytes") Or _
+			 StringInStr($sFileType, "Nero Burning ROM") Or StringInStr($sFileType, "Error Code Modeler")
 			CheckIso()
 			check7z(t('TERM_DISK_IMAGE'), True)
 
@@ -4729,7 +4729,7 @@ Func EvaluateLog($sLog)
 		   Or StringInStr($sLog, "ERROR: Wrong tag in package", 1) Or StringInStr($sLog, "unzip:  cannot find", 1) _
 		   Or StringInStr($sLog, "Open ERROR: Can not open the file as") Or StringInStr($sLog, "Error: System.Exception:") _
 		   Or StringInStr($sLog, "unknown WISE-version -> contact author") Or StringInStr($sLog, "Critical error:") _
-		   Or StringInStr($sLog, "[ERROR] ") Or StringInStr($sLog, "MainHeaderNotFoundError") Then
+		   Or StringInStr($sLog, "[ERROR] ") Or StringInStr($sLog, "MainHeaderNotFoundError") Or StringInStr($sLog, "*** ERROR:") Then
 		$success = $RESULT_FAILED
 		SetError(1)
 	ElseIf StringInStr($sLog, "already exists.") Or StringInStr($sLog, "Overwrite") Then
@@ -5615,6 +5615,7 @@ Func _AfterUpdate()
 	FileDelete($bindir & "regexp.ndll")
 	FileDelete($bindir & "lime.ndll")
 	FileDelete($bindir & "dbxplug.wcx")
+	FileDelete($bindir & "unecm.exe")
 
 	FileDelete($defdir & "flv.ini")
 	FileDelete($defdir & "ns2.ini")
