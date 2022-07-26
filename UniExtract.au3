@@ -4250,7 +4250,7 @@ Func _CreateTrayMessageBox($TBText)
 
 	; Create GUI
 	Global $TBgui = GUICreate($name, $TBwidth, $TBheight, $trayX > -1 ? $trayX : @DesktopWidth - ($TBwidth + $iBetween), $trayY > -1 ? $trayY : $iSpace, _
-			$WS_POPUP, BitOR($WS_EX_TOOLWINDOW, $WS_EX_TOPMOST))
+			$WS_POPUP, BitOR($WS_EX_TOOLWINDOW, $WS_EX_TOPMOST, $WS_EX_TRANSPARENT))
 	GUISetBkColor($bDark? 0x2D2D2D: 0xEEEEEE)
 	_GuiRoundCorners($TBgui, 0, 0, 5, 5)
 
@@ -4272,7 +4272,6 @@ Func _CreateTrayMessageBox($TBText)
 		GUICtrlSetColor($idTrayStatusExt, 0xFFFFFF)
 	EndIf
 
-;~     DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 250, "long", 0x00080000 )
 	GUISetState(@SW_SHOWNOACTIVATE)
 
 	; Workaround to keep corners round while fading in
@@ -4292,9 +4291,8 @@ EndFunc
 ; Based on work by Valuater (http://www.autoitscript.com/forum/topic/85977-system-tray-message-box-udf/)
 Func _DeleteTrayMessageBox()
 	If Not $TBgui Then Return
-	;DllCall ( "user32.dll", "int", "AnimateWindow", "hwnd", $TBgui, "int", 300, "long", 0x00090000 )
 
-	; Workaround to keep corners round while fading out
+	; Fade out
 	For $i = 225 To 0 Step -10
 		WinSetTrans($TBgui, "", $i)
 		Sleep(1)
@@ -5985,18 +5983,14 @@ Func _WinGetByPID($iPID)
 EndFunc
 
 ; Round corners of status box
-; Code by ? (http://www.autoitscript.com/forum/topic/100790-guiroundcorners-help/page__p__719767__hl__round%20corner__fromsearch__1#entry719767)
-Func _GuiRoundCorners($h_win, $i_x1, $i_y1, $i_x3, $i_y3)
-	Local $pos, $ret, $ret2
-	$pos = WinGetPos($h_win)
-	$ret = DllCall("gdi32.dll", "long", "CreateRoundRectRgn", "long", $i_x1, "long", $i_y1, "long", $pos[2], "long", $pos[3], "long", $i_x3, "long", $i_y3)
+; Based on http://www.autoitscript.com/forum/topic/100790-guiroundcorners-help/page__p__719767__hl__round%20corner__fromsearch__1#entry719767
+Func _GuiRoundCorners($hWnd, $i_x1, $i_y1, $i_x3, $i_y3)
+	Local $aPos = WinGetPos($hWnd)
+	Local $aReturn = DllCall("gdi32.dll", "long", "CreateRoundRectRgn", "long", $i_x1, "long", $i_y1, "long", $aPos[2], "long", $aPos[3], "long", $i_x3, "long", $i_y3)
+	If Not $aReturn[0] Then Return False
 
-	If $ret[0] Then
-		$ret2 = DllCall("user32.dll", "long", "SetWindowRgn", "hwnd", $h_win, "long", $ret[0], "int", 1)
-		If $ret2[0] Then Return 1
-	EndIf
-
-	Return 0
+	$aReturn = DllCall("user32.dll", "long", "SetWindowRgn", "hwnd", $hWnd, "long", $aReturn[0], "int", 1)
+	Return $aReturn[0]
 EndFunc
 
 ; Create a checkbox control, set its checked state and advance the y position
