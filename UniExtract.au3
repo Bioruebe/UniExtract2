@@ -2185,7 +2185,7 @@ Func InitialCheckExt()
 			check7z(t('TERM_DISK_IMAGE'), True)
 		Case "dmg"
 			extract($TYPE_7Z, 'DMG ' & t('TERM_IMAGE'))
-		Case "cue", "gdi", "iso"
+		Case "cue", "gdi", "iso", "mds"
 			check7z(t('TERM_DISK_IMAGE'), True)
 			CheckIso()
 		Case "unitypackage"
@@ -5640,6 +5640,8 @@ Func _AfterUpdate()
 	FileDelete($licensedir & "Arc-reader_licence.txt")
 	FileDelete($licensedir & "Arc-reader_readme.txt")
 	FileDelete($licensedir & "libpng_license.txt")
+	FileDelete($licensedir & "wixtoolset_source.zpaq")
+	FileDelete($licensedir & "unzoo.c")
 
 	FileDelete($iconsdir & "Bioruebe.jpg")
 	FileDelete($iconsdir & "uniextract_inno.bmp")
