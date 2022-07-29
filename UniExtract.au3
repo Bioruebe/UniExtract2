@@ -10,7 +10,7 @@
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
-#AutoIt3Wrapper_Run_Au3Stripper=y
+#AutoIt3Wrapper_Run_Au3Stripper=n
 #Au3Stripper_Parameters=/mo
 #EndRegion ;**** Directives created by AutoIt3Wrapper_GUI ****
 
@@ -700,7 +700,7 @@ Func ReadPrefs()
 	Else
 		; Test file permissions, e.g. when UniExtract is in program files directory,
 		; user settings are stored in %appdata% due to permission issues
-		If CanAccess($globalIni) Then
+		If CanAccess($globalIni) And HasWriteAccess($globalIni) Then
 			Cout("Using global settings")
 			$settingsdir = @ScriptDir
 		Else
@@ -3680,27 +3680,32 @@ Func Cleanup($aFiles, $iMode = $iCleanup, $sDestination = 0)
 	WEnd
 EndFunc
 
-; Check write permissions for specified file or folder
+; Test if a path can be accessed
 Func CanAccess($sPath)
-	Local $bIsTemp = False
-
 	Cout("Checking permissions for path " & $sPath)
+
 	Local $bExists = FileExists($sPath)
-	If _IsDirectory($sPath) Or ($bExists = False And StringRight($sPath, 1)) Then
-		$bIsTemp = True
+	If _IsDirectory($sPath) Or ($bExists = False And StringRight($sPath, 1) == "\") Then
 		$sPath = _TempFile($sPath)
-	Else
-		If Not $bExists Then Return SetError(1, 0, False)
+		Return HasWriteAccess($sPath, True)
 	EndIf
 
-	Local $hFile = FileOpen($sPath, $FO_APPEND)
+	Return $bExists
+EndFunc
+
+; Test if the given path can be written to
+Func HasWriteAccess($sPath, $bDelete = False)
+	Cout("Testing write access")
+
+	Local $hFile = FileOpen($sPath, $FO_BINARY + $FO_APPEND)
 	If $hFile == -1 Then
 		Cout("Access denied")
 		Return False
 	EndIf
-	FileClose($hFile)
 
-	If $bIsTemp Then FileDelete($sPath)
+	FileClose($hFile)
+	If $bDelete Then FileDelete($sPath)
+
 	Return True
 EndFunc
 
@@ -6990,7 +6995,7 @@ Func GUI_ContextMenu()
 		EndIf
 	Next
 
-	; Disable Cascading context menu for non Win 7+ users as it is not supported
+	; Disable Cascading context menu on older versions of Windows as it is not supported
 	If _IsWin7OrNewer() Then
 		; Check if Cascading context menu entries are enabled
 		For $i = 0 To $iSize
