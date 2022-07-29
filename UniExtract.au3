@@ -4472,7 +4472,17 @@ Func _GetOSLanguage()
 	Return $aLanguage[1]
 EndFunc
 
-; Determine whether Windows version >= Windows 7 or not
+; Determine whether Windows version is >= 10 or not
+Func _IsWin10OrNewer()
+	Switch @OSVersion
+		Case "WIN_10", "WIN_11", "WIN_2019", "WIN_2022"
+			Return True
+		Case Else
+			return False
+	EndSwitch
+EndFunc
+
+; Determine whether Windows version is >= 7 or not
 Func _IsWin7OrNewer()
 	Return @OSVersion = "WIN_7" Or @OSVersion = "WIN_8" Or @OSVersion = "WIN_81" Or @OSVersion = "WIN_10" Or @OSVersion = "WIN_2016" Or _
 		   @OSVersion = "WIN_2012R2" Or @OSVersion = "WIN_2012"
@@ -6082,7 +6092,7 @@ EndFunc
 
 ; Set GUI color to white when using Windows 10 light theme
 Func _GuiSetColor()
-	If @OSVersion <> "WIN_10" Or $bHighContrastMode Or Not $bLightTheme Then Return
+	If Not _IsWin10OrNewer() Or $bHighContrastMode Or Not $bLightTheme Then Return
 
 	GUISetBkColor($COLOR_WHITE)
 	GUICtrlSetDefBkColor($COLOR_WHITE)
