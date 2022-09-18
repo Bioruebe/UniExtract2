@@ -4,39 +4,41 @@
 
 ### Compressed archives
 
-| Archive type   | Common file extension(s)                                     |
-| -------------- | ------------------------------------------------------------ |
-| 7-zip          | .7z, .exe, .001                                              |
-| ACE            | .ace, .exe                                                   |
-| **ALZip**      | .alz                                                         |
-| ARC            | .arc                                                         |
-| ARJ            | .arj, .exe                                                   |
-| **BCM**        | .bcm                                                         |
-| **BGA**        | .bza, .gza                                                   |
-| bzip2          | .bz2, .tbz2, .tar.bz2                                        |
-| CPIO           | .cpio                                                        |
-| **DGCA**       | .dgc                                                         |
-| **FreeArc**¹   | .arc                                                         |
-| gzip archive   | .gz, .tgz, .tar.gz, .ipk                                     |
-| KGB            | .kgb, kge, .exe                                              |
-| Linux packages | .deb, .rpm                                                   |
-| **LBR**        | .lbr, .lzr, .lqr                                             |
-| **LZIP**       | .lz                                                          |
-| LZH            | .lzh, .lha                                                   |
-| LZMA           | .lzma                                                        |
-| LZO            | .lzo                                                         |
-| LZW            | .Z, .tz, .tar.Z                                              |
-| LZX            | .lzx                                                         |
-| PEA            | .pea                                                         |
-| RAR            | .rar, .exe, .001, .r00, .part1.rar                           |
-| **StuffIt**    | .sit, sitx                                                   |
-| TAR            | .tar, .tbz2, .tgz, .txz, .tz, .tar.bz2, .tar.gz, .tar.xz, .tar.Z, ctar |
-| UHARC          | .uha                                                         |
-| UPX            | .exe, .dll                                                   |
-| XZ             | .xz, .txz, .tar.xz                                           |
-| ZIP            | .zip, .jar, .xpi, .wz, .exe, .imz                            |
-| Zoo            | .zoo                                                         |
-| ZPAQ           | .zpaq                                                        |
+| Archive type         | Common file extension(s)                                               |
+| -------------------- | ---------------------------------------------------------------------- |
+| 7-zip                | .7z, .exe, .001                                                        |
+| ACE                  | .ace, .exe                                                             |
+| **ALZip**            | .alz                                                                   |
+| ARC                  | .arc                                                                   |
+| ARJ                  | .arj, .exe                                                             |
+| **Asar**             | .asar                                                                  |
+| **BCM**              | .bcm                                                                   |
+| **BGA**              | .bza, .gza                                                             |
+| bzip2                | .bz2, .tbz2, .tar.bz2                                                  |
+| **Chromium package** | .pak                                                                   |
+| CPIO                 | .cpio                                                                  |
+| **DGCA**             | .dgc                                                                   |
+| **FreeArc**¹         | .arc                                                                   |
+| gzip archive         | .gz, .tgz, .tar.gz, .ipk                                               |
+| KGB                  | .kgb, kge, .exe                                                        |
+| Linux packages       | .deb, .rpm                                                             |
+| **LBR**              | .lbr, .lzr, .lqr                                                       |
+| **LZIP**             | .lz                                                                    |
+| LZH                  | .lzh, .lha                                                             |
+| LZMA                 | .lzma                                                                  |
+| LZO                  | .lzo                                                                   |
+| LZW                  | .Z, .tz, .tar.Z                                                        |
+| LZX                  | .lzx                                                                   |
+| PEA                  | .pea                                                                   |
+| RAR                  | .rar, .exe, .001, .r00, .part1.rar                                     |
+| **StuffIt**          | .sit, sitx                                                             |
+| TAR                  | .tar, .tbz2, .tgz, .txz, .tz, .tar.bz2, .tar.gz, .tar.xz, .tar.Z, ctar |
+| UHARC                | .uha                                                                   |
+| UPX                  | .exe, .dll                                                             |
+| XZ                   | .xz, .txz, .tar.xz                                                     |
+| ZIP                  | .zip, .jar, .xpi, .wz, .exe, .imz                                      |
+| Zoo                  | .zoo                                                                   |
+| ZPAQ                 | .zpaq                                                                  |
 
 ### Installers
 
@@ -72,37 +74,41 @@
 
 ### Disk images
 
-| Image type                      | Common file extension(s) |
-| ------------------------------- | ------------------------ |
-| **Amiga disk format**           | .adf                     |
-| **Android boot image**          | .img                     |
-| **Apple Disk Image**            | .dmg                     |
-| BIN/CUE                         | .bin, .cue               |
-| DiscJuggler CD-ROM image        | .cdi                     |
-| **Error Code Modeler**          | .ecm                     |
-| **gBurner Image**               | .gbi                     |
-| IMG floppy disk image           | .img                     |
-| ISO 9660                        | .iso                     |
-| **ISO Zipped format**           | .isz                     |
-| HTC NBH ROM image               | .nbh                     |
-| Nero                            | .nrg                     |
-| **PowerISO**                    | .daa                     |
-| **Magic ISO Image**             | .uif                     |
-| **VirtualBox Disk Image**       | .vdi                     |
-| **Virtual PC Virtual HD image** | .vhd                     |
-| **VMware 4 Virtual Disk**       | .vmdk                    |
-| Windows Imaging Format          | .wim                     |
+| Image type                        | Common file extension(s) |
+| --------------------------------- | ------------------------ |
+| **Amiga disk format**             | .adf                     |
+| **Android boot image**            | .img                     |
+| **Apple Disk Image**              | .dmg                     |
+| BIN/CUE                           | .bin, .cue               |
+| **CloneCD image**                 | .ccd                     |
+| **Compressed ISO**                | .cso                     |
+| DiscJuggler CD-ROM image          | .cdi                     |
+| **Dreamcast Gigabyte disc image** | .gdi                     |
+| **Error Code Modeler**            | .ecm                     |
+| **gBurner Image**                 | .gbi                     |
+| IMG floppy disk image             | .img                     |
+| ISO 9660                          | .iso                     |
+| **ISO Zipped format**             | .isz                     |
+| HTC NBH ROM image                 | .nbh                     |
+| Nero                              | .nrg                     |
+| **PowerISO**                      | .daa                     |
+| **Magic ISO Image**               | .uif                     |
+| **Media Descriptor File**         | .mdf, .mds               |
+| **VirtualBox Disk Image**         | .vdi                     |
+| **Virtual PC Virtual HD image**   | .vhd                     |
+| **VMware 4 Virtual Disk**         | .vmdk                    |
+| Windows Imaging Format            | .wim                     |
 
 ### Multimedia
 
-| File type                   | Common file extensions                                      | Details                                        |
-| ------------------------------ | ----------------------------------------------------------- | ---------------------------------------------- |
-| **Animated images**            | .gif, .png                                                  | Extracts individual frames from animated images |
-| **Audio files**                | .mp3, .ogg, .flac, .wma, .m4a, .aa,...                      | Convert compressed audio to .wav               |
-| **Flash files**                | .swf, .exe                                                  | Extract images, audio, flash components |
-| **FMOD Sample Bank**           | .fsb                                                        |                                                |
-| **sfArk compressed soundfont** | .sfark                                                      |                                                |
-| **Video files**                | .avi, .mp4, .mkv, .ogv, .webm, .wmv, .3gp, .m4v, .flv, .smk | Extracts all audio and video tracks            |
+| File type                      | Common file extensions                                      | Details                                          |
+| ------------------------------ | ----------------------------------------------------------- | ------------------------------------------------ |
+| **Animated images**            | .gif, .png                                                  | Extracts individual frames from animated images  |
+| **Audio files**                | .mp3, .ogg, .flac, .wma, .m4a, .aa,...                      | Convert compressed audio to .wav                 |
+| **Flash files**                | .swf, .exe                                                  | Extract images, audio, flash components          |
+| **FMOD Sample Bank**           | .fsb                                                        |                                                  |
+| **sfArk compressed soundfont** | .sfark                                                      |                                                  |
+| **Video files**                | .avi, .mp4, .mkv, .ogv, .webm, .wmv, .3gp, .m4v, .flv, .smk | Extracts all audio and (optionally) video tracks |
 
 ### Game archives
 
@@ -116,10 +122,10 @@
 | **NScripter**                  | .nsa, .ns2, .sar                                    |         |
 | **Ren'Py Visual Novel Engine** | .rpa                                                |         |
 | **RPG Maker**                  | .rgssad, .rgss2a, .rgss3a, .rpgmvp, .rpgmvo, rpgmvm |         |
-| **Smile Game builder**¹        | .sgbpack                                            |         |
+| **Smile Game builder**         | .sgbpack                                            |         |
 | **Telltale archive**           | .ttarch                                             |         |
 | **Unity**¹                     | .assets, .unity3d, .resource, .unitypackage         |         |
-| **Unreal Engine**¹             | ...                                                 |         |
+| **Unreal Engine**¹             | .pak                                                |         |
 | **UTAGE**                      | .utage                                              |         |
 | **Visionaire Engine**          | .vis, .vc001, .vv001                                |         |
 | **WinterMute Engine**          | .dcp                                                |         |
@@ -130,26 +136,30 @@
 
 ### Text-based files
 
-| File type                       | Common file extension(s)                |
-| ------------------------------- | --------------------------------------- |
-| **E-Mail message format**       | .eml                                    |
-| Encoded files                   | .b64, .ntx, .uu, .uue, .xx, .xxe, .yenc |
-| **GNU Gettext message catalog** | .mo                                     |
-| Microsoft Compiled Help file    | .chm                                    |
-| Microsoft Reader eBook          | .lit                                    |
-| Microsoft Windows Help file     | .hlp                                    |
-| MIME HTML archive               | .mht                                    |
-| Outlook Express mail archive    | .dbx                                    |
-| **Portable Document Format**¹   | .pdf                                    |
-| **Qt Message**                  | .qm                                     |
-| **SQLite database**             | .sqlite, .sqlite3, .db                  |
+| File type                       | Common file extension(s)                     |
+| ------------------------------- | -------------------------------------------- |
+| **E-Mail message format**       | .eml                                         |
+| **Encoded files**               | .b64, .hqx, .ntx, .uu, .uue, .xx, .xxe, .ync |
+| **GNU Gettext message catalog** | .mo                                          |
+| **MacBinary encoded file**      | different extensions                         |
+| Microsoft Compiled Help file    | .chm                                         |
+| Microsoft Reader eBook          | .lit                                         |
+| Microsoft Windows Help file     | .hlp                                         |
+| MIME HTML archive               | .mht                                         |
+| Outlook Express mail archive    | .dbx                                         |
+| **Php archive**                 | .phar                                        |
+| **Portable Document Format**¹   | .pdf                                         |
+| **Qt Message**                  | .qm                                          |
+| **SQLite database**             | .sqlite, .sqlite3, .db                       |
+| **Web archive**                 | .warc                                        |
 
 ### Other
 
-| File type              | Common file extension(s) |
-| ---------------------- | ------------------------ |
-| **Enigma Virtual Box** | .exe                     |
-| **MoleBox**            | .exe                     |
-| **Split files**        | .001, .002,...           |
+| File type                   | Common file extension(s)   |
+| --------------------------- | -------------------------- |
+| **Enigma Virtual Box**      | .exe                       |
+| **MoleBox**                 | .exe                       |
+| **Split files**             | .001, .002,...             |
+| **Windows thumbnail cache** | Thumbs.ds, thumbcache_*.db |
 
 **¹** Partly supported, some files cannot be extracted properly

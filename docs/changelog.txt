@@ -1,5 +1,5 @@
-2.0.0 RC 4 (2021):
-  Added better support for Smart Install Maker installers using simdec
+2.0.0 RC 4 (2022):
+  Added support for more Smart Install Maker installers using simdec
   Added support for more Inno Setup installers using innoextract, thanks to hgdagon
   Added support for MSU update packages, thanks to Elad Karako
   Added support for .unitypackage files
@@ -8,6 +8,15 @@
   Added support for newer .sgbpack files using sgbdec
   Added support for split files (.001, .002,...)
   Added support for InstallForge installers
+  Added support for Asar (Electron) archives using Asar7z
+  Added support for Base64, BinHex and MacBinary encoded files and Web Archive files using eDecoder
+  Added support for Chromium .pak archives using Grit7z
+  Added support for .cso, CloneCD .gdi and .mds disk images using Iso7z
+  Added support for ExFat disk images using ExFat7z
+  Added support for several forensic file formats using Forensic7z
+  Added support for Phar archives using Phar7z
+  Added support for Windows thumbnail cache files using Thumbs7z
+  Added support for .chd disk images using chdman, thanks to kotenok2000
   Added option to disable tray icon
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
@@ -33,7 +42,9 @@
   Fixed Aspack/UPX unpacking: files not being created in output directory; existing file being overwritten
   Changed design/usability of 'Execution warning' and 'Command line help' dialogs
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
-  Improved .cab, InstallShield, .iso, .nrg, .msp and ZIP extraction
+  Changed status box: you can now click through it, windows behind are not blocked anymore
+  Improved .cab, .dbx, disk image, InstallShield, .iso, .nrg, .mht, .msp, thumbs.db, .uu, .ync and ZIP extraction
+  Improved compatibility with Windows 11
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
   Updated BioLib to 2.4.0
   Updated cicdec to 2.3.0
@@ -49,8 +60,8 @@
   Updated lzip to 1.22
   Updated MediaInfo to 21.03
   Updated mtee to 2.7
-  Updated PeaZip to 1.07
-  Updated Qt Linguist to 6.3.0
+  Updated PeaZip to 1.08
+  Updated Qt Linguist to 6.3.1
   Updated QuickBMS to 0.11
   Updated rmvdec to 2.2.0
   Updated spoondec to 2.0.0
@@ -71,6 +82,8 @@
   Updated Russian translation, thanks to wvxwxvw
   Updated Spanish translation, thanks to GGobbi
   Updated Swedish translation, thanks to Sopor
+  Removed DBX Total Commander plugin, replaced with eDecoder
+  Removed unecm, replaced with Total Commander/7zip plugins
   Removed Smart Install Maker Unpacker, replaced with simdec
   Removed WolfDec plugin, replaced with GARbro
   Removed /prefs command line parameter
