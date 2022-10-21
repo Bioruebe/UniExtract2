@@ -116,14 +116,16 @@ Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "a
 	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
 	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITYPACKAGE = "unitypackage", _
 	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
-	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", $TYPE_ZPAQ = "zpaq"
+	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
+	  $TYPE_ZPAQ = "zpaq"
 Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHD, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FORGE, $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
 	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, $TYPE_NSIS, _
 	  $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, $TYPE_SQLITE, _
 	  $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, $TYPE_UNREAL, _
-	  $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_ZIP, $TYPE_ZOO, $TYPE_ZPAQ]
+	  $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, _
+	  $TYPE_ZOO, $TYPE_ZPAQ]
 
 
 Opt("GUIOnEventMode", 1)
@@ -289,6 +291,7 @@ Const $iscab = "iscab.exe"
 Const $is5cab = "i5comp.exe"
 Const $thinstall = Quote($bindir & "Extractor.exe")
 Const $unreal = "umodel.exe"
+Const $wolf = "WolfDec.exe"
 
 ; Define registry keys
 Global Const $reg = "HKCU" & $reg64 & "\Software\UniExtract"
@@ -1687,7 +1690,7 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "Wolf RPG Editor")
 			CheckGarbro()
-			extract($TYPE_ARC_CONV, "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+			extract($TYPE_WOLF, "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "YU-RIS Script Engine")
 			CheckGarbro()
@@ -3359,6 +3362,13 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			HasNetFramework(4)
 			_Run($wix & ' -x "' & $outdir & '" "' & $file & '"', $outdir, @SW_MINIMIZE, True, True, False)
 
+		Case $TYPE_WOLF
+			HasPlugin($wolf)
+			_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+			_RunInTempOutdir($tempoutdir, $wolf & ' ' & Quote($file), $outdir, @SW_MINIMIZE, True, True, False)
+			_Sleep(1000, "CLEANING_UP")
+			MoveFiles($outdir & "\" & $filename, $outdir, True, '', True, True)
+
 		Case $TYPE_ZIP
 			If Not extract($TYPE_7Z, -1, $additionalParameters, False, True) Then
 				If $arcdisp > -1 Then _CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
@@ -4305,6 +4315,14 @@ Func _DeleteTrayMessageBox()
 
 	GUIDelete($TBgui)
 	$TBgui = 0
+EndFunc
+
+Func _Sleep($iDuration, $sMessage = "PROCESSING")
+	_CreateTrayMessageBox(t($sMessage))
+
+	Sleep($iDuration)
+
+	_DeleteTrayMessageBox()
 EndFunc
 
 ; Test if a file is a known multipart archive and already in batch queue
@@ -5634,7 +5652,6 @@ Func _AfterUpdate()
 	FileDelete($bindir & "ethornell.exe")
 	FileDelete($bindir & "libpng12.dll")
 	FileDelete($bindir & "brunsdec.exe")
-	FileDelete($bindir & "WolfDec.exe")
 	FileDelete($bindir & "sim_unpacker.exe")
 	FileDelete($bindir & "regexp.ndll")
 	FileDelete($bindir & "lime.ndll")
@@ -6033,10 +6050,7 @@ EndFunc
 
 ; Set the image of a picture GUI control via GDI+ to support PNG files
 Func _GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
-	If Not _GDIPlus_Startup() Then
-		Cout("Failed to start GDI+")
-		Return SetError(1)
-	EndIf
+	If Not _GDIPlus_Startup() Then Return SetError(1, 0, Cout("Failed to start GDI+"))
 
 	; Clear to prevent issues with transparency
 	GUICtrlSetImage($idImage, "")
@@ -6047,6 +6061,7 @@ Func _GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
 
 	If @error Then
 		Cout("Failed to load image " & $sPath)
+		SetError(2)
 	Else
 		GUICtrlSendMsg($idImage, $STM_SETIMAGE, 0, $hBitmap)
 	EndIf
@@ -7649,7 +7664,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 
 	; Define plugins
 	; executable|name|description|filetypes|filemask|extractionfilter|outdir|newfilename|password
-	Local $aPluginInfo[11][9] = [ _
+	Local $aPluginInfo[12][9] = [ _
 		[$arc_conv, 'arc_conv', t('PLUGIN_ARC_CONV'), 'nsa, wolf, xp3, ypf', 'arc_conv_r*.7z', 'arc_conv.exe', '', '', 'I Agree'], _
 		[$thinstall, 'h4sh3m Virtual Apps Dependency Extractor', t('PLUGIN_THINSTALL'), 'exe (Thinstall)', 'Extractor.rar', '', '', '', 'h4sh3m'], _
 		[$iscab, 'iscab', t('PLUGIN_ISCAB'), 'cab', 'iscab.exe;ISTools.dll', '', '', '', 0], _
@@ -7659,6 +7674,7 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 		[$dgca, 'DGCA', t('PLUGIN_DGCA'), 'dgca', 'dgca_v*.zip', $dgca, '', '', 0], _
 		[$bootimg, 'bootimg', t('PLUGIN_BOOTIMG'), 'boot.img', 'unpack_repack_kernel_redmi1s.zip', 'bootimg.exe', '', '', 0], _
 		[$is5cab, 'is5comp', t('PLUGIN_IS5COMP'), 'cab (InstallShield)', 'i5comp21.rar', 'I5comp.exe|ZD50149.DLL|ZD51145.DLL', '', '', 0], _
+		[$wolf, 'WolfDec', t('PLUGIN_WOLF'), 'wolf (' & t('TERM_ENCRYPTED') & ')', $wolf, '', '', '', 0], _
 		[$extsis, 'ExtSIS', t('PLUGIN_EXTSIS'), 'sis, sisx', 'siscontents*.zip', $extsis, '', '', 0], _
 		[$bitrock, 'Bitrock Unpacker', t('PLUGIN_BITROCK'), 'exe (Bitrock)', "bitrock-unpacker*.exe", '', '', $bitrock, 0] _
 	]

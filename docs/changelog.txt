@@ -85,7 +85,6 @@
   Removed DBX Total Commander plugin, replaced with eDecoder
   Removed unecm, replaced with Total Commander/7zip plugins
   Removed Smart Install Maker Unpacker, replaced with simdec
-  Removed WolfDec plugin, replaced with GARbro
   Removed /prefs command line parameter
 
 2.0.0 RC 3 (24/08/2020):
