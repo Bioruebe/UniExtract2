@@ -44,6 +44,7 @@
 #include <GuiComboBoxEx.au3>
 #include <GUIEdit.au3>
 #include <GuiListBox.au3>
+#include <GuiMenu.au3>
 #include <INet.au3>
 #include <InetConstants.au3>
 #include <Math.au3>
@@ -172,7 +173,7 @@ Global $file, $filename, $filenamefull, $filedir, $fileext, $sFileSize, $initout
 Global $hMutex, $hProgress, $hTridDll = 0
 Global $prompt, $prefs, $sUpdateURL = $sUrlUpdateStable, $eCustomPromptSetting = $PROMPT_ASK
 Global $Type, $silent, $iUnicodeMode = $UNICODE_NONE, $reg64 = "", $iOsArch = 32
-Global $logdir, $archdir, $userDefDir, $batchQueue, $fileScanLogFile, $sPasswordFile, $aDefDirs[0]
+Global $logdir, $archdir, $settingsdir, $userDefDir, $batchQueue, $fileScanLogFile, $sPasswordFile, $aDefDirs[0]
 Global $sFullLog = "", $success = $RESULT_UNKNOWN, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
 Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Global $unpackfailed, $exefailed, $ttarchfailed
@@ -616,12 +617,12 @@ Func ParseCommandLine()
 		$prompt = True
 		GUI_Plugins()
 
-	ElseIf $cmdline[1] = "/remove" Or $cmdline[1] = "/uninstall" Then
-		_IsWin7OrNewer()
-		GUI_ContextMenu_remove()
-		GUI_ContextMenu_fileassoc(0)
-		SendStats("uninstall")
-		terminate($STATUS_SILENT)
+	ElseIf $cmdline[1] = "/uninstall" Then
+		If $silentmode Then
+			Uninstall(True, _ArraySearch($cmdline, "/removeuserdata"))
+		Else
+			GUI_Uninstall()
+		EndIf
 
 	ElseIf $cmdline[1] = "/batchclear" Then
 		GUI_Batch_Clear()
@@ -694,7 +695,7 @@ Func ReadPrefs()
 	If IsAdmin() Then Cout("Warning: running as admin")
 
 	; Select ini file
-	Local $settingsdir = @AppDataDir & "\Bioruebe\UniExtract"
+	Global $settingsdir = @AppDataDir & "\Bioruebe\UniExtract"
 	Local Const $globalIni = @ScriptDir & "\UniExtract.ini"
 	Local Const $userIni = $settingsdir & "\UniExtract.ini"
 
@@ -4317,6 +4318,7 @@ Func _DeleteTrayMessageBox()
 	$TBgui = 0
 EndFunc
 
+; Display a message and wait for the given time
 Func _Sleep($iDuration, $sMessage = "PROCESSING")
 	_CreateTrayMessageBox(t($sMessage))
 
@@ -5735,6 +5737,19 @@ Func RepairProgramFiles($sMsg)
 	CheckUpdate($UPDATEMSG_SILENT, False, $UPDATE_HELPER)
 	Run($sUniExtract, @ScriptDir)
 	Return True
+EndFunc
+
+; Remove explorer integration and optionally remove user data
+Func Uninstall($bRemoveLogs = True, $bRemoveUserData = False)
+	SendStats("uninstall")
+
+	GUI_ContextMenu_remove()
+	GUI_ContextMenu_fileassoc(0)
+
+	If $bRemoveLogs Then GUI_DeleteLogs()
+	If $bRemoveUserData Then DirRemove($settingsdir, 1)
+
+	terminate($STATUS_SILENT)
 EndFunc
 
 ; ------------------------ Begin GUI Control Functions ------------------------
@@ -7348,6 +7363,38 @@ Func GUI_FirstStart_Exit()
 	$FS_GUI = False
 	GUISetState(@SW_SHOW, $guimain)
 	Cout("First start configuration finished")
+EndFunc
+
+; Ask user whether to keep settings or not and uninstall
+Func GUI_Uninstall()
+	Local $hGui = GUICreate($title, 434, 218, -1, -1)
+	_GuiSetColor()
+	_GUICtrlCreatePic($sLogoFile, 16, 16, 57, 57)
+	GUICtrlCreateLabel(t('UNINSTALL_TITLE'), 88, 16, 328, 28)
+	GUICtrlSetFont(-1, 16, 600, 0, "Arial")
+	GUICtrlCreateLabel(t('UNINSTALL_LABEL'), 88, 48, 326, 57)
+	Local $idCheckboxRemoveLogs = GUICtrlCreateCheckbox(t('UNINSTALL_REMOVE_LOGS'), 104, 118, 265, 17)
+	GUICtrlSetState(-1, $GUI_CHECKED)
+	Local $idCheckboxRemoveUserData = GUICtrlCreateCheckbox(t('UNINSTALL_REMOVE_USERDATA'), 104, 142, 265, 17)
+	Local $idOk = GUICtrlCreateButton(t('UNINSTALL'), 328, 176, 89, 25)
+
+	Local $hMenu = _GUICtrlMenu_GetSystemMenu($hGui)
+	_GUICtrlMenu_EnableMenuItem($hMenu, $SC_CLOSE, $MF_GRAYED, False)
+
+	Opt("GUIOnEventMode", 0)
+	GUISetState(@SW_SHOW)
+
+	While 1
+		If GUIGetMsg() == $idOk Then ExitLoop
+	WEnd
+
+	Local $bRemoveLogs = _IsChecked($idCheckboxRemoveLogs)
+	Local $bRemoveUserData = _IsChecked($idCheckboxRemoveUserData)
+
+	GUIDelete($hGui)
+	Opt("GUIOnEventMode", 1)
+
+	Uninstall($bRemoveLogs, $bRemoveUserData)
 EndFunc
 
 ; Display command line help
