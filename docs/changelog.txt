@@ -15,6 +15,7 @@
   Added support for ExFat disk images using ExFat7z
   Added support for several forensic file formats using Forensic7z
   Added support for Phar archives using Phar7z
+  Added support for PyInstaller installers using Py7z
   Added support for Windows thumbnail cache files using Thumbs7z
   Added support for .chd disk images using chdman, thanks to kotenok2000
   Added option to disable tray icon

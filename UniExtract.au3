@@ -1243,6 +1243,9 @@ Func FileScan_ExeInfo($bUseCmd = $extract)
 		Case StringInStr($sFileType, "Explorer cache file")
 			extract($TYPE_7Z, "Explorer Thumbnail " & t('TERM_DATABASE'))
 
+		Case StringInStr($sFileType, "PyInstaller")
+			extract($TYPE_7Z, "PyInstaller " & t('TERM_PACKAGE'))
+
 		Case StringInStr($sFileType, "MSCF Cab file detected") Or StringInStr($sFileType, "VirtualBox Installer")
 			extract($TYPE_MSCF, "MSCF " & t('TERM_INSTALLER'))
 
@@ -4508,7 +4511,7 @@ Func _IsWin7OrNewer()
 		Case "WIN_7", "WIN_8", "WIN_81", "WIN_10", "WIN_11", "WIN_2012", "WIN_2012R2", "WIN_2016", "WIN_2019", "WIN_2022"
 			Return True
 		Case Else
-			return False
+			Return False
 	EndSwitch
 EndFunc
 

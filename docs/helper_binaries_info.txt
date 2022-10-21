@@ -145,6 +145,8 @@ Iso7z										x86\Formats\Iso7z.32.dll		1.8.4		---------	Freeware*				Dec Softw
 											x64\Formats\Iso7z.64.dll		-------		---------	-------					-------								-------
 Phar7z										x86\Formats\Phar7z.32.dll		1.0			---------	Freeware*				Dec Software						https://www.tc4shell.com/en/7zip/phar7z/
 											x64\Formats\Phar7z.64.dll		-------		---------	-------					-------								-------
+Py7z										x86\Formats\Py7z.32.dll			1.1			---------	Freeware*				Dec Software						https://www.tc4shell.com/en/7zip/py7z/
+											x64\Formats\Py7z.64.dll			-------		---------	-------					-------								-------
 Thumbs7z									x86\Formats\Thumbs7z.32.dll		1.0			---------	Freeware*				Dec Software						https://www.tc4shell.com/en/7zip/thumbs7z/
 											x64\Formats\Thumbs7z.64.dll		-------		---------	-------					-------								-------
 

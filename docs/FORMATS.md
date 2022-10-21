@@ -62,6 +62,7 @@
 | **MSCF**                       | .exe                                   |
 | **Netopsystems FEAD**          | .exe                                   |
 | NSIS                           | .exe                                   |
+| **PyInstaller**                | .exe                                   |
 | Self-Extracting Zip            | .exe                                   |
 | SetupFactory¹                  | .exe                                   |
 | **Smart Install Maker**        | .exe                                   |
