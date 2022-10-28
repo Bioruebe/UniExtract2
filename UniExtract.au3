@@ -1644,6 +1644,9 @@ Func tridcompare($sFileType)
 			extract($TYPE_RAR, 'RAR ' & t('TERM_ARCHIVE'))
 
 		; Game Archives
+		Case StringInStr($sFileType, "Artemis engine resource archive")
+			CheckGarbro("Artemis " & t('TERM_GAME') & " " & t('TERM_ARCHIVE'))
+
 		Case StringInStr($sFileType, "BGI (Buriko General Interpreter) engine")
 			CheckGarbro()
 
@@ -1654,18 +1657,20 @@ Func tridcompare($sFileType)
 			CheckGarbro()
 
 		Case StringInStr($sFileType, "ClsFileLink") Or StringInStr($sFileType, "ERISA archive file")
-			CheckGarbro()
-			extract($TYPE_ARC_CONV, "ERISA archive file" & t('TERM_GAME') & t('TERM_ARCHIVE'))
+			Local $sMessage = "ERISA " & t('TERM_GAME') & " " & t('TERM_ARCHIVE')
+			CheckGarbro($sMessage)
+			extract($TYPE_ARC_CONV, $sMessage)
 
 		Case StringInStr($sFileType, "KiriKiri Adventure Game System Package")
-			CheckGarbro()
-			extract($TYPE_ARC_CONV, 'KiriKiri Adventure Game System ' & t('TERM_PACKAGE'))
+			Local $sMessage = "KiriKiri Adventure Game System " & t('TERM_PACKAGE')
+			CheckGarbro($sMessage)
+			extract($TYPE_ARC_CONV, $sMessage)
 
 		Case StringInStr($sFileType, "Livemaker Engine main game executable")
-			CheckGarbro()
+			CheckGarbro("Livemaker " & t('TERM_GAME'))
 
 		Case StringInStr($sFileType, "NScripter archive, version 1")
-			CheckGarbro()
+			CheckGarbro("NScripter " & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Ren'Py data file")
 			extract($TYPE_RPA, "Ren'Py " & t('TERM_ARCHIVE'))
@@ -1693,12 +1698,14 @@ Func tridcompare($sFileType)
 			extract($TYPE_DCP, 'Wintermute Engine ' & t('TERM_GAME') & t('TERM_PACKAGE'))
 
 		Case StringInStr($sFileType, "Wolf RPG Editor")
-			CheckGarbro()
-			extract($TYPE_WOLF, "Wolf RPG Editor " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+			Local $sMessage = "Wolf RPG Editor " & t('TERM_GAME') & " " & t('TERM_ARCHIVE')
+			CheckGarbro($sMessage)
+			extract($TYPE_WOLF, $sMessage)
 
 		Case StringInStr($sFileType, "YU-RIS Script Engine")
-			CheckGarbro()
-			extract($TYPE_ARC_CONV, "YU-RIS Script Engine " & t('TERM_GAME') & t('TERM_ARCHIVE'))
+			Local $sMessage = "YU-RIS " & t('TERM_GAME') & t('TERM_ARCHIVE')
+			CheckGarbro($sMessage)
+			extract($TYPE_ARC_CONV, $sMessage)
 
 		Case StringInStr($sFileType, "sfArk compressed SoundFont")
 			extract($TYPE_SFARK, 'sfArk ' & t('TERM_COMPRESSED'))
@@ -2032,7 +2039,7 @@ Func CheckGame($bUseGaup = True, $bUseGarbro = True)
 EndFunc
 
 ; Determine if file can be extracted with GARbro
-Func CheckGarbro()
+Func CheckGarbro($arcdisp = 0)
 	HasNetFramework(4.6)
 	Cout("Testing GARbro")
 	_CreateTrayMessageBox(t('TERM_TESTING') & ' GARbro ' & t('TERM_ARCHIVE'))
@@ -2041,7 +2048,7 @@ Func CheckGarbro()
 		$return = StringStripWS(StringStripCR(FetchStdout($garbro & ' i "' & $file & '"', $filedir, @SW_HIDE, -1)), 8)
 		If $return == "ZIP" Then check7z()
 
-		extract($TYPE_GARBRO, $return & ' ' & t('TERM_GAME') & t('TERM_FILE'))
+		extract($TYPE_GARBRO, $arcdisp? $arcdisp: $return & ' ' & t('TERM_GAME') & t('TERM_FILE'))
 	EndIf
 
 	_DeleteTrayMessageBox()
