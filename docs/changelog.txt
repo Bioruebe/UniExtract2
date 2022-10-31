@@ -44,7 +44,9 @@
   Changed design/usability of 'Execution warning' and 'Command line help' dialogs
   Changed QuickBMS extraction to auto-rename files on conflict, thanks to claudehenchoz
   Changed status box: you can now click through it, windows behind are not blocked anymore
-  Improved .cab, .dbx, disk image, InstallShield, .iso, .nrg, .mht, .msp, thumbs.db, .uu, .ync and ZIP extraction
+  Changed RAR extraction to keep damaged files
+  Improved .cab, .dbx, disk image, InstallShield, .iso, .nrg, .mht, .msp, .psf, thumbs.db, .uu,
+		   .ync and ZIP extraction
   Improved compatibility with Windows 11
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
   Updated BioLib to 2.4.0

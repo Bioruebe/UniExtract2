@@ -3001,7 +3001,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_RAR
 			Local $sPassword = _FindArchivePassword($rar & ' lt -p- "' & $file & '"', $rar & ' t -p"%PASSWORD%" "' & $file & '"', "encrypted", 0, 0)
-			_Run($rar & ' x ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
+			_Run($rar & ' x -kb ' & ($sPassword == 0? '"': '-p"' & $sPassword & '" "') & $file & '"', $outdir, @SW_SHOW)
 			If @error = 3 Then terminate($STATUS_MISSINGPART)
 			If @extended Then terminate($STATUS_PASSWORD, $file, $arctype, $arcdisp)
 
@@ -4580,6 +4580,21 @@ Func _StringExtractAfter($sString, $sSubstring, $sEnd = @CRLF)
 	Return StringMid($sString, $iStart, $iEnd - $iStart)
 EndFunc
 
+; Search for a substring and return the whole line of the match
+Func _StringInStrGetLine($sString, $sSubstring, $sLineEnd = @CRLF)
+	Local $iPos = StringInStr($sString, $sSubstring)
+	If $iPos < 1 Then Return SetError(1, 0, 0)
+
+	Local $iLen = StringLen($sSubstring)
+	Local $iStart = StringInStr(StringLeft($sString, $iPos), $sLineEnd, $STR_NOCASESENSE, -1)
+	$iStart += $iStart > 0? StringLen($sLineEnd): 1
+
+	Local $iEnd = StringInStr($sString, $sLineEnd, $STR_NOCASESENSE, 1, $iPos + $iLen)
+	If $iEnd < $iStart Then $iEnd = StringLen($sString)
+
+	Return StringMid($sString, $iStart, $iEnd - $iStart)
+EndFunc
+
 ; Return file metadata
 ; (Source: http://www.autoitscript.com/forum/topic/40684-querying-a-files-metadata/)
 ;===============================================================================
@@ -4805,6 +4820,10 @@ Func ParseWarnings($sLog)
 	; 7-zip
 	Local $sReturn = _StringExtractAfter($sLog, "WARNINGS:" & @CRLF)
 	If Not @error Then AddWarning($sReturn)
+
+	; Unrar
+	$sReturn = _StringInStrGetLine($sLog, " - checksum error")
+	If $sReturn Then AddWarning($sReturn)
 
 	$sReturn = _StringExtractAfter($sLog, "Open WARNING: ")
 	If Not @error Then AddWarning($sReturn)
