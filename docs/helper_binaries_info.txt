@@ -63,10 +63,10 @@ Neko runtime								gc.dll							2.1			---------	MIT, others				Haxe Foundation	
 											gcmt-dll.dll					-------		---------	-------					-------								-------
 											neko.dll						-------		---------	-------					-------								-------
 											std.ndll						-------		---------	-------					-------								-------
-PeaZip										pea.exe							1.08		-	-	-	GNU LGPL				Giorgio Tani						https://peazip.github.io/
+PeaZip										pea.exe							1.1			-	-	-	GNU LGPL				Giorgio Tani						https://peazip.github.io/
 Portable Executable File Identifier	(PEiD)	PEiD.exe						0.95		---------	Freeware				Jibz, Qwerton, snaker, xineohP		http://www.peid.info/											
 PEiD signatures								userdb.txt						2012/04/24	---------	-------					-------								-------															
-Qt Linguist									lconvert.exe					6.3.1		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
+Qt Linguist									lconvert.exe					6.4.0		-	-	-	GNU GPL v2|GNU LGPL		The Qt Company Ltd.					https://github.com/thurask/Qt-Linguist/releases
 QuickBMS									quickbms.exe					0.11		!	-	!	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (1-157)					BMS.db							-------		---------	GNU GPL v2|public code	Luigi Auriemma						http://aluigi.altervista.org/quickbms.htm						
 QuickBMS scripts (157-322, Game Extractor)	BMS.db							2.01		---------	GNU GPL	v2				WATTO Studios						http://sourceforge.net/projects/gameextractor/					

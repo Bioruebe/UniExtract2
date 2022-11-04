@@ -63,8 +63,8 @@
   Updated lzip to 1.22
   Updated MediaInfo to 21.03
   Updated mtee to 2.7
-  Updated PeaZip to 1.08
-  Updated Qt Linguist to 6.3.1
+  Updated PeaZip to 1.1
+  Updated Qt Linguist to 6.4.0
   Updated QuickBMS to 0.11
   Updated rmvdec to 2.2.0
   Updated spoondec to 2.0.0
