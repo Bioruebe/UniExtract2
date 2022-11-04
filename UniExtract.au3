@@ -2508,23 +2508,17 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Warn_Execute($file & ' /batch /no-reg /no-postinstall /dest "' & $outdir & '"')
 			ShellExecuteWait($file, '/batch /no-reg /no-postinstall /dest "' & $outdir & '"', $outdir)
 
-		Case $TYPE_ENIGMA ; Test
+		Case $TYPE_ENIGMA
 			_RunInTempOutdir($tempoutdir, $enigma & ' /nogui "' & $file & '"', $tempoutdir, @SW_HIDE, True, False, False)
 
 			_FileMove($outdir & "\" & $filename & "_unpacked.exe", $outdir & "\" & GetFileName() & "_" & t('TERM_UNPACKED') & ".exe")
-			; TODO: move other folders
 
 			; Read log file
 			Local $sPath = $outdir & "\!unpacker.log"
-			Local $return = Cout(FileRead($sPath))
+			Local $sLog = Cout(FileRead($sPath))
 			FileDelete($sPath)
 
-			; Success evaluation
-			If StringInStr($return, 'Expected section name ".enigma2"') Then
-				$success = $RESULT_FAILED
-			ElseIf StringInStr($return, '[+] Finished!') Then
-				$success = $RESULT_SUCCESS
-			EndIf
+			EvaluateLog($sLog)
 
 		Case $TYPE_FEAD
 			Local $sParameters = ' /s -nos_ne -nos_o"' & $tempoutdir & '\"'
@@ -4178,7 +4172,7 @@ Func terminate($status, $fname = '', $arctype = '', $arcdisp = '')
 			Prompt(48, 'MOVE_FAILED', CreateArray($file, $fname))
 			$exitcode = 12
 		Case $STATUS_NOFREESPACE
-			Prompt(48, 'NO_FREE_SPACE_ERROR', $file)
+			Prompt(16, 'NO_FREE_SPACE_ERROR', $fname)
 			$exitcode = 13
 		Case $STATUS_MISSINGPART
 			Prompt(48, 'MISSING_PART', $file)
@@ -4775,7 +4769,8 @@ Func EvaluateLog($sLog)
 	ElseIf StringInStr($sLog, "Break signaled") Or StringInStr($sLog, "Program aborted") Or StringInStr($sLog, "User break") Then
 		Cout("Cancelled by user")
 		$success = $RESULT_CANCELED
-	ElseIf StringInStr($sLog, "There is not enough space on the disk") Then
+	ElseIf StringInStr($sLog, "There is not enough space on the disk") Or _
+		   StringInStr($sLog, "[x] There is not enough space in working directory. Unpacking would most likely fail!") Then
 		$success = $RESULT_NOFREESPACE
 		SetError(2)
 	ElseIf StringInStr($sLog, "You need to start extraction from a previous volume") Or _
@@ -4789,7 +4784,7 @@ Func EvaluateLog($sLog)
 		   StringInStr($sLog, "Done ...") Or StringInStr($sLog, ": done") Or _
 		   StringInStr($sLog, "Result:	Successful, errorcode 0") Or StringInStr($sLog, "... Successful") Or _
 		   StringInStr($sLog, "Extract files [ ") Or StringInStr($sLog, "Done; file is OK") Or _
-		   StringInStr($sLog, "Successfully extracted to") Then
+		   StringInStr($sLog, "Successfully extracted to") Or StringInStr($sLog, "[+] Finished!") Then
 		Cout("Success evaluation passed")
 		$success = $RESULT_SUCCESS
 	ElseIf StringInStr($sLog, "err code(", 1) Or StringInStr($sLog, "stacktrace", 1) _
@@ -4798,7 +4793,8 @@ Func EvaluateLog($sLog)
 		   Or StringInStr($sLog, "ERROR: Wrong tag in package", 1) Or StringInStr($sLog, "unzip:  cannot find", 1) _
 		   Or StringInStr($sLog, "Open ERROR: Can not open the file as") Or StringInStr($sLog, "Error: System.Exception:") _
 		   Or StringInStr($sLog, "unknown WISE-version -> contact author") Or StringInStr($sLog, "Critical error:") _
-		   Or StringInStr($sLog, "[ERROR] ") Or StringInStr($sLog, "MainHeaderNotFoundError") Or StringInStr($sLog, "*** ERROR:") Then
+		   Or StringInStr($sLog, "[ERROR] ") Or StringInStr($sLog, "MainHeaderNotFoundError") Or StringInStr($sLog, "*** ERROR:") _
+		   Or StringInStr($sLog, 'Expected section name ".enigma2"') Then
 		$success = $RESULT_FAILED
 		SetError(1)
 	ElseIf StringInStr($sLog, "already exists.") Or StringInStr($sLog, "Overwrite") Then
