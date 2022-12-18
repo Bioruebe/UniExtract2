@@ -106,26 +106,26 @@ Const $STATUS_SYNTAX = "syntax", $STATUS_FILEINFO = "fileinfo", $STATUS_UNKNOWNE
 	  $STATUS_NOTSUPPORTED = "notsupported", $STATUS_MISSINGEXE = "missingexe", $STATUS_TIMEOUT = "timeout", $STATUS_PASSWORD = "password", _
 	  $STATUS_MISSINGDEF = "missingdef", $STATUS_MOVEFAILED = "movefailed", $STATUS_NOFREESPACE = "nofreespace", $STATUS_MISSINGPART = "missingpart", _
 	  $STATUS_FAILED = "failed", $STATUS_SUCCESS = "success", $STATUS_SILENT = "silent", $STATUS_TRAYEXIT = "trayexit"
-Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_ARC_CONV = "arc_conv", _
-	  $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHD = "chd", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
+Const $TYPE_7Z = "7z", $TYPE_ACE = "ace", $TYPE_ACTUAL = "actual", $TYPE_AI = "ai", $TYPE_ALZ = "alz", $TYPE_AP4 = "ap4", $TYPE_ARC_CONV = "arc_conv", _
+	  $TYPE_ASH = "ash", $TYPE_AUDIO = "audio", $TYPE_BCM = "bcm", $TYPE_BOOTIMG = "bootimg", $TYPE_CAB = "cab", $TYPE_CHD = "chd", $TYPE_CHM = "chm", $TYPE_CI = "ci", _
 	  $TYPE_CIC = "cic", $TYPE_CTAR = "ctar", $TYPE_DGCA = "dgca", $TYPE_DAA = "daa", $TYPE_DCP = "dcp", $TYPE_EI = "ei", $TYPE_ENIGMA = "enigma", _
 	  $TYPE_FEAD = "fead", $TYPE_FORGE = "installforge", $TYPE_FREEARC = "freearc", $TYPE_FSB = "fsb", $TYPE_GARBRO = "garbro", $TYPE_GHOST = "ghost", _
 	  $TYPE_HLP = "hlp", $TYPE_INNO = "inno", $TYPE_ISCAB = "iscab", $TYPE_ISCRIPT = "installscript", $TYPE_ISEXE = "isexe", $TYPE_ISZ = "isz", _
-	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", _
+	  $TYPE_KGB = "kgb", $TYPE_LZ = "lz", $TYPE_LZ7 = "lz7", $TYPE_LZO = "lzo", $TYPE_LZX = "lzx", $TYPE_MOLE = "mole", $TYPE_MSCF = "mscf", $TYPE_MSI = "msi", _
 	  $TYPE_MSM = "msm", $TYPE_MSP = "msp", $TYPE_MSU = "msu", $TYPE_NBH = "nbh", $TYPE_NSIS = "NSIS", $TYPE_PDF = "PDF", $TYPE_PEA = "pea", _
 	  $TYPE_QBMS = "qbms", $TYPE_RAI = "rai", $TYPE_RAR = "rar", $TYPE_RGSS = "rgss", $TYPE_ROBO = "robo", $TYPE_RPA = "rpa", $TYPE_SFARK = "sfark", _
 	  $TYPE_SIS = "sis", $TYPE_SQLITE = "sqlite", $TYPE_SUPERDAT = "superdat", $TYPE_SWF = "swf", $TYPE_SWFEXE = "swfexe", _
-	  $TYPE_THINSTALL = "thinstall", $TYPE_TTARCH = "ttarch", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITYPACKAGE = "unitypackage", _
+	  $TYPE_THINSTALL = "thinstall", $TYPE_TPL = "tpl", $TYPE_TTARCH = "ttarch", $TYPE_U8 = "u8", $TYPE_UHA = "uha", $TYPE_UIF = "uif", $TYPE_UNITYPACKAGE = "unitypackage", _
 	  $TYPE_UNREAL = "unreal", $TYPE_VIDEO = "video", $TYPE_VIDEO_CONVERT = "videoconv", $TYPE_VISIONAIRE3 = "visionaire3", $TYPE_VSSFX = "vssfx", _
-	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
+	  $TYPE_VSSFX_PATH = "vssfxpath", $TYPE_WAD = "wad", $TYPE_WISE = "wise", $TYPE_WIX = "wix", $TYPE_WOLF = "wolf", $TYPE_ZIP = "zip", $TYPE_ZOO = "zoo", _
 	  $TYPE_ZPAQ = "zpaq"
-Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_ARC_CONV, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
+Const $aExtractionTypes = [$TYPE_7Z, $TYPE_ACE, $TYPE_ACTUAL, $TYPE_AI, $TYPE_ALZ, $TYPE_AP4, $TYPE_ARC_CONV, $TYPE_ASH, $TYPE_AUDIO, $TYPE_BCM, $TYPE_BOOTIMG, _
 	  $TYPE_CAB, $TYPE_CHD, $TYPE_CHM, $TYPE_CI, $TYPE_CIC, $TYPE_CTAR, $TYPE_DGCA, $TYPE_DAA, $TYPE_DCP, $TYPE_EI, $TYPE_ENIGMA, $TYPE_FEAD, _
 	  $TYPE_FORGE, $TYPE_FREEARC, $TYPE_FSB, $TYPE_GARBRO, $TYPE_GHOST, $TYPE_HLP, $TYPE_INNO, $TYPE_ISCAB, $TYPE_ISCRIPT, $TYPE_ISEXE, $TYPE_ISZ, _
-	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZO, $TYPE_LZX, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, $TYPE_NSIS, _
+	  $TYPE_KGB, $TYPE_LZ, $TYPE_LZ7, $TYPE_LZO, $TYPE_LZX, $TYPE_MOLE, $TYPE_MSCF, $TYPE_MSI, $TYPE_MSM, $TYPE_MSP, $TYPE_MSU, $TYPE_NBH, $TYPE_NSIS, _
 	  $TYPE_PDF, $TYPE_PEA, $TYPE_QBMS, $TYPE_RAI, $TYPE_RAR, $TYPE_RGSS, $TYPE_ROBO, $TYPE_RPA, $TYPE_SFARK, $TYPE_SIS, $TYPE_SQLITE, _
-	  $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, $TYPE_UNREAL, _
-	  $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WISE, $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, _
+	  $TYPE_SUPERDAT, $TYPE_SWF, $TYPE_SWFEXE, $TYPE_THINSTALL, $TYPE_TTARCH, $TYPE_U8, $TYPE_UHA, $TYPE_UIF, $TYPE_UNITYPACKAGE, $TYPE_UNREAL, _
+	  $TYPE_VIDEO, $TYPE_VIDEO_CONVERT, $TYPE_VISIONAIRE3, $TYPE_VSSFX, $TYPE_VSSFX_PATH, $TYPE_WAD, $TYPE_WISE, $TYPE_WIX, $TYPE_WOLF, $TYPE_ZIP, _
 	  $TYPE_ZOO, $TYPE_ZPAQ]
 
 
@@ -204,7 +204,9 @@ Const $7z = Quote($archdir & '7z.exe', True)
 Const $7zsplit = "7ZSplit.exe"
 Const $ace = "acefile.exe"
 Const $alz = "unalz.exe"
+Const $ap4 = "unap4.exe"
 Const $arj = "arj.exe"
+Const $ash = "ash.exe"
 Const $aspack = Quote($bindir & "AspackDie.exe", True)
 Const $bcm = Quote($archdir & "bcm.exe", True)
 Const $chd = $archdir & "chdman.exe"
@@ -246,6 +248,7 @@ Const $rar = Quote($archdir & "UnRAR.exe", True)
 Const $rgss = "RgssDecrypter.exe"
 Const $rpa = "unrpa.exe"
 Const $sfark = "sfarkxtc.exe"
+Const $sharpii = "sharpii.exe"
 Const $sqlite = "sqlite3.exe"
 Const $swf = "swfextract.exe"
 Const $trid = "trid.exe"
@@ -258,6 +261,7 @@ Const $uif = "uif2iso.exe"
 Const $unshield = "unshield.exe"
 Const $upx = "upx.exe"
 Const $visionaire3 = "VIS3Ext.exe"
+Const $wwcxtool = "wwcxtool.exe"
 Const $wise_ewise = "e_wise_w.exe"
 Const $wise_wun = "wun.exe"
 Const $wix = Quote($bindir & "dark\dark.exe", True)
@@ -1713,6 +1717,9 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "EPOC Installation package")
 			extract($TYPE_SIS, 'SymbianOS ' & t('TERM_INSTALLER'))
 
+		Case StringInStr($sFileType, "Wii TPL images container")
+			extract($TYPE_TPL, "Wii TPL images " & t('TERM_CONTAINER'))
+			
 		Case StringInStr($sFileType, "MacBinary")
 			extract($TYPE_7Z, "MacBinary " & t('TERM_ENCODED'))
 
@@ -1728,6 +1735,12 @@ Func tridcompare($sFileType)
 		Case StringInStr($sFileType, "PHP source")
 			check7z("Phar  " & t('TERM_ARCHIVE'))
 
+		Case StringInStr($sFileType, "Nintendo Wii Data")
+			extract($TYPE_WAD, "Nintendo Wii WAD " & t('TERM_ARCHIVE'))
+			
+		Case StringInStr($sFileType, "Wii U8 archive")
+			extract($TYPE_U8, "Nintendo Wii U8 " & t('TERM_ARCHIVE'))
+		
 		Case StringInStr($sFileType, "Web ARChive")
 			extract($TYPE_7Z, "Web " & t('TERM_ARCHIVE'))
 
@@ -2204,6 +2217,12 @@ Func InitialCheckExt()
 			CheckIso()
 		Case "unitypackage"
 			extract($TYPE_UNITYPACKAGE, "Unity Engine Asset Package")
+		Case "lz7"
+			extract($TYPE_LZ7, "Nintendo Wii LZ7 " & t('TERM_ARCHIVE'))
+		Case "ash"
+			extract($TYPE_ASH, "Nintendo Wii ASH " & t('TERM_ARCHIVE'))
+		Case "ap4"
+			extract($TYPE_AP4, "Sonix OID Reading Pen " & t('TERM_ARCHIVE'))
 	EndSwitch
 EndFunc
 
@@ -2382,6 +2401,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			ProcessWait($filenamefull, $Timeout)
 			ProcessWaitClose($filenamefull, $Timeout)
 
+		Case $TYPE_AP4
+			_Run($ap4 & ' -v "' & $file & '"', $outdir)
+		
 		Case $TYPE_ARC_CONV
 			If Not HasPlugin($arc_conv, $returnFail) Then Return
 
@@ -2404,13 +2426,17 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			$run = 0
 			MoveFiles($file & "~", $outdir, True, "", True, True)
 
+		Case $TYPE_ASH
+			_Run($ash & ' "' & $file & '"', $outdir)
+			_FileMove($file & ".arc", $outdir & "\")
+		
 		Case $TYPE_AUDIO
 			HasFFMPEG()
 			_Run($cmd & $ffmpeg & ' -i "' & $file & '" "' & GetFileName() & '.wav"', $outdir, @SW_HIDE)
 
 		Case $TYPE_BCM
 			_Run($bcm & ' -d "' & $file & '" "' & $outdir & '\' & GetFileName() & '"', $filedir, @SW_HIDE, True, True, False)
-
+			
 		Case $TYPE_BOOTIMG
 			HasPlugin($bootimg)
 			$ret = $outdir & "\" & $bootimg
@@ -2775,7 +2801,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_LZ
 			_RunInTempOutdir($tempoutdir, $lz & ' -d -k -v -v "' & $file & '"', $tempoutdir, @SW_SHOW, True, True, False)
-
+		
+		Case $TYPE_LZ7
+			_Run($wwcxtool & ' /u "' & $file & '" "' & $filename & '"')
+		
 		Case $TYPE_LZO
 			_Run($lzo & ' -d -p"' & $outdir & '" "' & $file & '"', $filedir)
 
@@ -3120,6 +3149,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			Sleep(1000)
 			ProcessClose($pid)
 
+		Case $TYPE_TPL
+			_Run($sharpii & ' TPL -from "' & $file & '" "' & $filename & '.png"')
+			
 		Case $TYPE_TTARCH
 			If $ttarchfailed Then Return 0
 
@@ -3143,6 +3175,9 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				$returnFail = True
 			EndIf
 
+		Case $TYPE_U8
+			_Run($sharpii & ' U8 -u "' & $file & '" "' & $outdir & '"', $outdir)
+		
 		Case $TYPE_UHA
 			_Run($uharc & ' x -t"' & $outdir & '" "' & $file & '"', $outdir)
 			If Not $success And _DirGetSize($outdir, $initdirsize + 1) <= $initdirsize Then
@@ -3321,7 +3356,10 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 
 		Case $TYPE_VSSFX_PATH ; Test
 			RunWait(Warn_Execute($file & ' /extract:"' & $outdir & '" /quiet'), $outdir)
-
+		
+		Case $TYPE_WAD
+			_Run($sharpii & ' WAD -u "' & $file & '" "' & $outdir & '"', $outdir)
+		
 		Case $TYPE_WISE
 			_Run($wise_ewise & ' "' & $file & '" "' & $outdir & '"', $filedir)
 			If $success == $RESULT_FAILED Then
