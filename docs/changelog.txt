@@ -1,4 +1,4 @@
-2.0.0 RC 4 (2022):
+2.0.0 RC 4 (2023):
   Added support for more Smart Install Maker installers using simdec
   Added support for more Inno Setup installers using innoextract, thanks to hgdagon
   Added support for MSU update packages, thanks to Elad Karako
@@ -18,6 +18,8 @@
   Added support for PyInstaller installers using Py7z
   Added support for Windows thumbnail cache files using Thumbs7z
   Added support for .chd disk images using chdman, thanks to kotenok2000
+  Added support for newer Ren'Py archives
+  Added support for high DPI screens
   Added option to disable tray icon
   Fixed Inno extraction failing if 'Delete additional files' option is enabled, thanks to platomav and ltGuillaume
   Fixed some rare problems if the file extension contains upper case
@@ -54,7 +56,7 @@
   Updated dark to 3.14.0.4118
   Updated demoleition to 0.65
   Updated EnigmaVB unpacker to 0.59
-  Updated Exeinfo PE to 0.0.6.7
+  Updated Exeinfo PE to 0.0.7.3
   Updated file to 5.40
   Updated GNU gettext to 0.21
   Updated godotdec to 2.1.1

@@ -7,6 +7,7 @@
 #AutoIt3Wrapper_Res_Field=Author|Jared Breland, Bioruebe
 #AutoIt3Wrapper_Res_Field=Homepage|https://bioruebe.com/dev/uniextract/
 #AutoIt3Wrapper_Res_Field=Timestamp|%date%
+#AutoIt3Wrapper_Res_HiDpi=y
 #AutoIt3Wrapper_Run_AU3Check=n
 #AutoIt3Wrapper_AU3Check_Stop_OnWarning=y
 #AutoIt3Wrapper_AU3Check_Parameters=-w 4 -w 5
@@ -60,6 +61,7 @@
 #include <WinAPIShPath.au3>
 #include <WinAPIsysinfoConstants.au3>
 #include <WindowsConstants.au3>
+#include "GuiScaler.au3"
 #include "HexDump.au3"
 #include "Pie.au3"
 
@@ -300,6 +302,7 @@ Global Const $regcurrent = "HKCU" & $reg64 & "\Software\Classes\*\shell\"
 Global Const $regall = "HKCR" & $reg64 & "\*\shell\"
 Global $reguser = $regcurrent
 
+; Design-related settings
 Global $bHighContrastMode = _IsHighContrastMode()
 Global $bLightTheme = _AppsUseLightTheme()
 
@@ -1671,6 +1674,9 @@ Func tridcompare($sFileType)
 
 		Case StringInStr($sFileType, "NScripter archive, version 1")
 			CheckGarbro("NScripter " & t('TERM_PACKAGE'))
+
+		Case StringInStr($sFileType, "Pajamas Adventure System game data archive")
+			CheckGarbro("Pajamas Adventure System " & t('TERM_GAME') & " " & t('TERM_ARCHIVE'))
 
 		Case StringInStr($sFileType, "Ren'Py data file")
 			extract($TYPE_RPA, "Ren'Py " & t('TERM_ARCHIVE'))
@@ -3735,29 +3741,31 @@ Func HasPlugin($sPlugin, $returnFail = False)
 	If $silentmode Then terminate($STATUS_MISSINGEXE, $file, $sPlugin, $sPlugin)
 
 	Opt("GUIOnEventMode", 0)
-	Local $hGUI = GUICreate($name, 416, 176, -1, -1, $GUI_SS_DEFAULT_GUI)
+	Local Const $iWidth = 416, $iHeight = 176
+	Local $hGui = GUICreate($name, $iWidth, $iHeight, -1, -1, $GUI_SS_DEFAULT_GUI)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('PLUGIN_MISSING', CreateArray($filenamefull, t('SELECT_FILE'))), 72, 20, 330, 113)
+	Local $idLabel = GUICtrlCreateLabel(t('PLUGIN_MISSING', CreateArray($filenamefull, t('SELECT_FILE'))), 72, 20, 330, 113)
 	Local $idPluginManager = GUICtrlCreateButton(t('MENU_HELP_PLUGINS_LABEL'), 194, 142, 123, 25)
 	Local $idCancel = GUICtrlCreateButton(t('EXIT_BUT'), 332, 142, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idCancel)
 	GUISetState(@SW_SHOW)
 
 	While True
 		Switch GUIGetMsg()
 			Case $GUI_EVENT_CLOSE, $idCancel
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				SendStats($STATUS_MISSINGEXE, $sPlugin)
 				terminate($STATUS_SILENT)
 			Case $idPluginManager
-				GUI_Plugins($hGUI, $sPlugin)
+				GUI_Plugins($hGui, $sPlugin)
 				Opt("GUIOnEventMode", 0)
 				If HasPlugin($sPlugin, True) Then ExitLoop
 		EndSwitch
 	WEnd
 
 	Opt("GUIOnEventMode", 1)
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Return True
 EndFunc
 
@@ -3804,11 +3812,12 @@ Func HasFFMPEG()
 	If $silentmode Then terminate($STATUS_MISSINGEXE, $filenamefull, "FFmpeg", "FFmpeg")
 
 	Opt("GUIOnEventMode", 0)
+	Local Const $iWidth = 416, $iHeight = 201
 	Local $sTranslation = t('TERM_DOWNLOAD')
 
-	Local $hGUI = GUICreate($name, 416, 201, -1, -1, $GUI_SS_DEFAULT_GUI)
+	Local $hGui = GUICreate($name, $iWidth, $iHeight, -1, -1, $GUI_SS_DEFAULT_GUI)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filenamefull, Quote($sTranslation))), 72, 20, 330, 107)
+	Local $idLabel = GUICtrlCreateLabel(t('FFMPEG_NEEDED', CreateArray($filenamefull, Quote($sTranslation))), 72, 20, 330, 107)
 	Local $idDownload = GUICtrlCreateButton($sTranslation, 242, 166, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 332, 166, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
@@ -3817,16 +3826,18 @@ Func HasFFMPEG()
 	_GuiCtrlLinkFormat()
 	Local $idSelectFile = GUICtrlCreateLabel(t('FFMPEG_SELECT_LABEL'), 10, 172, 133, 17)
 	_GuiCtrlLinkFormat()
+
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idSelectFile)
 	GUISetState(@SW_SHOW)
 
 	While True
 		Switch GUIGetMsg()
 			Case $GUI_EVENT_CLOSE, $idCancel
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				terminate($STATUS_SILENT)
 			Case $idDownload
 				If _IsChecked($idCheckbox) Then
-					GUIDelete($hGUI)
+					GUIDelete($hGui)
 					GetFFmpeg()
 					If @error Then terminate($STATUS_SILENT)
 					ExitLoop
@@ -3836,7 +3847,7 @@ Func HasFFMPEG()
 				ShellExecute("https://ffmpeg.org/legal.html")
 			Case $idSelectFile
 				Local $tmp = @WorkingDir
-				Local $sPath = FileOpenDialog(t('FFMPEG_SELECT_TITLE'), _GetFileOpenDialogInitDir(), "FFmpeg (ffmpeg.exe)", 1, "", $hGUI)
+				Local $sPath = FileOpenDialog(t('FFMPEG_SELECT_TITLE'), _GetFileOpenDialogInitDir(), "FFmpeg (ffmpeg.exe)", 1, "", $hGui)
 				If @error Or Not FileExists($sPath) Then ContinueLoop
 
 				; Make sure the executable is really FFmpeg
@@ -3852,7 +3863,7 @@ Func HasFFMPEG()
 					MsgBox($iTopmost + 16, $title, t('FFMPEG_INVALID_FILE'))
 					ContinueLoop
 				EndIf
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				Cout("FFmpeg selected: " & $sPath)
 
 				Local $sDestination = StringReplace($ffmpeg, '"', '')
@@ -3872,7 +3883,7 @@ Func HasFFMPEG()
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 
 	Opt("GUIOnEventMode", 1)
 EndFunc
@@ -4246,7 +4257,7 @@ EndFunc
 
 ; Show tray message box
 ; Based on work by Valuater (http://www.autoitscript.com/forum/topic/85977-system-tray-message-box-udf/)
-Func _CreateTrayMessageBox($TBText)
+Func _CreateTrayMessageBox($sMessage)
 	_DeleteTrayMessageBox()
 
 	If $bOptNoStatusBox = 1 Then Return
@@ -4259,28 +4270,19 @@ Func _CreateTrayMessageBox($TBText)
 
 	Local Static $trayX = Number(IniRead($prefs, "UniExtract Preferences", "statusposx", -1))
 	Local Static $trayY = Number(IniRead($prefs, "UniExtract Preferences", "statusposy", -1))
-	Local Const $TBwidth = 225, $TBheight = 100, $left = 15, $top = 12, $width = 200, $iBetween = 5, $iMaxCharCount = 28, $bDark = True
-
-	; Determine taskbar size
-	Local $pos = WinGetPos("[CLASS:Shell_TrayWnd]")
-	If @error Then Local $pos[4] = [0, 0, @DesktopWidth, 30]
-	Local $iSpace = ($pos[0] = $pos[1])? $pos[3] + $iBetween: $pos[1] - $TBheight - $iBetween
-
-	If $iSpace < 0 Or $iSpace > @DesktopHeight Then $iSpace = @DesktopHeight - $TBheight - $iBetween
+	Local Const $iWidth = 225, $iHeight = 100, $iLeft = 15, $iTop = 12, $iLabelWidth = 200, $iBetween = 5, $iMaxCharCount = 28, $bDark = True
 
 	; Create GUI
-	Global $TBgui = GUICreate($name, $TBwidth, $TBheight, $trayX > -1 ? $trayX : @DesktopWidth - ($TBwidth + $iBetween), $trayY > -1 ? $trayY : $iSpace, _
-			$WS_POPUP, BitOR($WS_EX_TOOLWINDOW, $WS_EX_TOPMOST, $WS_EX_TRANSPARENT))
+	Global $TBgui = GUICreate($name, $iWidth, $iHeight, -1, -1, $WS_POPUP, BitOR($WS_EX_TOOLWINDOW, $WS_EX_TOPMOST, $WS_EX_TRANSPARENT))
 	GUISetBkColor($bDark? 0x2D2D2D: 0xEEEEEE)
-	_GuiRoundCorners($TBgui, 0, 0, 5, 5)
 
 	; Labels
 	Local $fname = $filename == ""? "": GetFileName() & "." & $fileext
 	If StringLen($fname) > $iMaxCharCount Then $fname = StringLeft($fname, $iMaxCharCount) & " [...]"
-	If StringLen($TBText) > $iMaxCharCount * 2 Then $TBText = StringLeft($TBText, $iMaxCharCount * 2) & " [...]"
-	Local $idTrayFileName = GUICtrlCreateLabel($fname, $left, $top, $width, 16, $SS_LEFTNOWORDWRAP)
-	Local $idTrayStatus = GUICtrlCreateLabel($TBText, $left, GetPos($TBgui, $idTrayFileName, 6, False), $width, 30)
-	Global $idTrayStatusExt = GUICtrlCreateLabel("", $left, GetPos($TBgui, $idTrayStatus, 8, False), $width, 20, $SS_CENTER)
+	If StringLen($sMessage) > $iMaxCharCount * 2 Then $sMessage = StringLeft($sMessage, $iMaxCharCount * 2) & " [...]"
+	Local $idTrayFileName = GUICtrlCreateLabel($fname, $iLeft, $iTop, $iLabelWidth, 16, $SS_LEFTNOWORDWRAP)
+	Local $idTrayStatus = GUICtrlCreateLabel($sMessage, $iLeft, GetPos($TBgui, $idTrayFileName, 6, False), $iLabelWidth, 30)
+	Global $idTrayStatusExt = GUICtrlCreateLabel("", $iLeft, GetPos($TBgui, $idTrayStatus, 8, False), $iLabelWidth, 20, $SS_CENTER)
 
 	GUICtrlSetFont($idTrayFileName, 9, 500, 0, $FONT_ARIAL)
 	GUICtrlSetFont($idTrayStatus, 9, 500, 0, $FONT_ARIAL)
@@ -4292,6 +4294,22 @@ Func _CreateTrayMessageBox($TBText)
 		GUICtrlSetColor($idTrayStatusExt, 0xFFFFFF)
 	EndIf
 
+	_GuiSetScale($TBgui, $iWidth, $iHeight, $idTrayFileName, $idTrayStatusExt)
+	_GuiRoundCorners($TBgui, 0, 0, 5, 5)
+
+	; Get position after resizing
+	Local $aPos = WinGetPos($TBgui)
+
+	; Determine taskbar size
+	Local $pos = WinGetPos("[CLASS:Shell_TrayWnd]")
+	If @error Then Local $pos[4] = [0, 0, @DesktopWidth, 30]
+	Local $iSpace = ($pos[0] = $pos[1])? $pos[3] + $iBetween: $pos[1] - $aPos[3] - $iBetween
+
+	If $iSpace < 0 Or $iSpace > @DesktopHeight Then $iSpace = @DesktopHeight - $aPos[3] - $iBetween
+
+	Local $iPosX = $trayX > -1? $trayX: @DesktopWidth - ($aPos[2] + $iBetween)
+	Local $iPosY = $trayY > -1? $trayY: $iSpace
+	_GUI_Move($TBgui, $iPosX, $iPosY)
 	GUISetState(@SW_SHOWNOACTIVATE)
 
 	; Workaround to keep corners round while fading in
@@ -5462,12 +5480,14 @@ Func _UpdateHelpers($aFiles)
 	Local $sStatusDownloading = t('TERM_DOWNLOADING', 0, $language, "Downloading") & "... "
 	Local $sStatusSearching = t('UPDATE_STATUS_SEARCHING', 0, $language, "Searching for updates...")
 
-	Local $hGUI = GUICreate($title, 434, 130, -1, -1, $WS_POPUPWINDOW, -1, $guimain)
+	Local Const $iWidth = 434, $iHeight = 130
+	Local $hGui = GUICreate($title, $iWidth, $iHeight, -1, -1, $WS_POPUPWINDOW, -1, $guimain)
 	Local $idLabel = GUICtrlCreateLabel($sStatusDownloading, 16, 16, 408, 17)
 	GUICtrlCreateLabel(t('TERM_OVERALL_PROGRESS', 0, $language, "Overall progress") & ":", 16, 72, 80, 17)
 	Local $idProgressCurrent = GUICtrlCreateProgress(16, 32, 408, 25)
 	Local $idProgressTotal = GUICtrlCreateProgress(16, 88, 406, 25)
 	_GuiSetColor()
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idProgressTotal)
 	GUISetState(@SW_SHOW)
 
 	Local $i = 0, $iSize = UBound($aFiles), $iProgress = 0, $success = True
@@ -5524,7 +5544,7 @@ Func _UpdateHelpers($aFiles)
 	WEnd
 
 	SendStats("UpdateHelpers", 1)
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Return $success
 EndFunc
 
@@ -5623,10 +5643,12 @@ EndFunc
 
 ; Custom styled ProgressOn replacement
 Func _ProgressOn($sText, $hParent)
-	$hProgress = GUICreate($title, 270, 54, -1, -1, $WS_POPUPWINDOW, -1, $hParent)
+	Local Const $iWidth = 270, $iHeight = 54
+	$hProgress = GUICreate($title, $iWidth, $iHeight, -1, -1, $WS_POPUPWINDOW, -1, $hParent)
 	$idProgress = GUICtrlCreateProgress(4, 6, 259, 25)
-	GUICtrlCreateLabel($sText, 6, 36, 261, 17, $SS_CENTER)
+	Local $idLabel = GUICtrlCreateLabel($sText, 6, 36, 261, 17, $SS_CENTER)
 	_GuiSetColor()
+	_GuiSetScale($hProgress, $iWidth, $iHeight, $idProgress, $idLabel)
 	GUISetState(@SW_SHOW)
 EndFunc
 
@@ -5781,7 +5803,7 @@ EndFunc
 
 ; Build and display GUI if necessary
 Func CreateGUI()
-	Global $iGuiMainWidth = 344, $iGuiMainHeight = 182
+	Global $iGuiMainWidth = 344, $iGuiMainHeight = 136
 	Local Const $iLeft = 12, $iTop = 10, $iInputWidth = 290
 	Local $iPosY = $iTop - 1
 
@@ -5797,7 +5819,7 @@ Func CreateGUI()
 	EndSwitch
 
 	; Create GUI
-	Global $guimain = GUICreate($title, $iGuiMainWidth, $iGuiMainHeight + GUI_GetFontScalingModifier(True), -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
+	Global $guimain = GUICreate($title, $iGuiMainWidth, $iGuiMainHeight, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX), BitOR($WS_EX_ACCEPTFILES, $iTopmost, $exStyle < 0? 0: $exStyle))
 
 	_GuiSetColor()
 	Local $dropzone = GUICtrlCreateLabel("", 0, 0, $iGuiMainWidth, $iGuiMainHeight)
@@ -5936,6 +5958,7 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($quititem, "GUI_Exit")
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Exit")
 
+	_GuiSetScale($guimain, $iGuiMainWidth, $iGuiMainHeight, $dropzone, $BatchBut)
 	GUI_ScanOnly(False)
 	GetBatchQueue()
 
@@ -5977,7 +6000,7 @@ Func CustomPrompt($sMsg, $aVars)
 	Opt("GUIOnEventMode", 0)
 	Local $return = False
 
-	Local $hGUI = GUICreate($title, 417, 177, -1, -1, $GUI_SS_DEFAULT_GUI)
+	Local $hGui = GUICreate($title, 417, 177, -1, -1, $GUI_SS_DEFAULT_GUI)
 	GUICtrlCreateLabel(t($sMsg, $aVars), 72, 20, 332, 113)
 	Local $idYes = GUICtrlCreateButton(t('YES_BUT'), 251, 142, 75, 25)
 	Local $idNo = GUICtrlCreateButton(t('NO_BUT'), 332, 142, 75, 25)
@@ -6003,14 +6026,14 @@ Func CustomPrompt($sMsg, $aVars)
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 	Return $return
 EndFunc
 
 ; Return control width (for dynamic positioning)
-Func GetPos($hGUI, $hControl, $iOffset = 0, $bX = True)
-	Local $aReturn = ControlGetPos($hGUI, '', $hControl)
+Func GetPos($hGui, $hControl, $iOffset = 0, $bX = True)
+	Local $aReturn = ControlGetPos($hGui, '', $hControl)
 	If @error Then Return SetError(1, '', $iOffset)
 
 	If $bX Then
@@ -6081,8 +6104,8 @@ Func _GUICtrlCreateCheckbox($sTranslation, $bChecked, $iPosX, ByRef $iPosY, $iWi
 EndFunc
 
 ; Drop-in replacement for GUICtrlCreatePic with PNG support
-Func _GUICtrlCreatePic($sPath, $left, $top, $iWidth, $iHeight)
-	Local $idImage = GUICtrlCreatePic("", $left, $top, $iWidth, $iHeight)
+Func _GUICtrlCreatePic($sPath, $iLeft, $iTop, $iWidth, $iHeight)
+	Local $idImage = GUICtrlCreatePic("", $iLeft, $iTop, $iWidth, $iHeight)
 	_GDIPlus_LoadImage($idImage, $sPath, $iWidth, $iHeight)
 
 	Return $idImage
@@ -6146,7 +6169,16 @@ Func _AppsUseLightTheme()
 	Local $bEnabled = RegRead("HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme")
 	If @error Then Return True
 
+	Cout("Light theme: " & $bEnabled)
 	Return $bEnabled
+EndFunc
+
+; Enables GUI scaling for high DPI displays
+Func _GuiSetScale($hGui, $iWidth, $iHeight, $idFirstControl, $idLastControl)
+	Local $aControls[2] = [$idFirstControl, $idLastControl]
+	Local $iDpi = _WinAPI_GetDpiForMonitor(_WinAPI_MonitorFromWindow($hGui))
+	_GUI_SetResizing($hGui, $iWidth, $iHeight, $aControls)
+	_GUI_Resize($hGui, -1, -1, $iDpi)
 EndFunc
 
 ; Set GUI color to white when using Windows 10 light theme
@@ -6162,17 +6194,6 @@ Func _GuiCtrlLinkFormat($iFontSize = 8, $idControlID = -1)
 	GUICtrlSetFont($idControlID, $iFontSize, 800, 4, $FONT_ARIAL)
 	GUICtrlSetColor($idControlID, $COLOR_LINK)
 	GUICtrlSetCursor($idControlID, 0)
-EndFunc
-
-; Return the amount of pixels to increase GUI heigth if Windows font scaling is enabled
-Func GUI_GetFontScalingModifier($bOutput = False)
-	; Get the size of the title bar and calculate difference to the default value
-	Local $ret = _WinAPI_GetSystemMetrics($SM_CYCAPTION)
-	Local $iModifier = _Max(0, $ret - 23) * 2.5
-
-	If $bOutput Then Cout("Font scaling: height = " & $ret & ", modifier = " & $iModifier)
-
-	Return $iModifier
 EndFunc
 
 ; Drag and drop handler for multiple file support
@@ -6204,14 +6225,16 @@ EndFunc
 ; Display Warn_Execute GUI
 Func GUI_Warn_Execute()
 	Local $bChoice = False
+	Local Const $iWidth = 416, $iHeight = 177
 
 	Opt("GUIOnEventMode", 0)
-	Local $hGUI = GUICreate($title, 416, 177, -1, -1, $GUI_SS_DEFAULT_GUI)
-	GUICtrlCreateLabel(t('WARN_EXECUTE'), 72, 20, 332, 97)
+	Local $hGui = GUICreate($title, $iWidth, $iHeight, -1, -1, $GUI_SS_DEFAULT_GUI)
+	Local $idLabel = GUICtrlCreateLabel(t('WARN_EXECUTE'), 72, 20, 332, 97)
 	Local $idContinue = GUICtrlCreateButton(t('CONTINUE_BUT'), 242, 142, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 332, 142, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
 	Local $idRemember = GUICtrlCreateCheckbox(t('CHECKBOX_DONT_ASK_AGAIN'), 12, 148, 217, 17)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idRemember)
 	GUISetState(@SW_SHOW)
 
 	While True
@@ -6230,7 +6253,7 @@ Func GUI_Warn_Execute()
 		SavePref("warnexecute", $bOptWarnExecute)
 	EndIf
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 0)
 
 	Return $bChoice
@@ -6346,15 +6369,15 @@ EndFunc
 
 ; Build and display preferences GUI
 Func GUI_Prefs()
-	Local $iPosX, $iPosY, $iWidth
+	Local $iPosX, $iPosY, $iControlWidth, $iWidth = 466, $iHeight = 350
 	Cout("Creating preferences GUI")
 
 	; Create GUI
-	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), 466, 350, -1, -1, -1, $exStyle, $guimain)
+	Global $guiprefs = _GUICreate(t('PREFS_TITLE_LABEL'), $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
 	; General options
-	GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 8, 6, 260, 98)
+	Local $idGroup = GUICtrlCreateGroup(t('PREFS_UNIEXTRACT_OPTS_LABEL'), 8, 6, 260, 98)
 	GUICtrlCreateLabel(t('PREFS_LANG_LABEL'), 14, 36, 72, 15)
 	GUICtrlCreateLabel(t('PREFS_UPDATEINTERVAL_LABEL'), 14, 72, 128, 15)
 	Global $langselect = GUICtrlCreateCombo("", 100, 32, 160, 25, BitOR($CBS_DROPDOWNLIST, $WS_VSCROLL))
@@ -6375,27 +6398,27 @@ Func GUI_Prefs()
 	; Format-specific preferences
 	$iPosX = 14
 	$iPosY = 136
-	$iWidth = 230
+	$iControlWidth = 230
 	GUICtrlCreateGroup(t('PREFS_FORMAT_OPTS_LABEL'), 8, 116, 448, 188)
-	Global $historyopt = _GUICtrlCreateCheckbox('PREFS_HISTORY_LABEL', $history, $iPosX, $iPosY, $iWidth)
-	Global $idOptOpenOutDir = _GUICtrlCreateCheckbox('PREFS_OPEN_FOLDER_LABEL', $bOptOpenOutDir, $iPosX, $iPosY, $iWidth)
-	Global $idOptCheckFreeSpace = _GUICtrlCreateCheckbox('PREFS_CHECK_FREE_SPACE_LABEL', $bOptCheckFreeSpace, $iPosX, $iPosY, $iWidth)
-	Global $idOptRememberGuiSizePosition = _GUICtrlCreateCheckbox('PREFS_WINDOW_POSITION_LABEL', $bOptRememberGuiSizePosition, $iPosX, $iPosY, $iWidth)
-	Global $idOptNoTrayIcon = _GUICtrlCreateCheckbox('PREFS_HIDE_TRAY_LABEL', $bOptNoTrayIcon, $iPosX, $iPosY, $iWidth)
-	Global $idOptNoStatusBox = _GUICtrlCreateCheckbox('PREFS_HIDE_STATUS_LABEL', $bOptNoStatusBox, $iPosX, $iPosY, $iWidth)
-	Global $idOptGameMode = _GUICtrlCreateCheckbox('PREFS_HIDE_STATUS_FULLSCREEN_LABEL', $bOptHideStatusBoxIfFullscreen, $iPosX, $iPosY, $iWidth)
-	Global $idOptExtractVideo = _GUICtrlCreateCheckbox('PREFS_VIDEOTRACK_LABEL', $bOptExtractVideo, $iPosX, $iPosY, $iWidth)
+	Global $historyopt = _GUICtrlCreateCheckbox('PREFS_HISTORY_LABEL', $history, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptOpenOutDir = _GUICtrlCreateCheckbox('PREFS_OPEN_FOLDER_LABEL', $bOptOpenOutDir, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptCheckFreeSpace = _GUICtrlCreateCheckbox('PREFS_CHECK_FREE_SPACE_LABEL', $bOptCheckFreeSpace, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptRememberGuiSizePosition = _GUICtrlCreateCheckbox('PREFS_WINDOW_POSITION_LABEL', $bOptRememberGuiSizePosition, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptNoTrayIcon = _GUICtrlCreateCheckbox('PREFS_HIDE_TRAY_LABEL', $bOptNoTrayIcon, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptNoStatusBox = _GUICtrlCreateCheckbox('PREFS_HIDE_STATUS_LABEL', $bOptNoStatusBox, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptGameMode = _GUICtrlCreateCheckbox('PREFS_HIDE_STATUS_FULLSCREEN_LABEL', $bOptHideStatusBoxIfFullscreen, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptExtractVideo = _GUICtrlCreateCheckbox('PREFS_VIDEOTRACK_LABEL', $bOptExtractVideo, $iPosX, $iPosY, $iControlWidth)
 
 	$iPosX += 236
 	$iPosY = 136
-	$iWidth = 204
-	Global $idOptWarnExecute = _GUICtrlCreateCheckbox('PREFS_WARN_EXECUTE_LABEL', $bOptWarnExecute, $iPosX, $iPosY, $iWidth)
-	Global $unicodecheckopt = _GUICtrlCreateCheckbox('PREFS_CHECK_UNICODE_LABEL', $checkUnicode, $iPosX, $iPosY, $iWidth)
-	Global $appendextopt = _GUICtrlCreateCheckbox('PREFS_APPEND_EXT_LABEL', $appendext, $iPosX, $iPosY, $iWidth)
-	Global $idOptCreateLog = _GUICtrlCreateCheckbox('PREFS_LOG_LABEL', $bOptCreateLog, $iPosX, $iPosY, $iWidth)
-	Global $idOptFeedbackPrompt = _GUICtrlCreateCheckbox('PREFS_FEEDBACK_PROMPT_LABEL', $bOptAskForFeedback == 1, $iPosX, $iPosY, $iWidth, 20, $BS_AUTO3STATE)
-	Global $idOptSendStats = _GUICtrlCreateCheckbox('PREFS_SEND_STATS_LABEL', $bOptSendStats, $iPosX, $iPosY, $iWidth)
-	Global $idOptBetaUpdates = _GUICtrlCreateCheckbox('PREFS_BETA_UPDATES_LABEL', $bOptNightlyUpdates, $iPosX, $iPosY, $iWidth)
+	$iControlWidth = 204
+	Global $idOptWarnExecute = _GUICtrlCreateCheckbox('PREFS_WARN_EXECUTE_LABEL', $bOptWarnExecute, $iPosX, $iPosY, $iControlWidth)
+	Global $unicodecheckopt = _GUICtrlCreateCheckbox('PREFS_CHECK_UNICODE_LABEL', $checkUnicode, $iPosX, $iPosY, $iControlWidth)
+	Global $appendextopt = _GUICtrlCreateCheckbox('PREFS_APPEND_EXT_LABEL', $appendext, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptCreateLog = _GUICtrlCreateCheckbox('PREFS_LOG_LABEL', $bOptCreateLog, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptFeedbackPrompt = _GUICtrlCreateCheckbox('PREFS_FEEDBACK_PROMPT_LABEL', $bOptAskForFeedback == 1, $iPosX, $iPosY, $iControlWidth, 20, $BS_AUTO3STATE)
+	Global $idOptSendStats = _GUICtrlCreateCheckbox('PREFS_SEND_STATS_LABEL', $bOptSendStats, $iPosX, $iPosY, $iControlWidth)
+	Global $idOptBetaUpdates = _GUICtrlCreateCheckbox('PREFS_BETA_UPDATES_LABEL', $bOptNightlyUpdates, $iPosX, $iPosY, $iControlWidth)
 	GUICtrlCreateGroup("", -99, -99, 1, 1)
 
 	; Buttons
@@ -6440,12 +6463,10 @@ Func GUI_Prefs()
 	GUICtrlSetState($idOptDeleteSourceFile[$eOptDeleteSourceFile], $GUI_CHECKED)
 	GUICtrlSetData($langselect, GetLanguageList(), $language)
 
-	; Set events
+	_GuiSetScale($guiprefs, $iWidth, $iHeight, $idGroup, $idCancel)
 	GUICtrlSetOnEvent($idOk, "GUI_Prefs_Ok")
 	GUICtrlSetOnEvent($idCancel, "GUI_Prefs_Exit")
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_Prefs_Exit")
-
-	; Display GUI and wait for action
 	GUISetState(@SW_SHOW)
 EndFunc
 
@@ -6612,16 +6633,18 @@ EndFunc
 
 ; Display batch queue and allow changes
 Func GUI_Batch_Show()
+	Local Const $iWidth = 418, $iHeight = 267
 	Local Const $iListLeft = 8, $iListTop = 8
 	Local $iLastIndex = -1, $bTooltip = False
 	Cout("Opening batch queue edit GUI")
-	Local $hGUI = GUICreate($name, 418, 267, 476, 262, BitOR($WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU, $WS_SIZEBOX), -1, $guimain)
+	Local $hGui = GUICreate($name, 418, 267, -1, -1, BitOR($WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU, $WS_SIZEBOX), -1, $guimain)
 	_GuiSetColor()
 	Local $idList = GUICtrlCreateList("", $iListLeft, $iListTop, 401, 201)
 	GUICtrlSetData(-1, _ArrayToString($queueArray, "|"))
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 40, 225, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 171, 225, 75, 25)
 	Local $idDelete	= GUICtrlCreateButton(t('DELETE_BUT'), 304, 224, 73, 25)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idList, $idDelete)
 	GUISetState(@SW_SHOW)
 	Opt("GUIOnEventMode", 0)
 
@@ -6649,7 +6672,7 @@ Func GUI_Batch_Show()
 			Case Else
 				; Display tooltips if file name too long
 				; Code by Malkey (https://www.autoitscript.com/forum/topic/146743-listbox-tooltip-for-long-items/?do=findComment&comment=1039835)
-				Local $aCursorInfo = GUIGetCursorInfo($hGUI)
+				Local $aCursorInfo = GUIGetCursorInfo($hGui)
 				If $aCursorInfo[4] = $idList Then
 					Local $iIndex = _GUICtrlListBox_ItemFromPoint($idList, $aCursorInfo[0] - $iListLeft, $aCursorInfo[1] - $iListTop)
 					If $iLastIndex == $iIndex Then ContinueLoop
@@ -6672,7 +6695,7 @@ Func GUI_Batch_Show()
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
@@ -6684,7 +6707,6 @@ EndFunc
 
 ; Process dropped files
 Func GUI_Drop()
-;~ 	_ArrayDisplay($gaDropFiles)
 	Cout("Drag and drop action detected")
 
 	Local $iCount = 0
@@ -6731,6 +6753,8 @@ EndFunc
 
 ; Create Feedback GUI
 Func GUI_Feedback()
+	Local Const $iWidth = 402, $iHeight = 508
+
 	; Attach input file information
 	If $file Then
 		If Not $isexe Then Cout("--------------------------------------------------File dump--------------------------------------------------" & _
@@ -6740,10 +6764,10 @@ Func GUI_Feedback()
 		Global $bOptAskForFeedback = 0
 	EndIf
 
-	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), 402, 528 + GUI_GetFontScalingModifier(), -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
+	Global $FB_GUI = GUICreate(t('FEEDBACK_TITLE_LABEL'), $iWidth, $iHeight, -1, -1, BitOR($WS_SIZEBOX, $WS_SYSMENU), -1, $guimain)
 	_GuiSetColor()
 
-	GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 8, 8, 384, 17)
+	Local $idLabel = GUICtrlCreateLabel(t('FEEDBACK_SYSINFO_LABEL'), 8, 8, 384, 17)
 	Local $FB_SysCont = GUICtrlCreateInput(@OSVersion & " " & @OSArch & (@OSServicePack = ""? "": " " & @OSServicePack) & ", Lang: " & @OSLang & ", UE: " & $language, 8, 24, 385, 21, $ES_READONLY)
 
 	GUICtrlCreateLabel(t('FEEDBACK_OUTPUT_LABEL'), 8, 56, 384, 17)
@@ -6759,6 +6783,8 @@ Func GUI_Feedback()
 
 	Local $idSend = GUICtrlCreateButton(t('SEND_BUT'), 111, 470, 75, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 215, 470, 75, 25)
+
+	_GuiSetScale($FB_GUI, $iWidth, $iHeight, $idLabel, $idCancel)
 	Local $idSelectAll = GUICtrlCreateDummy()
 
 	Local $accelKeys[1][2] = [["^a", $idSelectAll]]
@@ -6801,14 +6827,16 @@ EndFunc
 
 ; Display warning when using an outdated version of UniExtract
 Func GUI_Feedback_Outdated()
+	Local Const $iWidth = 416, $iHeight = 156
 	Opt("GUIOnEventMode", 0)
 
-	Local $hGUI = GUICreate($name, 416, 156, -1, -1, $GUI_SS_DEFAULT_GUI, -1, $FB_GUI)
+	Local $hGui = GUICreate($name, $iWidth, $iHeight, -1, -1, $GUI_SS_DEFAULT_GUI, -1, $FB_GUI)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FEEDBACK_OUTDATED'), 72, 20, 330, 113)
+	Local $idLabel = GUICtrlCreateLabel(t('FEEDBACK_OUTDATED'), 72, 20, 330, 113)
+	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
 	Local $idInstall = GUICtrlCreateButton(t('UPDATE_ACTION_INSTALL'), 194, 120, 123, 25)
 	Local $idContinue = GUICtrlCreateButton(t('CONTINUE_BUT'), 332, 120, 75, 25)
-	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idContinue)
 	GUISetState(@SW_SHOW)
 	SendStats("FeedbackOutdated")
 
@@ -6817,13 +6845,13 @@ Func GUI_Feedback_Outdated()
 			Case $GUI_EVENT_CLOSE, $idContinue
 				ExitLoop
 			Case $idInstall
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				Opt("GUIOnEventMode", 1)
 				Return CheckUpdate($UPDATEMSG_FOUND_ONLY)
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
@@ -6910,14 +6938,16 @@ Func GUI_Feedback_Prompt()
 	If Not ($bOptAskForFeedback And $extract) Or $silentmode Then Return
 	If $bOptAskForFeedback == 2 Then Return GUI_Feedback()
 
+	Local Const $iWidth = 416, $iHeight = 176
 	Opt("GUIOnEventMode", 0)
-	Local $hGUI = GUICreate($name, 416, 176, -1, -1, $GUI_SS_DEFAULT_GUI)
+	Local $hGui = GUICreate($name, $iWidth, $iHeight, -1, -1, $GUI_SS_DEFAULT_GUI)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FEEDBACK_PROMPT'), 72, 20, 330, 111)
+	Local $idLabel = GUICtrlCreateLabel(t('FEEDBACK_PROMPT'), 72, 20, 330, 111)
 	Local $idYes = GUICtrlCreateButton(t('YES_BUT'), 242, 142, 75, 25)
 	Local $idNo = GUICtrlCreateButton(t('NO_BUT'), 332, 142, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 20, 49, 49)
 	Local $idRemember = GUICtrlCreateCheckbox(t('CHECKBOX_REMEMBER'), 12, 148, 217, 17)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idRemember)
 	GUISetState(@SW_SHOW)
 
 	While True
@@ -6929,7 +6959,7 @@ Func GUI_Feedback_Prompt()
 					$bOptAskForFeedback = 2
 					SavePref("feedbackprompt", $bOptAskForFeedback)
 				EndIf
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				GUI_Feedback()
 				ExitLoop
 			Case $idNo
@@ -6941,7 +6971,7 @@ Func GUI_Feedback_Prompt()
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
@@ -7006,13 +7036,14 @@ EndFunc
 ; Create GUI to change context menu
 Func GUI_ContextMenu()
 	Cout("Creating context menu GUI")
+	Local Const $iWidth = 450, $iHeight = 630
 	Local $iSize = UBound($CM_Shells) - 1
 	Global $CM_Checkbox[$iSize + 1]
 
-	Global $CM_GUI = _GUICreate(t('PREFS_TITLE_LABEL'), 450, 630, -1, -1, -1, $exStyle, $guimain)
+	Global $CM_GUI = _GUICreate(t('PREFS_TITLE_LABEL'), $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
 
-	GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 8, 4, 434, 495)
+	Local $idGroup = GUICtrlCreateGroup(t('CONTEXT_ENTRIES_LABEL'), 8, 4, 434, 495)
 	Global $CM_Checkbox_enabled = GUICtrlCreateCheckbox(t('CONTEXT_ENABLED_LABEL'), 24, 22, -1, 17)
 	Global $CM_Checkbox_allusers = GUICtrlCreateCheckbox(t('CONTEXT_ALL_USERS_LABEL'), GetPos($CM_GUI, $CM_Checkbox_enabled, 25), 22, -1, 17)
 	Global $CM_Simple_Radio = GUICtrlCreateRadio(t('CONTEXT_SIMPLE_RADIO'), 96, 50, 145, 17)
@@ -7101,6 +7132,7 @@ Func GUI_ContextMenu()
 
 	GUICtrlSetData($CM_add_input, $addassoc)
 
+	_GuiSetScale($CM_GUI, $iWidth, $iHeight, $idGroup, $CM_Cancel)
 	GUI_ContextMenu_activate()
 	GUI_ContextMenu_ChangePic()
 
@@ -7292,19 +7324,21 @@ EndFunc
 
 ; Perform special actions if Universal Extractor is started the first time
 Func GUI_FirstStart()
+	Local Const $iWidth = 504, $iHeight = 387
 	Cout("Creating first start assistant")
 	GUISetState(@SW_HIDE, $guimain)
+
 	; Create GUI
-	Global $FS_GUI = GUICreate($title, 504, 387)
+	Global $FS_GUI = GUICreate($title, $iWidth, $iHeight)
 	_GuiSetColor()
 	_GUICtrlCreatePic($sLogoFile, 8, 312, 65, 65)
-	GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
+	Local $idLabel = GUICtrlCreateLabel($name, 8, 8, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 24, 800, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(StringReplace(t('FIRSTSTART_TITLE'), "&", ""), 8, 50, 488, 60, $SS_CENTER)
 	GUICtrlSetFont(-1, 14, 800, 0, $FONT_ARIAL)
 	Global $FS_Section = GUICtrlCreateLabel("", 16, 85, 382, 28)
 	GUICtrlSetFont(-1, 14, 800, 4, $FONT_ARIAL)
-	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 170)
+	Global $FS_Text = GUICtrlCreateLabel("", 16, 120, 468, 140)
 	Global $FS_Next = GUICtrlCreateButton(t('NEXT_BUT'), 296, 344, 89, 25)
 	Local $idExit = GUICtrlCreateButton(t('EXIT_BUT'), 400, 344, 89, 25)
 	Global $FS_Prev = GUICtrlCreateButton(t('PREV_BUT'), 192, 344, 89, 25)
@@ -7312,6 +7346,7 @@ Func GUI_FirstStart()
 	Global $FS_Button = GUICtrlCreateButton("", 187, 260, 129, 41)
 	Global $FS_Progress = GUICtrlCreateLabel("", 80, 350, 21, 17)
 
+	_GuiSetScale($FS_GUI, $iWidth, $iHeight, $idLabel, $FS_Progress)
 	GUISetOnEvent($GUI_EVENT_CLOSE, "GUI_FirstStart_Exit")
 	GUICtrlSetOnEvent($idExit, "GUI_FirstStart_Exit")
 	GUICtrlSetOnEvent($FS_Next, "GUI_FirstStart_Next")
@@ -7366,15 +7401,12 @@ Func GUI_FirstStart_ShowPage()
 	Cout("First start assistant - step " & $page)
 	Switch $page
 		Case 1
-			GUICtrlSetPos($FS_Text, 16, 120, 468, 170)
 			GUICtrlSetState($FS_Button, $GUI_HIDE)
 		Case 2
-			GUICtrlSetPos($FS_Text, 16, 120, 468, 125)
 			GUICtrlSetState($FS_Button, $GUI_SHOW)
 			GUICtrlSetData($FS_Button, t('PREFS_TITLE_LABEL'))
 			GUICtrlSetOnEvent($FS_Button, "GUI_Prefs")
 		Case 3
-			;GUICtrlSetState($FS_Button, $GUI_SHOW)
 			GUICtrlSetData($FS_Button, t('CONTEXT_ENTRIES_LABEL'))
 			GUICtrlSetOnEvent($FS_Button, "GUI_ContextMenu")
 		Case Else
@@ -7392,10 +7424,11 @@ EndFunc
 
 ; Ask user whether to keep settings or not and uninstall
 Func GUI_Uninstall()
-	Local $hGui = GUICreate($title, 434, 218, -1, -1)
+	Local Const $iWidth = 434, $iHeight = 218
+	Local $hGui = GUICreate($title, $iWidth, $iHeight, -1, -1)
 	_GuiSetColor()
 	_GUICtrlCreatePic($sLogoFile, 16, 16, 57, 57)
-	GUICtrlCreateLabel(t('UNINSTALL_TITLE'), 88, 16, 328, 28)
+	Local $idLabel = GUICtrlCreateLabel(t('UNINSTALL_TITLE'), 88, 16, 328, 28)
 	GUICtrlSetFont(-1, 16, 600, 0, "Arial")
 	GUICtrlCreateLabel(t('UNINSTALL_LABEL'), 88, 48, 326, 57)
 	Local $idCheckboxRemoveLogs = GUICtrlCreateCheckbox(t('UNINSTALL_REMOVE_LOGS'), 104, 118, 265, 17)
@@ -7403,6 +7436,7 @@ Func GUI_Uninstall()
 	Local $idCheckboxRemoveUserData = GUICtrlCreateCheckbox(t('UNINSTALL_REMOVE_USERDATA'), 104, 142, 265, 17)
 	Local $idOk = GUICtrlCreateButton(t('UNINSTALL'), 328, 176, 89, 25)
 
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idOk)
 	Local $hMenu = _GUICtrlMenu_GetSystemMenu($hGui)
 	_GUICtrlMenu_EnableMenuItem($hMenu, $SC_CLOSE, $MF_GRAYED, False)
 
@@ -7426,10 +7460,11 @@ EndFunc
 Func GUI_CommandLineHelp()
 	Opt("GUIOnEventMode", 0)
 
+	Local Const $iWidth = 560, $iHeight = 428
 	Local $sText = t('HELP_FILENAME') & t('HELP_DESTINATION') & t('HELP_SCAN', "/scan") & t('HELP_SILENT', "/silent") & t('HELP_BATCH', "/batch") & _
 				   t('HELP_TYPE', "/type=") & t('HELP_SUB', "/sub") & t('HELP_LAST', "/last") & t('HELP_NOARGS') & t('HELP_MORE')
 
-	Local $hGUI = GUICreate($title, 560, 428)
+	Local $hGui = GUICreate($title, $iWidth, $iHeight)
 	_GuiSetColor()
 	Local $idClose = GUICtrlCreateButton(t('CLOSE_BUT'), 466, 390, 75, 25)
 	GUICtrlCreateLabel(t('HELP_TITLE'), 18, 12, 440, 28)
@@ -7442,6 +7477,7 @@ Func GUI_CommandLineHelp()
 	GUICtrlCreateInput(t('HELP_EXAMPLE', @ScriptName), 18, 354, 523, 21, BitOR($GUI_SS_DEFAULT_INPUT,$ES_READONLY))
 	Local $idLink = GUICtrlCreateLabel(t('HELP_DOCS_LINK'), 18, 396, 250, 17)
 	_GuiCtrlLinkFormat(8)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idClose, $idLink)
 	GUISetState(@SW_SHOW)
 
 	While 1
@@ -7472,14 +7508,14 @@ Func GUI_MethodSelect($aData, $arcdisp)
 	EndIf
 
 	_DeleteTrayMessageBox()
-	Local Const $base_height = 130, $base_radio = 100
+	Local Const $iWidth = 330, $iHeight = 130 + $size * 20, $base_radio = 100
 	Local $size = UBound($aData) - 1, $select[$size]
 
 	; Create GUI and set header information
 	Opt("GUIOnEventMode", 0)
-	Local $hGUI = GUICreate($title, 330, $base_height + ($size * 20))
+	Local $hGui = GUICreate($title, $iWidth, $iHeight)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('METHOD_HEADER', $aData[0]), 5, 5, 320, 20)
+	Local $idLabel = GUICtrlCreateLabel(t('METHOD_HEADER', $aData[0]), 5, 5, 320, 20)
 	GUICtrlSetFont(-1, -1, 1200)
 	GUICtrlCreateLabel(t('METHOD_TEXT_LABEL', $aData[0]), 5, 25, 320, 65, $SS_LEFT)
 
@@ -7494,7 +7530,7 @@ Func GUI_MethodSelect($aData, $arcdisp)
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 235, $base_radio - 10 + ($size * 10), 80, 20)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 235, $base_radio - 10 + ($size * 10) + 30, 80, 20)
 
-	; Set properties
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idCancel)
 	GUICtrlSetState($select[0], $GUI_CHECKED)
 	GUICtrlSetState($idOk, $GUI_DEFBUTTON)
 	GUISetState(@SW_SHOW)
@@ -7505,7 +7541,7 @@ Func GUI_MethodSelect($aData, $arcdisp)
 			Case $idOk
 				For $i = 0 To $size - 1
 					If _IsChecked($select[$i]) Then
-						GUIDelete($hGUI)
+						GUIDelete($hGui)
 						Opt("GUIOnEventMode", 1)
 						_CreateTrayMessageBox(t('EXTRACTING') & @CRLF & $arcdisp)
 						Cout("Selected method: " & $i + 1)
@@ -7535,23 +7571,25 @@ Func GUI_MethodSelectList($aEntries, $sStandard = "", $sText = "METHOD_GAME_LABE
 		EndIf
 	EndIf
 
+	Local Const $iWidth = 274, $iHeight = 460
 	Local $sSelection = 0
 	If $silentmode Then Return $sSelection
 
-	Local $hGUI = GUICreate($title, 274, 460, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
+	Local $hGui = GUICreate($title, $iWidth, $iHeight, -1, -1, BitOR($WS_SIZEBOX, $WS_MINIMIZEBOX, $WS_CAPTION, $WS_POPUP, $WS_SYSMENU))
 	_GuiSetColor()
 	GUICtrlCreateLabel(t($sText, CreateArray($filenamefull, $sStandard, t('CANCEL_BUT'))), 10, 8, 252, 144, $SS_CENTER)
 	Local $idList = GUICtrlCreateList("", 24, 150, 225, 270, BitOR($WS_VSCROLL, $WS_HSCROLL, $LBS_NOINTEGRALHEIGHT))
 	GUICtrlSetData(-1, $sStandard & '|' & _ArrayToString($aEntries))
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 40, 427, 81, 25)
 	Local $idCancel = GUICtrlCreateButton(t('CANCEL_BUT'), 152, 427, 81, 25)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idList, $idCancel)
 	_GUICtrlListBox_UpdateHScroll($idList)
 	_GUICtrlListBox_SetCurSel($idList, 0)
 	GUISetState(@SW_SHOW)
 	Opt("GUIOnEventMode", 0)
 
 	While True
-		Switch GUIGetMsg($hGUI)
+		Switch GUIGetMsg($hGui)
 			Case $idOk
 				$sSelection = GUICtrlRead($idList)
 				If $sSelection == $sStandard Then $sSelection = 0
@@ -7562,7 +7600,7 @@ Func GUI_MethodSelectList($aEntries, $sStandard = "", $sText = "METHOD_GAME_LABE
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 
 	Return $sSelection
@@ -7572,18 +7610,20 @@ EndFunc
 Func _GUI_FileScan()
 	Opt("GUIOnEventMode", 0)
 
+	Local Const $iWidth = 454, $iHeight = 248
 	Local $sFileType = _FiletypeGet(True, 48)
 	Local $iCount = StringSplit($sFileType, @CR)[0]
 
-	Local $hGUI = GUICreate($name, 454, 248)
+	Local $hGui = GUICreate($name, $iWidth, $iHeight)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('FILESCAN_TITLE'), 80, 10, 368, 17)
+	Local $idLabel = GUICtrlCreateLabel(t('FILESCAN_TITLE'), 80, 10, 368, 17)
 	GUICtrlSetFont(-1, 9, 600, 4)
 	Local $idEdit = GUICtrlCreateEdit($sFileType, 81, 26, 367, 181, BitOR($ES_READONLY, $ES_MULTILINE, $iCount > 13? $WS_VSCROLL: 0), $WS_EX_CLIENTEDGE)
 	GUICtrlSetFont(-1, 8.5, 0, 0, "Courier New")
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 362, 214, 81, 25)
-	_GUICtrlCreatePic($sLogoFile, 4, 12, 73, 73)
 	Local $idCopy = GUICtrlCreateButton(t('COPY_BUT'), 260, 214, 81, 25)
+	_GUICtrlCreatePic($sLogoFile, 4, 12, 73, 73)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idCopy)
 
 	GUICtrlSetBkColor($idEdit, $COLOR_WHITE)
 	GUISetState(@SW_SHOWNORMAL)
@@ -7599,7 +7639,7 @@ Func _GUI_FileScan()
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
@@ -7609,16 +7649,18 @@ Func GUI_Error_WithFeedbackButton($sTitle, $sText)
 
 	Opt("GUIOnEventMode", 0)
 
-	Local $hGui = GUICreate($name, 436, 194)
+	Local Const $iWidth = 436, $iHeight = 194
+	Local $hGui = GUICreate($name, $iWidth, $iHeight)
 	_GuiSetColor()
 
 	_GUICtrlCreatePic($sLogoFile, 10, 26, 73, 73)
-	GUICtrlCreateLabel(t($sTitle), 102, 10, 308, 28)
+	Local $idLabel = GUICtrlCreateLabel(t($sTitle), 102, 10, 308, 28)
 	GUICtrlSetFont(-1, 14, 400, 4, $FONT_ARIAL)
 	GUICtrlCreateLabel($sText, 102, 42, 301, 104)
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 336, 158, 81, 25)
 	Local $idFeedback = GUICtrlCreateButton(t('FEEDBACK_TITLE_LABEL'), 101, 158, 81, 25)
 
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idFeedback)
 	GUISetState(@SW_SHOW)
 
 	While 1
@@ -7627,14 +7669,14 @@ Func GUI_Error_WithFeedbackButton($sTitle, $sText)
 			Case $GUI_EVENT_CLOSE, $idOk
 				ExitLoop
 			Case $idFeedback
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				GUI_Feedback()
 				ExitLoop
 		EndSwitch
 	WEnd
 
 	Opt("GUIOnEventMode", 1)
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 EndFunc
 
 ; Display unknown file type error message with file scan result box
@@ -7646,13 +7688,13 @@ Func GUI_Error_UnknownExt()
 
 	Local $sFileType = _FiletypeGet(True, 50)
 	Local Const $bHasResult = StringLen($sFileType) > 0
-	Local Const $iHeight = $bHasResult? 290: 190
+	Local Const $iWidth = 488, $iHeight = $bHasResult? 290: 190
 	Local Const $iPosY = $iHeight - 34
 
-	Local $hGUI = GUICreate($name, 488, $iHeight)
+	Local $hGui = GUICreate($name, $iWidth, $iHeight)
 	_GuiSetColor()
 
-	GUICtrlCreateLabel(t('UNKNOWN_FILETYPE_TITLE'), 96, 10, 375, 28)
+	Local $idLabel = GUICtrlCreateLabel(t('UNKNOWN_FILETYPE_TITLE'), 96, 10, 375, 28)
 	GUICtrlSetFont(-1, 16, 400, 4, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('UNKNOWN_FILETYPE', $filenamefull), 96, 42, 375, 71)
 	Local $idImage = _GUICtrlCreatePic($sLogoFile, 10, 26, 73, 73)
@@ -7670,6 +7712,7 @@ Func GUI_Error_UnknownExt()
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), 395, $iPosY, 81, 25)
 	Local $idFeedback = GUICtrlCreateButton(t('FEEDBACK_TITLE_LABEL'), 95, $iPosY, 81, 25)
 
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idFeedback)
 	GUISetState(@SW_SHOW)
 
 	While True
@@ -7681,7 +7724,7 @@ Func GUI_Error_UnknownExt()
 				Local $iLen = $aReturn[1] - $aReturn[0]
 				ClipPut($iLen < 1? $sFileType: StringMid($sFileType, $aReturn[0], $iLen + 1))
 			Case $idFeedback
-				GUIDelete($hGUI)
+				GUIDelete($hGui)
 				GUI_Feedback()
 				ExitLoop
 			Case $idImage
@@ -7689,7 +7732,7 @@ Func GUI_Error_UnknownExt()
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 EndFunc
 
@@ -7698,14 +7741,17 @@ Func GUI_UpdatePrompt()
 	Local $bChoice = False
 	Opt("GUIOnEventMode", 0)
 
-	Local $hGUI = GUICreate($name, 454, 314, -1, -1, -1, -1, $guimain)
+	Local Const $iWidth = 454, $iHeight = 314
+	Local $hGui = GUICreate($name, $iWidth, $iHeight, -1, -1, -1, -1, $guimain)
 	_GuiSetColor()
-	GUICtrlCreateLabel(t('UPDATE_PROMPT', $name), 72, 12, 372, 40)
+	Local $idLabel = GUICtrlCreateLabel(t('UPDATE_PROMPT', $name), 72, 12, 372, 40)
 	GUICtrlCreateLabel(t('UPDATE_WHATS_NEW'), 8, 64, 372, 17)
 	Local $idEdit = GUICtrlCreateEdit(t('TERM_LOADING'), 8, 80, 440, 193, BitOR($ES_READONLY, $WS_VSCROLL), $WS_EX_STATICEDGE)
 	Local $idYes = GUICtrlCreateButton(t('YES_BUT'), 272, 280, 75, 25)
 	Local $idNo = GUICtrlCreateButton(t('NO_BUT'), 368, 280, 75, 25)
 	_GUICtrlCreatePic($sLogoFile, 8, 8, 48, 48)
+
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idNo)
 	GUISetState(@SW_SHOW)
 
 	Local $return = _INetGetSource($sUpdateURL & "news")
@@ -7722,7 +7768,7 @@ Func GUI_UpdatePrompt()
 		EndSwitch
 	WEnd
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 	Opt("GUIOnEventMode", 1)
 	Return $bChoice
 EndFunc
@@ -7751,12 +7797,13 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 		[$bitrock, 'Bitrock Unpacker', t('PLUGIN_BITROCK'), 'exe (Bitrock)', "bitrock-unpacker*.exe", '', '', $bitrock, 0] _
 	]
 
+	Local Const $iWidth = 410, $iHeight = 167
 	Local Const $sSupportedFileTypes = t('PLUGIN_SUPPORTED_FILETYPES')
 	Local $current = -1, $sWorkingDir = @WorkingDir, $aReturn[0], $iIndex = -1, $sWorkingDir = @WorkingDir
 	If $sSelection Then $iIndex = _ArraySearch($aPluginInfo, $sSelection, 0, 0, 0, 0, 1, 0)
 	FileChangeDir(@UserProfileDir)
 
-	Local $GUI_Plugins = GUICreate($name, 410, 167, -1, -1, -1, -1, $hParent)
+	Local $GUI_Plugins = GUICreate($name, $iWidth, $iHeight, -1, -1, -1, -1, $hParent)
 	_GuiSetColor()
 	Local $GUI_Plugins_List = GUICtrlCreateList("", 8, 8, 209, 149)
 	GUICtrlSetData(-1, _ArrayToString($aPluginInfo, "|", -1, -1, "|", 1, 1))
@@ -7767,6 +7814,8 @@ Func GUI_Plugins($hParent = 0, $sSelection = 0)
 	Local $GUI_Plugins_Description = GUICtrlCreateEdit("", 224, 8, 177, 85, BitOR($ES_AUTOVSCROLL, $ES_WANTRETURN, $ES_READONLY, $ES_NOHIDESEL,$ES_MULTILINE))
 	Local $GUI_Plugins_FileTypes = GUICtrlCreateEdit("", 224, 96, 177, 33, BitOR($ES_AUTOVSCROLL, $ES_WANTRETURN, $ES_READONLY, $ES_NOHIDESEL,$ES_MULTILINE))
 	$current = GUI_Plugins_Update($GUI_Plugins_List, $GUI_Plugins_FileTypes, $GUI_Plugins_Description, $GUI_Plugins_Download, $GUI_Plugins_SelectClose, $sSupportedFileTypes, $aPluginInfo)
+
+	_GuiSetScale($GUI_Plugins, $iWidth, $iHeight, $GUI_Plugins_List, $GUI_Plugins_FileTypes)
 	GUISetState(@SW_SHOW)
 
 	Opt("GUIOnEventMode", 0)
@@ -7931,11 +7980,12 @@ EndFunc
 
 ; Display usage statistics
 Func GUI_Stats()
+	Local Const $iWidth = 730, $iHeight = 434
 	Local $aReturn = IniReadSection($prefs, "Statistics")
 	If @error Or $aReturn[0][0] < 10 Then Return MsgBox($iTopmost + $MB_ICONWARNING, $name, t('STATS_NO_DATA'))
 
 	Local $sTitle = StringReplace(t('MENU_HELP_STATS_LABEL'), "&", "")
-	Local $GUI_Stats = GUICreate($sTitle, 730, 434, 315, 209, -1, -1, $guimain)
+	Local $GUI_Stats = GUICreate($sTitle, $iWidth, $iHeight, -1, -1, -1, -1, $guimain)
 	Local $GUI_Stats_Status_Pie = GUICtrlCreatePic("", 8, 72, 209, 209)
 	Local $GUI_Stats_Types_Pie = GUICtrlCreatePic("", 368, 72, 353, 353)
 	Local $GUI_Stats_Types_Legend = GUICtrlCreatePic("", 8, 312, 337, 113)
@@ -7944,9 +7994,11 @@ Func GUI_Stats()
 	GUICtrlSetFont(-1, 18, $FW_MEDIUM, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('STATS_HEADER_STATUS'), 8, 48, 212, 24, $SS_CENTER)
 	GUICtrlSetFont(-1, 12, $FW_LIGHT, 0, $FONT_ARIAL)
-	GUICtrlCreateLabel(t('STATS_HEADER_TYPE'), 368, 48, 354, 24, $SS_CENTER)
+	Local $idLabel = GUICtrlCreateLabel(t('STATS_HEADER_TYPE'), 368, 48, 354, 24, $SS_CENTER)
 	GUICtrlSetFont(-1, 12, $FW_LIGHT, 0, $FONT_ARIAL)
 	GUISetBkColor($COLOR_WHITE)
+
+	_GuiSetScale($GUI_Stats, $iWidth, $iHeight, $GUI_Stats_Status_Pie, $idLabel)
 	GUISetState(@SW_SHOW)
 
 	Local $GUI_Stats_Types[0], $GUI_Stats_Status = [[0, t('STATS_STATUS_SUCCESS'), $COLOR_GREEN], [0, t('STATS_STATUS_FAILED'), $COLOR_RED], [0, t('STATS_STATUS_FILEINFO'), $COLOR_PURPLE], [0, t('STATS_STATUS_UNKNOWN'), $COLOR_GRAY]]
@@ -8032,17 +8084,18 @@ Func GUI_About()
 	Local Const $iWidth = 437, $iHeight = 285
 	Cout("Creating about GUI")
 
-	_GUICreate($title & ' "' & $sCodename & '"', $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
+	Local $hGui = _GUICreate($title & ' "' & $sCodename & '"', $iWidth, $iHeight, -1, -1, -1, $exStyle, $guimain)
 	_GuiSetColor()
-	GUICtrlCreateLabel($name, 16, 16, $iWidth - 32, 52, $SS_CENTER)
+	Local $idLabel = GUICtrlCreateLabel($name, 16, 16, $iWidth - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $iWidth - 32, 17, $SS_CENTER)
-	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, -1, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, $iHeight - 104 - 58, $SS_CENTER)
 	GUICtrlCreateLabel($sOptGuid, 5, $iHeight - 15, 275, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
 	Local $sPath = $iconsdir & "Bioruebe" & ($bHighContrastMode? "White": "") & ".png"
-	_GUICtrlCreatePic($sPath , $iWidth - 100 - 10, $iHeight - 48 - 10, 100, 48)
 	Local $idOk = GUICtrlCreateButton(t('OK_BUT'), $iWidth / 2 - 45, $iHeight - 50, 90, 25)
+	_GUICtrlCreatePic($sPath , $iWidth - 100 - 10, $iHeight - 58, 100, 48)
+	_GuiSetScale($hGui, $iWidth, $iHeight, $idLabel, $idOk)
 	GUISetState(@SW_SHOW)
 
 	GUICtrlSetOnEvent($idOk, "GUI_Close")
@@ -8051,23 +8104,23 @@ EndFunc
 
 ; Create a GUI and save window handle
 Func _GUICreate($sTitle, $iWidth, $iHeight, $iLeft = -1, $iTop = -1, $iStyle = -1, $iExStyle = -1, $hParent = 0)
-	Local $hGUI = GUICreate($sTitle, $iWidth, $iHeight, $iLeft, $iTop, $iStyle, $iExStyle, $hParent)
-	_ArrayAdd($aGUIs, $hGUI)
-	Return $hGUI
+	Local $hGui = GUICreate($sTitle, $iWidth, $iHeight, $iLeft, $iTop, $iStyle, $iExStyle, $hParent)
+	_ArrayAdd($aGUIs, $hGui)
+	Return $hGui
 EndFunc
 
 ; Close active GUI
 ; This makes it possible to have multiple windows open and close the correct one
 ; via OnEventMode without having to create a wrapper function for each GUI
 Func GUI_Close()
-	For $hGUI In $aGUIs
-		If WinActive($hGUI) Then ExitLoop
+	For $hGui In $aGUIs
+		If WinActive($hGui) Then ExitLoop
 	Next
 
 	; Fallback: use the last created GUI if finding the active one fails
-	If Not $hGUI Then $hGUI = _ArrayPop($aGUIs)
+	If Not $hGui Then $hGui = _ArrayPop($aGUIs)
 
-	GUIDelete($hGUI)
+	GUIDelete($hGui)
 EndFunc
 
 ; Launch Universal Extractor website if help menu item clicked
