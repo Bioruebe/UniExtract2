@@ -52,27 +52,28 @@
   Improved compatibility with Windows 11
   Replaced context menu preview images, special thanks to Mirosław Żylewicz for designing them
   Updated BioLib to 2.4.0
-  Updated cicdec to 2.3.0
+  Updated cicdec to 3.0.1
   Updated dark to 3.14.0.4118
   Updated demoleition to 0.65
-  Updated EnigmaVB unpacker to 0.59
-  Updated Exeinfo PE to 0.0.7.3
+  Updated EnigmaVB unpacker to 0.61
+  Updated Exeinfo PE to 0.0.8.0
   Updated file to 5.40
   Updated GNU gettext to 0.21
-  Updated godotdec to 2.1.1
+  Updated godotdec to 2.1.2
   Updated helpdeco to 2.1.4
   Updated innounp to 0.50
   Updated lzip to 1.22
   Updated MediaInfo to 21.03
   Updated mtee to 2.7
-  Updated PeaZip to 1.1
-  Updated Qt Linguist to 6.4.0
-  Updated QuickBMS to 0.11
+  Updated PeaZip to 1.1.4
+  Updated Qt Linguist to 6.5.2
+  Updated QuickBMS to 0.12
   Updated rmvdec to 2.2.0
-  Updated spoondec to 2.0.0
-  Updated SQLite to 3.35.5
+  Updated spoondec to 2.0.1
+  Updated SQLite to 3.43.2
   Updated ttarchext to 0.3.2
-  Updated UnRAR to 6.11
+  Updated UnRAR to 6.24
+  Updated UPX to 4.1.0
   Updated WiX to 3.14.0.6526
   Updated Xpdf command line tools to 4.03
   Updated Chinese (Simplified) translation, thanks to SeaHOH

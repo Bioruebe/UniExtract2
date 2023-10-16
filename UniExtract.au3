@@ -1450,7 +1450,8 @@ Func filecompare($sFileType)
 		Case (StringInStr($sFileType, "RIFF", 0) And Not StringInStr($sFileType, "WAVE audio", 0)) Or _
 			 StringInStr($sFileType, "MPEG v", 0) Or StringInStr($sFileType, "MPEG sequence") Or _
 			 StringInStr($sFileType, "Microsoft ASF") Or StringInStr($sFileType, "GIF image") Or _
-			 StringInStr($sFileType, "PNG image") Or StringInStr($sFileType, "MNG video")
+			 StringInStr($sFileType, "PNG image") Or StringInStr($sFileType, "MNG video") Or _
+			 StringInStr($sFileType, "ISO Media, MP4")
 			extract($TYPE_VIDEO, t('TERM_VIDEO') & ' ' & t('TERM_FILE'))
 		Case StringInStr($sFileType, "AAC,")
 			extract($TYPE_AUDIO, 'AAC ' & t('TERM_AUDIO') & ' ' & t('TERM_FILE'))
@@ -7508,8 +7509,8 @@ Func GUI_MethodSelect($aData, $arcdisp)
 	EndIf
 
 	_DeleteTrayMessageBox()
-	Local Const $iWidth = 330, $iHeight = 130 + $size * 20, $base_radio = 100
 	Local $size = UBound($aData) - 1, $select[$size]
+	Local Const $iWidth = 330, $iHeight = 130 + $size * 20, $base_radio = 100
 
 	; Create GUI and set header information
 	Opt("GUIOnEventMode", 0)
