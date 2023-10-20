@@ -88,6 +88,7 @@
   Updated Russian translation, thanks to wvxwxvw
   Updated Spanish translation, thanks to GGobbi
   Updated Swedish translation, thanks to Sopor
+  Updated Ukrainian translation, thanks to YuriPet
   Removed DBX Total Commander plugin, replaced with eDecoder
   Removed unecm, replaced with Total Commander/7zip plugins
   Removed Smart Install Maker Unpacker, replaced with simdec
