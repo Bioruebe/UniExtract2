@@ -500,6 +500,8 @@ EndFunc
 Func FilenameParse($f)
 	If StringIsSpace($f) Then Return SetError(1)
 
+	; Trim noise and unwrap. 
+	$f = StringRegExpReplace($f,'^[ "]*|([^\\])[ "]*$','\1')
 	$file = _PathFull($f)
 	$filedir = StringLeft($f, StringInStr($f, "\", 0, -1) - 1)
 	$filename = StringTrimLeft($f, StringInStr($f, "\", 0, -1))
