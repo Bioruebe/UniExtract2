@@ -1,10 +1,14 @@
-﻿#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
+#Region ;**** Directives created by AutoIt3Wrapper_GUI ****
 #AutoIt3Wrapper_Icon=.\Support\Icons\uniextract_exe.ico
 #AutoIt3Wrapper_Outfile=.\UniExtract.exe
 #AutoIt3Wrapper_Res_Description=Universal Extractor
-#AutoIt3Wrapper_Res_Fileversion=2.0.0
+#AutoIt3Wrapper_Res_ProductName=Universal Extractor
+#AutoIt3Wrapper_Res_Fileversion=2.0.0.2
+#AutoIt3Wrapper_Res_ProductVersion=2.2.0.5
+#AutoIt3Wrapper_Res_CompanyName=Legroom.net
+#AutoIt3Wrapper_Res_Language=1033
 #AutoIt3Wrapper_Res_LegalCopyright=GNU General Public License v2
-#AutoIt3Wrapper_Res_Field=Author|Jared Breland, Bioruebe
+#AutoIt3Wrapper_Res_Field=Author|Jared Breland, Bioruebe, gvp9000
 #AutoIt3Wrapper_Res_Field=Homepage|https://bioruebe.com/dev/uniextract/
 #AutoIt3Wrapper_Res_Field=Timestamp|%date%
 #AutoIt3Wrapper_Res_HiDpi=y
@@ -66,9 +70,9 @@
 #include "Pie.au3"
 
 Const $name = "Universal Extractor"
-Const $sVersion = "2.0.0 RC 4"
-Const $sVersionId = "2R4"
-Const $sCodename = "in memoriam"
+Const $sVersion = "2.0.0 RC5"
+Const $sVersionId = "2R5"
+Const $sCodename = "New Start"
 Const $title = $name & " " & $sVersion
 Const $sUrlWebsiteOriginal = "https://www.legroom.net/software/uniextract"
 Const $sUrlWebsite = "https://bioruebe.com/dev/uniextract"
@@ -163,6 +167,7 @@ Global $iCleanup = $OPTION_MOVE
 Global $bOptLockOutputDirectory = 0
 Global $bOptKeepOpen = 0
 Global $silentmode = 0
+Global $g_bUpdateRunning = False
 Global $extract = 1
 Global $checkUnicode = 1
 Global $bOptExtractVideo = 1
@@ -179,6 +184,7 @@ Global $logdir, $archdir, $settingsdir, $userDefDir, $batchQueue, $fileScanLogFi
 Global $sFullLog = "", $success = $RESULT_UNKNOWN, $sArcTypeOverride = 0, $sMethodSelectOverride = 0
 Global $innofailed, $arjfailed, $7zfailed, $zipfailed, $iefailed, $isofailed, $tridfailed, $gamefailed, $observerfailed
 Global $unpackfailed, $exefailed, $ttarchfailed
+Global $g_bInnoExtractUsable = False
 Global $oldpath, $oldoutdir, $sUnicodeName, $createdir
 Global $guiprefs, $TBgui = 0, $exStyle = -1, $idTrayStatusExt, $BatchBut, $idProgress, $sComError = 0
 Global $Tray_Statusbox, $isexe = False, $Message, $run = 0, $runtitle, $idOptDeleteSourceFile[3]
@@ -351,7 +357,9 @@ If Not FileExists($bindir) And RepairProgramFiles(t('PROGRAM_FILES_MISSING')) Th
 ; If no file passed, display GUI to select file and set options
 If $prompt Then
 	CreateGUI()
+	$g_bUpdateRunning = True
 	CheckUpdate($UPDATEMSG_FOUND_ONLY, True, $UPDATE_ALL, False)
+	$g_bUpdateRunning = False
 
 	While 1
 		If Not $guimain Then ExitLoop
@@ -2081,6 +2089,15 @@ Func checkIE()
 	extract($TYPE_QBMS, 'InstallExplorer ' & t('TERM_INSTALLER'), $ie)
 EndFunc
 
+; Evaluate whether innoextract probe output indicates the installer is usable for extraction
+Func _InnoExtractProbeUsable($sText)
+	If StringInStr($sText, "Not a supported Inno Setup installer!", 0) Then Return False
+	If StringInStr($sText, "Stream error while parsing setup headers!", 0) Then Return False
+	If StringInStr($sText, "error reason:", 0) Then Return False
+	If StringRegExp($sText, "(?i)Done with\s+[1-9]\d*\s+error") Then Return False
+	Return True
+EndFunc
+
 ; Determine if file is Inno Setup installer
 Func checkInno()
 	If $innofailed Then Return False
@@ -2088,16 +2105,22 @@ Func checkInno()
 	Cout("Testing Inno Setup")
 	_CreateTrayMessageBox(t('TERM_TESTING') & " Inno Setup " & t('TERM_INSTALLER'))
 
-	Local $sReturn = FetchStdout($innoextract & ' -i "' & $file & '"', $filedir, @SW_HIDE)
+	Local $sProbe = FetchStdout($innoextract & ' -i "' & $file & '"', $filedir, @SW_HIDE)
 
 	_DeleteTrayMessageBox()
 
-	If Not StringInStr($sReturn, "Not a supported Inno Setup installer!", 0) Then _
-		Return extract($TYPE_INNO, "Inno Setup " & t('TERM_INSTALLER'), StringInStr($sReturn, "GOG.com game ID is"))
+	If StringInStr($sProbe, "Not a supported Inno Setup installer!", 0) Then
+		$innofailed = True
+		checkIE()
+		Return False
+	EndIf
 
-	$innofailed = True
-	checkIE()
-	Return False
+	$g_bInnoExtractUsable = _InnoExtractProbeUsable($sProbe)
+
+	Local $sGogId = StringStripWS(FetchStdout($innoextract & ' --gog-game-id --silent "' & $file & '"', $filedir, @SW_HIDE), 3)
+	Local $bGog = ($sGogId <> "")
+
+	Return extract($TYPE_INNO, "Inno Setup " & t('TERM_INSTALLER'), $bGog)
 EndFunc
 
 ; Search for data*.cab file in file directory and extract it if found
@@ -2133,9 +2156,9 @@ Func CheckLessmsi()
 	If Not HasNetFramework(4, False) Then Return False
 
 	Cout("Testing lessmsi")
-	Local $return = FetchStdout($msi_lessmsi & ' l "' & $file & '"', $outdir)
+	Local $return = FetchStdout($msi_lessmsi & ' l -t File "' & $file & '"', $outdir)
 
-	Return StringInStr($return, "Listing msi file") And Not StringInStr($return, "Error: ")
+	Return Not StringInStr($return, "Error: ") And StringStripWS($return, 8) <> ""
 EndFunc
 
 ; Determine if file is NSIS installer
@@ -2267,6 +2290,7 @@ EndFunc
 
 ; Extract known archive formats
 Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess = False, $returnFail = False)
+	$g_bInnoExtractUsable = False
 	$success = $RESULT_UNKNOWN
 
 	Cout("Starting " & $arctype & " extraction")
@@ -2645,7 +2669,7 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 				Cleanup($aCleanup)
 			EndIf
 
-			If $additionalParameters Or $success == $RESULT_FAILED Then
+			If ($additionalParameters Or $success == $RESULT_FAILED) And $g_bInnoExtractUsable Then
 				_Run($innoextract & ' -e --progress=1 --collisions rename -d "' & $outdir & '" "' & $file & '"', $filedir)
 				Local $aCleanup[] = ["embedded", "tmp", "commonappdata", "cf", "cf32", "group", "userappdata", "userdocs"]
 				Cleanup($aCleanup)
@@ -2842,9 +2866,12 @@ Func extract($arctype, $arcdisp = 0, $additionalParameters = "", $returnSuccess 
 			; Try Lessmsi first
 			$ret = CheckLessmsi()
 			If $ret Then
-				_Run($msi_lessmsi & ' x "' & $file & '" "' & $outdir & '\"', $outdir, @SW_HIDE, True, True, True)
+				_Run($msi_lessmsi & ' xo "' & $file & '" "' & $outdir & '"', $outdir, @SW_HIDE, True, True, True)
 				MoveFiles($outdir & "\SourceDir", $outdir, False, "", True)
-				If $success == $RESULT_UNKNOWN And DirGetSize($outdir) == $initdirsize Then $success = $RESULT_FAILED
+				If $success == $RESULT_UNKNOWN Then
+					Sleep(300)
+					If DirGetSize($outdir) == $initdirsize Then $success = $RESULT_FAILED
+				EndIf
 			EndIf
 
 			; If lessmsi fails or .NET framework is not available, the user can choose between legacy extractors
@@ -5800,6 +5827,17 @@ Func Uninstall($bRemoveLogs = True, $bRemoveUserData = False)
 	terminate($STATUS_SILENT)
 EndFunc
 
+Func SafeCheckUpdate()
+    If $g_bUpdateRunning Then
+        MsgBox(64, "Updater", "An update check is already running.")
+        Return
+    EndIf
+
+    $g_bUpdateRunning = True
+    CheckUpdate($UPDATEMSG_PROMPT, False, $UPDATE_ALL, True)
+    $g_bUpdateRunning = False
+EndFunc
+
 ; ------------------------ Begin GUI Control Functions ------------------------
 
 ; Build and display GUI if necessary
@@ -5945,7 +5983,7 @@ Func CreateGUI()
 	GUICtrlSetOnEvent($pluginsitem, "GUI_Plugins")
 	GUICtrlSetOnEvent($feedbackitem, "GUI_Feedback")
 	GUICtrlSetOnEvent($firststartitem, "GUI_FirstStart")
-	GUICtrlSetOnEvent($updateitem, "CheckUpdate")
+	GUICtrlSetOnEvent($updateitem, "SafeCheckUpdate")
 	GUICtrlSetOnEvent($webitem, "GUI_Website_Original")
 	GUICtrlSetOnEvent($web2item, "GUI_Website")
 	GUICtrlSetOnEvent($gititem, "GUI_Website_Github")
@@ -8090,7 +8128,7 @@ Func GUI_About()
 	Local $idLabel = GUICtrlCreateLabel($name, 16, 16, $iWidth - 32, 52, $SS_CENTER)
 	GUICtrlSetFont(-1, 25, 400, 0, $FONT_ARIAL)
 	GUICtrlCreateLabel(t('ABOUT_VERSION', CreateArray($sVersion, FileGetVersion($sUniExtract, "Timestamp"))), 16, 72, $iWidth - 32, 17, $SS_CENTER)
-	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, $iHeight - 104 - 58, $SS_CENTER)
+	GUICtrlCreateLabel(t('ABOUT_INFO_LABEL', CreateArray("Jared Breland <jbreland@legroom.net>", "uniextract@bioruebe.com", "Modified by gvp9000", "TrIDLib (C) 2008 - 2011 Marco Pontello" & @CRLF & "<http://mark0.net/code-tridlib-e.html>", "GNU GPLv2")), 16, 104, $iWidth - 32, $iHeight - 104 - 58, $SS_CENTER)
 	GUICtrlCreateLabel($sOptGuid, 5, $iHeight - 15, 275, 15)
 	GUICtrlSetFont(-1, 8, 800, 0, $FONT_ARIAL)
 	Local $sPath = $iconsdir & "Bioruebe" & ($bHighContrastMode? "White": "") & ".png"
